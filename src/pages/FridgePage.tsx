@@ -32,6 +32,73 @@ const QUICK_INGREDIENTS = [
   'Chocolat',
 ]
 
+const INGREDIENT_SYNONYMS: Record<string, string[]> = {
+  oeuf: ['oeuf', 'oeufs', 'œuf', 'œufs'],
+  pate: [
+    'pate',
+    'pates',
+    'pâtes',
+    'spaghetti',
+    'spaghettis',
+    'tagliatelle',
+    'tagliatelles',
+    'penne',
+    'coquillette',
+    'coquillettes',
+  ],
+  riz: ['riz'],
+  creme: [
+    'creme',
+    'crème',
+    'creme fraiche',
+    'crème fraîche',
+    'creme liquide',
+    'crème liquide',
+    'creme epaisse',
+    'crème épaisse',
+  ],
+  fromage: [
+    'fromage',
+    'fromages',
+    'emmental',
+    'gruyere',
+    'gruyère',
+    'mozzarella',
+    'mozza',
+    'cheddar',
+    'comte',
+    'comté',
+    'parmesan',
+  ],
+  tomate: ['tomate', 'tomates', 'tomate cerise', 'tomates cerises'],
+  oignon: ['oignon', 'oignons'],
+  ail: ['ail', 'gousse ail', "gousse d'ail", 'gousses ail', "gousses d'ail"],
+  pommeDeTerre: [
+    'pomme de terre',
+    'pommes de terre',
+    'patate',
+    'patates',
+  ],
+  poulet: ['poulet', 'blanc de poulet', 'filet de poulet', 'escalope de poulet'],
+  jambon: ['jambon', 'dés de jambon', 'des de jambon', 'tranche de jambon'],
+  viandeHachee: [
+    'viande hachee',
+    'viande hachée',
+    'steak hache',
+    'steak haché',
+    'boeuf hache',
+    'bœuf haché',
+  ],
+  courgette: ['courgette', 'courgettes'],
+  carotte: ['carotte', 'carottes'],
+  chocolat: ['chocolat', 'chocolat noir', 'chocolat au lait'],
+  lait: ['lait'],
+  farine: ['farine'],
+  beurre: ['beurre'],
+  sucre: ['sucre', 'sucre en poudre', 'cassonade'],
+  huile: ['huile', 'huile olive', "huile d'olive", 'huile de tournesol'],
+}
+
 function normalizeText(value: string) {
   return value
     .toLowerCase()
@@ -42,6 +109,61 @@ function normalizeText(value: string) {
     .replace(/[^a-z0-9\s-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+function removeIngredientDetails(value: string) {
+  return normalizeText(value)
+    .replace(/\b\d+([.,]\d+)?\b/g, ' ')
+    .replace(
+      /\b(g|gr|gramme|grammes|kg|kilo|kilos|ml|cl|l|litre|litres|cuillere|cuilleres|cafe|soupe|cas|cac|pincee|pincees|tranche|tranches|boite|boites|sachet|sachets|verre|verres)\b/g,
+      ' ',
+    )
+    .replace(/\b(de|du|des|d|la|le|les|un|une|a|au|aux|et|ou)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function singularizeText(value: string) {
+  return value
+    .split(' ')
+    .map((word) => {
+      if (word.length > 3 && word.endsWith('s')) {
+        return word.slice(0, -1)
+      }
+
+      return word
+    })
+    .join(' ')
+}
+
+function getIngredientTerms(value: string) {
+  const base = normalizeText(value)
+  const simplified = removeIngredientDetails(value)
+
+  const terms = new Set<string>()
+
+  ;[base, simplified, singularizeText(base), singularizeText(simplified)]
+    .filter(Boolean)
+    .forEach((term) => terms.add(term))
+
+  Object.values(INGREDIENT_SYNONYMS).forEach((synonyms) => {
+    const normalizedSynonyms = synonyms.map((synonym) => normalizeText(synonym))
+
+    const hasSynonym = normalizedSynonyms.some((synonym) => {
+      return Array.from(terms).some((term) => {
+        return term === synonym || term.includes(synonym) || synonym.includes(term)
+      })
+    })
+
+    if (hasSynonym) {
+      normalizedSynonyms.forEach((synonym) => terms.add(synonym))
+      normalizedSynonyms
+        .map((synonym) => singularizeText(synonym))
+        .forEach((synonym) => terms.add(synonym))
+    }
+  })
+
+  return Array.from(terms).filter(Boolean)
 }
 
 function parseFridgeIngredients(value: string) {
@@ -59,16 +181,24 @@ function ingredientMatches(
   recipeIngredient: string,
   availableIngredients: string[],
 ) {
-  const normalizedRecipeIngredient = normalizeText(recipeIngredient)
+  const recipeTerms = getIngredientTerms(recipeIngredient)
 
   return availableIngredients.some((availableIngredient) => {
-    const normalizedAvailableIngredient = normalizeText(availableIngredient)
+    const availableTerms = getIngredientTerms(availableIngredient)
 
-    if (!normalizedAvailableIngredient) {
-      return false
-    }
+    return recipeTerms.some((recipeTerm) => {
+      return availableTerms.some((availableTerm) => {
+        if (!recipeTerm || !availableTerm) {
+          return false
+        }
 
-    return normalizedRecipeIngredient.includes(normalizedAvailableIngredient)
+        return (
+          recipeTerm === availableTerm ||
+          recipeTerm.includes(availableTerm) ||
+          availableTerm.includes(recipeTerm)
+        )
+      })
+    })
   })
 }
 
