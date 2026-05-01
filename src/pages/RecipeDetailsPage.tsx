@@ -183,6 +183,71 @@ function getStepTimers(step: string): StepTimer[] {
   return timers
 }
 
+function formatScaledQuantity(value: number) {
+  if (Number.isInteger(value)) {
+    return String(value)
+  }
+
+  const roundedValue = Math.round(value * 100) / 100
+
+  return String(roundedValue).replace('.', ',')
+}
+
+function parseFraction(value: string) {
+  const [topValue, bottomValue] = value.split('/').map(Number)
+
+  if (!topValue || !bottomValue) {
+    return null
+  }
+
+  return topValue / bottomValue
+}
+
+function scaleIngredientText(
+  ingredient: string,
+  originalServings: number,
+  selectedServings: number,
+) {
+  if (originalServings <= 0 || selectedServings <= 0) {
+    return ingredient
+  }
+
+  const multiplier = selectedServings / originalServings
+  const trimmedIngredient = ingredient.trim()
+
+  const fractionMatch = trimmedIngredient.match(/^(\d+)\/(\d+)(.*)$/)
+
+  if (fractionMatch) {
+    const quantity = parseFraction(`${fractionMatch[1]}/${fractionMatch[2]}`)
+
+    if (!quantity) {
+      return ingredient
+    }
+
+    const scaledQuantity = quantity * multiplier
+    const restOfIngredient = fractionMatch[3] ?? ''
+
+    return `${formatScaledQuantity(scaledQuantity)}${restOfIngredient}`
+  }
+
+  const decimalMatch = trimmedIngredient.match(/^(\d+(?:[.,]\d+)?)(.*)$/)
+
+  if (!decimalMatch) {
+    return ingredient
+  }
+
+  const quantity = Number(decimalMatch[1].replace(',', '.'))
+
+  if (Number.isNaN(quantity)) {
+    return ingredient
+  }
+
+  const scaledQuantity = quantity * multiplier
+  const restOfIngredient = decimalMatch[2] ?? ''
+
+  return `${formatScaledQuantity(scaledQuantity)}${restOfIngredient}`
+}
+
 export default function RecipeDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -211,6 +276,8 @@ export default function RecipeDetailsPage() {
     useState<DayKey>('monday')
   const [selectedPlanningMeal, setSelectedPlanningMeal] =
     useState<MealKey>('dinner')
+
+  const [selectedServings, setSelectedServings] = useState(1)
 
   const [guidedCookingOpen, setGuidedCookingOpen] = useState(false)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
@@ -296,6 +363,7 @@ export default function RecipeDetailsPage() {
 
         if (!ignore) {
           setRecipe(data)
+          setSelectedServings(Math.max(1, data.servings))
           setAuthorProfile(loadedAuthorProfile)
           setIsFavorite(loadedFavoriteStatus)
           setSimilarRecipes(relatedRecipes)
@@ -449,6 +517,20 @@ export default function RecipeDetailsPage() {
     }, 2500)
   }
 
+  function decreaseServings() {
+    setSelectedServings((currentValue) => Math.max(1, currentValue - 1))
+  }
+
+  function increaseServings() {
+    setSelectedServings((currentValue) => currentValue + 1)
+  }
+
+  function resetServings() {
+    if (!recipe) return
+
+    setSelectedServings(Math.max(1, recipe.servings))
+  }
+
   function clearTimerState() {
     setActiveTimerSeconds(null)
     setActiveTimerLabel('')
@@ -471,7 +553,6 @@ export default function RecipeDetailsPage() {
 
   function goToPreviousStep() {
     clearTimerState()
-
     setCurrentStepIndex((currentIndex) => Math.max(currentIndex - 1, 0))
   }
 
@@ -479,7 +560,6 @@ export default function RecipeDetailsPage() {
     if (!recipe) return
 
     clearTimerState()
-
     setCurrentStepIndex((currentIndex) =>
       Math.min(currentIndex + 1, recipe.steps.length - 1),
     )
@@ -576,6 +656,10 @@ export default function RecipeDetailsPage() {
   const totalTime = recipe.prepTime + recipe.cookTime
   const imageToDisplay = recipe.imageUrl || recipe.image
 
+  const scaledIngredients = recipe.ingredients.map((ingredient) =>
+    scaleIngredientText(ingredient, recipe.servings, selectedServings),
+  )
+
   const authorName = authorProfile?.username || 'Utilisateur'
   const authorBio = authorProfile?.bio ?? ''
   const authorAvatarUrl = authorProfile?.avatarUrl ?? ''
@@ -583,6 +667,7 @@ export default function RecipeDetailsPage() {
 
   const currentStep = recipe.steps[currentStepIndex]
   const currentStepTimers = getStepTimers(currentStep || '')
+
   const guidedProgress =
     recipe.steps.length > 0
       ? Math.round(((currentStepIndex + 1) / recipe.steps.length) * 100)
@@ -624,8 +709,13 @@ export default function RecipeDetailsPage() {
               <aside className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
                 <p className="font-black text-orange-600">Ingrédients</p>
 
+                <p className="mt-1 text-sm font-semibold text-stone-500">
+                  Quantités pour {selectedServings} personne
+                  {selectedServings > 1 ? 's' : ''}
+                </p>
+
                 <ul className="mt-5 space-y-3">
-                  {recipe.ingredients.map((ingredient, index) => (
+                  {scaledIngredients.map((ingredient, index) => (
                     <li
                       key={`${ingredient}-${index}`}
                       className="rounded-2xl bg-[#fffaf3] px-4 py-3 font-semibold text-stone-700"
@@ -654,7 +744,7 @@ export default function RecipeDetailsPage() {
 
                   {currentStepTimers.length > 0 && (
                     <div className="mt-8 rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100">
-                      <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                      <p className="font-black text-orange-600">
                         Minuteur détecté
                       </p>
 
@@ -674,51 +764,41 @@ export default function RecipeDetailsPage() {
                   )}
 
                   {activeTimerSeconds !== null && (
-                    <div
-                      className={`mt-6 rounded-[2rem] p-6 ring-1 ${
-                        remainingTimerSeconds === 0
-                          ? 'bg-green-50 text-green-900 ring-green-100'
-                          : 'bg-white text-stone-950 ring-orange-100'
-                      }`}
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-                            Minuteur {activeTimerLabel}
-                          </p>
+                    <div className="mt-8 rounded-[2rem] bg-stone-950 p-6 text-white shadow-sm">
+                      <p className="text-sm font-black uppercase tracking-wide text-orange-300">
+                        Minuteur {activeTimerLabel}
+                      </p>
 
-                          <p className="mt-2 text-5xl font-black">
-                            {formatTimerTime(remainingTimerSeconds)}
-                          </p>
+                      <p className="mt-3 text-5xl font-black">
+                        {formatTimerTime(remainingTimerSeconds)}
+                      </p>
 
-                          {remainingTimerSeconds === 0 && (
-                            <p className="mt-2 font-black text-green-700">
-                              Minuteur terminé !
-                            </p>
-                          )}
-                        </div>
+                      {remainingTimerSeconds === 0 && (
+                        <p className="mt-3 font-bold text-green-300">
+                          Minuteur terminé !
+                        </p>
+                      )}
 
-                        <div className="flex flex-wrap gap-3">
-                          <button
-                            type="button"
-                            onClick={toggleTimer}
-                            className="rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-                          >
-                            {timerRunning
-                              ? 'Pause'
-                              : remainingTimerSeconds === 0
-                                ? 'Relancer'
-                                : 'Reprendre'}
-                          </button>
+                      <div className="mt-5 flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={toggleTimer}
+                          className="rounded-full bg-white px-5 py-3 font-black text-stone-950 transition hover:bg-orange-50"
+                        >
+                          {timerRunning
+                            ? 'Pause'
+                            : remainingTimerSeconds === 0
+                              ? 'Relancer'
+                              : 'Reprendre'}
+                        </button>
 
-                          <button
-                            type="button"
-                            onClick={resetTimer}
-                            className="rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-orange-700 transition hover:bg-orange-50"
-                          >
-                            Réinitialiser
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={resetTimer}
+                          className="rounded-full border border-white/20 px-5 py-3 font-black text-white transition hover:bg-white/10"
+                        >
+                          Réinitialiser
+                        </button>
                       </div>
                     </div>
                   )}
@@ -783,7 +863,8 @@ export default function RecipeDetailsPage() {
         <article className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="min-h-[340px] bg-[#fff1e6]">
-              {imageToDisplay && imageToDisplay.startsWith('http') ? (
+              {typeof imageToDisplay === 'string' &&
+              imageToDisplay.startsWith('http') ? (
                 <img
                   src={imageToDisplay}
                   alt={recipe.title}
@@ -863,7 +944,6 @@ export default function RecipeDetailsPage() {
                   <p className="text-sm font-medium text-stone-500">
                     Préparation
                   </p>
-
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {recipe.prepTime} min
                   </p>
@@ -871,7 +951,6 @@ export default function RecipeDetailsPage() {
 
                 <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-sm font-medium text-stone-500">Cuisson</p>
-
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {recipe.cookTime} min
                   </p>
@@ -879,7 +958,6 @@ export default function RecipeDetailsPage() {
 
                 <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-sm font-medium text-stone-500">Total</p>
-
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {totalTime} min
                   </p>
@@ -887,9 +965,8 @@ export default function RecipeDetailsPage() {
 
                 <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-sm font-medium text-stone-500">Portions</p>
-
                   <p className="mt-1 text-xl font-black text-stone-950">
-                    {recipe.servings} pers.
+                    {selectedServings} pers.
                   </p>
                 </div>
               </div>
@@ -1047,9 +1124,69 @@ export default function RecipeDetailsPage() {
               </p>
             </div>
 
+            <div className="mt-6 rounded-[1.5rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100 print:hidden">
+              <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                Adapter les portions
+              </p>
+
+              <p className="mt-2 text-sm font-semibold text-stone-500">
+                Recette prévue pour {recipe.servings} personne
+                {recipe.servings > 1 ? 's' : ''}. Les quantités sont
+                recalculées automatiquement.
+              </p>
+
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={decreaseServings}
+                  disabled={selectedServings <= 1}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-orange-200 bg-white text-xl font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  −
+                </button>
+
+                <div className="rounded-full bg-white px-6 py-3 font-black text-stone-950 shadow-sm ring-1 ring-orange-100">
+                  {selectedServings} personne{selectedServings > 1 ? 's' : ''}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={increaseServings}
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-xl font-black text-white transition hover:bg-orange-600"
+                >
+                  +
+                </button>
+
+                <button
+                  type="button"
+                  onClick={resetServings}
+                  className="rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50"
+                >
+                  Revenir à {recipe.servings} pers.
+                </button>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {[2, 4, 6, 8].map((servingValue) => (
+                  <button
+                    key={servingValue}
+                    type="button"
+                    onClick={() => setSelectedServings(servingValue)}
+                    className={`rounded-full px-4 py-2 text-sm font-black transition ${
+                      selectedServings === servingValue
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-white text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
+                    }`}
+                  >
+                    {servingValue} pers.
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {recipe.ingredients.length > 0 ? (
               <ul className="mt-6 space-y-3">
-                {recipe.ingredients.map((ingredient, index) => (
+                {scaledIngredients.map((ingredient, index) => (
                   <li
                     key={`${ingredient}-${index}`}
                     className="flex items-center gap-3 rounded-[1.4rem] bg-[#fff5ec] px-4 py-3 text-stone-700"

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
+import { useAuth } from '../context/useAuth'
 import { getRecipes } from '../services/recipes'
-import { addShoppingListItem } from '../services/shoppingList'
+import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
 
 type DayKey =
@@ -17,12 +18,6 @@ type DayKey =
 type MealKey = 'lunch' | 'dinner'
 
 type MealPlannerState = Record<DayKey, Record<MealKey, string>>
-
-type PlannedMeal = {
-  day: DayKey
-  meal: MealKey
-  recipe: Recipe
-}
 
 const STORAGE_KEY = 'carnet-recettes-weekly-planner'
 
@@ -53,84 +48,58 @@ function createEmptyPlanner(): MealPlannerState {
   }
 }
 
-function getInitialPlanner() {
+function getSavedPlanner(): MealPlannerState {
+  if (typeof window === 'undefined') {
+    return createEmptyPlanner()
+  }
+
   try {
     const savedPlanner = window.localStorage.getItem(STORAGE_KEY)
+    const emptyPlanner = createEmptyPlanner()
 
     if (!savedPlanner) {
-      return createEmptyPlanner()
+      return emptyPlanner
     }
 
+    const parsedPlanner = JSON.parse(savedPlanner) as Partial<MealPlannerState>
+
     return {
-      ...createEmptyPlanner(),
-      ...JSON.parse(savedPlanner),
-    } as MealPlannerState
+      monday: { ...emptyPlanner.monday, ...parsedPlanner.monday },
+      tuesday: { ...emptyPlanner.tuesday, ...parsedPlanner.tuesday },
+      wednesday: { ...emptyPlanner.wednesday, ...parsedPlanner.wednesday },
+      thursday: { ...emptyPlanner.thursday, ...parsedPlanner.thursday },
+      friday: { ...emptyPlanner.friday, ...parsedPlanner.friday },
+      saturday: { ...emptyPlanner.saturday, ...parsedPlanner.saturday },
+      sunday: { ...emptyPlanner.sunday, ...parsedPlanner.sunday },
+    }
   } catch {
     return createEmptyPlanner()
   }
 }
 
-function getRecipeTotalTime(recipe: Recipe) {
-  return recipe.prepTime + recipe.cookTime
+function savePlanner(planner: MealPlannerState) {
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(planner))
 }
 
-function getMealLabel(meal: MealKey) {
-  return MEALS.find((currentMeal) => currentMeal.key === meal)?.label ?? meal
-}
-
-function getDayLabel(day: DayKey) {
-  return DAYS.find((currentDay) => currentDay.key === day)?.label ?? day
-}
-
-function RecipeMiniCard({ recipe }: { recipe: Recipe }) {
-  return (
-    <Link
-      to={`/recipes/${recipe.id}`}
-      className="mt-4 block rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100 transition hover:bg-orange-50"
-    >
-      <div className="flex gap-4">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.25rem] bg-white text-4xl shadow-sm">
-          {recipe.imageUrl ? (
-            <img
-              src={recipe.imageUrl}
-              alt={recipe.title}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <span>{recipe.image || '🍽️'}</span>
-          )}
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700">
-              {recipe.category}
-            </span>
-
-            <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-black text-stone-700">
-              {recipe.difficulty}
-            </span>
-          </div>
-
-          <h3 className="mt-2 line-clamp-2 font-black text-stone-950">
-            {recipe.title}
-          </h3>
-
-          <div className="mt-2 flex flex-wrap gap-3 text-xs font-bold text-stone-600">
-            <span>⏱️ {getRecipeTotalTime(recipe)} min</span>
-            <span>🍽️ {recipe.servings} pers.</span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  )
+function getRecipeImage(recipe: Recipe) {
+  return recipe.imageUrl || recipe.image || '🍽️'
 }
 
 export default function MealPlannerPage() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+
   const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [planner, setPlanner] = useState<MealPlannerState>(getInitialPlanner)
+  const [planner, setPlanner] = useState<MealPlannerState>(() =>
+    getSavedPlanner(),
+  )
+
+  const [selectedRecipeId, setSelectedRecipeId] = useState('')
+  const [selectedDay, setSelectedDay] = useState<DayKey>('monday')
+  const [selectedMeal, setSelectedMeal] = useState<MealKey>('dinner')
+
   const [loading, setLoading] = useState(true)
-  const [generating, setGenerating] = useState(false)
+  const [generatingShoppingList, setGeneratingShoppingList] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -161,375 +130,479 @@ export default function MealPlannerPage() {
     }
   }, [])
 
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(planner))
-  }, [planner])
-
-  const recipeById = useMemo(() => {
+  const recipesById = useMemo(() => {
     return new Map(recipes.map((recipe) => [String(recipe.id), recipe]))
   }, [recipes])
 
-  const plannedMeals = useMemo(() => {
-    const meals: PlannedMeal[] = []
+  const plannedRecipeIds = useMemo(() => {
+    return DAYS.flatMap((day) =>
+      MEALS.map((meal) => planner[day.key][meal.key]).filter(Boolean),
+    )
+  }, [planner])
 
-    DAYS.forEach((day) => {
-      MEALS.forEach((meal) => {
-        const recipeId = planner[day.key][meal.key]
-        const recipe = recipeById.get(recipeId)
+  const uniquePlannedRecipes = useMemo(() => {
+    const uniqueIds = Array.from(new Set(plannedRecipeIds))
 
-        if (recipe) {
-          meals.push({
-            day: day.key,
-            meal: meal.key,
-            recipe,
-          })
-        }
-      })
-    })
+    return uniqueIds
+      .map((recipeId) => recipesById.get(recipeId))
+      .filter((recipe): recipe is Recipe => Boolean(recipe))
+  }, [plannedRecipeIds, recipesById])
 
-    return meals
-  }, [planner, recipeById])
+  const plannedMealsCount = plannedRecipeIds.length
 
-  const plannedRecipeCount = plannedMeals.length
+  const plannedDaysCount = DAYS.filter((day) =>
+    MEALS.some((meal) => planner[day.key][meal.key]),
+  ).length
 
-  const totalIngredientsCount = plannedMeals.reduce((total, plannedMeal) => {
-    return total + plannedMeal.recipe.ingredients.filter(Boolean).length
-  }, 0)
+  const estimatedIngredientsCount = uniquePlannedRecipes.reduce(
+    (total, recipe) => total + recipe.ingredients.length,
+    0,
+  )
 
-  const uniqueRecipeCount = new Set(
-    plannedMeals.map((plannedMeal) => plannedMeal.recipe.id),
-  ).size
-
-  function updateMeal(day: DayKey, meal: MealKey, recipeId: string) {
-    setPlanner((currentPlanner) => ({
-      ...currentPlanner,
+  function updatePlannerSlot(
+    day: DayKey,
+    meal: MealKey,
+    recipeId: string,
+    message?: string,
+  ) {
+    const nextPlanner: MealPlannerState = {
+      ...planner,
       [day]: {
-        ...currentPlanner[day],
+        ...planner[day],
         [meal]: recipeId,
       },
-    }))
+    }
 
+    setPlanner(nextPlanner)
+    savePlanner(nextPlanner)
     setErrorMessage('')
-    setSuccessMessage('')
+    setSuccessMessage(message || '')
   }
 
-  function clearMeal(day: DayKey, meal: MealKey) {
-    updateMeal(day, meal, '')
+  function handleAddRecipeToPlanning() {
+    if (!selectedRecipeId) {
+      setSuccessMessage('')
+      setErrorMessage('Choisis une recette avant de l’ajouter au planning.')
+      return
+    }
+
+    const recipe = recipesById.get(selectedRecipeId)
+
+    updatePlannerSlot(
+      selectedDay,
+      selectedMeal,
+      selectedRecipeId,
+      recipe
+        ? `"${recipe.title}" a été ajouté au planning.`
+        : 'Recette ajoutée au planning.',
+    )
   }
 
-  function clearPlanner() {
+  function handleRemoveRecipe(day: DayKey, meal: MealKey) {
+    updatePlannerSlot(day, meal, '', 'La recette a été retirée du planning.')
+  }
+
+  function handleClearPlanning() {
     const confirmClear = window.confirm(
       'Voulez-vous vraiment vider tout le planning de la semaine ?',
     )
 
     if (!confirmClear) return
 
-    setPlanner(createEmptyPlanner())
+    const emptyPlanner = createEmptyPlanner()
+
+    setPlanner(emptyPlanner)
+    savePlanner(emptyPlanner)
     setErrorMessage('')
     setSuccessMessage('Le planning a été vidé.')
   }
 
-  async function generateShoppingList() {
-    if (plannedMeals.length === 0) {
-      setErrorMessage('Ajoute au moins une recette dans le planning.')
+  async function handleGenerateShoppingList() {
+    if (!user) {
+      navigate('/auth')
       return
     }
 
-    const ingredientsToAdd = plannedMeals.flatMap((plannedMeal) =>
-      plannedMeal.recipe.ingredients.filter(Boolean),
-    )
-
-    if (ingredientsToAdd.length === 0) {
-      setErrorMessage('Les recettes sélectionnées n’ont pas d’ingrédients.')
+    if (uniquePlannedRecipes.length === 0) {
+      setSuccessMessage('')
+      setErrorMessage(
+        'Ajoute au moins une recette au planning avant de générer la liste de courses.',
+      )
       return
     }
 
     try {
-      setGenerating(true)
+      setGeneratingShoppingList(true)
       setErrorMessage('')
       setSuccessMessage('')
 
-      await Promise.all(
-        ingredientsToAdd.map((ingredient) => addShoppingListItem(ingredient)),
-      )
+      let addedItemsCount = 0
 
-      setSuccessMessage(
-        `${ingredientsToAdd.length} ingrédient${
-          ingredientsToAdd.length > 1 ? 's ont' : ' a'
-        } été ajouté${ingredientsToAdd.length > 1 ? 's' : ''} à ta liste de courses.`,
-      )
-    } catch (error) {
-      console.error(error)
+      for (const recipe of uniquePlannedRecipes) {
+        const addedItems = await addRecipeIngredientsToShoppingList(
+          recipe.id,
+          recipe.ingredients,
+        )
 
-      if (
-        error instanceof Error &&
-        error.message.toLowerCase().includes('utilisateur non connecté')
-      ) {
-        setErrorMessage(
-          'Connecte-toi pour générer la liste de courses depuis ton planning.',
+        addedItemsCount += addedItems.length
+      }
+
+      if (addedItemsCount === 0) {
+        setSuccessMessage(
+          'Les ingrédients du planning sont déjà dans ta liste de courses.',
         )
       } else {
-        setErrorMessage(
-          'Impossible de générer la liste de courses pour le moment.',
+        setSuccessMessage(
+          `${addedItemsCount} ingrédient${
+            addedItemsCount > 1 ? 's ont' : ' a'
+          } été ajouté${addedItemsCount > 1 ? 's' : ''} à ta liste de courses.`,
         )
       }
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible de générer la liste de courses.')
     } finally {
-      setGenerating(false)
+      setGeneratingShoppingList(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
-        Chargement du planning...
-      </div>
-    )
+  function selectPlanningSlot(day: DayKey, meal: MealKey) {
+    setSelectedDay(day)
+    setSelectedMeal(meal)
+    setErrorMessage('')
+    setSuccessMessage('Choisis maintenant une recette dans le formulaire.')
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
   }
 
   return (
-    <section className="space-y-10">
-      <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
-        <div className="grid gap-10 px-6 py-10 lg:grid-cols-[1fr_0.8fr] lg:px-12 lg:py-14">
+    <section className="mx-auto max-w-6xl space-y-8 pt-4">
+      <div className="rounded-[2.5rem] bg-[#fffaf3] p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+            <div className="mb-5 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
               <span>📅</span>
               <span>Planning de semaine</span>
             </div>
 
-            <h1 className="max-w-3xl text-4xl font-black leading-tight text-stone-950 md:text-6xl">
-              Prépare tes repas de la semaine
+            <h1 className="max-w-3xl text-4xl font-black leading-tight text-stone-950 md:text-5xl">
+              Organise tes repas simplement.
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-600">
-              Choisis une recette pour chaque jour, puis génère automatiquement
-              ta liste de courses avec tous les ingrédients nécessaires.
+            <p className="mt-4 max-w-2xl text-lg leading-8 text-stone-600">
+              Prévois les déjeuners et les dîners, puis transforme ton planning
+              en liste de courses.
             </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={generateShoppingList}
-                disabled={generating || plannedMeals.length === 0}
-                className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {generating
-                  ? 'Génération...'
-                  : 'Générer ma liste de courses'}
-              </button>
-
-              <button
-                type="button"
-                onClick={clearPlanner}
-                className="rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
-              >
-                Vider le planning
-              </button>
-            </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-            <div className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-              <p className="text-4xl font-black text-orange-700">
-                {plannedRecipeCount}
+          <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[390px]">
+            <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+              <p className="text-3xl font-black text-orange-600">
+                {plannedMealsCount}
               </p>
-              <p className="mt-1 font-bold text-stone-700">
-                repas planifié{plannedRecipeCount > 1 ? 's' : ''}
-              </p>
+              <p className="text-sm font-bold text-stone-600">repas</p>
             </div>
 
-            <div className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-              <p className="text-4xl font-black text-stone-950">
-                {uniqueRecipeCount}
+            <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+              <p className="text-3xl font-black text-green-700">
+                {plannedDaysCount}
               </p>
-              <p className="mt-1 font-bold text-stone-700">
-                recette{uniqueRecipeCount > 1 ? 's' : ''} différente
-                {uniqueRecipeCount > 1 ? 's' : ''}
-              </p>
+              <p className="text-sm font-bold text-stone-600">jours</p>
             </div>
 
-            <div className="rounded-[1.75rem] bg-green-50 p-6 shadow-sm ring-1 ring-green-100">
-              <p className="text-4xl font-black text-green-800">
-                {totalIngredientsCount}
+            <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+              <p className="text-3xl font-black text-stone-800">
+                {estimatedIngredientsCount}
               </p>
-              <p className="mt-1 font-bold text-green-800">
-                ingrédient{totalIngredientsCount > 1 ? 's' : ''} à prévoir
-              </p>
+              <p className="text-sm font-bold text-stone-600">ingrédients</p>
             </div>
           </div>
+        </div>
+
+        <div className="mt-7 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={handleGenerateShoppingList}
+            disabled={generatingShoppingList}
+            className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {generatingShoppingList
+              ? 'Génération en cours...'
+              : 'Générer la liste de courses'}
+          </button>
+
+          <Link
+            to="/shopping-list"
+            className="rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+          >
+            Voir ma liste
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleClearPlanning}
+            className="rounded-full border border-red-100 bg-white px-6 py-3 font-bold text-red-600 transition hover:bg-red-50"
+          >
+            Vider le planning
+          </button>
         </div>
       </div>
 
       {errorMessage && (
-        <div className="rounded-2xl bg-red-50 px-5 py-4 text-red-700">
-          <p className="font-bold">{errorMessage}</p>
-
-          {errorMessage.includes('Connecte-toi') && (
-            <Link
-              to="/auth"
-              className="mt-2 inline-block font-black text-red-800 underline"
-            >
-              Aller à la connexion
-            </Link>
-          )}
+        <div className="rounded-2xl bg-red-50 px-5 py-4 font-bold text-red-700">
+          {errorMessage}
         </div>
       )}
 
       {successMessage && (
-        <div className="rounded-2xl bg-green-50 px-5 py-4 text-green-700">
-          <p className="font-bold">{successMessage}</p>
-
-          <Link
-            to="/shopping-list"
-            className="mt-2 inline-block font-black text-green-800 underline"
-          >
-            Voir ma liste de courses
-          </Link>
+        <div className="rounded-2xl bg-green-50 px-5 py-4 font-bold text-green-700">
+          {successMessage}
         </div>
       )}
 
-      {recipes.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
-          <p className="text-2xl font-black text-stone-950">
-            Aucune recette disponible
-          </p>
+      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-6">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="font-bold text-orange-600">Ajouter rapidement</p>
 
-          <p className="mt-3 text-stone-600">
-            Ajoute d’abord quelques recettes pour pouvoir créer un planning.
-          </p>
+            <h2 className="text-2xl font-black text-stone-950">
+              Choisir une recette pour un repas
+            </h2>
+
+            <p className="mt-1 text-sm font-semibold text-stone-500">
+              Sélectionne une recette, un jour, puis le déjeuner ou le dîner à
+              remplir.
+            </p>
+          </div>
 
           <Link
-            to="/add-recipe"
-            className="mt-6 inline-flex rounded-full bg-orange-500 px-6 py-3 font-bold text-white transition hover:bg-orange-600"
+            to="/recipes"
+            className="rounded-full bg-[#fffaf3] px-5 py-3 text-sm font-bold text-orange-700 ring-1 ring-orange-100 transition hover:bg-orange-50"
           >
-            Ajouter une recette
+            Parcourir les recettes
           </Link>
+        </div>
+
+        <div className="grid gap-3 lg:grid-cols-[1.2fr_0.7fr_0.7fr_auto]">
+          <select
+            value={selectedRecipeId}
+            onChange={(event) => {
+              setSelectedRecipeId(event.target.value)
+              setErrorMessage('')
+              setSuccessMessage('')
+            }}
+            className="rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+          >
+            <option value="">Choisir une recette</option>
+
+            {recipes.map((recipe) => (
+              <option key={recipe.id} value={recipe.id}>
+                {recipe.title}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedDay}
+            onChange={(event) => {
+              setSelectedDay(event.target.value as DayKey)
+              setErrorMessage('')
+              setSuccessMessage('')
+            }}
+            className="rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+          >
+            {DAYS.map((day) => (
+              <option key={day.key} value={day.key}>
+                {day.label}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedMeal}
+            onChange={(event) => {
+              setSelectedMeal(event.target.value as MealKey)
+              setErrorMessage('')
+              setSuccessMessage('')
+            }}
+            className="rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+          >
+            {MEALS.map((meal) => (
+              <option key={meal.key} value={meal.key}>
+                {meal.emoji} {meal.label}
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            onClick={handleAddRecipeToPlanning}
+            className="rounded-2xl bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
+          >
+            Ajouter
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
+          Chargement du planning...
         </div>
       ) : (
-        <div className="grid gap-6 xl:grid-cols-2">
-          {DAYS.map((day) => (
-            <article
-              key={day.key}
-              className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
-            >
-              <div className="mb-6 flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-                    {day.shortLabel}
-                  </p>
+        <div className="space-y-4">
+          {DAYS.map((day) => {
+            const dayMealsCount = MEALS.filter(
+              (meal) => planner[day.key][meal.key],
+            ).length
 
-                  <h2 className="text-3xl font-black text-stone-950">
-                    {day.label}
-                  </h2>
-                </div>
-
-                <span className="rounded-full bg-[#fffaf3] px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100">
-                  {
-                    MEALS.filter((meal) => planner[day.key][meal.key]).length
-                  }
-                  /2 repas
-                </span>
-              </div>
-
-              <div className="space-y-5">
-                {MEALS.map((meal) => {
-                  const selectedRecipeId = planner[day.key][meal.key]
-                  const selectedRecipe = recipeById.get(selectedRecipeId)
-
-                  return (
-                    <div
-                      key={meal.key}
-                      className="rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <h3 className="flex items-center gap-2 text-lg font-black text-stone-950">
-                          <span>{meal.emoji}</span>
-                          {meal.label}
-                        </h3>
-
-                        {selectedRecipe && (
-                          <button
-                            type="button"
-                            onClick={() => clearMeal(day.key, meal.key)}
-                            className="text-sm font-black text-orange-700 underline"
-                          >
-                            Retirer
-                          </button>
-                        )}
-                      </div>
-
-                      <select
-                        value={selectedRecipeId}
-                        onChange={(event) =>
-                          updateMeal(day.key, meal.key, event.target.value)
-                        }
-                        className="mt-4 w-full rounded-2xl border border-orange-100 bg-white px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-                      >
-                        <option value="">Choisir une recette</option>
-
-                        {recipes.map((recipe) => (
-                          <option key={recipe.id} value={String(recipe.id)}>
-                            {recipe.title} — {getRecipeTotalTime(recipe)} min
-                          </option>
-                        ))}
-                      </select>
-
-                      {selectedRecipe ? (
-                        <RecipeMiniCard recipe={selectedRecipe} />
-                      ) : (
-                        <p className="mt-4 rounded-[1.5rem] bg-white p-4 text-sm font-semibold text-stone-500 ring-1 ring-orange-100">
-                          Aucun repas choisi pour le {getMealLabel(meal.key).toLowerCase()}.
-                        </p>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
-
-      {plannedMeals.length > 0 && (
-        <div className="rounded-[2.5rem] bg-[#fffaf3] p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
-                Récapitulatif
-              </p>
-
-              <h2 className="mt-2 text-3xl font-black text-stone-950">
-                Repas prévus cette semaine
-              </h2>
-            </div>
-
-            <button
-              type="button"
-              onClick={generateShoppingList}
-              disabled={generating}
-              className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {generating ? 'Génération...' : 'Envoyer en liste de courses'}
-            </button>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {plannedMeals.map((plannedMeal) => (
-              <Link
-                key={`${plannedMeal.day}-${plannedMeal.meal}`}
-                to={`/recipes/${plannedMeal.recipe.id}`}
-                className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50"
+            return (
+              <section
+                key={day.key}
+                className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100"
               >
-                <p className="text-xs font-black uppercase tracking-wide text-orange-600">
-                  {getDayLabel(plannedMeal.day)} ·{' '}
-                  {getMealLabel(plannedMeal.meal)}
-                </p>
+                <div className="grid gap-5 lg:grid-cols-[180px_1fr] lg:items-stretch">
+                  <div className="flex items-center justify-between rounded-[1.5rem] bg-[#fffaf3] px-5 py-4 ring-1 ring-orange-100 lg:block">
+                    <div>
+                      <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                        {day.shortLabel}
+                      </p>
 
-                <p className="mt-2 font-black text-stone-950">
-                  {plannedMeal.recipe.title}
-                </p>
-              </Link>
-            ))}
-          </div>
+                      <h2 className="text-3xl font-black text-stone-950">
+                        {day.label}
+                      </h2>
+
+                      <p className="mt-2 text-sm font-semibold text-stone-500">
+                        Déjeuner et dîner
+                      </p>
+                    </div>
+
+                    <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-stone-600 shadow-sm ring-1 ring-orange-100 lg:mt-5 lg:inline-block">
+                      {dayMealsCount}/2 repas
+                    </span>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {MEALS.map((meal) => {
+                      const recipeId = planner[day.key][meal.key]
+                      const recipe = recipeId ? recipesById.get(recipeId) : null
+                      const image = recipe ? getRecipeImage(recipe) : null
+                      const isImageUrl =
+                        typeof image === 'string' && image.startsWith('http')
+
+                      const mealDescription =
+                        meal.key === 'lunch'
+                          ? 'Repas du midi'
+                          : 'Repas du soir'
+
+                      return (
+                        <div
+                          key={meal.key}
+                          className={`rounded-[1.5rem] border p-4 transition ${
+                            recipe
+                              ? 'border-orange-200 bg-[#fffaf3]'
+                              : 'border-dashed border-orange-200 bg-white/70'
+                          }`}
+                        >
+                          <div className="mb-4 flex items-start justify-between gap-3">
+                            <div>
+                              <p className="font-black text-stone-900">
+                                {meal.emoji} {meal.label}
+                              </p>
+
+                              <p className="mt-1 text-sm font-semibold text-stone-500">
+                                {mealDescription}
+                              </p>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                selectPlanningSlot(day.key, meal.key)
+                              }
+                              className="rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700 transition hover:bg-orange-200"
+                            >
+                              {recipe ? 'Changer' : '+ Ajouter'}
+                            </button>
+                          </div>
+
+                          {recipe ? (
+                            <div className="flex gap-4 rounded-[1.25rem] bg-white p-3 shadow-sm ring-1 ring-orange-100">
+                              <Link
+                                to={`/recipes/${recipe.id}`}
+                                className="h-24 w-24 shrink-0 overflow-hidden rounded-[1rem] bg-[#fff1e6]"
+                              >
+                                {isImageUrl ? (
+                                  <img
+                                    src={image}
+                                    alt={recipe.title}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-full items-center justify-center text-4xl">
+                                    {image}
+                                  </div>
+                                )}
+                              </Link>
+
+                              <div className="min-w-0 flex-1">
+                                <Link
+                                  to={`/recipes/${recipe.id}`}
+                                  className="line-clamp-2 font-black text-stone-950 transition hover:text-orange-600"
+                                >
+                                  {recipe.title}
+                                </Link>
+
+                                <p className="mt-1 text-sm font-semibold text-stone-500">
+                                  {recipe.prepTime + recipe.cookTime} min ·{' '}
+                                  {recipe.servings} pers.
+                                </p>
+
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      selectPlanningSlot(day.key, meal.key)
+                                    }
+                                    className="rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-sm font-bold text-orange-700 transition hover:bg-orange-100"
+                                  >
+                                    Remplacer
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleRemoveRecipe(day.key, meal.key)
+                                    }
+                                    className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                                  >
+                                    Retirer
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="rounded-[1.25rem] border border-dashed border-orange-200 bg-white/70 px-4 py-5">
+                              <p className="font-bold text-stone-500">
+                                Aucun repas prévu.
+                              </p>
+
+                              <p className="mt-1 text-sm font-semibold text-stone-400">
+                                Clique sur “+ Ajouter” pour choisir une recette
+                                dans le formulaire du haut.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </section>
+            )
+          })}
         </div>
       )}
     </section>
