@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import RecipeCard from '../components/recipes/RecipeCard'
 import { getRecipes } from '../services/recipes'
+import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
 
 type FridgeRecipeMatch = {
@@ -98,7 +100,15 @@ function analyzeRecipe(
   }
 }
 
-function MatchSummary({ match }: { match: FridgeRecipeMatch }) {
+function MatchSummary({
+  match,
+  adding,
+  onAddMissingIngredients,
+}: {
+  match: FridgeRecipeMatch
+  adding: boolean
+  onAddMissingIngredients: (match: FridgeRecipeMatch) => void
+}) {
   return (
     <div className="mb-4 rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -146,7 +156,7 @@ function MatchSummary({ match }: { match: FridgeRecipeMatch }) {
         </div>
       )}
 
-      {match.missingIngredients.length > 0 && match.missingCount <= 4 && (
+      {match.missingIngredients.length > 0 && (
         <div className="mt-4">
           <p className="text-xs font-bold uppercase tracking-wide text-orange-700">
             Il manque
@@ -162,6 +172,17 @@ function MatchSummary({ match }: { match: FridgeRecipeMatch }) {
               </span>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => onAddMissingIngredients(match)}
+            disabled={adding}
+            className="mt-4 w-full rounded-full bg-orange-500 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {adding
+              ? 'Ajout en cours...'
+              : 'Ajouter les ingrédients manquants'}
+          </button>
         </div>
       )}
     </div>
@@ -173,11 +194,15 @@ function MatchSection({
   description,
   emptyMessage,
   matches,
+  addingRecipeId,
+  onAddMissingIngredients,
 }: {
   title: string
   description: string
   emptyMessage: string
   matches: FridgeRecipeMatch[]
+  addingRecipeId: number | null
+  onAddMissingIngredients: (match: FridgeRecipeMatch) => void
 }) {
   return (
     <section className="space-y-6">
@@ -195,7 +220,12 @@ function MatchSection({
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {matches.map((match) => (
             <div key={match.recipe.id}>
-              <MatchSummary match={match} />
+              <MatchSummary
+                match={match}
+                adding={addingRecipeId === match.recipe.id}
+                onAddMissingIngredients={onAddMissingIngredients}
+              />
+
               <RecipeCard recipe={match.recipe} />
             </div>
           ))}
@@ -209,7 +239,9 @@ export default function FridgePage() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [fridgeValue, setFridgeValue] = useState('')
   const [loading, setLoading] = useState(true)
+  const [addingRecipeId, setAddingRecipeId] = useState<number | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
     let ignore = false
@@ -307,6 +339,53 @@ export default function FridgePage() {
     setFridgeValue('Œufs, pâtes, crème, jambon, fromage, oignons')
   }
 
+  async function handleAddMissingIngredients(match: FridgeRecipeMatch) {
+    if (match.missingIngredients.length === 0) {
+      return
+    }
+
+    try {
+      setAddingRecipeId(match.recipe.id)
+      setErrorMessage('')
+      setSuccessMessage('')
+
+      const createdItems = await addRecipeIngredientsToShoppingList(
+        match.recipe.id,
+        match.missingIngredients,
+      )
+
+      setSuccessMessage(
+        `${createdItems.length} ingrédient${
+          createdItems.length > 1 ? 's ont' : ' a'
+        } été ajouté${createdItems.length > 1 ? 's' : ''} à ta liste de courses.`,
+      )
+    } catch (error) {
+      console.error(error)
+
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes('utilisateur non connecté')
+      ) {
+        setErrorMessage(
+          'Connecte-toi pour ajouter les ingrédients à ta liste de courses.',
+        )
+      } else if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes('déjà dans la liste')
+      ) {
+        setErrorMessage(
+          'Ces ingrédients sont déjà dans ta liste de courses pour cette recette.',
+        )
+      } else {
+        setErrorMessage(
+          'Impossible d’ajouter les ingrédients à la liste de courses.',
+        )
+      }
+    } finally {
+      setAddingRecipeId(null)
+    }
+  }
+
   return (
     <section className="space-y-12">
       <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
@@ -314,6 +393,7 @@ export default function FridgePage() {
           <div>
             <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
               <span>🥕</span>
+
               <span>Mode Frigo</span>
             </div>
 
@@ -338,7 +418,11 @@ export default function FridgePage() {
 
               <button
                 type="button"
-                onClick={() => setFridgeValue('')}
+                onClick={() => {
+                  setFridgeValue('')
+                  setErrorMessage('')
+                  setSuccessMessage('')
+                }}
                 className="rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
               >
                 Vider mon frigo
@@ -353,7 +437,11 @@ export default function FridgePage() {
 
             <textarea
               value={fridgeValue}
-              onChange={(event) => setFridgeValue(event.target.value)}
+              onChange={(event) => {
+                setFridgeValue(event.target.value)
+                setErrorMessage('')
+                setSuccessMessage('')
+              }}
               placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
               className="mt-4 min-h-40 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-[#fffaf3] px-5 py-4 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
             />
@@ -399,9 +487,31 @@ export default function FridgePage() {
       </div>
 
       {errorMessage && (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 text-red-700">
-          {errorMessage}
-        </p>
+        <div className="rounded-2xl bg-red-50 px-5 py-4 text-red-700">
+          <p className="font-bold">{errorMessage}</p>
+
+          {errorMessage.includes('Connecte-toi') && (
+            <Link
+              to="/auth"
+              className="mt-2 inline-block font-black text-red-800 underline"
+            >
+              Aller à la connexion
+            </Link>
+          )}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="rounded-2xl bg-green-50 px-5 py-4 text-green-700">
+          <p className="font-bold">{successMessage}</p>
+
+          <Link
+            to="/shopping-list"
+            className="mt-2 inline-block font-black text-green-800 underline"
+          >
+            Voir ma liste de courses
+          </Link>
+        </div>
       )}
 
       {loading ? (
@@ -466,6 +576,8 @@ export default function FridgePage() {
             description="Ces recettes utilisent uniquement les ingrédients que tu as indiqués."
             emptyMessage="Aucune recette complète pour le moment."
             matches={readyRecipes}
+            addingRecipeId={addingRecipeId}
+            onAddMissingIngredients={handleAddMissingIngredients}
           />
 
           <MatchSection
@@ -473,6 +585,8 @@ export default function FridgePage() {
             description="Ces recettes sont presque prêtes : il manque seulement quelques éléments."
             emptyMessage="Aucune recette presque complète pour le moment."
             matches={almostReadyRecipes}
+            addingRecipeId={addingRecipeId}
+            onAddMissingIngredients={handleAddMissingIngredients}
           />
 
           <MatchSection
@@ -480,6 +594,8 @@ export default function FridgePage() {
             description="Ces recettes peuvent t’inspirer, même s’il manque plusieurs ingrédients."
             emptyMessage="Aucune idée proche trouvée."
             matches={inspiredRecipes}
+            addingRecipeId={addingRecipeId}
+            onAddMissingIngredients={handleAddMissingIngredients}
           />
         </div>
       )}
