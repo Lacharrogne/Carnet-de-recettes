@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+
 import RecipeCard from '../components/recipes/RecipeCard'
 import RecipeReviews from '../components/reviews/RecipeReviews'
 import { useAuth } from '../context/useAuth'
@@ -8,6 +9,103 @@ import { getProfile, type UserProfile } from '../services/profiles'
 import { deleteRecipe, getRecipeById, getRecipes } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
+
+type DayKey =
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+  | 'sunday'
+
+type MealKey = 'lunch' | 'dinner'
+
+type MealPlannerState = Record<DayKey, Record<MealKey, string>>
+
+const STORAGE_KEY = 'carnet-recettes-weekly-planner'
+
+const DAYS: { key: DayKey; label: string }[] = [
+  { key: 'monday', label: 'Lundi' },
+  { key: 'tuesday', label: 'Mardi' },
+  { key: 'wednesday', label: 'Mercredi' },
+  { key: 'thursday', label: 'Jeudi' },
+  { key: 'friday', label: 'Vendredi' },
+  { key: 'saturday', label: 'Samedi' },
+  { key: 'sunday', label: 'Dimanche' },
+]
+
+const MEALS: { key: MealKey; label: string; emoji: string }[] = [
+  { key: 'lunch', label: 'Déjeuner', emoji: '☀️' },
+  { key: 'dinner', label: 'Dîner', emoji: '🌙' },
+]
+
+function createEmptyPlanner(): MealPlannerState {
+  return {
+    monday: { lunch: '', dinner: '' },
+    tuesday: { lunch: '', dinner: '' },
+    wednesday: { lunch: '', dinner: '' },
+    thursday: { lunch: '', dinner: '' },
+    friday: { lunch: '', dinner: '' },
+    saturday: { lunch: '', dinner: '' },
+    sunday: { lunch: '', dinner: '' },
+  }
+}
+
+function getSavedPlanner(): MealPlannerState {
+  if (typeof window === 'undefined') {
+    return createEmptyPlanner()
+  }
+
+  try {
+    const savedPlanner = window.localStorage.getItem(STORAGE_KEY)
+    const emptyPlanner = createEmptyPlanner()
+
+    if (!savedPlanner) {
+      return emptyPlanner
+    }
+
+    const parsedPlanner = JSON.parse(savedPlanner) as Partial<MealPlannerState>
+
+    return {
+      monday: { ...emptyPlanner.monday, ...parsedPlanner.monday },
+      tuesday: { ...emptyPlanner.tuesday, ...parsedPlanner.tuesday },
+      wednesday: { ...emptyPlanner.wednesday, ...parsedPlanner.wednesday },
+      thursday: { ...emptyPlanner.thursday, ...parsedPlanner.thursday },
+      friday: { ...emptyPlanner.friday, ...parsedPlanner.friday },
+      saturday: { ...emptyPlanner.saturday, ...parsedPlanner.saturday },
+      sunday: { ...emptyPlanner.sunday, ...parsedPlanner.sunday },
+    }
+  } catch {
+    return createEmptyPlanner()
+  }
+}
+
+function saveRecipeToPlanner(
+  day: DayKey,
+  meal: MealKey,
+  recipeId: Recipe['id'],
+) {
+  const currentPlanner = getSavedPlanner()
+
+  const nextPlanner: MealPlannerState = {
+    ...currentPlanner,
+    [day]: {
+      ...currentPlanner[day],
+      [meal]: String(recipeId),
+    },
+  }
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextPlanner))
+}
+
+function getDayLabel(day: DayKey) {
+  return DAYS.find((currentDay) => currentDay.key === day)?.label ?? day
+}
+
+function getMealLabel(meal: MealKey) {
+  return MEALS.find((currentMeal) => currentMeal.key === meal)?.label ?? meal
+}
 
 export default function RecipeDetailsPage() {
   const { id } = useParams()
@@ -32,6 +130,11 @@ export default function RecipeDetailsPage() {
   const [addingIngredientIndex, setAddingIngredientIndex] = useState<
     number | null
   >(null)
+
+  const [selectedPlanningDay, setSelectedPlanningDay] =
+    useState<DayKey>('monday')
+  const [selectedPlanningMeal, setSelectedPlanningMeal] =
+    useState<MealKey>('dinner')
 
   const isOwner = !!viewerId && !!recipe && recipe.userId === viewerId
 
@@ -211,6 +314,28 @@ export default function RecipeDetailsPage() {
     } finally {
       setAddingIngredientIndex(null)
     }
+  }
+
+  function handleAddRecipeToPlanning() {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+
+    if (!recipe) return
+
+    saveRecipeToPlanner(selectedPlanningDay, selectedPlanningMeal, recipe.id)
+
+    setErrorMessage('')
+    setSuccessMessage(
+      `"${recipe.title}" a été ajouté au planning : ${getDayLabel(
+        selectedPlanningDay,
+      ).toLowerCase()} ${getMealLabel(selectedPlanningMeal).toLowerCase()}.`,
+    )
+
+    window.setTimeout(() => {
+      setSuccessMessage('')
+    }, 2500)
   }
 
   async function handleCopyLink() {
@@ -474,6 +599,70 @@ export default function RecipeDetailsPage() {
                   </button>
                 </>
               )}
+            </div>
+
+            <div className="mt-8 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 print:hidden">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                    Planning de semaine
+                  </p>
+
+                  <h2 className="mt-2 text-2xl font-black text-stone-950">
+                    Ajouter cette recette au planning
+                  </h2>
+
+                  <p className="mt-2 text-stone-600">
+                    Choisis un jour et un repas pour retrouver cette recette
+                    dans ton planning.
+                  </p>
+                </div>
+
+                <Link
+                  to="/planning"
+                  className="rounded-full border border-orange-200 bg-[#fffaf3] px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50"
+                >
+                  Voir le planning
+                </Link>
+              </div>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+                <select
+                  value={selectedPlanningDay}
+                  onChange={(event) =>
+                    setSelectedPlanningDay(event.target.value as DayKey)
+                  }
+                  className="rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+                >
+                  {DAYS.map((day) => (
+                    <option key={day.key} value={day.key}>
+                      {day.label}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={selectedPlanningMeal}
+                  onChange={(event) =>
+                    setSelectedPlanningMeal(event.target.value as MealKey)
+                  }
+                  className="rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+                >
+                  {MEALS.map((meal) => (
+                    <option key={meal.key} value={meal.key}>
+                      {meal.emoji} {meal.label}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={handleAddRecipeToPlanning}
+                  className="rounded-2xl bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
+                >
+                  Ajouter
+                </button>
+              </div>
             </div>
           </div>
         </div>
