@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+
 import { useAuth } from '../../context/useAuth'
 import { supabase } from '../../lib/supabase'
 import { getProfile, type UserProfile } from '../../services/profiles'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `rounded-full px-5 py-3 text-sm font-bold transition ${
+  `whitespace-nowrap rounded-full px-4 py-3 text-sm font-bold transition ${
     isActive
       ? 'bg-orange-500 text-white shadow-sm'
       : 'text-stone-800 hover:bg-orange-50 hover:text-orange-600'
@@ -42,10 +43,12 @@ export default function Header() {
     }
   }, [userId])
 
-  const displayedName =
-    profile?.username || user?.email?.split('@')[0] || 'Profil'
+  const activeProfile = userId ? profile : null
 
-  const displayedAvatarUrl = profile?.avatarUrl ?? ''
+  const displayedName =
+    activeProfile?.username || user?.email?.split('@')[0] || 'Profil'
+
+  const displayedAvatarUrl = activeProfile?.avatarUrl ?? ''
   const avatarLetter = displayedName.charAt(0).toUpperCase()
 
   function closeMenu() {
@@ -61,13 +64,13 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-orange-100/80 bg-[#fffaf3]/95 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-2">
+      <div className="mx-auto flex max-w-[100rem] items-center justify-between gap-4 px-5 py-2">
         <Link
           to="/"
           onClick={closeMenu}
-          className="group flex items-center gap-6"
+          className="group flex shrink-0 items-center gap-4"
         >
-          <div className="relative h-12 w-24 shrink-0 overflow-visible">
+          <div className="relative h-12 w-20 shrink-0 overflow-visible">
             <img
               src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
               alt="Logo Carnet de recettes"
@@ -86,13 +89,17 @@ export default function Header() {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-2 rounded-full bg-white/70 px-2 py-2 shadow-sm ring-1 ring-orange-100 lg:flex">
+        <nav className="hidden items-center gap-1 rounded-full bg-white/70 px-2 py-2 shadow-sm ring-1 ring-orange-100 lg:flex">
           <NavLink to="/" className={navLinkClass}>
             Accueil
           </NavLink>
 
           <NavLink to="/recipes" className={navLinkClass}>
             Recettes
+          </NavLink>
+
+          <NavLink to="/frigo" className={navLinkClass}>
+            Mode frigo
           </NavLink>
 
           {user && (
@@ -112,12 +119,12 @@ export default function Header() {
           )}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden shrink-0 items-center gap-2 lg:flex">
           {user ? (
             <>
               <Link
                 to="/profile"
-                className="flex items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 font-bold text-stone-900 shadow-sm transition hover:bg-orange-50 hover:text-orange-600"
+                className="flex items-center gap-3 rounded-full bg-[#f4e8dc] px-3 py-2 font-bold text-stone-900 shadow-sm transition hover:bg-orange-50 hover:text-orange-600"
               >
                 <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
                   {displayedAvatarUrl ? (
@@ -131,13 +138,13 @@ export default function Header() {
                   )}
                 </div>
 
-                <span className="max-w-32 truncate">{displayedName}</span>
+                <span className="max-w-28 truncate">{displayedName}</span>
               </Link>
 
               <button
                 type="button"
                 onClick={handleLogout}
-                className="rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-600 transition hover:bg-orange-50"
+                className="whitespace-nowrap rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-600 transition hover:bg-orange-50"
               >
                 Déconnexion
               </button>
@@ -172,6 +179,10 @@ export default function Header() {
               className={navLinkClass}
             >
               Recettes
+            </NavLink>
+
+            <NavLink to="/frigo" onClick={closeMenu} className={navLinkClass}>
+              Mode frigo
             </NavLink>
 
             {user && (

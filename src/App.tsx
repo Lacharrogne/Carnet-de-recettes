@@ -13,6 +13,7 @@ import ProfilePage from './pages/ProfilePage'
 import PublicProfilePage from './pages/PublicProfilePage'
 import NotFoundPage from './pages/NotFoundPage'
 import ShoppingListPage from './pages/ShoppingListPage'
+import FridgePage from './pages/FridgePage'
 
 export default function App() {
   return (
@@ -26,6 +27,8 @@ export default function App() {
           <Route path="/recipes" element={<RecipesPage />} />
 
           <Route path="/recipes/:id" element={<RecipeDetailsPage />} />
+
+          <Route path="/frigo" element={<FridgePage />} />
 
           <Route path="/auth" element={<AuthPage />} />
 
