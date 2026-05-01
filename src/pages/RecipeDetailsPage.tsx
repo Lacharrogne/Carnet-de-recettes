@@ -23,6 +23,11 @@ type MealKey = 'lunch' | 'dinner'
 
 type MealPlannerState = Record<DayKey, Record<MealKey, string>>
 
+type StepTimer = {
+  label: string
+  seconds: number
+}
+
 const STORAGE_KEY = 'carnet-recettes-weekly-planner'
 
 const DAYS: { key: DayKey; label: string }[] = [
@@ -107,6 +112,77 @@ function getMealLabel(meal: MealKey) {
   return MEALS.find((currentMeal) => currentMeal.key === meal)?.label ?? meal
 }
 
+function formatTimerTime(seconds: number) {
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const remainingSeconds = seconds % 60
+
+  if (hours > 0) {
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
+      2,
+      '0',
+    )}:${String(remainingSeconds).padStart(2, '0')}`
+  }
+
+  return `${String(minutes).padStart(2, '0')}:${String(
+    remainingSeconds,
+  ).padStart(2, '0')}`
+}
+
+function getStepTimers(step: string): StepTimer[] {
+  const timers: StepTimer[] = []
+  const timerKeys = new Set<string>()
+  const normalizedStep = step.replace(/,/g, '.')
+
+  function addTimer(label: string, seconds: number) {
+    if (seconds <= 0) return
+
+    const cleanedLabel = label.replace(/\s+/g, ' ').trim()
+    const key = `${cleanedLabel}-${seconds}`
+
+    if (timerKeys.has(key)) return
+
+    timerKeys.add(key)
+
+    timers.push({
+      label: cleanedLabel,
+      seconds,
+    })
+  }
+
+  for (const match of normalizedStep.matchAll(/\b(\d+)\s*h\s*(\d{1,2})?\b/gi)) {
+    const hours = Number(match[1])
+    const minutes = Number(match[2] || 0)
+
+    addTimer(match[0], hours * 3600 + minutes * 60)
+  }
+
+  for (const match of normalizedStep.matchAll(/\b(\d+)\s*heures?\b/gi)) {
+    const hours = Number(match[1])
+
+    addTimer(match[0], hours * 3600)
+  }
+
+  for (const match of normalizedStep.matchAll(
+    /\b(\d+)(?:\s*(?:a|à|-)\s*(\d+))?\s*(minutes?|mins?|min)\b/gi,
+  )) {
+    const startMinutes = Number(match[1])
+    const endMinutes = match[2] ? Number(match[2]) : null
+
+    addTimer(match[0], (endMinutes ?? startMinutes) * 60)
+  }
+
+  for (const match of normalizedStep.matchAll(
+    /\b(\d+)\s*(secondes?|secs?|sec)\b/gi,
+  )) {
+    const seconds = Number(match[1])
+
+    addTimer(match[0], seconds)
+  }
+
+  return timers
+}
+
 export default function RecipeDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -138,6 +214,13 @@ export default function RecipeDetailsPage() {
 
   const [guidedCookingOpen, setGuidedCookingOpen] = useState(false)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
+
+  const [activeTimerSeconds, setActiveTimerSeconds] = useState<number | null>(
+    null,
+  )
+  const [activeTimerLabel, setActiveTimerLabel] = useState('')
+  const [remainingTimerSeconds, setRemainingTimerSeconds] = useState(0)
+  const [timerRunning, setTimerRunning] = useState(false)
 
   const isOwner = !!viewerId && !!recipe && recipe.userId === viewerId
 
@@ -218,6 +301,10 @@ export default function RecipeDetailsPage() {
           setSimilarRecipes(relatedRecipes)
           setCurrentStepIndex(0)
           setGuidedCookingOpen(false)
+          setActiveTimerSeconds(null)
+          setActiveTimerLabel('')
+          setRemainingTimerSeconds(0)
+          setTimerRunning(false)
         }
       })
       .catch((error) => {
@@ -236,6 +323,25 @@ export default function RecipeDetailsPage() {
       ignore = true
     }
   }, [invalidRecipeId, recipeId, viewerId])
+
+  useEffect(() => {
+    if (!guidedCookingOpen || !timerRunning) return
+
+    const intervalId = window.setInterval(() => {
+      setRemainingTimerSeconds((currentSeconds) => {
+        if (currentSeconds <= 1) {
+          setTimerRunning(false)
+          return 0
+        }
+
+        return currentSeconds - 1
+      })
+    }, 1000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [guidedCookingOpen, timerRunning])
 
   async function handleDelete() {
     if (!recipe) return
@@ -343,27 +449,66 @@ export default function RecipeDetailsPage() {
     }, 2500)
   }
 
+  function clearTimerState() {
+    setActiveTimerSeconds(null)
+    setActiveTimerLabel('')
+    setRemainingTimerSeconds(0)
+    setTimerRunning(false)
+  }
+
   function openGuidedCooking() {
     if (!recipe || recipe.steps.length === 0) return
 
+    clearTimerState()
     setCurrentStepIndex(0)
     setGuidedCookingOpen(true)
   }
 
   function closeGuidedCooking() {
+    clearTimerState()
     setGuidedCookingOpen(false)
   }
 
   function goToPreviousStep() {
+    clearTimerState()
+
     setCurrentStepIndex((currentIndex) => Math.max(currentIndex - 1, 0))
   }
 
   function goToNextStep() {
     if (!recipe) return
 
+    clearTimerState()
+
     setCurrentStepIndex((currentIndex) =>
       Math.min(currentIndex + 1, recipe.steps.length - 1),
     )
+  }
+
+  function startTimer(timer: StepTimer) {
+    setActiveTimerSeconds(timer.seconds)
+    setActiveTimerLabel(timer.label)
+    setRemainingTimerSeconds(timer.seconds)
+    setTimerRunning(true)
+  }
+
+  function toggleTimer() {
+    if (activeTimerSeconds === null) return
+
+    if (remainingTimerSeconds === 0) {
+      setRemainingTimerSeconds(activeTimerSeconds)
+      setTimerRunning(true)
+      return
+    }
+
+    setTimerRunning((currentValue) => !currentValue)
+  }
+
+  function resetTimer() {
+    if (activeTimerSeconds === null) return
+
+    setRemainingTimerSeconds(activeTimerSeconds)
+    setTimerRunning(false)
   }
 
   async function handleCopyLink() {
@@ -437,6 +582,7 @@ export default function RecipeDetailsPage() {
   const authorLetter = authorName.charAt(0).toUpperCase() || 'U'
 
   const currentStep = recipe.steps[currentStepIndex]
+  const currentStepTimers = getStepTimers(currentStep || '')
   const guidedProgress =
     recipe.steps.length > 0
       ? Math.round(((currentStepIndex + 1) / recipe.steps.length) * 100)
@@ -505,6 +651,77 @@ export default function RecipeDetailsPage() {
                   <p className="text-3xl font-black leading-relaxed text-stone-950 md:text-5xl md:leading-relaxed">
                     {currentStep}
                   </p>
+
+                  {currentStepTimers.length > 0 && (
+                    <div className="mt-8 rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100">
+                      <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                        Minuteur détecté
+                      </p>
+
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        {currentStepTimers.map((timer) => (
+                          <button
+                            key={`${timer.label}-${timer.seconds}`}
+                            type="button"
+                            onClick={() => startTimer(timer)}
+                            className="rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
+                          >
+                            Lancer {timer.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTimerSeconds !== null && (
+                    <div
+                      className={`mt-6 rounded-[2rem] p-6 ring-1 ${
+                        remainingTimerSeconds === 0
+                          ? 'bg-green-50 text-green-900 ring-green-100'
+                          : 'bg-white text-stone-950 ring-orange-100'
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                            Minuteur {activeTimerLabel}
+                          </p>
+
+                          <p className="mt-2 text-5xl font-black">
+                            {formatTimerTime(remainingTimerSeconds)}
+                          </p>
+
+                          {remainingTimerSeconds === 0 && (
+                            <p className="mt-2 font-black text-green-700">
+                              Minuteur terminé !
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap gap-3">
+                          <button
+                            type="button"
+                            onClick={toggleTimer}
+                            className="rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
+                          >
+                            {timerRunning
+                              ? 'Pause'
+                              : remainingTimerSeconds === 0
+                                ? 'Relancer'
+                                : 'Reprendre'}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={resetTimer}
+                            className="rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-orange-700 transition hover:bg-orange-50"
+                          >
+                            Réinitialiser
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-between">
@@ -646,6 +863,7 @@ export default function RecipeDetailsPage() {
                   <p className="text-sm font-medium text-stone-500">
                     Préparation
                   </p>
+
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {recipe.prepTime} min
                   </p>
@@ -653,6 +871,7 @@ export default function RecipeDetailsPage() {
 
                 <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-sm font-medium text-stone-500">Cuisson</p>
+
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {recipe.cookTime} min
                   </p>
@@ -660,6 +879,7 @@ export default function RecipeDetailsPage() {
 
                 <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-sm font-medium text-stone-500">Total</p>
+
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {totalTime} min
                   </p>
@@ -667,6 +887,7 @@ export default function RecipeDetailsPage() {
 
                 <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-sm font-medium text-stone-500">Portions</p>
+
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {recipe.servings} pers.
                   </p>
