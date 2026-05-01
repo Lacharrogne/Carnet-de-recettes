@@ -115,6 +115,10 @@ export default function Header() {
               <NavLink to="/shopping-list" className={navLinkClass}>
                 Liste de courses
               </NavLink>
+
+              <NavLink to="/planning" className={navLinkClass}>
+                Planning
+              </NavLink>
             </>
           )}
         </nav>
@@ -209,6 +213,14 @@ export default function Header() {
                   className={navLinkClass}
                 >
                   Liste de courses
+                </NavLink>
+
+                <NavLink
+                  to="/planning"
+                  onClick={closeMenu}
+                  className={navLinkClass}
+                >
+                  Planning
                 </NavLink>
 
                 <Link

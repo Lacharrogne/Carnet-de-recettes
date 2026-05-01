@@ -14,6 +14,7 @@ import PublicProfilePage from './pages/PublicProfilePage'
 import NotFoundPage from './pages/NotFoundPage'
 import ShoppingListPage from './pages/ShoppingListPage'
 import FridgePage from './pages/FridgePage'
+import MealPlannerPage from './pages/MealPlannerPage'
 
 export default function App() {
   return (
@@ -77,6 +78,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <FavoritesPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/planning"
+            element={
+              <ProtectedRoute>
+                <MealPlannerPage />
               </ProtectedRoute>
             }
           />
