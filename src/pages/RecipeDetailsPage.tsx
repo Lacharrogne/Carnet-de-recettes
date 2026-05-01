@@ -1,0 +1,583 @@
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import RecipeCard from '../components/recipes/RecipeCard'
+import RecipeReviews from '../components/reviews/RecipeReviews'
+import { useAuth } from '../context/useAuth'
+import { isRecipeFavorite, toggleFavorite } from '../services/favorites'
+import { getProfile, type UserProfile } from '../services/profiles'
+import { deleteRecipe, getRecipeById, getRecipes } from '../services/recipes'
+import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
+import type { Recipe } from '../types/recipe'
+
+export default function RecipeDetailsPage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const { user } = useAuth()
+
+  const recipeId = Number(id)
+  const invalidRecipeId = !id || Number.isNaN(recipeId)
+  const viewerId = user?.id
+
+  const [recipe, setRecipe] = useState<Recipe | null>(null)
+  const [authorProfile, setAuthorProfile] = useState<UserProfile | null>(null)
+  const [similarRecipes, setSimilarRecipes] = useState<Recipe[]>([])
+
+  const [loading, setLoading] = useState(!invalidRecipeId)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
+
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [favoriteLoading, setFavoriteLoading] = useState(false)
+  const [addingIngredientIndex, setAddingIngredientIndex] = useState<
+    number | null
+  >(null)
+
+  const isOwner = !!viewerId && !!recipe && recipe.userId === viewerId
+
+  useEffect(() => {
+    let ignore = false
+
+    if (invalidRecipeId) return
+
+    getRecipeById(recipeId)
+      .then(async (data) => {
+        if (!data) {
+          throw new Error('Recette introuvable.')
+        }
+
+        const authorProfilePromise = data.userId
+          ? getProfile(data.userId).catch((error) => {
+              console.error(error)
+              return null
+            })
+          : Promise.resolve(null)
+
+        const favoriteStatusPromise = viewerId
+          ? isRecipeFavorite(recipeId).catch((error) => {
+              console.error(error)
+              return false
+            })
+          : Promise.resolve(false)
+
+        const recipesPromise = getRecipes().catch((error) => {
+          console.error(error)
+          return []
+        })
+
+        const [loadedAuthorProfile, loadedFavoriteStatus, allRecipes] =
+          await Promise.all([
+            authorProfilePromise,
+            favoriteStatusPromise,
+            recipesPromise,
+          ])
+
+        const currentRecipeTags = data.tags.map((tag) => tag.toLowerCase())
+
+        const relatedRecipes = allRecipes
+          .filter((item) => item.id !== data.id)
+          .filter((item) => {
+            const sameCategory = item.category === data.category
+
+            const hasCommonTag = item.tags.some((tag) =>
+              currentRecipeTags.includes(tag.toLowerCase()),
+            )
+
+            return sameCategory || hasCommonTag
+          })
+          .sort((a, b) => {
+            const aSameCategory = a.category === data.category ? 1 : 0
+            const bSameCategory = b.category === data.category ? 1 : 0
+
+            if (aSameCategory !== bSameCategory) {
+              return bSameCategory - aSameCategory
+            }
+
+            const aCommonTags = a.tags.filter((tag) =>
+              currentRecipeTags.includes(tag.toLowerCase()),
+            ).length
+
+            const bCommonTags = b.tags.filter((tag) =>
+              currentRecipeTags.includes(tag.toLowerCase()),
+            ).length
+
+            return bCommonTags - aCommonTags
+          })
+          .slice(0, 3)
+
+        if (!ignore) {
+          setRecipe(data)
+          setAuthorProfile(loadedAuthorProfile)
+          setIsFavorite(loadedFavoriteStatus)
+          setSimilarRecipes(relatedRecipes)
+        }
+      })
+      .catch((error) => {
+        if (!ignore) {
+          console.error(error)
+          setErrorMessage('Impossible de charger cette recette.')
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setLoading(false)
+        }
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [invalidRecipeId, recipeId, viewerId])
+
+  async function handleDelete() {
+    if (!recipe) return
+
+    const confirmDelete = window.confirm(
+      `Voulez-vous vraiment supprimer la recette "${recipe.title}" ?`,
+    )
+
+    if (!confirmDelete) return
+
+    try {
+      setIsDeleting(true)
+      await deleteRecipe(recipe.id)
+      navigate('/recipes')
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible de supprimer cette recette.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  async function handleToggleFavorite() {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+
+    if (!recipe) return
+
+    try {
+      setFavoriteLoading(true)
+      setErrorMessage('')
+      setSuccessMessage('')
+
+      const newValue = await toggleFavorite(recipe.id)
+      setIsFavorite(newValue)
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible de modifier les favoris.')
+    } finally {
+      setFavoriteLoading(false)
+    }
+  }
+
+  async function handleAddIngredientToShoppingList(
+    ingredient: string,
+    index: number,
+  ) {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+
+    if (!recipe) return
+
+    try {
+      setAddingIngredientIndex(index)
+      setErrorMessage('')
+      setSuccessMessage('')
+
+      const addedItems = await addRecipeIngredientsToShoppingList(recipe.id, [
+        ingredient,
+      ])
+
+      if (addedItems.length === 0) {
+        setSuccessMessage(`"${ingredient}" est déjà dans ta liste de courses.`)
+      } else {
+        setSuccessMessage(`"${ingredient}" a été ajouté à ta liste de courses.`)
+      }
+
+      window.setTimeout(() => {
+        setSuccessMessage('')
+      }, 2500)
+    } catch (error) {
+      console.error(error)
+      setSuccessMessage('')
+      setErrorMessage(
+        'Impossible d’ajouter cet ingrédient à la liste de courses.',
+      )
+    } finally {
+      setAddingIngredientIndex(null)
+    }
+  }
+
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setErrorMessage('')
+      setSuccessMessage('Lien copié dans le presse-papiers.')
+
+      window.setTimeout(() => {
+        setSuccessMessage('')
+      }, 2500)
+    } catch (error) {
+      console.error(error)
+      setSuccessMessage('')
+      setErrorMessage('Impossible de copier le lien.')
+    }
+  }
+
+  function handlePrint() {
+    window.print()
+  }
+
+  if (invalidRecipeId) {
+    return (
+      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+        <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+          Recette introuvable.
+        </p>
+
+        <Link
+          to="/recipes"
+          className="font-bold text-orange-700 hover:text-orange-800"
+        >
+          ← Retour aux recettes
+        </Link>
+      </section>
+    )
+  }
+
+  if (loading) {
+    return (
+      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+        <p className="text-stone-600">Chargement de la recette...</p>
+      </section>
+    )
+  }
+
+  if (!recipe) {
+    return (
+      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+        <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+          {errorMessage || 'Recette introuvable.'}
+        </p>
+
+        <Link
+          to="/recipes"
+          className="font-bold text-orange-700 hover:text-orange-800"
+        >
+          ← Retour aux recettes
+        </Link>
+      </section>
+    )
+  }
+
+  const totalTime = recipe.prepTime + recipe.cookTime
+  const imageToDisplay = recipe.imageUrl || recipe.image
+
+  const authorName = authorProfile?.username || 'Utilisateur'
+  const authorBio = authorProfile?.bio ?? ''
+  const authorAvatarUrl = authorProfile?.avatarUrl ?? ''
+  const authorLetter = authorName.charAt(0).toUpperCase() || 'U'
+
+  return (
+    <section className="space-y-10">
+      <div className="print:hidden">
+        <Link
+          to="/recipes"
+          className="inline-flex items-center rounded-full bg-white px-5 py-3 font-bold text-orange-700 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50"
+        >
+          ← Retour aux recettes
+        </Link>
+      </div>
+
+      {successMessage && (
+        <p className="rounded-2xl bg-green-50 px-4 py-3 font-medium text-green-700 print:hidden">
+          {successMessage}
+        </p>
+      )}
+
+      {errorMessage && (
+        <p className="rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700 print:hidden">
+          {errorMessage}
+        </p>
+      )}
+
+      <article className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
+        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="min-h-[340px] bg-[#fff1e6]">
+            {imageToDisplay && imageToDisplay.startsWith('http') ? (
+              <img
+                src={imageToDisplay}
+                alt={recipe.title}
+                className="h-full max-h-[560px] w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full min-h-[340px] items-center justify-center text-8xl">
+                {recipe.image || '🍽️'}
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col justify-center px-6 py-8 lg:px-10">
+            <div className="mb-5 flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700">
+                {recipe.category}
+              </span>
+
+              <span className="rounded-full bg-white px-4 py-2 text-sm font-bold text-stone-700 shadow-sm ring-1 ring-orange-100">
+                {recipe.difficulty}
+              </span>
+            </div>
+
+            <p className="mb-2 text-sm font-black uppercase tracking-wide text-orange-600">
+              Recette maison
+            </p>
+
+            <h1 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">
+              {recipe.title}
+            </h1>
+
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
+              {recipe.description}
+            </p>
+
+            {recipe.userId && (
+              <Link
+                to={`/users/${recipe.userId}`}
+                className="mt-7 block rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 print:hidden"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-2xl font-black text-white ring-2 ring-white">
+                    {authorAvatarUrl ? (
+                      <img
+                        src={authorAvatarUrl}
+                        alt={authorName}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      authorLetter
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-bold text-stone-500">
+                      Recette proposée par
+                    </p>
+
+                    <p className="text-lg font-black text-stone-950">
+                      {authorName}
+                    </p>
+
+                    <p className="mt-1 text-sm font-bold text-orange-700">
+                      Voir le profil →
+                    </p>
+                  </div>
+                </div>
+
+                {authorBio && (
+                  <p className="mt-4 leading-7 text-stone-600">{authorBio}</p>
+                )}
+              </Link>
+            )}
+
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
+                <p className="text-sm font-medium text-stone-500">
+                  Préparation
+                </p>
+                <p className="mt-1 text-xl font-black text-stone-950">
+                  {recipe.prepTime} min
+                </p>
+              </div>
+
+              <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
+                <p className="text-sm font-medium text-stone-500">Cuisson</p>
+                <p className="mt-1 text-xl font-black text-stone-950">
+                  {recipe.cookTime} min
+                </p>
+              </div>
+
+              <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
+                <p className="text-sm font-medium text-stone-500">Total</p>
+                <p className="mt-1 text-xl font-black text-stone-950">
+                  {totalTime} min
+                </p>
+              </div>
+
+              <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
+                <p className="text-sm font-medium text-stone-500">Portions</p>
+                <p className="mt-1 text-xl font-black text-stone-950">
+                  {recipe.servings} pers.
+                </p>
+              </div>
+            </div>
+
+            {recipe.tags.length > 0 && (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {recipe.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-[#f4e8dc] px-3 py-1 text-sm font-semibold text-stone-600"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-8 flex flex-wrap gap-3 print:hidden">
+              <button
+                type="button"
+                onClick={handleToggleFavorite}
+                disabled={favoriteLoading}
+                className="rounded-full border border-orange-200 bg-white px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isFavorite ? '♥ Retirer des favoris' : '♡ Ajouter aux favoris'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:bg-orange-50"
+              >
+                Copier le lien
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:bg-orange-50"
+              >
+                Imprimer
+              </button>
+
+              {isOwner && (
+                <>
+                  <Link
+                    to={`/recipes/${recipe.id}/edit`}
+                    className="rounded-full bg-stone-900 px-5 py-3 font-bold text-white transition hover:bg-stone-700"
+                  >
+                    Modifier
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="rounded-full bg-red-600 px-5 py-3 font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isDeleting ? 'Suppression...' : 'Supprimer'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+        <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+          <div>
+            <p className="font-bold text-orange-600">À préparer</p>
+
+            <h2 className="text-2xl font-black text-stone-950">
+              Ingrédients
+            </h2>
+
+            <p className="mt-1 text-sm text-stone-500 print:hidden">
+              Clique sur + pour ajouter uniquement les ingrédients souhaités à
+              ta liste de courses.
+            </p>
+          </div>
+
+          {recipe.ingredients.length > 0 ? (
+            <ul className="mt-6 space-y-3">
+              {recipe.ingredients.map((ingredient, index) => (
+                <li
+                  key={`${ingredient}-${index}`}
+                  className="flex items-center gap-3 rounded-[1.4rem] bg-[#fff5ec] px-4 py-3 text-stone-700"
+                >
+                  <span className="font-black text-orange-600">•</span>
+
+                  <span className="flex-1 font-medium">{ingredient}</span>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleAddIngredientToShoppingList(ingredient, index)
+                    }
+                    disabled={addingIngredientIndex === index}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-lg font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden"
+                    aria-label={`Ajouter ${ingredient} à la liste de courses`}
+                    title="Ajouter à la liste de courses"
+                  >
+                    {addingIngredientIndex === index ? '…' : '+'}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-4 text-stone-500">Aucun ingrédient renseigné.</p>
+          )}
+        </section>
+
+        <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+          <div>
+            <p className="font-bold text-orange-600">En cuisine</p>
+
+            <h2 className="text-2xl font-black text-stone-950">
+              Préparation
+            </h2>
+          </div>
+
+          {recipe.steps.length > 0 ? (
+            <ol className="mt-6 space-y-4">
+              {recipe.steps.map((step, index) => (
+                <li
+                  key={`${step}-${index}`}
+                  className="flex gap-4 rounded-[1.4rem] bg-[#fffaf3] px-4 py-4 text-stone-700 ring-1 ring-orange-50"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white">
+                    {index + 1}
+                  </span>
+
+                  <span className="leading-7">{step}</span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="mt-4 text-stone-500">Aucune étape renseignée.</p>
+          )}
+        </section>
+      </div>
+
+      <RecipeReviews recipeId={recipe.id} />
+
+      {similarRecipes.length > 0 && (
+        <section className="print:hidden">
+          <div className="mb-6">
+            <p className="font-bold text-orange-600">Suggestions</p>
+
+            <h2 className="text-3xl font-black text-stone-950">
+              Recettes similaires
+            </h2>
+
+            <p className="mt-2 text-stone-600">
+              Des idées proches par catégorie ou par tags.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {similarRecipes.map((similarRecipe) => (
+              <RecipeCard key={similarRecipe.id} recipe={similarRecipe} />
+            ))}
+          </div>
+        </section>
+      )}
+    </section>
+  )
+}
