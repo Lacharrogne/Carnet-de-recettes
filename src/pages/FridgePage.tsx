@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import RecipeCard from '../components/recipes/RecipeCard'
 import { getRecipes } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
@@ -30,6 +29,19 @@ const QUICK_INGREDIENTS = [
   'Oignons',
   'Courgettes',
   'Chocolat',
+]
+
+const ANTI_WASTE_INGREDIENTS = [
+  'Courgettes',
+  'Tomates',
+  'Œufs',
+  'Crème',
+  'Jambon',
+  'Fromage',
+  'Poulet',
+  'Pommes de terre',
+  'Carottes',
+  'Riz',
 ]
 
 const INGREDIENT_SYNONYMS: Record<string, string[]> = {
@@ -141,22 +153,31 @@ function getIngredientTerms(value: string) {
   const simplified = removeIngredientDetails(value)
 
   const terms = new Set<string>()
+  const rawTerms = [
+    base,
+    simplified,
+    singularizeText(base),
+    singularizeText(simplified),
+  ]
 
-  ;[base, simplified, singularizeText(base), singularizeText(simplified)]
-    .filter(Boolean)
-    .forEach((term) => terms.add(term))
+  rawTerms.filter(Boolean).forEach((term) => terms.add(term))
 
   Object.values(INGREDIENT_SYNONYMS).forEach((synonyms) => {
     const normalizedSynonyms = synonyms.map((synonym) => normalizeText(synonym))
 
     const hasSynonym = normalizedSynonyms.some((synonym) => {
       return Array.from(terms).some((term) => {
-        return term === synonym || term.includes(synonym) || synonym.includes(term)
+        return (
+          term === synonym ||
+          term.includes(synonym) ||
+          synonym.includes(term)
+        )
       })
     })
 
     if (hasSynonym) {
       normalizedSynonyms.forEach((synonym) => terms.add(synonym))
+
       normalizedSynonyms
         .map((synonym) => singularizeText(synonym))
         .forEach((synonym) => terms.add(synonym))
@@ -175,6 +196,20 @@ function parseFridgeIngredients(value: string) {
         .filter(Boolean),
     ),
   )
+}
+
+function getUniqueIngredients(ingredients: string[]) {
+  const uniqueIngredients = new Map<string, string>()
+
+  ingredients.forEach((ingredient) => {
+    const normalizedIngredient = normalizeText(ingredient)
+
+    if (normalizedIngredient) {
+      uniqueIngredients.set(normalizedIngredient, ingredient)
+    }
+  })
+
+  return Array.from(uniqueIngredients.values())
 }
 
 function ingredientMatches(
@@ -200,6 +235,16 @@ function ingredientMatches(
       })
     })
   })
+}
+
+function recipeUsesIngredient(recipe: Recipe, ingredient: string) {
+  if (!ingredient.trim()) {
+    return false
+  }
+
+  return recipe.ingredients.some((recipeIngredient) =>
+    ingredientMatches(recipeIngredient, [ingredient]),
+  )
 }
 
 function analyzeRecipe(
@@ -230,7 +275,7 @@ function analyzeRecipe(
   }
 }
 
-function MatchSummary({
+function FridgeResultCard({
   match,
   adding,
   onAddMissingIngredients,
@@ -239,75 +284,132 @@ function MatchSummary({
   adding: boolean
   onAddMissingIngredients: (match: FridgeRecipeMatch) => void
 }) {
-  return (
-    <div className="mb-4 rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-bold text-orange-600">Compatibilité</p>
+  const totalTime = match.recipe.prepTime + match.recipe.cookTime
 
-          <p className="text-2xl font-black text-stone-950">
-            {match.score} %
-          </p>
+  return (
+    <article className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md">
+      <div className="border-b border-orange-100 bg-[#fffaf3] p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-wide text-orange-600">
+              Compatibilité
+            </p>
+
+            <p className="mt-1 text-3xl font-black text-stone-950">
+              {match.score} %
+            </p>
+          </div>
+
+          <span
+            className={`rounded-full px-4 py-2 text-sm font-black ${
+              match.missingCount === 0
+                ? 'bg-green-100 text-green-700'
+                : match.missingCount <= 2
+                  ? 'bg-orange-100 text-orange-700'
+                  : 'bg-stone-100 text-stone-600'
+            }`}
+          >
+            {match.missingCount === 0
+              ? 'Tout est disponible'
+              : `${match.missingCount} ingrédient${
+                  match.missingCount > 1 ? 's' : ''
+                } manquant${match.missingCount > 1 ? 's' : ''}`}
+          </span>
         </div>
 
-        <span
-          className={`rounded-full px-4 py-2 text-sm font-black ${
-            match.missingCount === 0
-              ? 'bg-green-100 text-green-700'
-              : match.missingCount <= 2
-                ? 'bg-orange-100 text-orange-700'
-                : 'bg-stone-100 text-stone-600'
-          }`}
-        >
-          {match.missingCount === 0
-            ? 'Tout est disponible'
-            : `${match.missingCount} ingrédient${
-                match.missingCount > 1 ? 's' : ''
-              } manquant${match.missingCount > 1 ? 's' : ''}`}
-        </span>
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          {match.matchedIngredients.length > 0 && (
+            <div>
+              <p className="text-xs font-black uppercase tracking-wide text-green-700">
+                Tu as déjà
+              </p>
+
+              <div className="mt-2 flex flex-wrap gap-2">
+                {match.matchedIngredients.slice(0, 4).map((ingredient) => (
+                  <span
+                    key={ingredient}
+                    className="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700"
+                  >
+                    {ingredient}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {match.missingIngredients.length > 0 && (
+            <div>
+              <p className="text-xs font-black uppercase tracking-wide text-orange-700">
+                Il manque
+              </p>
+
+              <div className="mt-2 flex flex-wrap gap-2">
+                {match.missingIngredients.slice(0, 4).map((ingredient) => (
+                  <span
+                    key={ingredient}
+                    className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700"
+                  >
+                    {ingredient}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {match.matchedIngredients.length > 0 && (
-        <div className="mt-4">
-          <p className="text-xs font-bold uppercase tracking-wide text-green-700">
-            Tu as déjà
-          </p>
+      <Link
+        to={`/recipes/${match.recipe.id}`}
+        className="block p-5 transition hover:bg-orange-50/40"
+      >
+        <div className="flex gap-5">
+          <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#fff1e6] text-5xl">
+            {match.recipe.imageUrl ? (
+              <img
+                src={match.recipe.imageUrl}
+                alt={match.recipe.title}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span>{match.recipe.image || '🍽️'}</span>
+            )}
+          </div>
 
-          <div className="mt-2 flex flex-wrap gap-2">
-            {match.matchedIngredients.slice(0, 4).map((ingredient) => (
-              <span
-                key={ingredient}
-                className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700"
-              >
-                {ingredient}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700">
+                {match.recipe.category}
               </span>
-            ))}
+
+              <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-black text-stone-700">
+                {match.recipe.difficulty}
+              </span>
+            </div>
+
+            <h3 className="mt-3 text-xl font-black text-stone-950">
+              {match.recipe.title}
+            </h3>
+
+            <p className="mt-2 line-clamp-2 text-sm leading-6 text-stone-600">
+              {match.recipe.description ||
+                'Aucune description pour cette recette.'}
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-3 text-sm font-bold text-stone-600">
+              <span>⏱️ {totalTime} min</span>
+              <span>🍽️ {match.recipe.servings} pers.</span>
+            </div>
           </div>
         </div>
-      )}
+      </Link>
 
       {match.missingIngredients.length > 0 && (
-        <div className="mt-4">
-          <p className="text-xs font-bold uppercase tracking-wide text-orange-700">
-            Il manque
-          </p>
-
-          <div className="mt-2 flex flex-wrap gap-2">
-            {match.missingIngredients.slice(0, 4).map((ingredient) => (
-              <span
-                key={ingredient}
-                className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700"
-              >
-                {ingredient}
-              </span>
-            ))}
-          </div>
-
+        <div className="border-t border-orange-100 p-5">
           <button
             type="button"
             onClick={() => onAddMissingIngredients(match)}
             disabled={adding}
-            className="mt-4 w-full rounded-full bg-orange-500 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-full bg-orange-500 px-5 py-3 text-sm font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {adding
               ? 'Ajout en cours...'
@@ -315,7 +417,7 @@ function MatchSummary({
           </button>
         </div>
       )}
-    </div>
+    </article>
   )
 }
 
@@ -331,15 +433,23 @@ function MatchSection({
   description: string
   emptyMessage: string
   matches: FridgeRecipeMatch[]
-  addingRecipeId: number | null
+  addingRecipeId: Recipe['id'] | null
   onAddMissingIngredients: (match: FridgeRecipeMatch) => void
 }) {
   return (
-    <section className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-black text-stone-950">{title}</h2>
+    <section className="rounded-[2.5rem] bg-[#fffaf3]/90 p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-black text-stone-950">{title}</h2>
 
-        <p className="mt-2 text-stone-600">{description}</p>
+          <p className="mt-2 max-w-3xl leading-7 text-stone-600">
+            {description}
+          </p>
+        </div>
+
+        <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm ring-1 ring-orange-100">
+          {matches.length} résultat{matches.length > 1 ? 's' : ''}
+        </span>
       </div>
 
       {matches.length === 0 ? (
@@ -347,17 +457,14 @@ function MatchSection({
           {emptyMessage}
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 xl:grid-cols-2">
           {matches.map((match) => (
-            <div key={match.recipe.id}>
-              <MatchSummary
-                match={match}
-                adding={addingRecipeId === match.recipe.id}
-                onAddMissingIngredients={onAddMissingIngredients}
-              />
-
-              <RecipeCard recipe={match.recipe} />
-            </div>
+            <FridgeResultCard
+              key={match.recipe.id}
+              match={match}
+              adding={addingRecipeId === match.recipe.id}
+              onAddMissingIngredients={onAddMissingIngredients}
+            />
           ))}
         </div>
       )}
@@ -368,8 +475,11 @@ function MatchSection({
 export default function FridgePage() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [fridgeValue, setFridgeValue] = useState('')
+  const [priorityIngredient, setPriorityIngredient] = useState('')
   const [loading, setLoading] = useState(true)
-  const [addingRecipeId, setAddingRecipeId] = useState<number | null>(null)
+  const [addingRecipeId, setAddingRecipeId] = useState<Recipe['id'] | null>(
+    null,
+  )
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -404,15 +514,35 @@ export default function FridgePage() {
     return parseFridgeIngredients(fridgeValue)
   }, [fridgeValue])
 
+  const effectiveAvailableIngredients = useMemo(() => {
+    return getUniqueIngredients([
+      ...fridgeIngredients,
+      ...(priorityIngredient.trim() ? [priorityIngredient.trim()] : []),
+    ])
+  }, [fridgeIngredients, priorityIngredient])
+
   const analyzedRecipes = useMemo(() => {
-    if (fridgeIngredients.length === 0) {
+    if (effectiveAvailableIngredients.length === 0) {
       return []
     }
 
     return recipes
-      .map((recipe) => analyzeRecipe(recipe, fridgeIngredients))
+      .map((recipe) => analyzeRecipe(recipe, effectiveAvailableIngredients))
       .filter((match) => match.matchedIngredients.length > 0)
       .sort((firstRecipe, secondRecipe) => {
+        const firstUsesPriority = recipeUsesIngredient(
+          firstRecipe.recipe,
+          priorityIngredient,
+        )
+        const secondUsesPriority = recipeUsesIngredient(
+          secondRecipe.recipe,
+          priorityIngredient,
+        )
+
+        if (firstUsesPriority !== secondUsesPriority) {
+          return firstUsesPriority ? -1 : 1
+        }
+
         if (firstRecipe.missingCount !== secondRecipe.missingCount) {
           return firstRecipe.missingCount - secondRecipe.missingCount
         }
@@ -428,18 +558,37 @@ export default function FridgePage() {
 
         return firstRecipeTime - secondRecipeTime
       })
-  }, [fridgeIngredients, recipes])
+  }, [effectiveAvailableIngredients, priorityIngredient, recipes])
+
+  const antiWasteRecipes = useMemo(() => {
+    if (!priorityIngredient.trim()) {
+      return []
+    }
+
+    return analyzedRecipes.filter((match) =>
+      recipeUsesIngredient(match.recipe, priorityIngredient),
+    )
+  }, [analyzedRecipes, priorityIngredient])
+
+  const antiWasteRecipeIds = useMemo(() => {
+    return new Set(antiWasteRecipes.map((match) => match.recipe.id))
+  }, [antiWasteRecipes])
 
   const readyRecipes = analyzedRecipes.filter(
-    (match) => match.missingCount === 0,
+    (match) =>
+      match.missingCount === 0 && !antiWasteRecipeIds.has(match.recipe.id),
   )
 
   const almostReadyRecipes = analyzedRecipes.filter(
-    (match) => match.missingCount > 0 && match.missingCount <= 2,
+    (match) =>
+      match.missingCount > 0 &&
+      match.missingCount <= 2 &&
+      !antiWasteRecipeIds.has(match.recipe.id),
   )
 
   const inspiredRecipes = analyzedRecipes.filter(
-    (match) => match.missingCount > 2,
+    (match) =>
+      match.missingCount > 2 && !antiWasteRecipeIds.has(match.recipe.id),
   )
 
   function addQuickIngredient(ingredient: string) {
@@ -454,6 +603,8 @@ export default function FridgePage() {
     }
 
     setFridgeValue([...currentIngredients, ingredient].join(', '))
+    setErrorMessage('')
+    setSuccessMessage('')
   }
 
   function removeIngredient(ingredientToRemove: string) {
@@ -463,10 +614,15 @@ export default function FridgePage() {
     )
 
     setFridgeValue(nextIngredients.join(', '))
+    setErrorMessage('')
+    setSuccessMessage('')
   }
 
   function useExampleFridge() {
     setFridgeValue('Œufs, pâtes, crème, jambon, fromage, oignons')
+    setPriorityIngredient('Courgettes')
+    setErrorMessage('')
+    setSuccessMessage('')
   }
 
   async function handleAddMissingIngredients(match: FridgeRecipeMatch) {
@@ -550,6 +706,7 @@ export default function FridgePage() {
                 type="button"
                 onClick={() => {
                   setFridgeValue('')
+                  setPriorityIngredient('')
                   setErrorMessage('')
                   setSuccessMessage('')
                 }}
@@ -599,20 +756,76 @@ export default function FridgePage() {
         </div>
       </div>
 
-      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-        <p className="font-bold text-orange-600">Ingrédients rapides</p>
+      <div className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+          <p className="font-bold text-orange-600">Ingrédients rapides</p>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {QUICK_INGREDIENTS.map((ingredient) => (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {QUICK_INGREDIENTS.map((ingredient) => (
+              <button
+                key={ingredient}
+                type="button"
+                onClick={() => addQuickIngredient(ingredient)}
+                className="rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-stone-700 transition hover:bg-orange-100 hover:text-orange-700"
+              >
+                + {ingredient}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[2rem] bg-green-50 p-6 shadow-sm ring-1 ring-green-100">
+          <div className="flex items-center gap-3">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm">
+              ♻️
+            </span>
+
+            <div>
+              <p className="font-black text-green-800">Mode anti-gaspi</p>
+
+              <p className="text-sm text-green-700">
+                Mets en priorité un ingrédient à finir.
+              </p>
+            </div>
+          </div>
+
+          <input
+            value={priorityIngredient}
+            onChange={(event) => {
+              setPriorityIngredient(event.target.value)
+              setErrorMessage('')
+              setSuccessMessage('')
+            }}
+            placeholder="Exemple : courgettes"
+            className="mt-5 w-full rounded-[1.4rem] border border-green-100 bg-white px-5 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-green-300 focus:ring-4 focus:ring-green-100"
+          />
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {ANTI_WASTE_INGREDIENTS.map((ingredient) => (
+              <button
+                key={ingredient}
+                type="button"
+                onClick={() => {
+                  setPriorityIngredient(ingredient)
+                  setErrorMessage('')
+                  setSuccessMessage('')
+                }}
+                className="rounded-full bg-white px-4 py-2 text-sm font-bold text-green-800 shadow-sm ring-1 ring-green-100 transition hover:bg-green-100"
+              >
+                {ingredient}
+              </button>
+            ))}
+          </div>
+
+          {priorityIngredient && (
             <button
-              key={ingredient}
               type="button"
-              onClick={() => addQuickIngredient(ingredient)}
-              className="rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-stone-700 transition hover:bg-orange-100 hover:text-orange-700"
+              onClick={() => setPriorityIngredient('')}
+              className="mt-4 text-sm font-black text-green-800 underline"
             >
-              + {ingredient}
+              Retirer l’ingrédient anti-gaspi
             </button>
-          ))}
+          )}
         </div>
       </div>
 
@@ -648,14 +861,15 @@ export default function FridgePage() {
         <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
           Chargement des recettes...
         </div>
-      ) : fridgeIngredients.length === 0 ? (
+      ) : effectiveAvailableIngredients.length === 0 ? (
         <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
           <p className="text-xl font-black text-stone-950">
             Commence par remplir ton frigo.
           </p>
 
           <p className="mt-2 text-stone-600">
-            Ajoute quelques ingrédients pour découvrir les recettes possibles.
+            Ajoute quelques ingrédients ou choisis un ingrédient anti-gaspi pour
+            découvrir les recettes possibles.
           </p>
         </div>
       ) : analyzedRecipes.length === 0 ? (
@@ -670,8 +884,8 @@ export default function FridgePage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-14">
-          <div className="grid gap-4 md:grid-cols-3">
+        <div className="space-y-10">
+          <div className="grid gap-4 md:grid-cols-4">
             <div className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
               <p className="text-4xl font-black text-green-700">
                 {readyRecipes.length}
@@ -699,7 +913,26 @@ export default function FridgePage() {
 
               <p className="mt-1 font-bold text-stone-700">idées proches</p>
             </div>
+
+            <div className="rounded-[1.75rem] bg-green-50 p-6 shadow-sm ring-1 ring-green-100">
+              <p className="text-4xl font-black text-green-800">
+                {antiWasteRecipes.length}
+              </p>
+
+              <p className="mt-1 font-bold text-green-800">anti-gaspi</p>
+            </div>
           </div>
+
+          {priorityIngredient && (
+            <MatchSection
+              title="À cuisiner en priorité"
+              description={`Ces recettes utilisent “${priorityIngredient}”, l’ingrédient que tu veux finir.`}
+              emptyMessage="Aucune recette ne semble utiliser cet ingrédient."
+              matches={antiWasteRecipes}
+              addingRecipeId={addingRecipeId}
+              onAddMissingIngredients={handleAddMissingIngredients}
+            />
+          )}
 
           <MatchSection
             title="Je peux cuisiner maintenant"
