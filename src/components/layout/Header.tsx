@@ -108,10 +108,6 @@ export default function Header() {
                 Mes recettes
               </NavLink>
 
-              <NavLink to="/favorites" className={navLinkClass}>
-                Favoris
-              </NavLink>
-
               <NavLink to="/shopping-list" className={navLinkClass}>
                 Liste de courses
               </NavLink>
@@ -197,14 +193,6 @@ export default function Header() {
                   className={navLinkClass}
                 >
                   Mes recettes
-                </NavLink>
-
-                <NavLink
-                  to="/favorites"
-                  onClick={closeMenu}
-                  className={navLinkClass}
-                >
-                  Favoris
                 </NavLink>
 
                 <NavLink
