@@ -1,183 +1,235 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { useAuth } from '../context/useAuth'
 import {
   addShoppingListItem,
   deleteAllShoppingListItems,
   deleteCheckedShoppingListItems,
   deleteShoppingListItem,
   getShoppingListItems,
-  updateShoppingListItemChecked,
   type ShoppingListItem,
+  updateShoppingListItemChecked,
 } from '../services/shoppingList'
 
-type ShoppingCategory =
-  | 'Fruits & légumes'
-  | 'Produits frais'
-  | 'Viande / poisson'
-  | 'Épicerie'
-  | 'Boissons'
-  | 'Autres'
+type AisleCategoryKey =
+  | 'fruits-legumes'
+  | 'produits-frais'
+  | 'epicerie'
+  | 'viande-poisson'
+  | 'boissons'
+  | 'surgeles'
+  | 'autres'
+
+type AisleCategory = {
+  key: AisleCategoryKey
+  label: string
+  emoji: string
+  keywords: string[]
+}
 
 type ParsedShoppingItem = {
   item: ShoppingListItem
+  checked: boolean
   quantity: number | null
   unit: string
-  name: string
+  displayName: string
   normalizedName: string
-  category: ShoppingCategory
+  category: AisleCategory
 }
 
-type ShoppingListGroup = {
+type GroupedShoppingItem = {
   key: string
-  name: string
-  displayText: string
-  category: ShoppingCategory
-  items: ShoppingListItem[]
+  ids: number[]
   checked: boolean
-  createdAt: string
+  category: AisleCategory
+  displayText: string
+  items: ParsedShoppingItem[]
 }
 
-const CATEGORY_ORDER: ShoppingCategory[] = [
-  'Fruits & légumes',
-  'Produits frais',
-  'Viande / poisson',
-  'Épicerie',
-  'Boissons',
-  'Autres',
+const AISLE_CATEGORIES: AisleCategory[] = [
+  {
+    key: 'fruits-legumes',
+    label: 'Fruits et légumes',
+    emoji: '🥦',
+    keywords: [
+      'tomate',
+      'tomates',
+      'courgette',
+      'courgettes',
+      'carotte',
+      'carottes',
+      'oignon',
+      'oignons',
+      'ail',
+      'pomme',
+      'pommes',
+      'banane',
+      'bananes',
+      'salade',
+      'citron',
+      'citrons',
+      'fraise',
+      'fraises',
+      'poireau',
+      'poireaux',
+      'champignon',
+      'champignons',
+      'pomme de terre',
+      'pommes de terre',
+      'patate',
+      'patates',
+    ],
+  },
+  {
+    key: 'produits-frais',
+    label: 'Produits frais',
+    emoji: '🧀',
+    keywords: [
+      'lait',
+      'beurre',
+      'creme',
+      'crème',
+      'fromage',
+      'mozzarella',
+      'yaourt',
+      'yaourts',
+      'oeuf',
+      'oeufs',
+      'œuf',
+      'œufs',
+      'jambon',
+      'lardons',
+      'parmesan',
+      'emmental',
+      'gruyere',
+      'gruyère',
+    ],
+  },
+  {
+    key: 'epicerie',
+    label: 'Épicerie',
+    emoji: '🥫',
+    keywords: [
+      'pate',
+      'pates',
+      'pâtes',
+      'riz',
+      'farine',
+      'sucre',
+      'sel',
+      'poivre',
+      'huile',
+      'huile olive',
+      "huile d'olive",
+      'vinaigre',
+      'chocolat',
+      'levure',
+      'conserve',
+      'sauce',
+      'moutarde',
+      'basilic',
+      'herbe',
+      'herbes',
+      'epice',
+      'épice',
+      'epices',
+      'épices',
+    ],
+  },
+  {
+    key: 'viande-poisson',
+    label: 'Viande / poisson',
+    emoji: '🍗',
+    keywords: [
+      'poulet',
+      'boeuf',
+      'bœuf',
+      'viande',
+      'steak',
+      'poisson',
+      'saumon',
+      'thon',
+      'crevette',
+      'crevettes',
+      'porc',
+      'dinde',
+      'canard',
+    ],
+  },
+  {
+    key: 'boissons',
+    label: 'Boissons',
+    emoji: '🥤',
+    keywords: [
+      'eau',
+      'jus',
+      'coca',
+      'soda',
+      'lait',
+      'sirop',
+      'the',
+      'thé',
+      'cafe',
+      'café',
+      'boisson',
+    ],
+  },
+  {
+    key: 'surgeles',
+    label: 'Surgelés',
+    emoji: '❄️',
+    keywords: ['surgele', 'surgelé', 'surgeles', 'surgelés', 'glace', 'glaces'],
+  },
+  {
+    key: 'autres',
+    label: 'Autres',
+    emoji: '🛒',
+    keywords: [],
+  },
 ]
 
-const CATEGORY_EMOJIS: Record<ShoppingCategory, string> = {
-  'Fruits & légumes': '🥦',
-  'Produits frais': '🧀',
-  'Viande / poisson': '🥩',
-  Épicerie: '🛒',
-  Boissons: '🥤',
-  Autres: '🧺',
-}
-
-const UNIT_VARIANTS: Record<string, string[]> = {
-  g: ['g', 'gr', 'gramme', 'grammes'],
-  kg: ['kg', 'kilo', 'kilos'],
-  ml: ['ml'],
-  cl: ['cl'],
-  l: ['l', 'litre', 'litres'],
-  tranche: ['tranche', 'tranches'],
-  boîte: ['boite', 'boites', 'boîte', 'boîtes'],
-  sachet: ['sachet', 'sachets'],
-  pot: ['pot', 'pots'],
-  paquet: ['paquet', 'paquets'],
-  boule: ['boule', 'boules'],
-  gousse: ['gousse', 'gousses'],
-  tablette: ['tablette', 'tablettes'],
-  bouteille: ['bouteille', 'bouteilles'],
-}
-
-const CATEGORY_KEYWORDS: Record<ShoppingCategory, string[]> = {
-  'Fruits & légumes': [
-    'tomate',
-    'tomates',
-    'courgette',
-    'courgettes',
-    'carotte',
-    'carottes',
-    'oignon',
-    'oignons',
-    'ail',
-    'salade',
-    'pomme',
-    'pommes',
-    'banane',
-    'bananes',
-    'citron',
-    'citrons',
-    'poivron',
-    'poivrons',
-    'champignon',
-    'champignons',
-    'pomme de terre',
-    'pommes de terre',
-    'patate',
-    'patates',
-    'basilic',
-    'persil',
-    'menthe',
-  ],
-  'Produits frais': [
-    'oeuf',
-    'oeufs',
-    'œuf',
-    'œufs',
-    'lait',
-    'beurre',
-    'creme',
-    'crème',
-    'yaourt',
-    'fromage',
-    'mozzarella',
-    'mozza',
-    'emmental',
-    'gruyere',
-    'gruyère',
-    'parmesan',
-    'cheddar',
-    'mascarpone',
-    'jambon',
-  ],
-  'Viande / poisson': [
-    'poulet',
-    'boeuf',
-    'bœuf',
-    'steak',
-    'viande',
-    'saumon',
-    'thon',
-    'poisson',
-    'crevette',
-    'crevettes',
-    'lardon',
-    'lardons',
-    'dinde',
-  ],
-  Épicerie: [
-    'pate',
-    'pates',
-    'pâtes',
-    'riz',
-    'farine',
-    'sucre',
-    'sel',
-    'poivre',
-    'huile',
-    'olive',
-    'vinaigre',
-    'chocolat',
-    'levure',
-    'moutarde',
-    'mayonnaise',
-    'basilic',
-    'herbes',
-    'épice',
-    'epice',
-    'paprika',
-    'curry',
-    'conserve',
-  ],
-  Boissons: [
-    'eau',
-    'jus',
-    'soda',
-    'coca',
-    'limonade',
-    'lait',
-    'sirop',
-    'the',
-    'thé',
-    'café',
-    'cafe',
-  ],
-  Autres: [],
-}
+const UNITS = [
+  'g',
+  'gr',
+  'gramme',
+  'grammes',
+  'kg',
+  'kilo',
+  'kilos',
+  'ml',
+  'cl',
+  'l',
+  'litre',
+  'litres',
+  'cuillère',
+  'cuillères',
+  'cuillere',
+  'cuilleres',
+  'càs',
+  'cas',
+  'c.à.s',
+  'café',
+  'cafe',
+  'càc',
+  'cac',
+  'tranche',
+  'tranches',
+  'boîte',
+  'boîtes',
+  'boite',
+  'boites',
+  'sachet',
+  'sachets',
+  'verre',
+  'verres',
+  'pincée',
+  'pincées',
+  'pincee',
+  'pincees',
+  'boule',
+  'boules',
+]
 
 function normalizeText(value: string) {
   return value
@@ -189,6 +241,14 @@ function normalizeText(value: string) {
     .replace(/[^a-z0-9\s-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+function formatNumber(value: number) {
+  if (Number.isInteger(value)) {
+    return String(value)
+  }
+
+  return String(Math.round(value * 10) / 10).replace('.', ',')
 }
 
 function singularizeText(value: string) {
@@ -204,45 +264,19 @@ function singularizeText(value: string) {
     .join(' ')
 }
 
-function capitalizeFirstLetter(value: string) {
-  if (!value) return value
-
-  return value.charAt(0).toUpperCase() + value.slice(1)
-}
-
-function formatQuantity(value: number) {
-  return Number.isInteger(value) ? String(value) : String(value).replace('.', ',')
-}
-
-function getCategory(name: string): ShoppingCategory {
-  const normalizedName = normalizeText(name)
-
-  const category = CATEGORY_ORDER.find((currentCategory) => {
-    return CATEGORY_KEYWORDS[currentCategory].some((keyword) => {
-      const normalizedKeyword = normalizeText(keyword)
-
-      return (
-        normalizedName === normalizedKeyword ||
-        normalizedName.includes(normalizedKeyword) ||
-        normalizedKeyword.includes(normalizedName)
-      )
-    })
-  })
-
-  return category ?? 'Autres'
-}
-
-function getCanonicalUnit(value: string) {
+function getCategoryForItem(value: string) {
   const normalizedValue = normalizeText(value)
 
-  const unitEntry = Object.entries(UNIT_VARIANTS).find(([, variants]) =>
-    variants.some((variant) => normalizeText(variant) === normalizedValue),
+  return (
+    AISLE_CATEGORIES.find((category) =>
+      category.keywords.some((keyword) =>
+        normalizedValue.includes(normalizeText(keyword)),
+      ),
+    ) ?? AISLE_CATEGORIES[AISLE_CATEGORIES.length - 1]
   )
-
-  return unitEntry?.[0] ?? ''
 }
 
-function removeSmallWords(value: string) {
+function cleanIngredientName(value: string) {
   return normalizeText(value)
     .replace(/\b(de|du|des|d|la|le|les|un|une|a|au|aux|et|ou)\b/g, ' ')
     .replace(/\s+/g, ' ')
@@ -251,78 +285,63 @@ function removeSmallWords(value: string) {
 
 function parseShoppingItem(item: ShoppingListItem): ParsedShoppingItem {
   const cleanedText = item.text.trim()
-  const quantityMatch = cleanedText.match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/)
+  const unitPattern = UNITS.join('|')
 
-  let quantity: number | null = null
-  let remainingText = cleanedText
+  const match = cleanedText.match(
+    new RegExp(
+      `^(\\d+(?:[,.]\\d+)?)\\s*(${unitPattern})?\\s*(?:de|d’|d'|du|des)?\\s*(.+)$`,
+      'i',
+    ),
+  )
 
-  if (quantityMatch) {
-    quantity = Number(quantityMatch[1].replace(',', '.'))
-    remainingText = quantityMatch[2].trim()
-  }
-
-  const remainingWords = remainingText.split(/\s+/)
-  const firstWord = remainingWords[0] ?? ''
-  const canonicalUnit = getCanonicalUnit(firstWord)
-
-  let unit = ''
-  let name = remainingText
-
-  if (canonicalUnit) {
-    unit = canonicalUnit
-    name = remainingWords.slice(1).join(' ')
-  }
-
-  name = removeSmallWords(name)
-
-  if (!name) {
-    name = removeSmallWords(cleanedText)
-  }
-
-  const normalizedName = singularizeText(normalizeText(name))
+  const quantity = match ? Number(match[1].replace(',', '.')) : null
+  const unit = match?.[2] ?? ''
+  const displayName = match?.[3]?.trim() || cleanedText
+  const normalizedName = singularizeText(cleanIngredientName(displayName))
+  const category = getCategoryForItem(cleanedText)
 
   return {
     item,
-    quantity,
+    checked: item.checked,
+    quantity: Number.isNaN(quantity) ? null : quantity,
     unit,
-    name,
+    displayName,
     normalizedName,
-    category: getCategory(name),
+    category,
   }
 }
 
 function buildGroupDisplayText(parsedItems: ParsedShoppingItem[]) {
-  const firstParsedItem = parsedItems[0]
-  const displayName = capitalizeFirstLetter(firstParsedItem.name)
-  const quantitiesByUnit = new Map<string, number>()
-  let hasItemWithoutQuantity = false
+  const firstItem = parsedItems[0]
 
-  parsedItems.forEach((parsedItem) => {
-    if (parsedItem.quantity === null) {
-      hasItemWithoutQuantity = true
-      return
-    }
-
-    const currentQuantity = quantitiesByUnit.get(parsedItem.unit) ?? 0
-    quantitiesByUnit.set(parsedItem.unit, currentQuantity + parsedItem.quantity)
-  })
-
-  if (quantitiesByUnit.size === 1 && !hasItemWithoutQuantity) {
-    const [[unit, quantity]] = Array.from(quantitiesByUnit.entries())
-    const formattedQuantity = formatQuantity(quantity)
-
-    if (!unit) {
-      return `${formattedQuantity} ${firstParsedItem.name}`
-    }
-
-    return `${formattedQuantity} ${unit} de ${firstParsedItem.name}`
+  if (!firstItem) {
+    return ''
   }
 
-  if (quantitiesByUnit.size === 0 && parsedItems.length > 1) {
-    return `${displayName} ×${parsedItems.length}`
+  const sameUnit = parsedItems.every(
+    (parsedItem) =>
+      normalizeText(parsedItem.unit) === normalizeText(firstItem.unit),
+  )
+
+  const canAddQuantities =
+    sameUnit && parsedItems.every((parsedItem) => parsedItem.quantity !== null)
+
+  if (canAddQuantities) {
+    const totalQuantity = parsedItems.reduce(
+      (sum, parsedItem) => sum + (parsedItem.quantity ?? 0),
+      0,
+    )
+
+    return `${formatNumber(totalQuantity)} ${
+      firstItem.unit ? `${firstItem.unit} ` : ''
+    }${firstItem.displayName}`.trim()
   }
 
-  return displayName
+  if (parsedItems.length > 1) {
+    return `${parsedItems.length} × ${firstItem.displayName}`
+  }
+
+  return firstItem.item.text
 }
 
 function groupShoppingListItems(items: ShoppingListItem[]) {
@@ -330,8 +349,8 @@ function groupShoppingListItems(items: ShoppingListItem[]) {
   const groupsByKey = new Map<string, ParsedShoppingItem[]>()
 
   parsedItems.forEach((parsedItem) => {
-    const key = `${parsedItem.item.checked ? 'checked' : 'unchecked'}-${
-      parsedItem.category
+    const key = `${parsedItem.checked ? 'checked' : 'unchecked'}-${
+      parsedItem.category.key
     }-${parsedItem.normalizedName}`
 
     const currentGroup = groupsByKey.get(key) ?? []
@@ -344,188 +363,57 @@ function groupShoppingListItems(items: ShoppingListItem[]) {
 
       return {
         key,
-        name: firstParsedItem.name,
-        displayText: buildGroupDisplayText(groupItems),
+        ids: groupItems.map((groupItem) => groupItem.item.id),
+        checked: firstParsedItem.checked,
         category: firstParsedItem.category,
-        items: groupItems.map((parsedItem) => parsedItem.item),
-        checked: firstParsedItem.item.checked,
-        createdAt: groupItems
-          .map((parsedItem) => parsedItem.item.createdAt)
-          .sort()
-          .at(-1) as string,
+        displayText: buildGroupDisplayText(groupItems),
+        items: groupItems,
       }
     })
     .sort((firstGroup, secondGroup) => {
-      const firstCategoryIndex = CATEGORY_ORDER.indexOf(firstGroup.category)
-      const secondCategoryIndex = CATEGORY_ORDER.indexOf(secondGroup.category)
-
-      if (firstCategoryIndex !== secondCategoryIndex) {
-        return firstCategoryIndex - secondCategoryIndex
+      if (firstGroup.checked !== secondGroup.checked) {
+        return firstGroup.checked ? 1 : -1
       }
 
-      return firstGroup.name.localeCompare(secondGroup.name)
+      return firstGroup.category.label.localeCompare(secondGroup.category.label)
     })
 }
 
-function sortShoppingListItems(items: ShoppingListItem[]) {
-  return [...items].sort((a, b) => {
-    if (a.checked !== b.checked) {
-      return Number(a.checked) - Number(b.checked)
-    }
-
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  })
-}
-
-function ShoppingGroupCard({
-  group,
-  onToggleGroup,
-  onDeleteGroup,
-}: {
-  group: ShoppingListGroup
-  onToggleGroup: (group: ShoppingListGroup) => void
-  onDeleteGroup: (group: ShoppingListGroup) => void
-}) {
-  return (
-    <div
-      className={`rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 transition ${
-        group.checked
-          ? 'opacity-70 ring-green-100'
-          : 'ring-orange-100 hover:-translate-y-0.5 hover:shadow-md'
-      }`}
-    >
-      <div className="flex items-start gap-4">
-        <button
-          type="button"
-          onClick={() => onToggleGroup(group)}
-          className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-black transition ${
-            group.checked
-              ? 'border-green-600 bg-green-600 text-white'
-              : 'border-orange-200 bg-white text-transparent hover:border-orange-500'
-          }`}
-          aria-label={
-            group.checked ? 'Marquer comme non acheté' : 'Marquer comme acheté'
-          }
-        >
-          ✓
-        </button>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p
-              className={`text-lg font-black ${
-                group.checked
-                  ? 'text-stone-400 line-through'
-                  : 'text-stone-950'
-              }`}
-            >
-              {group.displayText}
-            </p>
-
-            {group.items.length > 1 && (
-              <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700">
-                {group.items.length} lignes regroupées
-              </span>
-            )}
-          </div>
-
-          <div className="mt-2 flex flex-wrap gap-2">
-            {group.items.slice(0, 3).map((item) => (
-              <span
-                key={item.id}
-                className="rounded-full bg-[#f4e8dc] px-3 py-1 text-xs font-bold text-stone-600"
-              >
-                {item.text}
-              </span>
-            ))}
-
-            {group.items.length > 3 && (
-              <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-bold text-stone-600">
-                +{group.items.length - 3}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => onDeleteGroup(group)}
-          className="rounded-xl px-3 py-2 text-sm font-bold text-stone-500 transition hover:bg-red-50 hover:text-red-600"
-        >
-          Supprimer
-        </button>
-      </div>
-    </div>
-  )
-}
-
-function ShoppingCategorySection({
-  category,
-  groups,
-  onToggleGroup,
-  onDeleteGroup,
-}: {
-  category: ShoppingCategory
-  groups: ShoppingListGroup[]
-  onToggleGroup: (group: ShoppingListGroup) => void
-  onDeleteGroup: (group: ShoppingListGroup) => void
-}) {
-  if (groups.length === 0) {
-    return null
-  }
-
-  return (
-    <section className="rounded-[2rem] bg-[#fffaf3] p-5 shadow-sm ring-1 ring-orange-100">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h3 className="flex items-center gap-3 text-xl font-black text-stone-950">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm">
-            {CATEGORY_EMOJIS[category]}
-          </span>
-
-          {category}
-        </h3>
-
-        <span className="rounded-full bg-white px-3 py-1 text-sm font-black text-orange-700 shadow-sm">
-          {groups.length}
-        </span>
-      </div>
-
-      <div className="space-y-3">
-        {groups.map((group) => (
-          <ShoppingGroupCard
-            key={group.key}
-            group={group}
-            onToggleGroup={onToggleGroup}
-            onDeleteGroup={onDeleteGroup}
-          />
-        ))}
-      </div>
-    </section>
-  )
+function getGroupedItemsByCategory(groups: GroupedShoppingItem[]) {
+  return AISLE_CATEGORIES.map((category) => ({
+    category,
+    groups: groups.filter((group) => group.category.key === category.key),
+  })).filter((section) => section.groups.length > 0)
 }
 
 export default function ShoppingListPage() {
+  const { user } = useAuth()
+
   const [items, setItems] = useState<ShoppingListItem[]>([])
   const [newItemText, setNewItemText] = useState('')
   const [loading, setLoading] = useState(true)
-  const [adding, setAdding] = useState(false)
-  const [deletingChecked, setDeletingChecked] = useState(false)
-  const [deletingAll, setDeletingAll] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
     let ignore = false
 
+    if (!user) {
+      return
+    }
+
     getShoppingListItems()
       .then((data) => {
         if (!ignore) {
-          setItems(sortShoppingListItems(data))
+          setItems(data)
+          setErrorMessage('')
         }
       })
       .catch((error) => {
+        console.error(error)
+
         if (!ignore) {
-          console.error(error)
           setErrorMessage('Impossible de charger la liste de courses.')
         }
       })
@@ -538,139 +426,131 @@ export default function ShoppingListPage() {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [user])
 
-  const checkedItems = useMemo(() => {
-    return items.filter((item) => item.checked)
+  const groupedItems = useMemo(() => {
+    return groupShoppingListItems(items)
   }, [items])
 
-  const uncheckedItems = useMemo(() => {
-    return items.filter((item) => !item.checked)
-  }, [items])
+  const groupedItemsByCategory = useMemo(() => {
+    return getGroupedItemsByCategory(groupedItems)
+  }, [groupedItems])
 
-  const uncheckedGroups = useMemo(() => {
-    return groupShoppingListItems(uncheckedItems)
-  }, [uncheckedItems])
+  const checkedItemsCount = items.filter((item) => item.checked).length
+  const uncheckedItemsCount = items.length - checkedItemsCount
+  const progress =
+    items.length > 0 ? Math.round((checkedItemsCount / items.length) * 100) : 0
 
-  const checkedGroups = useMemo(() => {
-    return groupShoppingListItems(checkedItems)
-  }, [checkedItems])
-
-  async function handleAddItem(event: FormEvent) {
+  async function handleAddItem(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const cleanedText = newItemText.trim()
 
-    if (!cleanedText) return
+    if (!cleanedText) {
+      return
+    }
 
     try {
-      setAdding(true)
+      setSaving(true)
       setErrorMessage('')
       setSuccessMessage('')
 
       const createdItem = await addShoppingListItem(cleanedText)
 
-      setItems((currentItems) =>
-        sortShoppingListItems([createdItem, ...currentItems]),
-      )
-
+      setItems((currentItems) => [createdItem, ...currentItems])
       setNewItemText('')
       setSuccessMessage('Ingrédient ajouté à la liste.')
     } catch (error) {
       console.error(error)
       setErrorMessage('Impossible d’ajouter cet ingrédient.')
     } finally {
-      setAdding(false)
+      setSaving(false)
     }
   }
 
-  async function handleToggleGroup(group: ShoppingListGroup) {
+  async function handleToggleGroup(group: GroupedShoppingItem) {
     try {
       setErrorMessage('')
       setSuccessMessage('')
 
-      const updatedItems = await Promise.all(
-        group.items.map((item) =>
-          updateShoppingListItemChecked(item.id, !group.checked),
-        ),
+      const nextCheckedValue = !group.checked
+
+      await Promise.all(
+        group.ids.map((id) => updateShoppingListItemChecked(id, nextCheckedValue)),
       )
 
       setItems((currentItems) =>
-        sortShoppingListItems(
-          currentItems.map((currentItem) => {
-            const updatedItem = updatedItems.find(
-              (item) => item.id === currentItem.id,
-            )
-
-            return updatedItem ?? currentItem
-          }),
+        currentItems.map((item) =>
+          group.ids.includes(item.id)
+            ? { ...item, checked: nextCheckedValue }
+            : item,
         ),
       )
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible de modifier ce groupe d’ingrédients.')
+      setErrorMessage('Impossible de modifier cet ingrédient.')
     }
   }
 
-  async function handleDeleteGroup(group: ShoppingListGroup) {
+  async function handleDeleteGroup(group: GroupedShoppingItem) {
     try {
       setErrorMessage('')
       setSuccessMessage('')
 
-      await Promise.all(group.items.map((item) => deleteShoppingListItem(item.id)))
+      await Promise.all(group.ids.map((id) => deleteShoppingListItem(id)))
 
       setItems((currentItems) =>
-        currentItems.filter(
-          (currentItem) =>
-            !group.items.some((groupItem) => groupItem.id === currentItem.id),
-        ),
+        currentItems.filter((item) => !group.ids.includes(item.id)),
       )
+
+      setSuccessMessage('Ingrédient supprimé de la liste.')
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible de supprimer ce groupe d’ingrédients.')
+      setErrorMessage('Impossible de supprimer cet ingrédient.')
     }
   }
 
   async function handleDeleteCheckedItems() {
-    if (checkedItems.length === 0) return
+    if (checkedItemsCount === 0) {
+      return
+    }
 
     const confirmDelete = window.confirm(
-      'Voulez-vous supprimer tous les ingrédients cochés ?',
+      'Supprimer tous les ingrédients déjà cochés ?',
     )
 
-    if (!confirmDelete) return
+    if (!confirmDelete) {
+      return
+    }
 
     try {
-      setDeletingChecked(true)
       setErrorMessage('')
       setSuccessMessage('')
 
       await deleteCheckedShoppingListItems()
 
-      setItems((currentItems) =>
-        currentItems.filter((currentItem) => !currentItem.checked),
-      )
-
+      setItems((currentItems) => currentItems.filter((item) => !item.checked))
       setSuccessMessage('Les ingrédients cochés ont été supprimés.')
     } catch (error) {
       console.error(error)
       setErrorMessage('Impossible de supprimer les ingrédients cochés.')
-    } finally {
-      setDeletingChecked(false)
     }
   }
 
   async function handleDeleteAllItems() {
-    if (items.length === 0) return
+    if (items.length === 0) {
+      return
+    }
 
     const confirmDelete = window.confirm(
       'Voulez-vous vraiment vider toute la liste de courses ?',
     )
 
-    if (!confirmDelete) return
+    if (!confirmDelete) {
+      return
+    }
 
     try {
-      setDeletingAll(true)
       setErrorMessage('')
       setSuccessMessage('')
 
@@ -681,222 +561,269 @@ export default function ShoppingListPage() {
     } catch (error) {
       console.error(error)
       setErrorMessage('Impossible de vider la liste de courses.')
-    } finally {
-      setDeletingAll(false)
     }
   }
 
-  if (loading) {
+  if (!user) {
     return (
-      <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
-        Chargement de la liste de courses...
-      </div>
+      <section className="mx-auto max-w-3xl rounded-[2.5rem] bg-[#fffaf3] px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
+        <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+          Liste de courses
+        </p>
+
+        <h1 className="mt-3 text-4xl font-black text-stone-950">
+          Connecte-toi pour accéder à ta liste.
+        </h1>
+
+        <p className="mt-4 text-lg leading-8 text-stone-600">
+          Ta liste de courses est personnelle. Elle se remplit avec les recettes
+          que tu ajoutes depuis le site.
+        </p>
+
+        <Link
+          to="/auth"
+          className="mt-8 inline-flex rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
+        >
+          Aller à la connexion
+        </Link>
+      </section>
     )
   }
 
   return (
     <section className="space-y-10">
-      <div className="rounded-[2.5rem] bg-[#fffaf3] p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
-        <div className="flex flex-wrap items-center justify-between gap-6">
+      <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
+        <div className="grid gap-10 px-6 py-10 lg:grid-cols-[1fr_0.8fr] lg:px-12 lg:py-14">
           <div>
-            <div className="mb-5 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+            <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
               <span>🛒</span>
-              <span>Organisation</span>
+              <span>Liste de courses</span>
             </div>
 
-            <h1 className="text-4xl font-black text-stone-950 md:text-6xl">
-              Liste de courses
+            <h1 className="max-w-3xl text-4xl font-black leading-tight text-stone-950 md:text-6xl">
+              Tout ce qu’il te faut pour cuisiner.
             </h1>
 
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-stone-600">
-              Prépare tes achats simplement. Les ingrédients sont regroupés et
-              rangés par rayons pour aller plus vite en magasin.
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-600">
+              Ajoute des ingrédients à la main ou laisse le planning et les
+              recettes remplir automatiquement ta liste. Les ingrédients sont
+              regroupés par rayon pour faire les courses plus vite.
             </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleDeleteCheckedItems}
+                disabled={checkedItemsCount === 0}
+                className="rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Supprimer les cochés
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteAllItems}
+                disabled={items.length === 0}
+                className="rounded-full border border-red-100 bg-white px-6 py-3 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Vider la liste
+              </button>
+            </div>
           </div>
 
-          <Link
-            to="/recipes"
-            className="rounded-full bg-orange-500 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-orange-600"
-          >
-            Explorer les recettes
-          </Link>
+          <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+            <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
+              Progression
+            </p>
+
+            <div className="mt-5 grid grid-cols-3 gap-3">
+              <div className="rounded-[1.4rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100">
+                <p className="text-3xl font-black text-orange-600">
+                  {items.length}
+                </p>
+                <p className="text-sm font-bold text-stone-600">ingrédients</p>
+              </div>
+
+              <div className="rounded-[1.4rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100">
+                <p className="text-3xl font-black text-green-700">
+                  {checkedItemsCount}
+                </p>
+                <p className="text-sm font-bold text-stone-600">achetés</p>
+              </div>
+
+              <div className="rounded-[1.4rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100">
+                <p className="text-3xl font-black text-stone-950">
+                  {uncheckedItemsCount}
+                </p>
+                <p className="text-sm font-bold text-stone-600">restants</p>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-full bg-[#fff1e6] p-2">
+              <div
+                className="h-4 rounded-full bg-orange-500 transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+
+            <p className="mt-3 text-sm font-bold text-stone-500">
+              {progress} % de la liste est déjà cochée.
+            </p>
+          </div>
         </div>
       </div>
 
-      {errorMessage && (
-        <div className="rounded-2xl bg-red-50 px-5 py-4 font-bold text-red-700">
-          {errorMessage}
-        </div>
-      )}
+      <form
+        onSubmit={handleAddItem}
+        className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
+      >
+        <p className="font-bold text-orange-600">Ajout manuel</p>
 
-      {successMessage && (
-        <div className="rounded-2xl bg-green-50 px-5 py-4 font-bold text-green-700">
-          {successMessage}
-        </div>
-      )}
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-          <p className="text-4xl font-black text-stone-950">{items.length}</p>
-
-          <p className="mt-1 font-bold text-stone-700">
-            ingrédient{items.length > 1 ? 's' : ''} dans la liste
-          </p>
-        </div>
-
-        <div className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-          <p className="text-4xl font-black text-orange-700">
-            {uncheckedGroups.length}
-          </p>
-
-          <p className="mt-1 font-bold text-stone-700">groupes à acheter</p>
-        </div>
-
-        <div className="rounded-[1.75rem] bg-green-50 p-6 shadow-sm ring-1 ring-green-100">
-          <p className="text-4xl font-black text-green-800">
-            {checkedItems.length}
-          </p>
-
-          <p className="mt-1 font-bold text-green-800">déjà pris</p>
-        </div>
-      </div>
-
-      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-        <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
-          Ajout rapide
-        </p>
-
-        <h2 className="mt-2 text-2xl font-black text-stone-950">
-          Ajouter un ingrédient
-        </h2>
-
-        <p className="mt-2 text-stone-600">
-          Tu peux écrire une quantité, par exemple : 2 œufs, 500 g de farine ou
-          1 boule de mozzarella.
-        </p>
-
-        <form onSubmit={handleAddItem} className="mt-5 flex flex-col gap-3 md:flex-row">
+        <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
           <input
             value={newItemText}
-            onChange={(event) => setNewItemText(event.target.value)}
-            placeholder="Exemple : 6 œufs, farine, tomates..."
-            className="w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+            onChange={(event) => {
+              setNewItemText(event.target.value)
+              setErrorMessage('')
+              setSuccessMessage('')
+            }}
+            placeholder="Exemple : 3 tomates, 500 g de farine, lait..."
+            className="rounded-2xl border border-orange-100 bg-[#fffaf3] px-5 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
           />
 
           <button
             type="submit"
-            disabled={adding}
-            className="rounded-2xl bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={saving || !newItemText.trim()}
+            className="rounded-2xl bg-orange-500 px-6 py-4 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {adding ? 'Ajout...' : 'Ajouter'}
+            {saving ? 'Ajout...' : 'Ajouter'}
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
 
-      {items.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
-          <p className="text-2xl font-black text-stone-950">
-            Ta liste de courses est vide
+      {successMessage && (
+        <p className="rounded-2xl bg-green-50 px-5 py-4 font-bold text-green-700">
+          {successMessage}
+        </p>
+      )}
+
+      {errorMessage && (
+        <p className="rounded-2xl bg-red-50 px-5 py-4 font-bold text-red-700">
+          {errorMessage}
+        </p>
+      )}
+
+      {loading ? (
+        <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
+          Chargement de la liste de courses...
+        </div>
+      ) : items.length === 0 ? (
+        <div className="rounded-[2rem] bg-white p-10 text-center shadow-sm ring-1 ring-orange-100">
+          <p className="text-5xl">🛒</p>
+
+          <h2 className="mt-4 text-3xl font-black text-stone-950">
+            Ta liste est vide.
+          </h2>
+
+          <p className="mx-auto mt-3 max-w-xl text-stone-600">
+            Ajoute un ingrédient à la main, ajoute une recette à ton planning ou
+            clique sur les ingrédients d’une fiche recette.
           </p>
 
-          <p className="mt-3 text-stone-600">
-            Ajoute un ingrédient manuellement ou ajoute les ingrédients depuis
-            une recette.
-          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link
+              to="/recipes"
+              className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
+            >
+              Parcourir les recettes
+            </Link>
 
-          <Link
-            to="/recipes"
-            className="mt-6 inline-flex rounded-full bg-orange-500 px-6 py-3 font-bold text-white transition hover:bg-orange-600"
-          >
-            Trouver une recette
-          </Link>
+            <Link
+              to="/planning"
+              className="rounded-full border border-orange-200 bg-white px-6 py-3 font-black text-orange-700 transition hover:bg-orange-50"
+            >
+              Voir le planning
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="space-y-8">
-          <div className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
-                  Ma liste
-                </p>
+          {groupedItemsByCategory.map(({ category, groups }) => (
+            <section
+              key={category.key}
+              className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
+            >
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                    Rayon
+                  </p>
 
-                <h2 className="mt-2 text-3xl font-black text-stone-950">
-                  À acheter par rayons
-                </h2>
+                  <h2 className="text-2xl font-black text-stone-950">
+                    {category.emoji} {category.label}
+                  </h2>
+                </div>
 
-                <p className="mt-2 text-stone-600">
-                  Coche les groupes au fur et à mesure de tes achats.
-                </p>
+                <span className="rounded-full bg-[#fffaf3] px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100">
+                  {groups.length} élément{groups.length > 1 ? 's' : ''}
+                </span>
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                {checkedItems.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleDeleteCheckedItems}
-                    disabled={deletingChecked}
-                    className="rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50 disabled:opacity-60"
+              <div className="grid gap-3">
+                {groups.map((group) => (
+                  <div
+                    key={group.key}
+                    className={`flex flex-wrap items-center gap-3 rounded-[1.5rem] px-4 py-4 ring-1 transition ${
+                      group.checked
+                        ? 'bg-green-50 text-green-800 ring-green-100'
+                        : 'bg-[#fffaf3] text-stone-800 ring-orange-100'
+                    }`}
                   >
-                    {deletingChecked ? 'Suppression...' : 'Supprimer les cochés'}
-                  </button>
-                )}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleGroup(group)}
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-black transition ${
+                        group.checked
+                          ? 'bg-green-600 text-white'
+                          : 'bg-white text-orange-600 ring-1 ring-orange-100 hover:bg-orange-50'
+                      }`}
+                      aria-label={
+                        group.checked
+                          ? 'Marquer comme non acheté'
+                          : 'Marquer comme acheté'
+                      }
+                    >
+                      {group.checked ? '✓' : ''}
+                    </button>
 
-                <button
-                  type="button"
-                  onClick={handleDeleteAllItems}
-                  disabled={deletingAll}
-                  className="rounded-full border border-red-100 bg-red-50 px-5 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-60"
-                >
-                  {deletingAll ? 'Suppression...' : 'Vider la liste'}
-                </button>
-              </div>
-            </div>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={`font-black ${
+                          group.checked ? 'line-through opacity-70' : ''
+                        }`}
+                      >
+                        {group.displayText}
+                      </p>
 
-            {uncheckedGroups.length === 0 ? (
-              <div className="rounded-[2rem] bg-green-50 p-6 text-green-800 ring-1 ring-green-100">
-                Tous les ingrédients sont cochés. Tu peux supprimer les cochés
-                ou garder ta liste pour plus tard.
-              </div>
-            ) : (
-              <div className="space-y-5">
-                {CATEGORY_ORDER.map((category) => (
-                  <ShoppingCategorySection
-                    key={category}
-                    category={category}
-                    groups={uncheckedGroups.filter(
-                      (group) => group.category === category,
-                    )}
-                    onToggleGroup={handleToggleGroup}
-                    onDeleteGroup={handleDeleteGroup}
-                  />
+                      {group.items.length > 1 && (
+                        <p className="mt-1 text-sm font-semibold text-stone-500">
+                          Regroupe {group.items.length} lignes similaires.
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteGroup(group)}
+                      className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
                 ))}
               </div>
-            )}
-          </div>
-
-          {checkedGroups.length > 0 && (
-            <div className="rounded-[2.5rem] bg-green-50 p-6 shadow-sm ring-1 ring-green-100 md:p-8">
-              <h2 className="text-2xl font-black text-green-900">Déjà pris</h2>
-
-              <p className="mt-2 text-green-700">
-                Ces ingrédients sont cochés. Tu peux les décocher si besoin.
-              </p>
-
-              <div className="mt-6 space-y-5">
-                {CATEGORY_ORDER.map((category) => (
-                  <ShoppingCategorySection
-                    key={category}
-                    category={category}
-                    groups={checkedGroups.filter(
-                      (group) => group.category === category,
-                    )}
-                    onToggleGroup={handleToggleGroup}
-                    onDeleteGroup={handleDeleteGroup}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+            </section>
+          ))}
         </div>
       )}
     </section>

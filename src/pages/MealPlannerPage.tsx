@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
+import { supabase } from '../lib/supabase'
 import { getRecipes } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
@@ -18,103 +19,96 @@ type DayKey =
 type MainMealKey = 'lunch' | 'dinner'
 type ExtraMealKey = 'breakfast' | 'snack' | 'dessert'
 
-type MealPlannerState = {
-  days: Record<DayKey, Record<MainMealKey, string>>
-  extras: Record<ExtraMealKey, string[]>
+type DayPlannerState = Record<DayKey, Record<MainMealKey, string>>
+type WeeklyExtrasState = Record<ExtraMealKey, string[]>
+
+type MealPlannerState = DayPlannerState & {
+  weeklyExtras: WeeklyExtrasState
 }
 
-type ActiveModal =
+type OpenPickerSlot =
   | {
-      type: 'daily'
+      type: 'main'
       day: DayKey
       meal: MainMealKey
     }
   | {
       type: 'extra'
-      extra: ExtraMealKey
+      meal: ExtraMealKey
     }
-  | null
 
 const STORAGE_KEY = 'carnet-recettes-weekly-planner'
-const SITE_LOGO_URL = '/ChatGPT Image 1 mai 2026, 04_35_16.png'
 
-const DAYS: { key: DayKey; shortLabel: string; label: string }[] = [
-  { key: 'monday', shortLabel: 'Lun.', label: 'Lundi' },
-  { key: 'tuesday', shortLabel: 'Mar.', label: 'Mardi' },
-  { key: 'wednesday', shortLabel: 'Mer.', label: 'Mercredi' },
-  { key: 'thursday', shortLabel: 'Jeu.', label: 'Jeudi' },
-  { key: 'friday', shortLabel: 'Ven.', label: 'Vendredi' },
-  { key: 'saturday', shortLabel: 'Sam.', label: 'Samedi' },
-  { key: 'sunday', shortLabel: 'Dim.', label: 'Dimanche' },
+const DAYS: { key: DayKey; label: string; shortLabel: string }[] = [
+  { key: 'monday', label: 'Lundi', shortLabel: 'Lun.' },
+  { key: 'tuesday', label: 'Mardi', shortLabel: 'Mar.' },
+  { key: 'wednesday', label: 'Mercredi', shortLabel: 'Mer.' },
+  { key: 'thursday', label: 'Jeudi', shortLabel: 'Jeu.' },
+  { key: 'friday', label: 'Vendredi', shortLabel: 'Ven.' },
+  { key: 'saturday', label: 'Samedi', shortLabel: 'Sam.' },
+  { key: 'sunday', label: 'Dimanche', shortLabel: 'Dim.' },
 ]
 
-const MAIN_MEALS: {
-  key: MainMealKey
-  label: string
-  description: string
-  emoji: string
-}[] = [
-  {
-    key: 'lunch',
-    label: 'Déjeuner',
-    description: 'Repas du midi',
-    emoji: '☀️',
-  },
-  {
-    key: 'dinner',
-    label: 'Dîner',
-    description: 'Repas du soir',
-    emoji: '🌙',
-  },
+const MAIN_MEALS: { key: MainMealKey; label: string; emoji: string }[] = [
+  { key: 'lunch', label: 'Déjeuner', emoji: '☀️' },
+  { key: 'dinner', label: 'Dîner', emoji: '🌙' },
 ]
 
 const EXTRA_MEALS: {
   key: ExtraMealKey
   label: string
-  description: string
-  emptyMessage: string
   emoji: string
+  description: string
+  emptyText: string
 }[] = [
   {
     key: 'breakfast',
     label: 'Petit déjeuner',
-    description: 'Une ou plusieurs idées pour la semaine',
-    emptyMessage: 'Ajouter une idée pour petit déjeuner.',
     emoji: '🥐',
+    description: 'Une ou plusieurs idées pour la semaine',
+    emptyText: 'Aucune idée prévue pour le petit déjeuner.',
   },
   {
     key: 'snack',
     label: 'Goûter',
-    description: 'Des idées rapides pour les pauses',
-    emptyMessage: 'Ajouter une idée pour goûter.',
     emoji: '🍪',
+    description: 'Des idées rapides pour les pauses',
+    emptyText: 'Aucune idée prévue pour le goûter.',
   },
   {
     key: 'dessert',
     label: 'Dessert',
-    description: 'Des desserts à prévoir pour la semaine',
-    emptyMessage: 'Ajouter une idée pour dessert.',
     emoji: '🍰',
+    description: 'Des desserts à prévoir pour la semaine',
+    emptyText: 'Aucun dessert prévu.',
   },
 ]
 
 function createEmptyPlanner(): MealPlannerState {
   return {
-    days: {
-      monday: { lunch: '', dinner: '' },
-      tuesday: { lunch: '', dinner: '' },
-      wednesday: { lunch: '', dinner: '' },
-      thursday: { lunch: '', dinner: '' },
-      friday: { lunch: '', dinner: '' },
-      saturday: { lunch: '', dinner: '' },
-      sunday: { lunch: '', dinner: '' },
-    },
-    extras: {
+    monday: { lunch: '', dinner: '' },
+    tuesday: { lunch: '', dinner: '' },
+    wednesday: { lunch: '', dinner: '' },
+    thursday: { lunch: '', dinner: '' },
+    friday: { lunch: '', dinner: '' },
+    saturday: { lunch: '', dinner: '' },
+    sunday: { lunch: '', dinner: '' },
+    weeklyExtras: {
       breakfast: [],
       snack: [],
       dessert: [],
     },
   }
+}
+
+function cleanRecipeIds(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .map((item) => String(item))
+    .filter((item) => item.trim().length > 0)
 }
 
 function getSavedPlanner(): MealPlannerState {
@@ -130,54 +124,20 @@ function getSavedPlanner(): MealPlannerState {
       return emptyPlanner
     }
 
-    const parsedPlanner = JSON.parse(savedPlanner) as Partial<
-      MealPlannerState & Record<DayKey, Record<MainMealKey, string>>
-    >
-
-    if (parsedPlanner.days) {
-      return {
-        days: {
-          monday: { ...emptyPlanner.days.monday, ...parsedPlanner.days.monday },
-          tuesday: {
-            ...emptyPlanner.days.tuesday,
-            ...parsedPlanner.days.tuesday,
-          },
-          wednesday: {
-            ...emptyPlanner.days.wednesday,
-            ...parsedPlanner.days.wednesday,
-          },
-          thursday: {
-            ...emptyPlanner.days.thursday,
-            ...parsedPlanner.days.thursday,
-          },
-          friday: { ...emptyPlanner.days.friday, ...parsedPlanner.days.friday },
-          saturday: {
-            ...emptyPlanner.days.saturday,
-            ...parsedPlanner.days.saturday,
-          },
-          sunday: { ...emptyPlanner.days.sunday, ...parsedPlanner.days.sunday },
-        },
-        extras: {
-          breakfast: parsedPlanner.extras?.breakfast ?? [],
-          snack: parsedPlanner.extras?.snack ?? [],
-          dessert: parsedPlanner.extras?.dessert ?? [],
-        },
-      }
-    }
+    const parsedPlanner = JSON.parse(savedPlanner) as Partial<MealPlannerState>
 
     return {
-      ...emptyPlanner,
-      days: {
-        monday: { ...emptyPlanner.days.monday, ...parsedPlanner.monday },
-        tuesday: { ...emptyPlanner.days.tuesday, ...parsedPlanner.tuesday },
-        wednesday: {
-          ...emptyPlanner.days.wednesday,
-          ...parsedPlanner.wednesday,
-        },
-        thursday: { ...emptyPlanner.days.thursday, ...parsedPlanner.thursday },
-        friday: { ...emptyPlanner.days.friday, ...parsedPlanner.friday },
-        saturday: { ...emptyPlanner.days.saturday, ...parsedPlanner.saturday },
-        sunday: { ...emptyPlanner.days.sunday, ...parsedPlanner.sunday },
+      monday: { ...emptyPlanner.monday, ...parsedPlanner.monday },
+      tuesday: { ...emptyPlanner.tuesday, ...parsedPlanner.tuesday },
+      wednesday: { ...emptyPlanner.wednesday, ...parsedPlanner.wednesday },
+      thursday: { ...emptyPlanner.thursday, ...parsedPlanner.thursday },
+      friday: { ...emptyPlanner.friday, ...parsedPlanner.friday },
+      saturday: { ...emptyPlanner.saturday, ...parsedPlanner.saturday },
+      sunday: { ...emptyPlanner.sunday, ...parsedPlanner.sunday },
+      weeklyExtras: {
+        breakfast: cleanRecipeIds(parsedPlanner.weeklyExtras?.breakfast),
+        snack: cleanRecipeIds(parsedPlanner.weeklyExtras?.snack),
+        dessert: cleanRecipeIds(parsedPlanner.weeklyExtras?.dessert),
       },
     }
   } catch {
@@ -186,20 +146,19 @@ function getSavedPlanner(): MealPlannerState {
 }
 
 function savePlanner(planner: MealPlannerState) {
-  if (typeof window === 'undefined') return
-
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(planner))
+}
+
+function getRecipeImage(recipe: Recipe) {
+  return recipe.imageUrl || recipe.image || '🍽️'
 }
 
 function normalizeText(value: string) {
   return value
     .toLowerCase()
-    .replace(/œ/g, 'oe')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[’']/g, ' ')
-    .replace(/[^a-z0-9\s-]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/œ/g, 'oe')
     .trim()
 }
 
@@ -207,70 +166,57 @@ function getDayLabel(day: DayKey) {
   return DAYS.find((currentDay) => currentDay.key === day)?.label ?? day
 }
 
-function getMainMealLabel(meal: MainMealKey) {
-  return MAIN_MEALS.find((currentMeal) => currentMeal.key === meal)?.label ?? meal
-}
+function getMealLabel(meal: MainMealKey | ExtraMealKey) {
+  const mainMeal = MAIN_MEALS.find((currentMeal) => currentMeal.key === meal)
 
-function getExtraMealLabel(extra: ExtraMealKey) {
-  return EXTRA_MEALS.find((currentExtra) => currentExtra.key === extra)?.label ?? extra
-}
+  if (mainMeal) {
+    return mainMeal.label
+  }
 
-function getRecipeByStoredId(recipes: Recipe[], recipeId: string) {
-  return recipes.find((recipe) => String(recipe.id) === recipeId) ?? null
-}
+  const extraMeal = EXTRA_MEALS.find((currentMeal) => currentMeal.key === meal)
 
-function getRecipeImage(recipe: Recipe) {
-  return recipe.imageUrl || recipe.image
-}
-
-function getRecipeTotalTime(recipe: Recipe) {
-  return recipe.prepTime + recipe.cookTime
+  return extraMeal?.label ?? meal
 }
 
 function getAllPlannedRecipeIds(planner: MealPlannerState) {
-  const ids: string[] = []
-
-  DAYS.forEach((day) => {
-    MAIN_MEALS.forEach((meal) => {
-      const recipeId = planner.days[day.key][meal.key]
-
-      if (recipeId) {
-        ids.push(recipeId)
-      }
-    })
-  })
-
-  EXTRA_MEALS.forEach((extra) => {
-    ids.push(...planner.extras[extra.key])
-  })
-
-  return ids
-}
-
-function getUniquePlannedRecipes(planner: MealPlannerState, recipes: Recipe[]) {
-  const recipeIds = Array.from(new Set(getAllPlannedRecipeIds(planner)))
-
-  return recipeIds
-    .map((recipeId) => getRecipeByStoredId(recipes, recipeId))
-    .filter((recipe): recipe is Recipe => !!recipe)
-}
-
-function RecipeMiniature({ recipe }: { recipe: Recipe }) {
-  const imageToDisplay = getRecipeImage(recipe)
-
-  return (
-    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-[#fff1e6] text-4xl">
-      {imageToDisplay && imageToDisplay.startsWith('http') ? (
-        <img
-          src={imageToDisplay}
-          alt={recipe.title}
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <span>{recipe.image || '🍽️'} </span>
-      )}
-    </div>
+  const mainRecipeIds = DAYS.flatMap((day) =>
+    MAIN_MEALS.map((meal) => planner[day.key][meal.key]).filter(Boolean),
   )
+
+  const extraRecipeIds = EXTRA_MEALS.flatMap(
+    (extraMeal) => planner.weeklyExtras[extraMeal.key],
+  ).filter(Boolean)
+
+  return [...mainRecipeIds, ...extraRecipeIds]
+}
+
+function plannerUsesRecipe(planner: MealPlannerState, recipeId: Recipe['id']) {
+  return getAllPlannedRecipeIds(planner).includes(String(recipeId))
+}
+
+async function deleteRecipeIngredientsFromShoppingList(recipeId: Recipe['id']) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError) {
+    throw userError
+  }
+
+  if (!user) {
+    throw new Error('Utilisateur non connecté.')
+  }
+
+  const { error } = await supabase
+    .from('shopping_list_items')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('recipe_id', recipeId)
+
+  if (error) {
+    throw error
+  }
 }
 
 export default function MealPlannerPage() {
@@ -283,11 +229,14 @@ export default function MealPlannerPage() {
   )
 
   const [loading, setLoading] = useState(true)
-  const [activeModal, setActiveModal] = useState<ActiveModal>(null)
-  const [recipeSearch, setRecipeSearch] = useState('')
-  const [addingRecipeId, setAddingRecipeId] = useState<Recipe['id'] | null>(
+  const [openPickerSlot, setOpenPickerSlot] = useState<OpenPickerSlot | null>(
     null,
   )
+  const [searchValue, setSearchValue] = useState('')
+  const [syncingRecipeId, setSyncingRecipeId] = useState<Recipe['id'] | null>(
+    null,
+  )
+
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -304,7 +253,7 @@ export default function MealPlannerPage() {
         console.error(error)
 
         if (!ignore) {
-          setErrorMessage('Impossible de charger les recettes pour le moment.')
+          setErrorMessage('Impossible de charger les recettes.')
         }
       })
       .finally(() => {
@@ -318,490 +267,561 @@ export default function MealPlannerPage() {
     }
   }, [])
 
-  useEffect(() => {
-    savePlanner(planner)
+  const recipesById = useMemo(() => {
+    return new Map(recipes.map((recipe) => [String(recipe.id), recipe]))
+  }, [recipes])
+
+  const plannedRecipeIds = useMemo(() => {
+    return getAllPlannedRecipeIds(planner)
   }, [planner])
+
+  const uniquePlannedRecipes = useMemo(() => {
+    const uniqueIds = Array.from(new Set(plannedRecipeIds))
+
+    return uniqueIds
+      .map((recipeId) => recipesById.get(recipeId))
+      .filter((recipe): recipe is Recipe => Boolean(recipe))
+  }, [plannedRecipeIds, recipesById])
+
+  const plannedMealsCount = plannedRecipeIds.length
+
+  const plannedDaysCount = DAYS.filter((day) =>
+    MAIN_MEALS.some((meal) => planner[day.key][meal.key]),
+  ).length
+
+  const estimatedIngredientsCount = uniquePlannedRecipes.reduce(
+    (total, recipe) => total + recipe.ingredients.length,
+    0,
+  )
 
   const filteredRecipes = useMemo(() => {
-    const search = normalizeText(recipeSearch)
+    const query = normalizeText(searchValue)
 
-    if (!search) {
-      return recipes
+    if (!query) {
+      return recipes.slice(0, 30)
     }
 
-    return recipes.filter((recipe) => {
-      const searchableContent = normalizeText(
-        [
-          recipe.title,
-          recipe.description,
-          recipe.category,
-          recipe.difficulty,
-          ...recipe.tags,
-          ...recipe.ingredients,
-        ].join(' '),
-      )
+    return recipes
+      .filter((recipe) => {
+        const searchableContent = normalizeText(
+          [
+            recipe.title,
+            recipe.description,
+            recipe.category,
+            recipe.difficulty,
+            ...recipe.tags,
+            ...recipe.ingredients,
+          ].join(' '),
+        )
 
-      return searchableContent.includes(search)
-    })
-  }, [recipeSearch, recipes])
-
-  const plannedMealCount = useMemo(() => {
-    return DAYS.reduce((count, day) => {
-      return (
-        count +
-        MAIN_MEALS.filter((meal) => planner.days[day.key][meal.key]).length
-      )
-    }, 0)
-  }, [planner])
-
-  const organizedDayCount = useMemo(() => {
-    return DAYS.filter((day) => {
-      return MAIN_MEALS.some((meal) => planner.days[day.key][meal.key])
-    }).length
-  }, [planner])
-
-  const estimatedIngredientCount = useMemo(() => {
-    const uniqueIngredients = new Set<string>()
-
-    getUniquePlannedRecipes(planner, recipes).forEach((recipe) => {
-      recipe.ingredients.forEach((ingredient) => {
-        const normalizedIngredient = normalizeText(ingredient)
-
-        if (normalizedIngredient) {
-          uniqueIngredients.add(normalizedIngredient)
-        }
+        return searchableContent.includes(query)
       })
-    })
+      .slice(0, 50)
+  }, [recipes, searchValue])
 
-    return uniqueIngredients.size
-  }, [planner, recipes])
-
-  function clearMessages() {
-    setErrorMessage('')
-    setSuccessMessage('')
-  }
-
-  function openDailyModal(day: DayKey, meal: MainMealKey) {
-    clearMessages()
-    setRecipeSearch('')
-    setActiveModal({ type: 'daily', day, meal })
-  }
-
-  function openExtraModal(extra: ExtraMealKey) {
-    clearMessages()
-    setRecipeSearch('')
-    setActiveModal({ type: 'extra', extra })
-  }
-
-  function closeModal() {
-    setActiveModal(null)
-    setRecipeSearch('')
-    setAddingRecipeId(null)
-  }
-
-  function removeDailyRecipe(day: DayKey, meal: MainMealKey) {
-    setPlanner((currentPlanner) => ({
-      ...currentPlanner,
-      days: {
-        ...currentPlanner.days,
-        [day]: {
-          ...currentPlanner.days[day],
-          [meal]: '',
-        },
-      },
-    }))
-
-    setSuccessMessage('La recette a été retirée du planning.')
-    setErrorMessage('')
-  }
-
-  function removeExtraRecipe(extra: ExtraMealKey, recipeIdToRemove: string) {
-    setPlanner((currentPlanner) => ({
-      ...currentPlanner,
-      extras: {
-        ...currentPlanner.extras,
-        [extra]: currentPlanner.extras[extra].filter(
-          (recipeId) => recipeId !== recipeIdToRemove,
-        ),
-      },
-    }))
-
-    setSuccessMessage('La recette a été retirée du planning.')
-    setErrorMessage('')
-  }
-
-  function clearPlanner() {
-    const confirmClear = window.confirm(
-      'Voulez-vous vraiment vider tout le planning ?',
-    )
-
-    if (!confirmClear) return
-
-    setPlanner(createEmptyPlanner())
-    setSuccessMessage('Le planning a été vidé.')
-    setErrorMessage('')
-  }
-
-  async function addRecipeToShoppingListAutomatically(recipe: Recipe) {
-    if (recipe.ingredients.length === 0) {
-      return 0
-    }
-
-    const createdItems = await addRecipeIngredientsToShoppingList(
-      recipe.id,
-      recipe.ingredients,
-    )
-
-    return createdItems.length
-  }
-
-  async function handleSelectRecipe(recipe: Recipe) {
-    if (!activeModal) return
-
+  async function addRecipeIngredientsAutomatically(recipe: Recipe) {
     if (!user) {
       navigate('/auth')
       return
     }
 
     try {
-      setAddingRecipeId(recipe.id)
-      setErrorMessage('')
-      setSuccessMessage('')
+      setSyncingRecipeId(recipe.id)
 
-      if (activeModal.type === 'daily') {
-        setPlanner((currentPlanner) => ({
-          ...currentPlanner,
-          days: {
-            ...currentPlanner.days,
-            [activeModal.day]: {
-              ...currentPlanner.days[activeModal.day],
-              [activeModal.meal]: String(recipe.id),
-            },
-          },
-        }))
-      }
-
-      if (activeModal.type === 'extra') {
-        setPlanner((currentPlanner) => {
-          const currentRecipes = currentPlanner.extras[activeModal.extra]
-          const recipeAlreadyAdded = currentRecipes.includes(String(recipe.id))
-
-          return {
-            ...currentPlanner,
-            extras: {
-              ...currentPlanner.extras,
-              [activeModal.extra]: recipeAlreadyAdded
-                ? currentRecipes
-                : [...currentRecipes, String(recipe.id)],
-            },
-          }
-        })
-      }
-
-      let createdIngredientsCount = 0
-
-      try {
-        createdIngredientsCount =
-          await addRecipeToShoppingListAutomatically(recipe)
-      } catch (error) {
-        console.error(error)
-      }
-
-      const slotText =
-        activeModal.type === 'daily'
-          ? `${getDayLabel(activeModal.day).toLowerCase()} ${getMainMealLabel(
-              activeModal.meal,
-            ).toLowerCase()}`
-          : getExtraMealLabel(activeModal.extra).toLowerCase()
-
-      setSuccessMessage(
-        createdIngredientsCount > 0
-          ? `"${recipe.title}" a été ajouté au planning pour ${slotText}. ${createdIngredientsCount} ingrédient${
-              createdIngredientsCount > 1 ? 's ont' : ' a'
-            } été ajouté${
-              createdIngredientsCount > 1 ? 's' : ''
-            } automatiquement à ta liste de courses.`
-          : `"${recipe.title}" a été ajouté au planning pour ${slotText}. La liste de courses est déjà à jour.`,
-      )
-
-      closeModal()
+      await addRecipeIngredientsToShoppingList(recipe.id, recipe.ingredients)
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible d’ajouter cette recette au planning.')
+
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes('déjà')
+      ) {
+        return
+      }
+
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes('utilisateur non connecté')
+      ) {
+        navigate('/auth')
+        return
+      }
+
+      setErrorMessage(
+        'La recette a été ajoutée au planning, mais la liste de courses n’a pas pu être mise à jour.',
+      )
     } finally {
-      setAddingRecipeId(null)
+      setSyncingRecipeId(null)
     }
   }
 
-  function handlePrintPlanner() {
+  async function removeRecipeIngredientsIfUnused(
+    nextPlanner: MealPlannerState,
+    recipeId: Recipe['id'],
+  ) {
+    if (plannerUsesRecipe(nextPlanner, recipeId)) {
+      return
+    }
+
+    try {
+      await deleteRecipeIngredientsFromShoppingList(recipeId)
+    } catch (error) {
+      console.error(error)
+
+      setErrorMessage(
+        'La recette a été retirée du planning, mais les ingrédients n’ont pas pu être supprimés de la liste de courses.',
+      )
+    }
+  }
+
+  function openRecipePicker(slot: OpenPickerSlot) {
+    setOpenPickerSlot(slot)
+    setSearchValue('')
+    setErrorMessage('')
+    setSuccessMessage('')
+  }
+
+  function closeRecipePicker() {
+    setOpenPickerSlot(null)
+    setSearchValue('')
+  }
+
+  async function handleChooseRecipe(recipe: Recipe) {
+    if (!openPickerSlot) {
+      return
+    }
+
+    let oldRecipeId = ''
+    let nextPlanner: MealPlannerState = planner
+
+    if (openPickerSlot.type === 'main') {
+      oldRecipeId = planner[openPickerSlot.day][openPickerSlot.meal]
+
+      nextPlanner = {
+        ...planner,
+        [openPickerSlot.day]: {
+          ...planner[openPickerSlot.day],
+          [openPickerSlot.meal]: String(recipe.id),
+        },
+      }
+    }
+
+    if (openPickerSlot.type === 'extra') {
+      const currentExtraRecipes = planner.weeklyExtras[openPickerSlot.meal]
+
+      nextPlanner = {
+        ...planner,
+        weeklyExtras: {
+          ...planner.weeklyExtras,
+          [openPickerSlot.meal]: [...currentExtraRecipes, String(recipe.id)],
+        },
+      }
+    }
+
+    setPlanner(nextPlanner)
+    savePlanner(nextPlanner)
+    closeRecipePicker()
+
+    setErrorMessage('')
+    setSuccessMessage(
+      `"${recipe.title}" a été ajouté au planning. La liste de courses se met à jour automatiquement.`,
+    )
+
+    await addRecipeIngredientsAutomatically(recipe)
+
+    if (oldRecipeId && oldRecipeId !== String(recipe.id)) {
+      await removeRecipeIngredientsIfUnused(nextPlanner, Number(oldRecipeId))
+    }
+
+    window.setTimeout(() => {
+      setSuccessMessage('')
+    }, 3000)
+  }
+
+  async function handleRemoveMainRecipe(day: DayKey, meal: MainMealKey) {
+    const recipeId = planner[day][meal]
+
+    if (!recipeId) {
+      return
+    }
+
+    const nextPlanner: MealPlannerState = {
+      ...planner,
+      [day]: {
+        ...planner[day],
+        [meal]: '',
+      },
+    }
+
+    setPlanner(nextPlanner)
+    savePlanner(nextPlanner)
+
+    setErrorMessage('')
+    setSuccessMessage(
+      'La recette a été retirée du planning. La liste de courses se met à jour automatiquement.',
+    )
+
+    await removeRecipeIngredientsIfUnused(nextPlanner, Number(recipeId))
+
+    window.setTimeout(() => {
+      setSuccessMessage('')
+    }, 3000)
+  }
+
+  async function handleRemoveExtraRecipe(meal: ExtraMealKey, recipeId: string) {
+    const nextPlanner: MealPlannerState = {
+      ...planner,
+      weeklyExtras: {
+        ...planner.weeklyExtras,
+        [meal]: planner.weeklyExtras[meal].filter(
+          (currentRecipeId) => currentRecipeId !== recipeId,
+        ),
+      },
+    }
+
+    setPlanner(nextPlanner)
+    savePlanner(nextPlanner)
+
+    setErrorMessage('')
+    setSuccessMessage(
+      'La recette a été retirée du planning. La liste de courses se met à jour automatiquement.',
+    )
+
+    await removeRecipeIngredientsIfUnused(nextPlanner, Number(recipeId))
+
+    window.setTimeout(() => {
+      setSuccessMessage('')
+    }, 3000)
+  }
+
+  async function handleClearPlanning() {
+    const confirmClear = window.confirm(
+      'Voulez-vous vraiment vider tout le planning de la semaine ? Les ingrédients liés aux recettes du planning seront aussi retirés de la liste de courses.',
+    )
+
+    if (!confirmClear) {
+      return
+    }
+
+    const recipeIdsToRemove = Array.from(new Set(plannedRecipeIds))
+    const emptyPlanner = createEmptyPlanner()
+
+    setPlanner(emptyPlanner)
+    savePlanner(emptyPlanner)
+
+    setErrorMessage('')
+    setSuccessMessage(
+      'Le planning a été vidé. La liste de courses se met à jour automatiquement.',
+    )
+
+    for (const recipeId of recipeIdsToRemove) {
+      await removeRecipeIngredientsIfUnused(emptyPlanner, Number(recipeId))
+    }
+
+    window.setTimeout(() => {
+      setSuccessMessage('')
+    }, 3000)
+  }
+
+  function handlePrintPlanning() {
     window.print()
   }
 
-  function renderDailyMealSlot(day: DayKey, meal: MainMealKey) {
-    const recipeId = planner.days[day][meal]
-    const recipe = recipeId ? getRecipeByStoredId(recipes, recipeId) : null
-    const mealData = MAIN_MEALS.find((currentMeal) => currentMeal.key === meal)
+  function renderRecipeMiniCard(recipe: Recipe, actions?: React.ReactNode) {
+    const image = getRecipeImage(recipe)
+    const isImageUrl = typeof image === 'string' && image.startsWith('http')
 
     return (
-      <div className="rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100">
-        <div>
-          <p className="text-xl font-black text-stone-950">
-            <span className="mr-2">{mealData?.emoji}</span>
-            {mealData?.label}
-          </p>
-
-          <p className="mt-1 text-sm font-semibold text-stone-500">
-            {mealData?.description}
-          </p>
+      <div className="flex items-center gap-4 rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-[#fff1e6] text-3xl">
+          {isImageUrl ? (
+            <img
+              src={image}
+              alt={recipe.title}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            image
+          )}
         </div>
 
-        {recipe ? (
-          <div className="mt-5 rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
-            <div className="flex gap-4">
-              <RecipeMiniature recipe={recipe} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-lg font-black text-stone-950">
+            {recipe.title}
+          </p>
 
-              <div className="min-w-0 flex-1">
-                <p className="line-clamp-2 text-lg font-black text-stone-950">
-                  {recipe.title}
-                </p>
+          <p className="mt-1 text-sm font-bold text-stone-500">
+            {recipe.prepTime + recipe.cookTime} min · {recipe.servings} pers.
+          </p>
 
-                <p className="mt-1 text-sm font-semibold text-stone-500">
-                  {getRecipeTotalTime(recipe)} min · {recipe.servings} pers.
-                </p>
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => openDailyModal(day, meal)}
-                    className="rounded-full bg-orange-500 px-4 py-2 text-sm font-black text-white transition hover:bg-orange-600"
-                  >
-                    Changer
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => removeDailyRecipe(day, meal)}
-                    className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50"
-                  >
-                    Retirer
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => openDailyModal(day, meal)}
-            className="mt-5 flex min-h-32 w-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-orange-200 bg-white px-5 py-6 text-center transition hover:border-orange-400 hover:bg-orange-50"
-          >
-            <span className="text-sm font-bold text-stone-400">
-              Aucun repas prévu pour ce moment.
-            </span>
-
-            <span className="mt-3 rounded-full bg-orange-100 px-5 py-2 font-black text-orange-700">
-              + Ajouter une recette
-            </span>
-          </button>
-        )}
+          <div className="mt-3 flex flex-wrap gap-2">{actions}</div>
+        </div>
       </div>
     )
   }
-
-  function renderExtraMeal(extra: ExtraMealKey) {
-    const extraData = EXTRA_MEALS.find((currentExtra) => currentExtra.key === extra)
-    const recipeIds = planner.extras[extra]
-    const extraRecipes = recipeIds
-      .map((recipeId) => getRecipeByStoredId(recipes, recipeId))
-      .filter((recipe): recipe is Recipe => !!recipe)
-
-    return (
-      <div className="rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xl font-black text-stone-950">
-              <span className="mr-2">{extraData?.emoji}</span>
-              {extraData?.label}
-            </p>
-
-            <p className="mt-1 text-sm font-semibold text-stone-500">
-              {extraData?.description}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => openExtraModal(extra)}
-            className="rounded-full bg-orange-100 px-5 py-2 font-black text-orange-700 transition hover:bg-orange-200"
-          >
-            + Ajouter
-          </button>
-        </div>
-
-        {extraRecipes.length > 0 ? (
-          <div className="mt-5 space-y-3">
-            {extraRecipes.map((recipe) => (
-              <div
-                key={recipe.id}
-                className="flex items-center gap-4 rounded-[1.4rem] bg-white p-3 shadow-sm ring-1 ring-orange-100"
-              >
-                <RecipeMiniature recipe={recipe} />
-
-                <div className="min-w-0 flex-1">
-                  <p className="line-clamp-2 font-black text-stone-950">
-                    {recipe.title}
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-stone-500">
-                    {getRecipeTotalTime(recipe)} min · {recipe.servings} pers.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => removeExtraRecipe(extra, String(recipe.id))}
-                  className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50"
-                >
-                  Retirer
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => openExtraModal(extra)}
-            className="mt-5 w-full rounded-[1.5rem] border border-dashed border-orange-200 bg-white px-5 py-6 text-left transition hover:border-orange-400 hover:bg-orange-50"
-          >
-            <span className="block font-bold text-stone-500">
-              Aucune recette prévue.
-            </span>
-
-            <span className="mt-2 inline-block rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700">
-              {extraData?.emptyMessage}
-            </span>
-          </button>
-        )}
-      </div>
-    )
-  }
-
-  const modalTitle =
-    activeModal?.type === 'daily'
-      ? `${getDayLabel(activeModal.day)} — ${getMainMealLabel(activeModal.meal)}`
-      : activeModal?.type === 'extra'
-        ? getExtraMealLabel(activeModal.extra)
-        : ''
 
   return (
     <>
       <style>
         {`
+          .print-planning {
+            display: none;
+          }
+
           @media print {
             @page {
-              size: A4 portrait;
+              size: A4;
               margin: 10mm;
             }
 
-            html,
-            body,
-            #root {
+            body {
               background: white !important;
             }
 
-            body header:not(.planner-print-header) {
-              display: none !important;
+            body * {
+              visibility: hidden !important;
             }
 
-            body nav {
-              display: none !important;
+            .print-planning,
+            .print-planning * {
+              visibility: visible !important;
             }
 
-            .planner-print-page {
+            .print-planning {
               display: block !important;
-              color: #111827 !important;
-              font-family: Arial, sans-serif !important;
+              position: absolute;
+              inset: 0;
+              width: 100%;
+              padding: 0;
+              color: #1c1917;
+              background: white;
+              font-family: Arial, sans-serif;
             }
 
-            .planner-print-card {
+            .print-page {
+              page-break-after: always;
+            }
+
+            .print-page:last-child {
+              page-break-after: auto;
+            }
+
+            .print-card {
+              border: 1px solid #eadfd3;
+              border-radius: 14px;
+              padding: 12px;
               break-inside: avoid;
-              page-break-inside: avoid;
+              background: #fffaf3;
             }
 
-            .planner-print-grid {
-              display: grid !important;
+            .print-day-grid {
+              display: grid;
               grid-template-columns: 1fr 1fr;
               gap: 10px;
             }
 
-            .planner-print-extra-grid {
-              display: grid !important;
-              grid-template-columns: repeat(3, 1fr);
-              gap: 8px;
+            .print-section-title {
+              margin-top: 18px;
+              margin-bottom: 8px;
+              color: #ea580c;
+              font-size: 10px;
+              font-weight: 900;
+              text-transform: uppercase;
+              letter-spacing: 0.08em;
             }
 
-            * {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
+            .print-recipe-title {
+              font-weight: 800;
+            }
+
+            .print-muted {
+              color: #78716c;
             }
           }
         `}
       </style>
 
-      <section className="mx-auto max-w-7xl space-y-8 print:hidden">
-        {successMessage && (
-          <div className="rounded-2xl bg-green-50 px-5 py-4 font-bold text-green-700 ring-1 ring-green-100">
-            {successMessage}
-          </div>
-        )}
-
-        {errorMessage && (
-          <div className="rounded-2xl bg-red-50 px-5 py-4 font-bold text-red-700 ring-1 ring-red-100">
-            {errorMessage}
-          </div>
-        )}
-
-        <section className="grid gap-8 rounded-[2.5rem] bg-[#fffaf3] p-6 shadow-sm ring-1 ring-orange-100 lg:grid-cols-[0.75fr_1fr] lg:p-10">
-          <div className="flex flex-col justify-between">
+      <div className="print-planning">
+        <div className="print-page">
+          <div className="mb-5 flex items-center justify-between border-b border-stone-200 pb-4">
             <div>
-              <div className="mb-8 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-5 py-3 font-bold text-orange-700">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">
+                Carnet de recettes
+              </p>
+
+              <h1 className="mt-1 text-3xl font-black">
+                Planning de la semaine
+              </h1>
+
+              <p className="mt-1 text-sm text-stone-500">
+                Imprimé le {new Date().toLocaleDateString('fr-FR')}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3">
+              <img
+                src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
+                alt="Carnet de recettes"
+                className="h-14 w-14 object-contain"
+              />
+
+              <div>
+                <p className="text-lg font-black">Carnet de recettes</p>
+                <p className="text-xs font-bold text-stone-500">
+                  Cuisine maison & petits plats
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="print-card">
+              <p className="text-2xl font-black text-orange-600">
+                {plannedMealsCount}
+              </p>
+              <p className="text-xs font-bold">repas prévus</p>
+            </div>
+
+            <div className="print-card">
+              <p className="text-2xl font-black text-green-700">
+                {plannedDaysCount}
+              </p>
+              <p className="text-xs font-bold">jours organisés</p>
+            </div>
+
+            <div className="print-card">
+              <p className="text-2xl font-black">{estimatedIngredientsCount}</p>
+              <p className="text-xs font-bold">ingrédients estimés</p>
+            </div>
+          </div>
+
+          <p className="print-section-title">Habitudes et envies</p>
+
+          <div className="grid grid-cols-3 gap-3">
+            {EXTRA_MEALS.map((extraMeal) => {
+              const recipeIds = planner.weeklyExtras[extraMeal.key]
+              const extraRecipes = recipeIds
+                .map((recipeId) => recipesById.get(recipeId))
+                .filter((recipe): recipe is Recipe => Boolean(recipe))
+
+              return (
+                <div key={extraMeal.key} className="print-card">
+                  <p className="mb-2 font-black">
+                    {extraMeal.emoji} {extraMeal.label}
+                  </p>
+
+                  {extraRecipes.length > 0 ? (
+                    <ul className="space-y-1 text-sm">
+                      {extraRecipes.map((recipe) => (
+                        <li key={recipe.id}>• {recipe.title}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm print-muted">Aucun prévu.</p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          <p className="print-section-title">Semaine détaillée</p>
+
+          <div className="print-day-grid">
+            {DAYS.map((day) => {
+              const dayMealsCount = MAIN_MEALS.filter(
+                (meal) => planner[day.key][meal.key],
+              ).length
+
+              return (
+                <div key={day.key} className="print-card">
+                  <div className="mb-3 flex items-start justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase text-orange-600">
+                        {day.shortLabel}
+                      </p>
+                      <h2 className="text-xl font-black">{day.label}</h2>
+                    </div>
+
+                    <p className="rounded-full border border-orange-100 bg-white px-3 py-1 text-xs font-black">
+                      {dayMealsCount}/2
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {MAIN_MEALS.map((meal) => {
+                      const recipeId = planner[day.key][meal.key]
+                      const recipe = recipeId ? recipesById.get(recipeId) : null
+
+                      return (
+                        <div key={meal.key}>
+                          <p className="mb-1 font-black text-orange-600">
+                            {meal.emoji} {meal.label}
+                          </p>
+
+                          {recipe ? (
+                            <div>
+                              <p className="print-recipe-title">
+                                {recipe.title}
+                              </p>
+
+                              <p className="text-xs print-muted">
+                                {recipe.prepTime + recipe.cookTime} min ·{' '}
+                                {recipe.servings} pers.
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-sm print-muted">
+                              Aucun repas prévu.
+                            </p>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      <section className="space-y-10">
+        <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
+          <div className="grid gap-10 px-6 py-10 xl:grid-cols-[0.9fr_1.1fr] xl:px-10">
+            <div>
+              <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
                 <span>🗓️</span>
                 <span>Planning de semaine</span>
               </div>
 
-              <h1 className="text-5xl font-black leading-tight text-stone-950 md:text-6xl">
+              <h1 className="max-w-xl text-4xl font-black leading-tight text-stone-950 md:text-6xl">
                 Organise tes repas simplement.
               </h1>
 
-              <p className="mt-7 max-w-xl text-xl leading-9 text-stone-600">
+              <p className="mt-6 max-w-xl text-lg leading-8 text-stone-600">
                 Clique directement sur un repas, choisis une recette, et les
                 ingrédients sont ajoutés automatiquement à ta liste de courses.
               </p>
-            </div>
 
-            <div className="mt-10">
-              <div className="grid max-w-xl grid-cols-3 gap-3">
+              <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
                 <div className="rounded-[1.4rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
                   <p className="text-4xl font-black text-orange-600">
-                    {plannedMealCount}
+                    {plannedMealsCount}
                   </p>
-
                   <p className="mt-1 font-bold text-stone-700">repas</p>
                 </div>
 
                 <div className="rounded-[1.4rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
                   <p className="text-4xl font-black text-green-800">
-                    {organizedDayCount}
+                    {plannedDaysCount}
                   </p>
-
                   <p className="mt-1 font-bold text-stone-700">jours</p>
                 </div>
 
                 <div className="rounded-[1.4rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
-                  <p className="text-4xl font-black text-stone-900">
-                    {estimatedIngredientCount}
+                  <p className="text-4xl font-black text-stone-950">
+                    {estimatedIngredientsCount}
                   </p>
-
                   <p className="mt-1 font-bold text-stone-700">ingrédients</p>
                 </div>
               </div>
@@ -823,7 +843,7 @@ export default function MealPlannerPage() {
 
                 <button
                   type="button"
-                  onClick={handlePrintPlanner}
+                  onClick={handlePrintPlanning}
                   className="rounded-full border border-orange-200 bg-white px-6 py-4 font-black text-stone-900 transition hover:bg-orange-50"
                 >
                   Imprimer le planning
@@ -831,55 +851,144 @@ export default function MealPlannerPage() {
 
                 <button
                   type="button"
-                  onClick={clearPlanner}
+                  onClick={handleClearPlanning}
                   className="rounded-full border border-red-100 bg-white px-6 py-4 font-black text-red-600 transition hover:bg-red-50"
                 >
                   Vider le planning
                 </button>
               </div>
             </div>
-          </div>
 
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-            <p className="font-black uppercase tracking-wide text-orange-600">
-              Habitudes et envies
-            </p>
+            <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+              <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                Habitudes et envies
+              </p>
 
-            <h2 className="mt-2 text-3xl font-black text-stone-950">
-              Petit déjeuner, goûter et dessert
-            </h2>
+              <h2 className="mt-2 text-3xl font-black text-stone-950">
+                Petit déjeuner, goûter et dessert
+              </h2>
 
-            <p className="mt-2 font-semibold text-stone-500">
-              Ajoute plusieurs idées pour la semaine, sans devoir choisir un
-              jour précis.
-            </p>
+              <p className="mt-2 font-semibold text-stone-500">
+                Ajoute plusieurs idées pour la semaine, sans devoir choisir un
+                jour précis.
+              </p>
 
-            <div className="mt-6 space-y-5">
-              {EXTRA_MEALS.map((extra) => (
-                <div key={extra.key}>{renderExtraMeal(extra.key)}</div>
-              ))}
+              <div className="mt-6 space-y-5">
+                {EXTRA_MEALS.map((extraMeal) => {
+                  const recipeIds = planner.weeklyExtras[extraMeal.key]
+                  const extraRecipes = recipeIds
+                    .map((recipeId) => recipesById.get(recipeId))
+                    .filter((recipe): recipe is Recipe => Boolean(recipe))
+
+                  return (
+                    <div
+                      key={extraMeal.key}
+                      className="rounded-[1.8rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <h3 className="text-xl font-black text-stone-950">
+                            {extraMeal.emoji} {extraMeal.label}
+                          </h3>
+
+                          <p className="mt-1 font-semibold text-stone-500">
+                            {extraMeal.description}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openRecipePicker({
+                              type: 'extra',
+                              meal: extraMeal.key,
+                            })
+                          }
+                          className="rounded-full bg-orange-100 px-5 py-3 font-black text-orange-700 transition hover:bg-orange-200"
+                        >
+                          + Ajouter
+                        </button>
+                      </div>
+
+                      <div className="mt-4 space-y-3 rounded-[1.4rem] border border-dashed border-orange-200 bg-white/70 p-4">
+                        {extraRecipes.length > 0 ? (
+                          extraRecipes.map((recipe) => (
+                            <div key={`${extraMeal.key}-${recipe.id}`}>
+                              {renderRecipeMiniCard(recipe, (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleRemoveExtraRecipe(
+                                      extraMeal.key,
+                                      String(recipe.id),
+                                    )
+                                  }
+                                  className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                                >
+                                  Retirer
+                                </button>
+                              ))}
+                            </div>
+                          ))
+                        ) : (
+                          <div>
+                            <p className="font-bold text-stone-500">
+                              {extraMeal.emptyText}
+                            </p>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openRecipePicker({
+                                  type: 'extra',
+                                  meal: extraMeal.key,
+                                })
+                              }
+                              className="mt-3 rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700 transition hover:bg-orange-200"
+                            >
+                              + Ajouter une idée
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+
+        {errorMessage && (
+          <div className="rounded-2xl bg-red-50 px-5 py-4 text-red-700">
+            <p className="font-bold">{errorMessage}</p>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="rounded-2xl bg-green-50 px-5 py-4 text-green-700">
+            <p className="font-bold">{successMessage}</p>
+          </div>
+        )}
 
         {loading ? (
           <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
-            Chargement des recettes...
+            Chargement du planning...
           </div>
         ) : (
-          <section className="space-y-6">
+          <div className="space-y-6">
             {DAYS.map((day) => {
-              const dayMealCount = MAIN_MEALS.filter(
-                (meal) => planner.days[day.key][meal.key],
+              const dayMealsCount = MAIN_MEALS.filter(
+                (meal) => planner[day.key][meal.key],
               ).length
 
               return (
-                <article
+                <section
                   key={day.key}
-                  className="grid gap-6 rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 lg:grid-cols-[0.35fr_1fr_1fr]"
+                  className="grid gap-6 rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 xl:grid-cols-[0.35fr_1fr_1fr]"
                 >
-                  <div className="rounded-[2rem] bg-[#fffaf3] p-6 ring-1 ring-orange-100">
-                    <p className="font-black uppercase tracking-wide text-orange-600">
+                  <div className="rounded-[1.8rem] bg-[#fffaf3] p-6 ring-1 ring-orange-100">
+                    <p className="text-sm font-black uppercase tracking-wide text-orange-600">
                       {day.shortLabel}
                     </p>
 
@@ -887,291 +996,194 @@ export default function MealPlannerPage() {
                       {day.label}
                     </h2>
 
-                    <div className="mt-7 inline-flex rounded-full bg-white px-5 py-3 font-black text-stone-700 shadow-sm ring-1 ring-orange-100">
-                      {dayMealCount}/2
-                    </div>
+                    <p className="mt-6 inline-flex rounded-full bg-white px-5 py-3 font-black text-stone-700 shadow-sm ring-1 ring-orange-100">
+                      {dayMealsCount}/2 repas
+                    </p>
                   </div>
 
-                  {renderDailyMealSlot(day.key, 'lunch')}
-                  {renderDailyMealSlot(day.key, 'dinner')}
-                </article>
+                  {MAIN_MEALS.map((meal) => {
+                    const recipeId = planner[day.key][meal.key]
+                    const recipe = recipeId ? recipesById.get(recipeId) : null
+                    const mealDescription =
+                      meal.key === 'lunch' ? 'Repas du midi' : 'Repas du soir'
+
+                    return (
+                      <div
+                        key={meal.key}
+                        className="rounded-[1.8rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100"
+                      >
+                        <div className="mb-4">
+                          <h3 className="text-xl font-black text-stone-950">
+                            {meal.emoji} {meal.label}
+                          </h3>
+
+                          <p className="mt-1 font-semibold text-stone-500">
+                            {mealDescription}
+                          </p>
+                        </div>
+
+                        {recipe ? (
+                          renderRecipeMiniCard(recipe, (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  openRecipePicker({
+                                    type: 'main',
+                                    day: day.key,
+                                    meal: meal.key,
+                                  })
+                                }
+                                className="rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700 transition hover:bg-orange-200"
+                              >
+                                Changer
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRemoveMainRecipe(day.key, meal.key)
+                                }
+                                className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                              >
+                                Retirer
+                              </button>
+                            </>
+                          ))
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              openRecipePicker({
+                                type: 'main',
+                                day: day.key,
+                                meal: meal.key,
+                              })
+                            }
+                            className="flex min-h-40 w-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-orange-200 bg-white/70 px-5 py-6 text-center transition hover:bg-orange-50"
+                          >
+                            <span className="text-lg font-black text-stone-500">
+                              Aucun repas prévu pour ce moment.
+                            </span>
+
+                            <span className="mt-4 rounded-full bg-orange-100 px-5 py-3 font-black text-orange-700">
+                              + Ajouter une recette
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </section>
               )
             })}
-          </section>
+          </div>
         )}
       </section>
 
-      <section className="planner-print-page hidden print:block">
-        <header className="planner-print-header mb-5 flex items-start justify-between border-b border-stone-200 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-orange-100">
-              <img
-                src={SITE_LOGO_URL}
-                alt="Logo Carnet de recettes"
-                className="h-full w-full object-contain"
-              />
-            </div>
+      {openPickerSlot && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/40 px-4 py-6 backdrop-blur-sm">
+          <div className="flex max-h-[88vh] w-full max-w-4xl flex-col rounded-[2rem] bg-[#fffaf3] p-6 shadow-2xl ring-1 ring-orange-100 md:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                  Ajouter une recette
+                </p>
 
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.25em] text-orange-600">
-                Carnet de recettes
-              </p>
+                <h2 className="mt-2 text-3xl font-black text-stone-950">
+                  {openPickerSlot.type === 'main'
+                    ? `${getDayLabel(openPickerSlot.day)} — ${getMealLabel(
+                        openPickerSlot.meal,
+                      )}`
+                    : getMealLabel(openPickerSlot.meal)}
+                </h2>
 
-              <h1 className="mt-1 text-3xl font-black text-stone-950">
-                Planning de la semaine
-              </h1>
-
-              <p className="mt-1 text-sm text-stone-500">
-                Cuisine maison & petits plats
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-orange-100 px-4 py-3 text-right">
-            <p className="text-xs font-black uppercase text-stone-500">
-              Résumé
-            </p>
-
-            <p className="mt-1 text-2xl font-black text-orange-600">
-              {plannedMealCount}
-            </p>
-
-            <p className="text-xs font-bold text-stone-600">repas prévus</p>
-          </div>
-        </header>
-
-        <div className="mb-5 grid grid-cols-3 gap-3">
-          <div className="planner-print-card rounded-2xl border border-stone-200 p-3">
-            <p className="text-2xl font-black text-orange-600">
-              {plannedMealCount}
-            </p>
-
-            <p className="text-xs font-bold text-stone-600">repas prévus</p>
-          </div>
-
-          <div className="planner-print-card rounded-2xl border border-stone-200 p-3">
-            <p className="text-2xl font-black text-green-800">
-              {organizedDayCount}
-            </p>
-
-            <p className="text-xs font-bold text-stone-600">jours organisés</p>
-          </div>
-
-          <div className="planner-print-card rounded-2xl border border-stone-200 p-3">
-            <p className="text-2xl font-black text-stone-950">
-              {estimatedIngredientCount}
-            </p>
-
-            <p className="text-xs font-bold text-stone-600">
-              ingrédients estimés
-            </p>
-          </div>
-        </div>
-
-        <section className="planner-print-card mb-5 rounded-2xl border border-stone-200 p-4">
-          <p className="text-xs font-black uppercase tracking-wide text-orange-600">
-            Habitudes et envies
-          </p>
-
-          <h2 className="mt-1 text-xl font-black text-stone-950">
-            Petit déjeuner, goûter et dessert
-          </h2>
-
-          <div className="planner-print-extra-grid mt-4">
-            {EXTRA_MEALS.map((extra) => {
-              const extraRecipes = planner.extras[extra.key]
-                .map((recipeId) => getRecipeByStoredId(recipes, recipeId))
-                .filter((recipe): recipe is Recipe => !!recipe)
-
-              return (
-                <div key={extra.key} className="rounded-xl bg-stone-50 p-3">
-                  <p className="font-black text-stone-950">
-                    {extra.emoji} {extra.label}
-                  </p>
-
-                  {extraRecipes.length > 0 ? (
-                    <ul className="mt-2 space-y-1 text-sm">
-                      {extraRecipes.map((recipe) => (
-                        <li key={recipe.id}>• {recipe.title}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="mt-2 text-sm text-stone-500">
-                      Aucun prévu.
-                    </p>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </section>
-
-        <section>
-          <p className="text-xs font-black uppercase tracking-wide text-orange-600">
-            Semaine détaillée
-          </p>
-
-          <h2 className="mt-1 text-xl font-black text-stone-950">
-            Déjeuner et dîner
-          </h2>
-
-          <div className="planner-print-grid mt-4">
-            {DAYS.map((day) => {
-              const lunchRecipe = getRecipeByStoredId(
-                recipes,
-                planner.days[day.key].lunch,
-              )
-              const dinnerRecipe = getRecipeByStoredId(
-                recipes,
-                planner.days[day.key].dinner,
-              )
-
-              return (
-                <div
-                  key={day.key}
-                  className="planner-print-card rounded-2xl border border-stone-200 p-4"
-                >
-                  <div className="mb-3 flex items-start justify-between">
-                    <div>
-                      <p className="text-xs font-black uppercase text-orange-600">
-                        {day.shortLabel}
-                      </p>
-
-                      <h3 className="text-xl font-black text-stone-950">
-                        {day.label}
-                      </h3>
-                    </div>
-
-                    <p className="text-xs font-black text-stone-500">
-                      {
-                        [lunchRecipe, dinnerRecipe].filter(
-                          (recipe) => !!recipe,
-                        ).length
-                      }
-                      /2
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div>
-                      <p className="font-black text-orange-600">☀️ Déjeuner</p>
-
-                      <p className="mt-1 text-sm text-stone-700">
-                        {lunchRecipe
-                          ? `${lunchRecipe.title} — ${getRecipeTotalTime(
-                              lunchRecipe,
-                            )} min`
-                          : 'Aucun repas prévu.'}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="font-black text-orange-600">🌙 Dîner</p>
-
-                      <p className="mt-1 text-sm text-stone-700">
-                        {dinnerRecipe
-                          ? `${dinnerRecipe.title} — ${getRecipeTotalTime(
-                              dinnerRecipe,
-                            )} min`
-                          : 'Aucun repas prévu.'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </section>
-
-        <p className="mt-5 border-t border-stone-200 pt-3 text-xs text-stone-400">
-          Imprimé avec Carnet de recettes.
-        </p>
-      </section>
-
-      {activeModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/50 p-4 backdrop-blur-sm print:hidden">
-          <div className="flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-[2rem] bg-[#fffaf3] shadow-2xl ring-1 ring-orange-100">
-            <div className="shrink-0 border-b border-orange-100 px-6 py-5">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="font-black uppercase tracking-wide text-orange-600">
-                    Ajouter une recette
-                  </p>
-
-                  <h2 className="mt-1 text-3xl font-black text-stone-950">
-                    {modalTitle}
-                  </h2>
-
-                  <p className="mt-2 max-w-2xl font-semibold leading-7 text-stone-500">
-                    Recherche une recette, puis clique dessus pour l’ajouter. La
-                    liste de courses sera mise à jour automatiquement.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-orange-700 transition hover:bg-orange-50"
-                >
-                  Fermer
-                </button>
+                <p className="mt-2 max-w-2xl font-semibold leading-7 text-stone-500">
+                  Recherche une recette, puis clique dessus pour l’ajouter. La
+                  liste de courses sera mise à jour automatiquement.
+                </p>
               </div>
 
-              <input
-                autoFocus
-                value={recipeSearch}
-                onChange={(event) => setRecipeSearch(event.target.value)}
-                placeholder="Rechercher une recette : pâtes, gâteau, poulet..."
-                className="mt-5 w-full rounded-[1.5rem] border border-orange-200 bg-white px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-              />
+              <button
+                type="button"
+                onClick={closeRecipePicker}
+                className="rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-orange-700 transition hover:bg-orange-50"
+              >
+                Fermer
+              </button>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            <input
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              placeholder="Rechercher une recette : pâtes, gâteau, poulet..."
+              autoFocus
+              className="mt-6 w-full rounded-[1.5rem] border border-orange-200 bg-white px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+            />
+
+            <div className="mt-6 min-h-0 flex-1 overflow-y-auto pr-2">
               {filteredRecipes.length === 0 ? (
-                <div className="rounded-[1.5rem] bg-white p-6 text-center font-bold text-stone-500 ring-1 ring-orange-100">
-                  Aucune recette ne correspond à ta recherche.
+                <div className="rounded-[1.5rem] bg-white p-6 text-center text-stone-500 shadow-sm ring-1 ring-orange-100">
+                  Aucune recette trouvée.
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {filteredRecipes.map((recipe) => (
-                    <button
-                      key={recipe.id}
-                      type="button"
-                      onClick={() => handleSelectRecipe(recipe)}
-                      disabled={addingRecipeId === recipe.id}
-                      className="flex w-full gap-4 rounded-[1.5rem] bg-white p-4 text-left shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <RecipeMiniature recipe={recipe} />
+                  {filteredRecipes.map((recipe) => {
+                    const image = getRecipeImage(recipe)
+                    const isImageUrl =
+                      typeof image === 'string' && image.startsWith('http')
+                    const isSyncing = syncingRecipeId === recipe.id
 
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xl font-black text-stone-950">
-                          {recipe.title}
-                        </p>
-
-                        <p className="mt-1 line-clamp-2 font-semibold text-stone-500">
-                          {recipe.description}
-                        </p>
-
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700">
-                            {recipe.category}
-                          </span>
-
-                          <span className="rounded-full bg-[#fffaf3] px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-orange-100">
-                            {getRecipeTotalTime(recipe)} min
-                          </span>
-
-                          <span className="rounded-full bg-[#fffaf3] px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-orange-100">
-                            {recipe.servings} pers.
-                          </span>
+                    return (
+                      <button
+                        key={recipe.id}
+                        type="button"
+                        onClick={() => handleChooseRecipe(recipe)}
+                        disabled={isSyncing}
+                        className="flex w-full items-center gap-4 rounded-[1.5rem] bg-white p-4 text-left shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-[#fff1e6] text-3xl">
+                          {isImageUrl ? (
+                            <img
+                              src={image}
+                              alt={recipe.title}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            image
+                          )}
                         </div>
-                      </div>
 
-                      <span className="hidden rounded-full bg-orange-500 px-5 py-3 font-black text-white md:block">
-                        {addingRecipeId === recipe.id ? 'Ajout...' : 'Ajouter'}
-                      </span>
-                    </button>
-                  ))}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xl font-black text-stone-950">
+                            {recipe.title}
+                          </p>
+
+                          <p className="mt-1 line-clamp-1 font-semibold text-stone-500">
+                            {recipe.description}
+                          </p>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700">
+                              {recipe.category}
+                            </span>
+
+                            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-stone-600 ring-1 ring-orange-100">
+                              {recipe.prepTime + recipe.cookTime} min
+                            </span>
+
+                            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-stone-600 ring-1 ring-orange-100">
+                              {recipe.servings} pers.
+                            </span>
+                          </div>
+                        </div>
+
+                        <span className="hidden rounded-full bg-orange-500 px-5 py-3 font-black text-white md:block">
+                          Ajouter
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </div>
