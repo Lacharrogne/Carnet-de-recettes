@@ -14,6 +14,12 @@ const personalLinks = [
     emoji: '👤',
   },
   {
+    label: 'Mes relations',
+    description: 'Amis, abonnés et abonnements',
+    to: '/social',
+    emoji: '👥',
+  },
+  {
     label: 'Mes recettes',
     description: 'Voir et modifier tes recettes',
     to: '/my-recipes',
@@ -56,8 +62,11 @@ function navPillClass(isActive: boolean) {
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   navPillClass(isActive)
 
-function dropdownPanelClass(width = 'w-[420px]', align = 'left-1/2 -translate-x-1/2') {
-  return `pointer-events-none absolute ${align} top-full z-50 mt-3 ${width} rounded-[2rem] bg-white p-4 opacity-0 shadow-xl ring-1 ring-orange-100 transition duration-200 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100`
+function dropdownPanelClass(
+  width = 'w-[420px]',
+  align = 'left-1/2 -translate-x-1/2',
+) {
+  return `pointer-events-none absolute ${align} top-full z-50 mt-3 ${width} max-h-[calc(100vh-8rem)] overflow-y-auto rounded-[1.5rem] bg-white p-3 opacity-0 shadow-xl ring-1 ring-orange-100 transition duration-200 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100`
 }
 
 export default function Header() {
@@ -217,90 +226,105 @@ export default function Header() {
 
         <div className="hidden items-center gap-3 lg:flex">
           {user ? (
-            <>
-              <div className="group relative">
-                <Link
-                  to="/profile"
-                  className="flex items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 font-bold text-stone-900 shadow-sm transition hover:bg-orange-50 hover:text-orange-600"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
-                    {displayedAvatarUrl ? (
-                      <img
-                        src={displayedAvatarUrl}
-                        alt={displayedName}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      avatarLetter
-                    )}
+            <div className="group relative">
+              <Link
+                to="/profile"
+                className="flex items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 font-bold text-stone-900 shadow-sm transition hover:bg-orange-50 hover:text-orange-600"
+              >
+                <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
+                  {displayedAvatarUrl ? (
+                    <img
+                      src={displayedAvatarUrl}
+                      alt={displayedName}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    avatarLetter
+                  )}
+                </div>
+
+                <span className="max-w-32 truncate">{displayedName}</span>
+                <span className="text-xs text-stone-500">▾</span>
+              </Link>
+
+              <div className={dropdownPanelClass('w-[390px]', 'right-0')}>
+                <div className="mb-3 rounded-[1.3rem] bg-[#fffaf3] p-3 ring-1 ring-orange-100">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
+                      {displayedAvatarUrl ? (
+                        <img
+                          src={displayedAvatarUrl}
+                          alt={displayedName}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        avatarLetter
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-black text-stone-950">
+                        {displayedName}
+                      </p>
+
+                      <p className="truncate text-xs font-semibold text-stone-500">
+                        {user.email}
+                      </p>
+                    </div>
                   </div>
+                </div>
 
-                  <span className="max-w-32 truncate">{displayedName}</span>
-                </Link>
+                <div className="grid gap-1">
+                  {personalLinks.map((link) => (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      className="group/item rounded-2xl p-2.5 transition hover:bg-orange-50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#fff1e6] text-xl transition group-hover/item:scale-105">
+                          {link.emoji}
+                        </span>
 
-                <div className={dropdownPanelClass('w-[460px]', 'right-0')}>
-                  <div className="mb-4 rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-lg font-black text-white ring-2 ring-white">
-                        {displayedAvatarUrl ? (
-                          <img
-                            src={displayedAvatarUrl}
-                            alt={displayedName}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          avatarLetter
-                        )}
+                        <div className="min-w-0">
+                          <p className="truncate font-black leading-tight text-stone-950">
+                            {link.label}
+                          </p>
+
+                          <p className="truncate text-xs font-semibold text-stone-500">
+                            {link.description}
+                          </p>
+                        </div>
                       </div>
+                    </Link>
+                  ))}
+                </div>
 
-                      <div className="min-w-0">
-                        <p className="truncate text-lg font-black text-stone-950">
-                          {displayedName}
+                <div className="mt-3 border-t border-orange-100 pt-3">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full rounded-2xl border border-red-100 bg-red-50 p-2.5 text-left transition hover:bg-red-100"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-xl">
+                        🚪
+                      </span>
+
+                      <div>
+                        <p className="font-black leading-tight text-red-700">
+                          Déconnexion
                         </p>
 
-                        <p className="truncate text-sm font-semibold text-stone-500">
-                          {user.email}
+                        <p className="text-xs font-semibold text-red-500">
+                          Quitter ton compte
                         </p>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="grid gap-2">
-                    {personalLinks.map((link) => (
-                      <Link
-                        key={link.to}
-                        to={link.to}
-                        className="group/item rounded-2xl p-3 transition hover:bg-orange-50"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#fff1e6] text-2xl transition group-hover/item:scale-105">
-                            {link.emoji}
-                          </span>
-
-                          <div>
-                            <p className="font-black text-stone-950">
-                              {link.label}
-                            </p>
-
-                            <p className="text-sm font-semibold text-stone-500">
-                              {link.description}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+                  </button>
                 </div>
               </div>
-
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-600 transition hover:bg-orange-50"
-              >
-                Déconnexion
-              </button>
-            </>
+            </div>
           ) : (
             <NavLink to="/auth" className={navLinkClass}>
               Connexion
@@ -379,9 +403,9 @@ export default function Header() {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="rounded-2xl border border-orange-200 bg-white px-4 py-3 text-left font-black text-orange-600"
+                    className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-left font-black text-red-700"
                   >
-                    Déconnexion
+                    🚪 Déconnexion
                   </button>
                 </div>
               </details>

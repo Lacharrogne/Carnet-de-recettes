@@ -17,6 +17,7 @@ import NotFoundPage from './pages/NotFoundPage'
 import ShoppingListPage from './pages/ShoppingListPage'
 import FridgePage from './pages/FridgePage'
 import MealPlannerPage from './pages/MealPlannerPage'
+import SocialPage from './pages/SocialPage'
 
 function getPageBackgroundClass(pathname: string) {
   if (pathname === '/') {
@@ -133,6 +134,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <MealPlannerPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/social"
+            element={
+              <ProtectedRoute>
+                <SocialPage />
               </ProtectedRoute>
             }
           />
