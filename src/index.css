@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @theme {
-
   /* Tons bruns / carnet */
   --color-slate-50: #fffaf3;
   --color-slate-100: #f5eadf;
@@ -42,47 +41,17 @@ html {
   scroll-behavior: smooth;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #e8b39a;
-
-  background-image:
-    radial-gradient(circle at top left, rgba(182, 83, 59, 0.22), transparent 30%),
-    radial-gradient(circle at top right, rgba(113, 50, 37, 0.16), transparent 28%),
-
-    /* joints horizontaux */
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0px,
-      transparent 42px,
-      rgba(113, 50, 37, 0.28) 42px,
-      rgba(113, 50, 37, 0.28) 45px
-    ),
-
-    /* joints verticaux */
-    repeating-linear-gradient(
-      to right,
-      rgba(113, 50, 37, 0.22) 0px,
-      rgba(113, 50, 37, 0.22) 3px,
-      transparent 3px,
-      transparent 96px
-    ),
-
-    linear-gradient(
-      to bottom,
-      #f4c3aa 0%,
-      #e8a184 45%,
-      #d8896c 100%
-    );
-
-  background-size:
-    auto,
-    auto,
-    96px 45px,
-    96px 45px,
-    auto;
+  background: #fff8f3;
 }
 
 * {
@@ -121,9 +90,203 @@ textarea {
   background-color: #fffdf9;
 }
 
-/* Impression propre pour les recettes */
+/* Accueil : fond brique chaleureux */
+.page-background-home {
+  background-color: #e8b39a;
+  background-image:
+    radial-gradient(circle at top left, rgba(182, 83, 59, 0.22), transparent 30%),
+    radial-gradient(circle at top right, rgba(113, 50, 37, 0.16), transparent 28%),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 42px,
+      rgba(113, 50, 37, 0.28) 42px,
+      rgba(113, 50, 37, 0.28) 45px
+    ),
+    repeating-linear-gradient(
+      to right,
+      rgba(113, 50, 37, 0.22) 0px,
+      rgba(113, 50, 37, 0.22) 3px,
+      transparent 3px,
+      transparent 96px
+    ),
+    linear-gradient(
+      to bottom,
+      #f4c3aa 0%,
+      #e8a184 45%,
+      #d8896c 100%
+    );
+  background-size:
+    auto,
+    auto,
+    96px 45px,
+    96px 45px,
+    auto;
+  background-attachment: fixed;
+}
+
+/* Mode frigo : ambiance froide, propre, bleutée */
+.page-background-fridge {
+  background-color: #def7ff;
+  background-image:
+    radial-gradient(circle at 15% 18%, rgba(255, 255, 255, 0.9) 0 14px, transparent 15px),
+    radial-gradient(circle at 82% 24%, rgba(255, 255, 255, 0.65) 0 10px, transparent 11px),
+    radial-gradient(circle at 70% 76%, rgba(255, 255, 255, 0.5) 0 18px, transparent 19px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.13) 1px, transparent 1px),
+    linear-gradient(rgba(14, 165, 233, 0.13) 1px, transparent 1px),
+    linear-gradient(135deg, #e8fbff 0%, #d8f5ff 45%, #f8feff 100%);
+  background-size:
+    260px 260px,
+    310px 310px,
+    360px 360px,
+    90px 90px,
+    90px 90px,
+    auto;
+  background-attachment: fixed;
+}
+
+/* Page recettes : papier carnet / fiche cuisine */
+.page-background-recipes {
+  background-color: #fff4e8;
+  background-image:
+    linear-gradient(rgba(180, 120, 70, 0.12) 1px, transparent 1px),
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.9), transparent 25%),
+    radial-gradient(circle at 80% 10%, rgba(255, 226, 190, 0.7), transparent 25%),
+    linear-gradient(135deg, #fff9f0 0%, #fff1de 50%, #fffaf3 100%);
+  background-size:
+    100% 36px,
+    auto,
+    auto,
+    auto;
+  background-attachment: fixed;
+}
+
+/* Ajouter / modifier une recette : plan de travail */
+.page-background-add-recipe {
+  background-color: #fff1df;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.75), transparent 24%),
+    radial-gradient(circle at 88% 22%, rgba(255, 210, 160, 0.6), transparent 24%),
+    linear-gradient(90deg, rgba(180, 120, 70, 0.1) 1px, transparent 1px),
+    linear-gradient(rgba(180, 120, 70, 0.1) 1px, transparent 1px),
+    linear-gradient(135deg, #fff9ef 0%, #ffe8c8 100%);
+  background-size:
+    auto,
+    auto,
+    110px 110px,
+    110px 110px,
+    auto;
+  background-attachment: fixed;
+}
+
+/* Mes recettes : ambiance cuisine personnelle */
+.page-background-my-recipes {
+  background-color: #fff0df;
+  background-image:
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.75), transparent 26%),
+    radial-gradient(circle at 80% 25%, rgba(255, 211, 154, 0.5), transparent 26%),
+    repeating-linear-gradient(
+      45deg,
+      rgba(190, 120, 65, 0.08) 0px,
+      rgba(190, 120, 65, 0.08) 2px,
+      transparent 2px,
+      transparent 24px
+    ),
+    linear-gradient(135deg, #fff8ed 0%, #ffe3c2 100%);
+  background-attachment: fixed;
+}
+
+/* Favoris : doux, chaleureux, un peu plus personnel */
+.page-background-favorites {
+  background-color: #fff0f3;
+  background-image:
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.85), transparent 24%),
+    radial-gradient(circle at 78% 18%, rgba(255, 190, 205, 0.45), transparent 28%),
+    radial-gradient(circle at 55% 80%, rgba(255, 220, 226, 0.5), transparent 28%),
+    linear-gradient(135deg, #fff7f8 0%, #ffe5eb 100%);
+  background-attachment: fixed;
+}
+
+/* Liste de courses : papier + marché */
+.page-background-shopping {
+  background-color: #eef9ed;
+  background-image:
+    linear-gradient(rgba(60, 120, 70, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60, 120, 70, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.9), transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(194, 234, 180, 0.65), transparent 26%),
+    linear-gradient(135deg, #f8fff6 0%, #e2f5dc 100%);
+  background-size:
+    100% 42px,
+    120px 120px,
+    auto,
+    auto,
+    auto;
+  background-attachment: fixed;
+}
+
+/* Planning : quadrillage calendrier */
+.page-background-planning {
+  background-color: #fff2df;
+  background-image:
+    linear-gradient(rgba(203, 135, 60, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(203, 135, 60, 0.18) 1px, transparent 1px),
+    radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.88), transparent 24%),
+    radial-gradient(circle at 84% 20%, rgba(255, 220, 170, 0.62), transparent 26%),
+    linear-gradient(135deg, #fffaf1 0%, #ffe8c8 100%);
+  background-size:
+    120px 120px,
+    120px 120px,
+    auto,
+    auto,
+    auto;
+  background-attachment: fixed;
+}
+
+/* Profil public / profil perso */
+.page-background-profile {
+  background-color: #f6f1ff;
+  background-image:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.9), transparent 25%),
+    radial-gradient(circle at 80% 20%, rgba(221, 205, 255, 0.55), transparent 28%),
+    linear-gradient(135deg, #fbf8ff 0%, #eee5ff 100%);
+  background-attachment: fixed;
+}
+
+/* Connexion : simple et calme */
+.page-background-auth {
+  background-color: #fff7ed;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.9), transparent 25%),
+    radial-gradient(circle at 80% 18%, rgba(255, 220, 180, 0.6), transparent 25%),
+    linear-gradient(135deg, #fffaf3 0%, #ffe8cf 100%);
+  background-attachment: fixed;
+}
+
+/* Fond neutre pour les autres pages */
+.page-background-default {
+  background-color: #fff8f3;
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.85), transparent 25%),
+    radial-gradient(circle at 85% 20%, rgba(255, 226, 190, 0.5), transparent 25%),
+    linear-gradient(135deg, #fffaf3 0%, #f7eadf 100%);
+  background-attachment: fixed;
+}
+
+/* Impression propre */
 @media print {
-  body {
-    background: white;
+  body,
+  .page-background-home,
+  .page-background-fridge,
+  .page-background-recipes,
+  .page-background-add-recipe,
+  .page-background-my-recipes,
+  .page-background-favorites,
+  .page-background-shopping,
+  .page-background-planning,
+  .page-background-profile,
+  .page-background-auth,
+  .page-background-default {
+    background: white !important;
   }
 }

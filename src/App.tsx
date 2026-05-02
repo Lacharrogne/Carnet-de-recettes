@@ -1,6 +1,8 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
+
 import Header from './components/layout/Header'
 import ProtectedRoute from './components/ProtectedRoute'
+
 import HomePage from './pages/HomePage'
 import RecipesPage from './pages/RecipesPage'
 import RecipeDetailsPage from './pages/RecipeDetailsPage'
@@ -16,9 +18,58 @@ import ShoppingListPage from './pages/ShoppingListPage'
 import FridgePage from './pages/FridgePage'
 import MealPlannerPage from './pages/MealPlannerPage'
 
+function getPageBackgroundClass(pathname: string) {
+  if (pathname === '/') {
+    return 'page-background-home'
+  }
+
+  if (pathname.startsWith('/frigo')) {
+    return 'page-background-fridge'
+  }
+
+  if (pathname.startsWith('/shopping-list')) {
+    return 'page-background-shopping'
+  }
+
+  if (pathname.startsWith('/planning')) {
+    return 'page-background-planning'
+  }
+
+  if (pathname.startsWith('/favorites')) {
+    return 'page-background-favorites'
+  }
+
+  if (pathname.startsWith('/my-recipes')) {
+    return 'page-background-my-recipes'
+  }
+
+  if (pathname.startsWith('/add-recipe')) {
+    return 'page-background-add-recipe'
+  }
+
+  if (pathname.startsWith('/recipes')) {
+    return 'page-background-recipes'
+  }
+
+  if (pathname.startsWith('/profile') || pathname.startsWith('/users')) {
+    return 'page-background-profile'
+  }
+
+  if (pathname.startsWith('/auth')) {
+    return 'page-background-auth'
+  }
+
+  return 'page-background-default'
+}
+
 export default function App() {
+  const location = useLocation()
+  const pageBackgroundClass = getPageBackgroundClass(location.pathname)
+
   return (
-    <div className="min-h-screen bg-orange-50/40 text-slate-900">
+    <div
+      className={`min-h-screen text-slate-900 transition-colors duration-500 ${pageBackgroundClass}`}
+    >
       <Header />
 
       <main className="mx-auto max-w-6xl px-4 py-8">
@@ -26,14 +77,11 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
 
           <Route path="/recipes" element={<RecipesPage />} />
-
           <Route path="/recipes/:id" element={<RecipeDetailsPage />} />
-
           <Route path="/frigo" element={<FridgePage />} />
-
           <Route path="/auth" element={<AuthPage />} />
-
           <Route path="/shopping-list" element={<ShoppingListPage />} />
+          <Route path="/users/:userId" element={<PublicProfilePage />} />
 
           <Route
             path="/profile"
@@ -43,8 +91,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
-          <Route path="/users/:userId" element={<PublicProfilePage />} />
 
           <Route
             path="/add-recipe"
@@ -91,19 +137,6 @@ export default function App() {
             }
           />
 
-          <Route
-            path="*"
-            element={
-              <section className="rounded-3xl bg-white p-8 text-center shadow-sm">
-                <p className="text-2xl font-bold text-slate-900">
-                  Page introuvable
-                </p>
-                <p className="mt-2 text-slate-600">
-                  Cette page n’existe pas ou a été déplacée.
-                </p>
-              </section>
-            }
-          />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
