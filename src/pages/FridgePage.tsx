@@ -13,24 +13,6 @@ type FridgeRecipeMatch = {
   score: number
 }
 
-const QUICK_INGREDIENTS = [
-  'Œufs',
-  'Pâtes',
-  'Riz',
-  'Pommes de terre',
-  'Farine',
-  'Lait',
-  'Crème',
-  'Beurre',
-  'Fromage',
-  'Jambon',
-  'Poulet',
-  'Tomates',
-  'Oignons',
-  'Courgettes',
-  'Chocolat',
-]
-
 const ANTI_WASTE_INGREDIENTS = [
   'Courgettes',
   'Tomates',
@@ -153,6 +135,7 @@ function getIngredientTerms(value: string) {
   const simplified = removeIngredientDetails(value)
 
   const terms = new Set<string>()
+
   const rawTerms = [
     base,
     simplified,
@@ -285,6 +268,7 @@ function FridgeResultCard({
   onAddMissingIngredients: (match: FridgeRecipeMatch) => void
 }) {
   const totalTime = match.recipe.prepTime + match.recipe.cookTime
+  const imageToDisplay = match.recipe.imageUrl || match.recipe.image
 
   return (
     <article className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md">
@@ -318,14 +302,14 @@ function FridgeResultCard({
         </div>
 
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          {match.matchedIngredients.length > 0 && (
-            <div>
-              <p className="text-xs font-black uppercase tracking-wide text-green-700">
-                Tu as déjà
-              </p>
+          <div>
+            <p className="text-xs font-black uppercase tracking-wide text-green-700">
+              Tu as déjà
+            </p>
 
+            {match.matchedIngredients.length > 0 ? (
               <div className="mt-2 flex flex-wrap gap-2">
-                {match.matchedIngredients.slice(0, 4).map((ingredient) => (
+                {match.matchedIngredients.slice(0, 5).map((ingredient) => (
                   <span
                     key={ingredient}
                     className="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700"
@@ -334,17 +318,21 @@ function FridgeResultCard({
                   </span>
                 ))}
               </div>
-            </div>
-          )}
-
-          {match.missingIngredients.length > 0 && (
-            <div>
-              <p className="text-xs font-black uppercase tracking-wide text-orange-700">
-                Il manque
+            ) : (
+              <p className="mt-2 text-sm font-medium text-stone-500">
+                Aucun ingrédient reconnu.
               </p>
+            )}
+          </div>
 
+          <div>
+            <p className="text-xs font-black uppercase tracking-wide text-orange-700">
+              Il manque
+            </p>
+
+            {match.missingIngredients.length > 0 ? (
               <div className="mt-2 flex flex-wrap gap-2">
-                {match.missingIngredients.slice(0, 4).map((ingredient) => (
+                {match.missingIngredients.slice(0, 5).map((ingredient) => (
                   <span
                     key={ingredient}
                     className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700"
@@ -353,8 +341,12 @@ function FridgeResultCard({
                   </span>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="mt-2 text-sm font-medium text-green-700">
+                Rien à acheter.
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -364,9 +356,9 @@ function FridgeResultCard({
       >
         <div className="flex gap-5">
           <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#fff1e6] text-5xl">
-            {match.recipe.imageUrl ? (
+            {imageToDisplay && imageToDisplay.startsWith('http') ? (
               <img
-                src={match.recipe.imageUrl}
+                src={imageToDisplay}
                 alt={match.recipe.title}
                 className="h-full w-full object-cover"
               />
@@ -418,57 +410,6 @@ function FridgeResultCard({
         </div>
       )}
     </article>
-  )
-}
-
-function MatchSection({
-  title,
-  description,
-  emptyMessage,
-  matches,
-  addingRecipeId,
-  onAddMissingIngredients,
-}: {
-  title: string
-  description: string
-  emptyMessage: string
-  matches: FridgeRecipeMatch[]
-  addingRecipeId: Recipe['id'] | null
-  onAddMissingIngredients: (match: FridgeRecipeMatch) => void
-}) {
-  return (
-    <section className="rounded-[2.5rem] bg-[#fffaf3]/90 p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-black text-stone-950">{title}</h2>
-
-          <p className="mt-2 max-w-3xl leading-7 text-stone-600">
-            {description}
-          </p>
-        </div>
-
-        <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm ring-1 ring-orange-100">
-          {matches.length} résultat{matches.length > 1 ? 's' : ''}
-        </span>
-      </div>
-
-      {matches.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100">
-          {emptyMessage}
-        </div>
-      ) : (
-        <div className="grid gap-6 xl:grid-cols-2">
-          {matches.map((match) => (
-            <FridgeResultCard
-              key={match.recipe.id}
-              match={match}
-              adding={addingRecipeId === match.recipe.id}
-              onAddMissingIngredients={onAddMissingIngredients}
-            />
-          ))}
-        </div>
-      )}
-    </section>
   )
 }
 
@@ -534,6 +475,7 @@ export default function FridgePage() {
           firstRecipe.recipe,
           priorityIngredient,
         )
+
         const secondUsesPriority = recipeUsesIngredient(
           secondRecipe.recipe,
           priorityIngredient,
@@ -553,6 +495,7 @@ export default function FridgePage() {
 
         const firstRecipeTime =
           firstRecipe.recipe.prepTime + firstRecipe.recipe.cookTime
+
         const secondRecipeTime =
           secondRecipe.recipe.prepTime + secondRecipe.recipe.cookTime
 
@@ -560,49 +503,19 @@ export default function FridgePage() {
       })
   }, [effectiveAvailableIngredients, priorityIngredient, recipes])
 
-  const antiWasteRecipes = useMemo(() => {
+  const bestScore = analyzedRecipes[0]?.score ?? 0
+
+  const antiWasteCount = useMemo(() => {
     if (!priorityIngredient.trim()) {
-      return []
+      return 0
     }
 
     return analyzedRecipes.filter((match) =>
       recipeUsesIngredient(match.recipe, priorityIngredient),
-    )
+    ).length
   }, [analyzedRecipes, priorityIngredient])
 
-  const antiWasteRecipeIds = useMemo(() => {
-    return new Set(antiWasteRecipes.map((match) => match.recipe.id))
-  }, [antiWasteRecipes])
-
-  const readyRecipes = analyzedRecipes.filter(
-    (match) =>
-      match.missingCount === 0 && !antiWasteRecipeIds.has(match.recipe.id),
-  )
-
-  const almostReadyRecipes = analyzedRecipes.filter(
-    (match) =>
-      match.missingCount > 0 &&
-      match.missingCount <= 2 &&
-      !antiWasteRecipeIds.has(match.recipe.id),
-  )
-
-  const inspiredRecipes = analyzedRecipes.filter(
-    (match) =>
-      match.missingCount > 2 && !antiWasteRecipeIds.has(match.recipe.id),
-  )
-
-  function addQuickIngredient(ingredient: string) {
-    const currentIngredients = parseFridgeIngredients(fridgeValue)
-    const ingredientAlreadyExists = currentIngredients.some(
-      (currentIngredient) =>
-        normalizeText(currentIngredient) === normalizeText(ingredient),
-    )
-
-    if (ingredientAlreadyExists) {
-      return
-    }
-
-    setFridgeValue([...currentIngredients, ingredient].join(', '))
+  function clearMessages() {
     setErrorMessage('')
     setSuccessMessage('')
   }
@@ -614,15 +527,19 @@ export default function FridgePage() {
     )
 
     setFridgeValue(nextIngredients.join(', '))
-    setErrorMessage('')
-    setSuccessMessage('')
+    clearMessages()
   }
 
   function useExampleFridge() {
     setFridgeValue('Œufs, pâtes, crème, jambon, fromage, oignons')
     setPriorityIngredient('Courgettes')
-    setErrorMessage('')
-    setSuccessMessage('')
+    clearMessages()
+  }
+
+  function clearFridge() {
+    setFridgeValue('')
+    setPriorityIngredient('')
+    clearMessages()
   }
 
   async function handleAddMissingIngredients(match: FridgeRecipeMatch) {
@@ -632,8 +549,7 @@ export default function FridgePage() {
 
     try {
       setAddingRecipeId(match.recipe.id)
-      setErrorMessage('')
-      setSuccessMessage('')
+      clearMessages()
 
       const createdItems = await addRecipeIngredientsToShoppingList(
         match.recipe.id,
@@ -675,11 +591,10 @@ export default function FridgePage() {
   return (
     <section className="space-y-12">
       <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
-        <div className="grid gap-10 px-6 py-10 md:grid-cols-[1fr_0.8fr] md:px-12 md:py-14">
-          <div>
+        <div className="grid gap-10 px-6 py-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-12 lg:py-12">
+          <div className="flex flex-col justify-center">
             <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
               <span>🥕</span>
-
               <span>Mode Frigo</span>
             </div>
 
@@ -690,7 +605,7 @@ export default function FridgePage() {
             <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-600">
               Écris les ingrédients disponibles dans ton frigo, tes placards ou
               ton congélateur. Le carnet te propose ensuite les recettes les
-              plus faciles à faire maintenant.
+              plus simples à faire maintenant.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -704,12 +619,7 @@ export default function FridgePage() {
 
               <button
                 type="button"
-                onClick={() => {
-                  setFridgeValue('')
-                  setPriorityIngredient('')
-                  setErrorMessage('')
-                  setSuccessMessage('')
-                }}
+                onClick={clearFridge}
                 className="rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
               >
                 Vider mon frigo
@@ -717,115 +627,111 @@ export default function FridgePage() {
             </div>
           </div>
 
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-            <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
-              Ton frigo
-            </p>
+          <div className="space-y-5">
+            <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
+                    Ton frigo
+                  </p>
 
-            <textarea
-              value={fridgeValue}
-              onChange={(event) => {
-                setFridgeValue(event.target.value)
-                setErrorMessage('')
-                setSuccessMessage('')
-              }}
-              placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
-              className="mt-4 min-h-40 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-[#fffaf3] px-5 py-4 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
-            />
+                  <p className="mt-1 text-sm text-stone-500">
+                    Note ce que tu as déjà chez toi.
+                  </p>
+                </div>
 
-            <p className="mt-3 text-sm text-stone-500">
-              Sépare les ingrédients avec une virgule ou écris-les sur plusieurs
-              lignes.
-            </p>
+                <span className="rounded-full bg-[#fffaf3] px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-orange-100">
+                  {fridgeIngredients.length} ingrédient
+                  {fridgeIngredients.length > 1 ? 's' : ''}
+                </span>
+              </div>
 
-            {fridgeIngredients.length > 0 && (
-              <div className="mt-5 flex flex-wrap gap-2">
-                {fridgeIngredients.map((ingredient) => (
+              <textarea
+                value={fridgeValue}
+                onChange={(event) => {
+                  setFridgeValue(event.target.value)
+                  clearMessages()
+                }}
+                placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
+                className="mt-4 min-h-36 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-[#fffaf3] px-5 py-4 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+              />
+
+              <p className="mt-3 text-sm text-stone-500">
+                Sépare les ingrédients avec une virgule ou écris-les sur
+                plusieurs lignes.
+              </p>
+
+              {fridgeIngredients.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {fridgeIngredients.map((ingredient) => (
+                    <button
+                      key={ingredient}
+                      type="button"
+                      onClick={() => removeIngredient(ingredient)}
+                      className="rounded-full bg-orange-100 px-3 py-2 text-sm font-bold text-orange-700 transition hover:bg-orange-200"
+                    >
+                      {ingredient} ×
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-[2rem] bg-green-50 p-6 shadow-sm ring-1 ring-green-100">
+              <div className="flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-xl shadow-sm">
+                  ♻️
+                </span>
+
+                <div>
+                  <p className="font-black text-green-800">Mode anti-gaspi</p>
+
+                  <p className="text-sm text-green-700">
+                    Mets en priorité un ingrédient à finir.
+                  </p>
+                </div>
+              </div>
+
+              <input
+                value={priorityIngredient}
+                onChange={(event) => {
+                  setPriorityIngredient(event.target.value)
+                  clearMessages()
+                }}
+                placeholder="Exemple : courgettes"
+                className="mt-5 w-full rounded-[1.4rem] border border-green-100 bg-white px-5 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-green-300 focus:ring-4 focus:ring-green-100"
+              />
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {ANTI_WASTE_INGREDIENTS.map((ingredient) => (
                   <button
                     key={ingredient}
                     type="button"
-                    onClick={() => removeIngredient(ingredient)}
-                    className="rounded-full bg-orange-100 px-3 py-2 text-sm font-bold text-orange-700 transition hover:bg-orange-200"
+                    onClick={() => {
+                      setPriorityIngredient(ingredient)
+                      clearMessages()
+                    }}
+                    className="rounded-full bg-white px-4 py-2 text-sm font-bold text-green-800 shadow-sm ring-1 ring-green-100 transition hover:bg-green-100"
                   >
-                    {ingredient} ×
+                    {ingredient}
                   </button>
                 ))}
               </div>
-            )}
-          </div>
-        </div>
-      </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-          <p className="font-bold text-orange-600">Ingrédients rapides</p>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {QUICK_INGREDIENTS.map((ingredient) => (
-              <button
-                key={ingredient}
-                type="button"
-                onClick={() => addQuickIngredient(ingredient)}
-                className="rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-stone-700 transition hover:bg-orange-100 hover:text-orange-700"
-              >
-                + {ingredient}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-[2rem] bg-green-50 p-6 shadow-sm ring-1 ring-green-100">
-          <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm">
-              ♻️
-            </span>
-
-            <div>
-              <p className="font-black text-green-800">Mode anti-gaspi</p>
-
-              <p className="text-sm text-green-700">
-                Mets en priorité un ingrédient à finir.
-              </p>
+              {priorityIngredient && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPriorityIngredient('')
+                    clearMessages()
+                  }}
+                  className="mt-4 text-sm font-black text-green-800 underline"
+                >
+                  Retirer l’ingrédient anti-gaspi
+                </button>
+              )}
             </div>
           </div>
-
-          <input
-            value={priorityIngredient}
-            onChange={(event) => {
-              setPriorityIngredient(event.target.value)
-              setErrorMessage('')
-              setSuccessMessage('')
-            }}
-            placeholder="Exemple : courgettes"
-            className="mt-5 w-full rounded-[1.4rem] border border-green-100 bg-white px-5 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-green-300 focus:ring-4 focus:ring-green-100"
-          />
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {ANTI_WASTE_INGREDIENTS.map((ingredient) => (
-              <button
-                key={ingredient}
-                type="button"
-                onClick={() => {
-                  setPriorityIngredient(ingredient)
-                  setErrorMessage('')
-                  setSuccessMessage('')
-                }}
-                className="rounded-full bg-white px-4 py-2 text-sm font-bold text-green-800 shadow-sm ring-1 ring-green-100 transition hover:bg-green-100"
-              >
-                {ingredient}
-              </button>
-            ))}
-          </div>
-
-          {priorityIngredient && (
-            <button
-              type="button"
-              onClick={() => setPriorityIngredient('')}
-              className="mt-4 text-sm font-black text-green-800 underline"
-            >
-              Retirer l’ingrédient anti-gaspi
-            </button>
-          )}
         </div>
       </div>
 
@@ -884,83 +790,53 @@ export default function FridgePage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-10">
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-              <p className="text-4xl font-black text-green-700">
-                {readyRecipes.length}
+        <section className="rounded-[2.5rem] bg-[#fffaf3]/95 p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                Résultats
               </p>
 
-              <p className="mt-1 font-bold text-stone-700">
-                faisable maintenant
-              </p>
-            </div>
+              <h2 className="mt-2 text-3xl font-black text-stone-950 md:text-4xl">
+                Recettes proposées
+              </h2>
 
-            <div className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-              <p className="text-4xl font-black text-orange-700">
-                {almostReadyRecipes.length}
-              </p>
-
-              <p className="mt-1 font-bold text-stone-700">
-                presque faisable
+              <p className="mt-2 max-w-3xl leading-7 text-stone-600">
+                Les recettes sont triées automatiquement : d’abord celles qui
+                utilisent ton ingrédient anti-gaspi, puis celles avec le moins
+                d’ingrédients manquants.
               </p>
             </div>
 
-            <div className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-              <p className="text-4xl font-black text-stone-700">
-                {inspiredRecipes.length}
-              </p>
+            <div className="flex flex-wrap gap-3">
+              <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm ring-1 ring-orange-100">
+                {analyzedRecipes.length} recette
+                {analyzedRecipes.length > 1 ? 's' : ''}
+              </span>
 
-              <p className="mt-1 font-bold text-stone-700">idées proches</p>
-            </div>
+              <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-green-800 shadow-sm ring-1 ring-green-100">
+                meilleur score : {bestScore} %
+              </span>
 
-            <div className="rounded-[1.75rem] bg-green-50 p-6 shadow-sm ring-1 ring-green-100">
-              <p className="text-4xl font-black text-green-800">
-                {antiWasteRecipes.length}
-              </p>
-
-              <p className="mt-1 font-bold text-green-800">anti-gaspi</p>
+              {priorityIngredient && (
+                <span className="rounded-full bg-green-50 px-4 py-2 text-sm font-black text-green-800 shadow-sm ring-1 ring-green-100">
+                  {antiWasteCount} anti-gaspi
+                </span>
+              )}
             </div>
           </div>
 
-          {priorityIngredient && (
-            <MatchSection
-              title="À cuisiner en priorité"
-              description={`Ces recettes utilisent “${priorityIngredient}”, l’ingrédient que tu veux finir.`}
-              emptyMessage="Aucune recette ne semble utiliser cet ingrédient."
-              matches={antiWasteRecipes}
-              addingRecipeId={addingRecipeId}
-              onAddMissingIngredients={handleAddMissingIngredients}
-            />
-          )}
-
-          <MatchSection
-            title="Je peux cuisiner maintenant"
-            description="Ces recettes utilisent uniquement les ingrédients que tu as indiqués."
-            emptyMessage="Aucune recette complète pour le moment."
-            matches={readyRecipes}
-            addingRecipeId={addingRecipeId}
-            onAddMissingIngredients={handleAddMissingIngredients}
-          />
-
-          <MatchSection
-            title="Il me manque 1 ou 2 ingrédients"
-            description="Ces recettes sont presque prêtes : il manque seulement quelques éléments."
-            emptyMessage="Aucune recette presque complète pour le moment."
-            matches={almostReadyRecipes}
-            addingRecipeId={addingRecipeId}
-            onAddMissingIngredients={handleAddMissingIngredients}
-          />
-
-          <MatchSection
-            title="Idées proches"
-            description="Ces recettes peuvent t’inspirer, même s’il manque plusieurs ingrédients."
-            emptyMessage="Aucune idée proche trouvée."
-            matches={inspiredRecipes}
-            addingRecipeId={addingRecipeId}
-            onAddMissingIngredients={handleAddMissingIngredients}
-          />
-        </div>
+          <div className="grid gap-6 xl:grid-cols-2">
+            {analyzedRecipes.map((match) => (
+              <FridgeResultCard
+                key={match.recipe.id}
+                match={match}
+                adding={addingRecipeId === match.recipe.id}
+                onAddMissingIngredients={handleAddMissingIngredients}
+              />
+            ))}
+          </div>
+        </section>
       )}
     </section>
   )
