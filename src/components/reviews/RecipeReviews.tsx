@@ -4,12 +4,15 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import { getProfile, type UserProfile } from '../../services/profiles'
 import {
+  addReviewReply,
   deleteRecipeReview,
+  deleteReviewReply,
   getAverageRating,
-  getMyReviewForRecipe,
   getRecipeReviews,
   saveRecipeReview,
+  toggleReviewLike,
   type RecipeReview,
+  type RecipeReviewReply,
 } from '../../services/reviews'
 
 type RecipeReviewsProps = {
@@ -31,20 +34,58 @@ function formatComment(comment: string) {
     .filter(Boolean)
 }
 
+async function loadProfilesForReviews(reviews: RecipeReview[]) {
+  const uniqueUserIds = Array.from(
+    new Set(
+      reviews.flatMap((review) => [
+        review.userId,
+        ...review.replies.map((reply) => reply.userId),
+      ]),
+    ),
+  )
+
+  const profilesByUserId: Record<string, UserProfile | null> = {}
+
+  await Promise.all(
+    uniqueUserIds.map(async (reviewUserId) => {
+      try {
+        profilesByUserId[reviewUserId] = await getProfile(reviewUserId)
+      } catch (error) {
+        console.error(error)
+        profilesByUserId[reviewUserId] = null
+      }
+    }),
+  )
+
+  return profilesByUserId
+}
+
 export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
   const { user } = useAuth()
   const userId = user?.id
 
   const [reviews, setReviews] = useState<RecipeReview[]>([])
   const [myReview, setMyReview] = useState<RecipeReview | null>(null)
+
   const [reviewProfiles, setReviewProfiles] = useState<
     Record<string, UserProfile | null>
   >({})
+
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
+
+  const [replyingReviewId, setReplyingReviewId] = useState<number | null>(null)
+  const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({})
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [likingReviewId, setLikingReviewId] = useState<number | null>(null)
+  const [replySavingReviewId, setReplySavingReviewId] = useState<number | null>(
+    null,
+  )
+  const [deletingReplyId, setDeletingReplyId] = useState<number | null>(null)
+
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -62,29 +103,11 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
         setSuccessMessage('')
 
         const loadedReviews = await getRecipeReviews(recipeId)
+        const profilesByUserId = await loadProfilesForReviews(loadedReviews)
 
-        const uniqueUserIds = Array.from(
-          new Set(loadedReviews.map((review) => review.userId)),
-        )
-
-        const profilesByUserId: Record<string, UserProfile | null> = {}
-
-        await Promise.all(
-          uniqueUserIds.map(async (reviewUserId) => {
-            try {
-              profilesByUserId[reviewUserId] = await getProfile(reviewUserId)
-            } catch (error) {
-              console.error(error)
-              profilesByUserId[reviewUserId] = null
-            }
-          }),
-        )
-
-        let loadedMyReview: RecipeReview | null = null
-
-        if (userId) {
-          loadedMyReview = await getMyReviewForRecipe(recipeId)
-        }
+        const loadedMyReview = userId
+          ? loadedReviews.find((review) => review.userId === userId) ?? null
+          : null
 
         if (!ignore) {
           setReviews(loadedReviews)
@@ -119,6 +142,34 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
     }
   }, [recipeId, userId])
 
+  function clearMessages() {
+    setErrorMessage('')
+    setSuccessMessage('')
+  }
+
+  function updateReplyDraft(reviewId: number, value: string) {
+    setReplyDrafts((currentDrafts) => ({
+      ...currentDrafts,
+      [reviewId]: value,
+    }))
+  }
+
+  function getAuthorInfo(authorUserId: string, isMine: boolean) {
+    const profile = reviewProfiles[authorUserId]
+
+    const authorName = isMine
+      ? profile?.username
+        ? `${profile.username} · toi`
+        : 'Toi'
+      : profile?.username || 'Utilisateur'
+
+    return {
+      authorName,
+      authorAvatarUrl: profile?.avatarUrl ?? '',
+      authorLetter: authorName.charAt(0).toUpperCase() || 'U',
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -126,8 +177,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
     try {
       setSaving(true)
-      setErrorMessage('')
-      setSuccessMessage('')
+      clearMessages()
 
       const cleanComment = comment.trim()
 
@@ -136,6 +186,15 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
         rating,
         comment: cleanComment,
       })
+
+      const existingReview = reviews.find((review) => review.id === savedReview.id)
+
+      const enrichedReview: RecipeReview = {
+        ...savedReview,
+        likesCount: existingReview?.likesCount ?? savedReview.likesCount ?? 0,
+        likedByMe: existingReview?.likedByMe ?? savedReview.likedByMe ?? false,
+        replies: existingReview?.replies ?? savedReview.replies ?? [],
+      }
 
       const currentUserProfile = await getProfile(userId).catch((error) => {
         console.error(error)
@@ -147,21 +206,21 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
         [userId]: currentUserProfile,
       }))
 
-      setMyReview(savedReview)
-      setComment(savedReview.comment)
+      setMyReview(enrichedReview)
+      setComment(enrichedReview.comment)
 
       setReviews((currentReviews) => {
         const reviewAlreadyExists = currentReviews.some(
-          (review) => review.id === savedReview.id,
+          (review) => review.id === enrichedReview.id,
         )
 
         if (reviewAlreadyExists) {
           return currentReviews.map((review) =>
-            review.id === savedReview.id ? savedReview : review,
+            review.id === enrichedReview.id ? enrichedReview : review,
           )
         }
 
-        return [savedReview, ...currentReviews]
+        return [enrichedReview, ...currentReviews]
       })
 
       setSuccessMessage(
@@ -186,14 +245,14 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
     try {
       setDeleting(true)
-      setErrorMessage('')
-      setSuccessMessage('')
+      clearMessages()
 
       await deleteRecipeReview(myReview.id)
 
       setReviews((currentReviews) =>
         currentReviews.filter((review) => review.id !== myReview.id),
       )
+
       setMyReview(null)
       setRating(5)
       setComment('')
@@ -203,6 +262,164 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       setErrorMessage('Impossible de supprimer ton avis.')
     } finally {
       setDeleting(false)
+    }
+  }
+
+  async function handleToggleLike(review: RecipeReview) {
+    if (!userId) {
+      setErrorMessage('Connecte-toi pour aimer un commentaire.')
+      setSuccessMessage('')
+      return
+    }
+
+    try {
+      setLikingReviewId(review.id)
+      clearMessages()
+
+      const nextLikedValue = !review.likedByMe
+
+      await toggleReviewLike(review.id, review.likedByMe)
+
+      setReviews((currentReviews) =>
+        currentReviews.map((currentReview) => {
+          if (currentReview.id !== review.id) {
+            return currentReview
+          }
+
+          return {
+            ...currentReview,
+            likedByMe: nextLikedValue,
+            likesCount: Math.max(
+              0,
+              currentReview.likesCount + (nextLikedValue ? 1 : -1),
+            ),
+          }
+        }),
+      )
+
+      setMyReview((currentReview) => {
+        if (!currentReview || currentReview.id !== review.id) {
+          return currentReview
+        }
+
+        return {
+          ...currentReview,
+          likedByMe: nextLikedValue,
+          likesCount: Math.max(
+            0,
+            currentReview.likesCount + (nextLikedValue ? 1 : -1),
+          ),
+        }
+      })
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible de modifier le like.')
+    } finally {
+      setLikingReviewId(null)
+    }
+  }
+
+  async function handleReplySubmit(
+    event: FormEvent<HTMLFormElement>,
+    reviewId: number,
+  ) {
+    event.preventDefault()
+
+    if (!userId) {
+      setErrorMessage('Connecte-toi pour répondre à un commentaire.')
+      setSuccessMessage('')
+      return
+    }
+
+    const content = replyDrafts[reviewId]?.trim() ?? ''
+
+    if (!content) {
+      setErrorMessage('La réponse ne peut pas être vide.')
+      setSuccessMessage('')
+      return
+    }
+
+    try {
+      setReplySavingReviewId(reviewId)
+      clearMessages()
+
+      const createdReply = await addReviewReply({
+        reviewId,
+        content,
+      })
+
+      const currentUserProfile = await getProfile(userId).catch((error) => {
+        console.error(error)
+        return null
+      })
+
+      setReviewProfiles((currentProfiles) => ({
+        ...currentProfiles,
+        [userId]: currentUserProfile,
+      }))
+
+      setReviews((currentReviews) =>
+        currentReviews.map((review) => {
+          if (review.id !== reviewId) {
+            return review
+          }
+
+          return {
+            ...review,
+            replies: [...review.replies, createdReply],
+          }
+        }),
+      )
+
+      setReplyDrafts((currentDrafts) => ({
+        ...currentDrafts,
+        [reviewId]: '',
+      }))
+
+      setReplyingReviewId(null)
+      setSuccessMessage('Ta réponse a été ajoutée.')
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible d’ajouter ta réponse.')
+    } finally {
+      setReplySavingReviewId(null)
+    }
+  }
+
+  async function handleDeleteReply(reply: RecipeReviewReply) {
+    const confirmDelete = window.confirm(
+      'Voulez-vous vraiment supprimer cette réponse ?',
+    )
+
+    if (!confirmDelete) return
+
+    try {
+      setDeletingReplyId(reply.id)
+      clearMessages()
+
+      await deleteReviewReply(reply.id)
+
+      setReviews((currentReviews) =>
+        currentReviews.map((review) => {
+          if (review.id !== reply.reviewId) {
+            return review
+          }
+
+          return {
+            ...review,
+            replies: review.replies.filter(
+              (currentReply) => currentReply.id !== reply.id,
+            ),
+          }
+        }),
+      )
+
+      setSuccessMessage('Ta réponse a été supprimée.')
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible de supprimer cette réponse.')
+    } finally {
+      setDeletingReplyId(null)
     }
   }
 
@@ -341,7 +558,8 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
           </p>
 
           <p className="mt-1 text-sm text-stone-600">
-            Tu pourras noter la recette et laisser un commentaire.
+            Tu pourras noter la recette, aimer les commentaires et répondre aux
+            autres utilisateurs.
           </p>
 
           <Link
@@ -367,17 +585,14 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
         <div className="space-y-4">
           {reviews.map((review) => {
             const isMine = userId === review.userId
-            const profile = reviewProfiles[review.userId]
+            const { authorName, authorAvatarUrl, authorLetter } = getAuthorInfo(
+              review.userId,
+              isMine,
+            )
 
-            const authorName = isMine
-              ? profile?.username
-                ? `${profile.username} · toi`
-                : 'Toi'
-              : profile?.username || 'Utilisateur'
-
-            const authorAvatarUrl = profile?.avatarUrl ?? ''
-            const authorLetter = authorName.charAt(0).toUpperCase() || 'U'
             const formattedComment = formatComment(review.comment)
+            const replyDraft = replyDrafts[review.id] ?? ''
+            const replyCount = review.replies.length
 
             return (
               <article
@@ -424,6 +639,154 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                   <p className="text-sm italic text-stone-400 md:text-[15px]">
                     Aucun commentaire écrit.
                   </p>
+                )}
+
+                <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-orange-100 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => void handleToggleLike(review)}
+                    disabled={likingReviewId === review.id}
+                    className={`rounded-full px-4 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                      review.likedByMe
+                        ? 'bg-orange-500 text-white hover:bg-orange-600'
+                        : 'bg-white text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
+                    }`}
+                  >
+                    {review.likedByMe ? '♥ Aimé' : '♡ J’aime'}
+                    {review.likesCount > 0 ? ` · ${review.likesCount}` : ''}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!userId) {
+                        setErrorMessage(
+                          'Connecte-toi pour répondre à un commentaire.',
+                        )
+                        setSuccessMessage('')
+                        return
+                      }
+
+                      setReplyingReviewId((currentReviewId) =>
+                        currentReviewId === review.id ? null : review.id,
+                      )
+                      clearMessages()
+                    }}
+                    className="rounded-full bg-white px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 transition hover:bg-orange-50 hover:text-orange-700"
+                  >
+                    Répondre
+                    {replyCount > 0 ? ` · ${replyCount}` : ''}
+                  </button>
+                </div>
+
+                {replyingReviewId === review.id && (
+                  <form
+                    onSubmit={(event) => handleReplySubmit(event, review.id)}
+                    className="mt-4 rounded-[1.5rem] bg-white p-4 ring-1 ring-orange-100"
+                  >
+                    <label className="mb-2 block text-sm font-black text-stone-800">
+                      Ta réponse
+                    </label>
+
+                    <textarea
+                      value={replyDraft}
+                      onChange={(event) =>
+                        updateReplyDraft(review.id, event.target.value)
+                      }
+                      rows={3}
+                      placeholder={`Répondre à ${authorName.replace(
+                        ' · toi',
+                        '',
+                      )}...`}
+                      className="w-full rounded-[1.2rem] border border-orange-100 bg-[#fffdf9] px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                    />
+
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <button
+                        type="submit"
+                        disabled={replySavingReviewId === review.id}
+                        className="rounded-full bg-orange-500 px-5 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {replySavingReviewId === review.id
+                          ? 'Publication...'
+                          : 'Publier la réponse'}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setReplyingReviewId(null)}
+                        className="rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-black text-orange-700 transition hover:bg-orange-50"
+                      >
+                        Annuler
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {review.replies.length > 0 && (
+                  <div className="mt-5 space-y-3 border-l-2 border-orange-200 pl-4">
+                    {review.replies.map((reply) => {
+                      const replyIsMine = userId === reply.userId
+                      const replyAuthor = getAuthorInfo(
+                        reply.userId,
+                        replyIsMine,
+                      )
+
+                      const formattedReply = formatComment(reply.content)
+
+                      return (
+                        <div
+                          key={reply.id}
+                          className="rounded-[1.5rem] bg-white p-4 ring-1 ring-orange-100"
+                        >
+                          <div className="mb-3 flex items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
+                              {replyAuthor.authorAvatarUrl ? (
+                                <img
+                                  src={replyAuthor.authorAvatarUrl}
+                                  alt={replyAuthor.authorName}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                replyAuthor.authorLetter
+                              )}
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-black text-stone-950">
+                                {replyAuthor.authorName}
+                              </p>
+
+                              <p className="text-xs text-stone-500">
+                                {new Date(reply.updatedAt).toLocaleDateString(
+                                  'fr-FR',
+                                )}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 break-words text-sm leading-7 text-stone-700">
+                            {formattedReply.map((paragraph, index) => (
+                              <p key={`${reply.id}-${index}`}>{paragraph}</p>
+                            ))}
+                          </div>
+
+                          {replyIsMine && (
+                            <button
+                              type="button"
+                              onClick={() => void handleDeleteReply(reply)}
+                              disabled={deletingReplyId === reply.id}
+                              className="mt-3 text-xs font-black text-red-600 underline transition hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {deletingReplyId === reply.id
+                                ? 'Suppression...'
+                                : 'Supprimer ma réponse'}
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
                 )}
               </article>
             )
