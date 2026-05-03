@@ -1,10 +1,13 @@
 import { supabase } from '../lib/supabase'
 
+export type UserRole = 'user' | 'admin'
+
 export type UserProfile = {
   userId: string
   username: string
   bio: string
   avatarUrl: string
+  role: UserRole
 }
 
 type ProfileRow = {
@@ -12,6 +15,15 @@ type ProfileRow = {
   username: string
   bio: string
   avatar_url: string | null
+  role: UserRole | null
+}
+
+type EditableUserProfile = {
+  userId: string
+  username: string
+  bio: string
+  avatarUrl: string
+  role?: UserRole
 }
 
 function mapProfile(row: ProfileRow): UserProfile {
@@ -20,13 +32,14 @@ function mapProfile(row: ProfileRow): UserProfile {
     username: row.username,
     bio: row.bio,
     avatarUrl: row.avatar_url ?? '',
+    role: row.role === 'admin' ? 'admin' : 'user',
   }
 }
 
 export async function getProfile(userId: string): Promise<UserProfile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('user_id, username, bio, avatar_url')
+    .select('user_id, username, bio, avatar_url, role')
     .eq('user_id', userId)
     .maybeSingle()
 
@@ -36,7 +49,9 @@ export async function getProfile(userId: string): Promise<UserProfile | null> {
   return mapProfile(data as ProfileRow)
 }
 
-export async function saveProfile(values: UserProfile): Promise<UserProfile> {
+export async function saveProfile(
+  values: EditableUserProfile,
+): Promise<UserProfile> {
   const { data, error } = await supabase
     .from('profiles')
     .upsert(
@@ -51,7 +66,7 @@ export async function saveProfile(values: UserProfile): Promise<UserProfile> {
         onConflict: 'user_id',
       },
     )
-    .select('user_id, username, bio, avatar_url')
+    .select('user_id, username, bio, avatar_url, role')
     .single()
 
   if (error) throw error
