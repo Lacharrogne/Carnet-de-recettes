@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getRecipes } from '../services/recipes'
 import type { Recipe } from '../types/recipe'
 
 export default function HomePage() {
+  const navigate = useNavigate()
+
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -53,9 +55,14 @@ export default function HomePage() {
     })
   }, [recipes])
 
-  const usedCategoriesCount = useMemo(() => {
-    return categoriesWithCount.filter((category) => category.count > 0).length
-  }, [categoriesWithCount])
+  function goToRandomRecipe() {
+    if (recipes.length === 0) return
+
+    const randomIndex = Math.floor(Math.random() * recipes.length)
+    const randomRecipe = recipes[randomIndex]
+
+    navigate(`/recipes/${randomRecipe.id}`)
+  }
 
   return (
     <section className="space-y-14">
@@ -118,28 +125,35 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-[1.5rem] bg-[#fff5ec] p-5">
-                  <p className="text-4xl font-black text-stone-950">
-                    {recipes.length}
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-stone-600">
-                    recette{recipes.length > 1 ? 's' : ''} enregistrée
-                    {recipes.length > 1 ? 's' : ''}
-                  </p>
-                </div>
+              <div className="grid gap-4">
+                <button
+                  type="button"
+                  onClick={goToRandomRecipe}
+                  disabled={loading || recipes.length === 0}
+                  className="group rounded-[1.8rem] bg-orange-500 p-6 text-left text-white shadow-sm transition hover:-translate-y-1 hover:bg-orange-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <div className="flex items-center justify-between gap-5">
+                    <div>
+                      <p className="text-sm font-black uppercase tracking-wide text-orange-100">
+                        Bouton magique
+                      </p>
 
-                <div className="rounded-[1.5rem] bg-[#fff5ec] p-5">
-                  <p className="text-4xl font-black text-stone-950">
-                    {usedCategoriesCount}
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-stone-600">
-                    catégorie{usedCategoriesCount > 1 ? 's' : ''} utilisée
-                    {usedCategoriesCount > 1 ? 's' : ''}
-                  </p>
-                </div>
+                      <h3 className="mt-2 text-2xl font-black">
+                        Me proposer une recette
+                      </h3>
 
-                <div className="col-span-2 rounded-[1.5rem] bg-[#f7eee6] p-5">
+                      <p className="mt-2 text-sm font-semibold leading-6 text-orange-50">
+                        Clique ici et le carnet choisit une recette au hasard.
+                      </p>
+                    </div>
+
+                    <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl bg-white/20 text-4xl transition group-hover:rotate-6 group-hover:scale-110">
+                      🎲
+                    </span>
+                  </div>
+                </button>
+
+                <div className="rounded-[1.5rem] bg-[#f7eee6] p-5">
                   <p className="text-sm font-bold text-stone-500">
                     Dernière recette ajoutée
                   </p>
