@@ -1136,63 +1136,79 @@ export default function RecipeDetailsPage() {
                 </div>
               )}
 
-              <div className="mt-8 flex flex-wrap gap-3 print:hidden">
-                <button
-                  type="button"
-                  onClick={openGuidedCooking}
-                  disabled={recipe.steps.length === 0}
-                  className="rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  ▶ Lancer la recette
-                </button>
+              <div className="mt-8 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 print:hidden">
+  <div className="mb-4 flex items-center justify-between gap-3">
+    <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+      Actions rapides
+    </p>
 
-                <button
-                  type="button"
-                  onClick={handleToggleFavorite}
-                  disabled={favoriteLoading}
-                  className="rounded-full border border-orange-200 bg-white px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isFavorite
-                    ? '♥ Retirer des favoris'
-                    : '♡ Ajouter aux favoris'}
-                </button>
+    {isOwner && (
+      <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
+        Ta recette
+      </span>
+    )}
+  </div>
 
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:bg-orange-50"
-                >
-                  Copier le lien
-                </button>
+  <div className="grid gap-3 sm:grid-cols-2">
+    <button
+      type="button"
+      onClick={openGuidedCooking}
+      disabled={recipe.steps.length === 0}
+      className="flex items-center justify-center gap-2 rounded-full bg-orange-500 px-5 py-4 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      <span>▶</span>
+      <span>Lancer la recette</span>
+    </button>
 
-                <button
-                  type="button"
-                  onClick={handlePrint}
-                  className="rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:bg-orange-50"
-                >
-                  Imprimer
-                </button>
+    <button
+      type="button"
+      onClick={handleToggleFavorite}
+      disabled={favoriteLoading}
+      className="flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-[#fffaf3] px-5 py-4 font-black text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      <span>{isFavorite ? '♥' : '♡'}</span>
+      <span>
+        {isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+      </span>
+    </button>
 
-                {isOwner && (
-                  <>
-                    <Link
-                      to={`/recipes/${recipe.id}/edit`}
-                      className="rounded-full bg-stone-900 px-5 py-3 font-bold text-white transition hover:bg-stone-700"
-                    >
-                      Modifier
-                    </Link>
+    <button
+      type="button"
+      onClick={handleCopyLink}
+      className="flex items-center justify-center gap-2 rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
+    >
+      🔗 Copier le lien
+    </button>
 
-                    <button
-                      type="button"
-                      onClick={handleDelete}
-                      disabled={isDeleting}
-                      className="rounded-full bg-red-600 px-5 py-3 font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isDeleting ? 'Suppression...' : 'Supprimer'}
-                    </button>
-                  </>
-                )}
-              </div>
+    <button
+      type="button"
+      onClick={handlePrint}
+      className="flex items-center justify-center gap-2 rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
+    >
+      🖨️ Imprimer
+    </button>
+
+    {isOwner && (
+      <>
+        <Link
+          to={`/recipes/${recipe.id}/edit`}
+          className="flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-5 py-3 text-center font-bold text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-100"
+        >
+          ✏️ Modifier
+        </Link>
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="flex items-center justify-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-3 font-bold text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          🗑️ {isDeleting ? 'Suppression...' : 'Supprimer'}
+        </button>
+      </>
+    )}
+  </div>
+</div>
 
               <div className="mt-8 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 print:hidden">
                 <div className="flex flex-wrap items-center justify-between gap-4">
