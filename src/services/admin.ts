@@ -151,3 +151,62 @@ export async function getRecentAdminReviews(): Promise<AdminReviewPreview[]> {
 
   return (data ?? []).map((row) => mapReview(row as ReviewRow))
 }
+
+export async function deleteAdminReview(reviewId: number) {
+  const { error } = await supabase
+    .from('recipe_reviews')
+    .delete()
+    .eq('id', reviewId)
+
+  if (error) throw error
+}
+
+export async function deleteAdminRecipe(recipeId: number) {
+  const { error: reviewsError } = await supabase
+    .from('recipe_reviews')
+    .delete()
+    .eq('recipe_id', recipeId)
+
+  if (reviewsError) throw reviewsError
+
+  const { error: shoppingListError } = await supabase
+    .from('shopping_list_items')
+    .delete()
+    .eq('recipe_id', recipeId)
+
+  if (shoppingListError) throw shoppingListError
+
+  const { error } = await supabase.from('recipes').delete().eq('id', recipeId)
+
+  if (error) throw error
+}
+
+export async function deleteAdminProfile(userId: string) {
+  const { error: reviewsError } = await supabase
+    .from('recipe_reviews')
+    .delete()
+    .eq('user_id', userId)
+
+  if (reviewsError) throw reviewsError
+
+  const { error: shoppingListError } = await supabase
+    .from('shopping_list_items')
+    .delete()
+    .eq('user_id', userId)
+
+  if (shoppingListError) throw shoppingListError
+
+  const { error: recipesError } = await supabase
+    .from('recipes')
+    .delete()
+    .eq('user_id', userId)
+
+  if (recipesError) throw recipesError
+
+  const { error } = await supabase
+    .from('profiles')
+    .delete()
+    .eq('user_id', userId)
+
+  if (error) throw error
+}
