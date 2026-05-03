@@ -51,6 +51,12 @@ const personalLinks = [
     to: '/planning',
     emoji: '📅',
   },
+  {
+    label: 'Boîte à idées',
+    description: 'Proposer une amélioration',
+    to: '/ideas',
+    emoji: '💡',
+  },
 ]
 
 function navPillClass(isActive: boolean) {
@@ -292,6 +298,14 @@ useEffect(() => {
           >
             Mode frigo
           </NavLink>
+
+          <NavLink
+            to="/ideas"
+            onClick={closeDropdowns}
+            className={navLinkClass}
+          >
+            Idées
+          </NavLink>
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -460,6 +474,10 @@ useEffect(() => {
 
             <NavLink to="/frigo" onClick={closeMenu} className={navLinkClass}>
               Mode frigo
+            </NavLink>
+
+            <NavLink to="/ideas" onClick={closeMenu} className={navLinkClass}>
+              Idées
             </NavLink>
 
             {user && (

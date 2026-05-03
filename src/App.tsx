@@ -19,6 +19,7 @@ import FridgePage from './pages/FridgePage'
 import MealPlannerPage from './pages/MealPlannerPage'
 import SocialPage from './pages/SocialPage'
 import AdminPage from './pages/AdminPage'
+import IdeasPage from './pages/IdeasPage'
 
 function getPageBackgroundClass(pathname: string) {
   if (pathname === '/') {
@@ -85,6 +86,7 @@ export default function App() {
           <Route path="/shopping-list" element={<ShoppingListPage />} />
           <Route path="/users/:userId" element={<PublicProfilePage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/ideas" element={<IdeasPage />} />
 
           <Route
             path="/profile"
