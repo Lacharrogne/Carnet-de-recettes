@@ -19,6 +19,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [username, setUsername] = useState('')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState('')
@@ -30,6 +31,7 @@ export default function AuthPage() {
     const file = event.target.files?.[0] ?? null
 
     setAvatarFile(file)
+    setErrorMessage('')
 
     if (!file) {
       setAvatarPreview('')
@@ -63,8 +65,9 @@ export default function AuthPage() {
     if (!avatarFile) return ''
 
     const fileExtension = avatarFile.name.split('.').pop() || 'jpg'
+    const fileNameWithoutExtension = avatarFile.name.replace(/\.[^/.]+$/, '')
     const fileName = `${Date.now()}-${cleanFileName(
-      avatarFile.name,
+      fileNameWithoutExtension,
     )}.${fileExtension}`
 
     const filePath = `${userId}/${fileName}`
@@ -114,13 +117,15 @@ export default function AuthPage() {
         if (data.user && data.session) {
           const avatarUrl = await uploadAvatar(data.user.id)
 
-          await supabase.from('profiles').upsert({
+          const { error: profileError } = await supabase.from('profiles').upsert({
             user_id: data.user.id,
             username: cleanUsername,
             bio: '',
             avatar_url: avatarUrl,
             updated_at: new Date().toISOString(),
           })
+
+          if (profileError) throw profileError
 
           navigate('/')
           return
@@ -232,13 +237,28 @@ export default function AuthPage() {
             Mot de passe
           </label>
 
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
-            required
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3 pr-14 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+              required
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword((current) => !current)}
+              className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-lg transition hover:bg-orange-50"
+              aria-label={
+                showPassword
+                  ? 'Cacher le mot de passe'
+                  : 'Afficher le mot de passe'
+              }
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </button>
+          </div>
         </div>
 
         {message && (
@@ -275,6 +295,7 @@ export default function AuthPage() {
           setUsername('')
           setAvatarFile(null)
           setAvatarPreview('')
+          setShowPassword(false)
         }}
         className="mt-5 text-sm font-bold text-orange-600 hover:text-orange-700"
       >
