@@ -18,6 +18,7 @@ import ShoppingListPage from './pages/ShoppingListPage'
 import FridgePage from './pages/FridgePage'
 import MealPlannerPage from './pages/MealPlannerPage'
 import SocialPage from './pages/SocialPage'
+import { Analytics } from '@vercel/analytics/react'
 
 function getPageBackgroundClass(pathname: string) {
   if (pathname === '/') {
@@ -83,6 +84,7 @@ export default function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/shopping-list" element={<ShoppingListPage />} />
           <Route path="/users/:userId" element={<PublicProfilePage />} />
+          <Analytics />
 
           <Route
             path="/profile"

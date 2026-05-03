@@ -1,30 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getRecipes } from '../services/recipes'
 import type { Recipe } from '../types/recipe'
 
-function pickRandomRecipe(recipes: Recipe[], currentRecipeId?: Recipe['id']) {
-  if (recipes.length === 0) {
-    return null
-  }
-
-  const availableRecipes =
-    recipes.length > 1 && currentRecipeId
-      ? recipes.filter((recipe) => recipe.id !== currentRecipeId)
-      : recipes
-
-  const randomIndex = Math.floor(Math.random() * availableRecipes.length)
-
-  return availableRecipes[randomIndex] ?? null
-}
-
 export default function HomePage() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [randomRecipe, setRandomRecipe] = useState<Recipe | null>(null)
-  const [randomModalOpen, setRandomModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+
+  const [randomRecipe, setRandomRecipe] = useState<Recipe | null>(null)
+  const [randomModalOpen, setRandomModalOpen] = useState(false)
+  const [randomizing, setRandomizing] = useState(false)
 
   useEffect(() => {
     let ignore = false
@@ -70,130 +58,28 @@ export default function HomePage() {
     })
   }, [recipes])
 
-  function handleOpenRandomRecipe() {
-    const selectedRecipe = pickRandomRecipe(recipes, randomRecipe?.id)
+  function launchRandomRecipe() {
+    if (recipes.length === 0 || randomizing) return
 
-    setRandomRecipe(selectedRecipe)
     setRandomModalOpen(true)
+    setRandomRecipe(null)
+    setRandomizing(true)
+
+    window.setTimeout(() => {
+      const randomIndex = Math.floor(Math.random() * recipes.length)
+      setRandomRecipe(recipes[randomIndex])
+      setRandomizing(false)
+    }, 900)
   }
 
-  function handlePickAnotherRecipe() {
-    setRandomRecipe((currentRecipe) =>
-      pickRandomRecipe(recipes, currentRecipe?.id),
-    )
-  }
-
-  function handleCloseRandomModal() {
+  function closeRandomModal() {
     setRandomModalOpen(false)
+    setRandomRecipe(null)
+    setRandomizing(false)
   }
 
   return (
     <>
-      {randomModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/50 px-5 backdrop-blur-sm">
-          <div className="relative w-full max-w-md overflow-hidden rounded-[2.25rem] bg-white p-5 shadow-2xl ring-1 ring-orange-100">
-            <button
-              type="button"
-              onClick={handleCloseRandomModal}
-              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-xl font-black text-stone-700 shadow-sm transition hover:bg-orange-50 hover:text-orange-600"
-              aria-label="Fermer"
-            >
-              ×
-            </button>
-
-            {randomRecipe ? (
-              <>
-                <div className="overflow-hidden rounded-[1.75rem] bg-[#fff1e6]">
-                  <div className="flex h-52 items-center justify-center">
-                    {randomRecipe.imageUrl ? (
-                      <img
-                        src={randomRecipe.imageUrl}
-                        alt={randomRecipe.title}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-7xl">
-                        {randomRecipe.image || '🍽️'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="pt-5">
-                  <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-                    Recette choisie par le carnet
-                  </p>
-
-                  <h2 className="mt-2 text-3xl font-black leading-tight text-stone-950">
-                    {randomRecipe.title}
-                  </h2>
-
-                  <p className="mt-3 line-clamp-3 leading-7 text-stone-600">
-                    {randomRecipe.description ||
-                      'Aucune description pour cette recette.'}
-                  </p>
-
-                  <div className="mt-5 flex flex-wrap gap-3 text-sm font-bold text-stone-500">
-                    <span className="rounded-full bg-[#fff5ec] px-4 py-2">
-                      ⏱️ {randomRecipe.prepTime + randomRecipe.cookTime} min
-                    </span>
-
-                    <span className="rounded-full bg-[#fff5ec] px-4 py-2">
-                      🍽️ {randomRecipe.servings} pers.
-                    </span>
-
-                    <span className="rounded-full bg-[#fff5ec] px-4 py-2">
-                      {randomRecipe.category}
-                    </span>
-                  </div>
-
-                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                    <Link
-                      to={`/recipes/${randomRecipe.id}`}
-                      onClick={handleCloseRandomModal}
-                      className="rounded-full bg-orange-500 px-5 py-4 text-center font-black text-white shadow-sm transition hover:bg-orange-600"
-                    >
-                      Voir la recette
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={handlePickAnotherRecipe}
-                      className="rounded-full border border-orange-200 bg-white px-5 py-4 font-black text-orange-700 transition hover:bg-orange-50"
-                    >
-                      🎲 Relancer
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="p-4 text-center">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-orange-100 text-4xl">
-                  🎲
-                </div>
-
-                <h2 className="mt-5 text-2xl font-black text-stone-950">
-                  Aucune recette à proposer
-                </h2>
-
-                <p className="mt-2 leading-7 text-stone-600">
-                  Ajoute une première recette pour pouvoir utiliser le bouton
-                  magique.
-                </p>
-
-                <Link
-                  to="/add-recipe"
-                  onClick={handleCloseRandomModal}
-                  className="mt-6 inline-block rounded-full bg-orange-500 px-6 py-3 font-black text-white transition hover:bg-orange-600"
-                >
-                  Ajouter une recette
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       <section className="space-y-14">
         <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
           <div className="grid gap-10 px-6 py-10 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
@@ -248,7 +134,6 @@ export default function HomePage() {
                     <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
                       Aujourd’hui
                     </p>
-
                     <p className="text-xl font-black text-stone-950">
                       On cuisine quoi ?
                     </p>
@@ -257,26 +142,26 @@ export default function HomePage() {
 
                 <button
                   type="button"
-                  onClick={handleOpenRandomRecipe}
-                  disabled={loading}
-                  className="group w-full rounded-[2rem] bg-orange-500 p-6 text-left text-white shadow-sm transition hover:-translate-y-1 hover:bg-orange-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={launchRandomRecipe}
+                  disabled={loading || recipes.length === 0 || randomizing}
+                  className="group w-full rounded-[2rem] bg-orange-500 p-7 text-left text-white shadow-sm transition hover:-translate-y-1 hover:bg-orange-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <div className="flex items-center justify-between gap-5">
                     <div>
-                      <p className="text-sm font-black uppercase tracking-wide">
+                      <p className="text-sm font-black uppercase tracking-wide text-orange-100">
                         Bouton magique
                       </p>
 
-                      <p className="mt-4 text-2xl font-black leading-tight">
+                      <p className="mt-4 text-3xl font-black leading-tight">
                         Me proposer une recette
                       </p>
 
-                      <p className="mt-4 max-w-xs text-sm font-bold leading-6 text-white/90">
+                      <p className="mt-4 max-w-sm text-base font-bold leading-7 text-orange-50">
                         Clique ici et le carnet choisit une recette au hasard.
                       </p>
                     </div>
 
-                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[1.5rem] bg-white/20 text-4xl transition group-hover:rotate-6 group-hover:scale-105">
+                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[1.5rem] bg-white/20 text-4xl transition group-hover:rotate-12 group-hover:scale-105">
                       🎲
                     </div>
                   </div>
@@ -316,11 +201,9 @@ export default function HomePage() {
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
               <p className="font-bold text-orange-600">Explorer</p>
-
               <h2 className="text-3xl font-black text-stone-950">
                 Les grandes familles de recettes
               </h2>
-
               <p className="mt-2 text-stone-600">
                 Parcours le carnet selon tes envies du moment.
               </p>
@@ -343,7 +226,9 @@ export default function HomePage() {
               {categoriesWithCount.map((category) => (
                 <Link
                   key={category.value}
-                  to={`/recipes?category=${encodeURIComponent(category.value)}`}
+                  to={`/recipes?category=${encodeURIComponent(
+                    category.value,
+                  )}`}
                   className="group rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -378,11 +263,9 @@ export default function HomePage() {
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
               <p className="font-bold text-orange-600">Nouveautés</p>
-
               <h2 className="text-3xl font-black text-stone-950">
                 Les dernières recettes ajoutées
               </h2>
-
               <p className="mt-2 text-stone-600">
                 Les nouvelles idées à tester à la maison.
               </p>
@@ -433,7 +316,9 @@ export default function HomePage() {
                         className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <span className="text-6xl">{recipe.image || '🍽️'}</span>
+                      <span className="text-6xl">
+                        {recipe.image || '🍽️'}
+                      </span>
                     )}
                   </div>
 
@@ -466,6 +351,124 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {randomModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/45 px-5 py-8 backdrop-blur-sm">
+          <div className="relative w-full max-w-lg rounded-[2.5rem] bg-white p-6 shadow-2xl ring-1 ring-orange-100">
+            <button
+              type="button"
+              onClick={closeRandomModal}
+              className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#fff5ec] text-xl font-black text-stone-700 transition hover:bg-orange-100"
+              aria-label="Fermer"
+            >
+              ×
+            </button>
+
+            {randomizing ? (
+              <div className="flex min-h-[360px] flex-col items-center justify-center text-center">
+                <div className="mb-8 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-orange-500 text-6xl shadow-lg">
+                  <span className="animate-spin">🎲</span>
+                </div>
+
+                <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                  Le carnet choisit...
+                </p>
+
+                <h2 className="mt-3 text-3xl font-black text-stone-950">
+                  On mélange les idées
+                </h2>
+
+                <p className="mt-3 max-w-sm text-stone-600">
+                  Une recette arrive dans quelques secondes.
+                </p>
+              </div>
+            ) : randomRecipe ? (
+              <div>
+                <div className="mb-5 flex items-center gap-4 pr-12">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#fff1e6] text-4xl">
+                    {randomRecipe.imageUrl ? (
+                      <img
+                        src={randomRecipe.imageUrl}
+                        alt={randomRecipe.title}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      randomRecipe.image || '🍽️'
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                      Recette surprise
+                    </p>
+
+                    <h2 className="text-2xl font-black text-stone-950">
+                      {randomRecipe.title}
+                    </h2>
+                  </div>
+                </div>
+
+                <span className="inline-block rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700">
+                  {randomRecipe.category}
+                </span>
+
+                <p className="mt-5 leading-7 text-stone-600">
+                  {randomRecipe.description ||
+                    'Aucune description pour cette recette.'}
+                </p>
+
+                <div className="mt-6 grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl bg-[#fff5ec] p-4">
+                    <p className="text-sm font-bold text-stone-500">
+                      Temps total
+                    </p>
+                    <p className="mt-1 text-xl font-black text-stone-950">
+                      {randomRecipe.prepTime + randomRecipe.cookTime} min
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-[#fff5ec] p-4">
+                    <p className="text-sm font-bold text-stone-500">
+                      Portions
+                    </p>
+                    <p className="mt-1 text-xl font-black text-stone-950">
+                      {randomRecipe.servings} pers.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <Link
+                    to={`/recipes/${randomRecipe.id}`}
+                    onClick={closeRandomModal}
+                    className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
+                  >
+                    Voir la recette
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={launchRandomRecipe}
+                    className="rounded-full border border-orange-200 bg-white px-6 py-3 font-black text-orange-700 transition hover:bg-orange-50"
+                  >
+                    Relancer 🎲
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="py-10 text-center">
+                <p className="text-lg font-black text-stone-950">
+                  Aucune recette disponible.
+                </p>
+
+                <p className="mt-2 text-stone-600">
+                  Ajoute une recette pour utiliser le bouton magique.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   )
 }
