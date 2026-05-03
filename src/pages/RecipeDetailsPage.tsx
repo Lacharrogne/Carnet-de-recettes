@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import RecipeCard from '../components/recipes/RecipeCard'
@@ -441,7 +441,39 @@ export default function RecipeDetailsPage() {
   const [remainingTimerSeconds, setRemainingTimerSeconds] = useState(0)
   const [timerRunning, setTimerRunning] = useState(false)
 
+  const successTimeoutRef = useRef<number | null>(null)
+
   const isOwner = !!viewerId && !!recipe && recipe.userId === viewerId
+
+  function hideSuccessMessage() {
+    if (successTimeoutRef.current !== null) {
+      window.clearTimeout(successTimeoutRef.current)
+      successTimeoutRef.current = null
+    }
+
+    setSuccessMessage('')
+  }
+
+  function showSuccessMessage(message: string, duration = 3000) {
+    if (successTimeoutRef.current !== null) {
+      window.clearTimeout(successTimeoutRef.current)
+    }
+
+    setSuccessMessage(message)
+
+    successTimeoutRef.current = window.setTimeout(() => {
+      setSuccessMessage('')
+      successTimeoutRef.current = null
+    }, duration)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current !== null) {
+        window.clearTimeout(successTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     let ignore = false
@@ -525,6 +557,7 @@ export default function RecipeDetailsPage() {
           setActiveTimerLabel('')
           setRemainingTimerSeconds(0)
           setTimerRunning(false)
+          hideSuccessMessage()
         }
       })
       .catch((error) => {
@@ -595,12 +628,20 @@ export default function RecipeDetailsPage() {
     try {
       setFavoriteLoading(true)
       setErrorMessage('')
-      setSuccessMessage('')
+      hideSuccessMessage()
 
       const newValue = await toggleFavorite(recipe.id)
       setIsFavorite(newValue)
+
+      showSuccessMessage(
+        newValue
+          ? 'Recette ajoutée aux favoris.'
+          : 'Recette retirée des favoris.',
+        2500,
+      )
     } catch (error) {
       console.error(error)
+      hideSuccessMessage()
       setErrorMessage('Impossible de modifier les favoris.')
     } finally {
       setFavoriteLoading(false)
@@ -621,24 +662,21 @@ export default function RecipeDetailsPage() {
     try {
       setAddingIngredientIndex(index)
       setErrorMessage('')
-      setSuccessMessage('')
+      hideSuccessMessage()
 
       const addedItems = await addRecipeIngredientsToShoppingList(recipe.id, [
         ingredient,
       ])
 
       if (addedItems.length === 0) {
-        setSuccessMessage(`"${ingredient}" est déjà dans ta liste de courses.`)
+        showSuccessMessage(`"${ingredient}" est déjà dans ta liste de courses.`)
       } else {
-        setSuccessMessage(`"${ingredient}" a été ajouté à ta liste de courses.`)
+        showSuccessMessage(`"${ingredient}" a été ajouté à ta liste de courses.`)
       }
-
-      window.setTimeout(() => {
-        setSuccessMessage('')
-      }, 2500)
     } catch (error) {
       console.error(error)
-      setSuccessMessage('')
+
+      hideSuccessMessage()
       setErrorMessage(
         'Impossible d’ajouter cet ingrédient à la liste de courses.',
       )
@@ -647,7 +685,7 @@ export default function RecipeDetailsPage() {
     }
   }
 
-  function handleAddRecipeToPlanning() {
+  async function handleAddRecipeToPlanning() {
     if (!user) {
       navigate('/auth')
       return
@@ -655,18 +693,69 @@ export default function RecipeDetailsPage() {
 
     if (!recipe) return
 
-    saveRecipeToPlanner(selectedPlanningDay, selectedPlanningMeal, recipe.id)
+    const currentPlanner = getSavedPlanner()
+    const currentRecipeId =
+      currentPlanner[selectedPlanningDay][selectedPlanningMeal]
 
-    setErrorMessage('')
-    setSuccessMessage(
-      `"${recipe.title}" a été ajouté au planning : ${getDayLabel(
-        selectedPlanningDay,
-      ).toLowerCase()} ${getMealLabel(selectedPlanningMeal).toLowerCase()}.`,
-    )
+    const dayLabel = getDayLabel(selectedPlanningDay)
+    const mealLabel = getMealLabel(selectedPlanningMeal)
 
-    window.setTimeout(() => {
-      setSuccessMessage('')
-    }, 2500)
+    if (currentRecipeId && currentRecipeId !== String(recipe.id)) {
+      const confirmReplace = window.confirm(
+        `Il y a déjà une recette prévue pour ${dayLabel.toLowerCase()} ${mealLabel.toLowerCase()}.\n\nVeux-tu vraiment la remplacer par "${recipe.title}" ?`,
+      )
+
+      if (!confirmReplace) {
+        return
+      }
+    }
+
+    try {
+      setErrorMessage('')
+      hideSuccessMessage()
+
+      saveRecipeToPlanner(selectedPlanningDay, selectedPlanningMeal, recipe.id)
+
+      const addedItems = await addRecipeIngredientsToShoppingList(
+  recipe.id,
+  scaledIngredients,
+  {
+    allowDuplicates: true,
+  },
+)
+
+      if (currentRecipeId && currentRecipeId !== String(recipe.id)) {
+        showSuccessMessage(
+          `Recette remplacée dans le planning pour ${dayLabel.toLowerCase()} ${mealLabel.toLowerCase()}.`,
+        )
+      } else if (addedItems.length > 0) {
+        showSuccessMessage(
+          'Recette ajoutée au planning. Les ingrédients ont aussi été ajoutés à la liste de courses.',
+        )
+      } else {
+        showSuccessMessage(
+          'Recette ajoutée au planning. Les ingrédients étaient déjà dans la liste de courses.',
+        )
+      }
+    } catch (error) {
+      console.error(error)
+
+      hideSuccessMessage()
+
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes('déjà dans la liste')
+      ) {
+        showSuccessMessage(
+          'Recette ajoutée au planning. Les ingrédients étaient déjà dans la liste de courses.',
+        )
+        return
+      }
+
+      setErrorMessage(
+        'La recette a peut-être été ajoutée au planning, mais impossible d’ajouter les ingrédients à la liste de courses.',
+      )
+    }
   }
 
   function decreaseServings() {
@@ -746,15 +835,13 @@ export default function RecipeDetailsPage() {
   async function handleCopyLink() {
     try {
       await navigator.clipboard.writeText(window.location.href)
-      setErrorMessage('')
-      setSuccessMessage('Lien copié dans le presse-papiers.')
 
-      window.setTimeout(() => {
-        setSuccessMessage('')
-      }, 2500)
+      setErrorMessage('')
+      showSuccessMessage('Lien copié dans le presse-papiers.', 2500)
     } catch (error) {
       console.error(error)
-      setSuccessMessage('')
+
+      hideSuccessMessage()
       setErrorMessage('Impossible de copier le lien.')
     }
   }
@@ -1001,9 +1088,9 @@ export default function RecipeDetailsPage() {
         </div>
 
         {successMessage && (
-          <p className="rounded-2xl bg-green-50 px-4 py-3 font-medium text-green-700 print:hidden">
-            {successMessage}
-          </p>
+          <div className="fixed bottom-6 right-6 z-[90] max-w-sm rounded-2xl bg-stone-950 px-5 py-4 text-sm font-bold text-white shadow-xl print:hidden">
+            ✅ {successMessage}
+          </div>
         )}
 
         {errorMessage && (
@@ -1096,6 +1183,7 @@ export default function RecipeDetailsPage() {
                   <p className="text-sm font-medium text-stone-500">
                     Préparation
                   </p>
+
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {recipe.prepTime} min
                   </p>
@@ -1103,6 +1191,7 @@ export default function RecipeDetailsPage() {
 
                 <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-sm font-medium text-stone-500">Cuisson</p>
+
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {recipe.cookTime} min
                   </p>
@@ -1110,6 +1199,7 @@ export default function RecipeDetailsPage() {
 
                 <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-sm font-medium text-stone-500">Total</p>
+
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {totalTime} min
                   </p>
@@ -1117,6 +1207,7 @@ export default function RecipeDetailsPage() {
 
                 <div className="rounded-[1.5rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-sm font-medium text-stone-500">Portions</p>
+
                   <p className="mt-1 text-xl font-black text-stone-950">
                     {selectedServings} pers.
                   </p>
@@ -1137,78 +1228,79 @@ export default function RecipeDetailsPage() {
               )}
 
               <div className="mt-8 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 print:hidden">
-  <div className="mb-4 flex items-center justify-between gap-3">
-    <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-      Actions rapides
-    </p>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                    Actions rapides
+                  </p>
 
-    {isOwner && (
-      <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
-        Ta recette
-      </span>
-    )}
-  </div>
+                  {isOwner && (
+                    <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
+                      Ta recette
+                    </span>
+                  )}
+                </div>
 
-  <div className="grid gap-3 sm:grid-cols-2">
-    <button
-      type="button"
-      onClick={openGuidedCooking}
-      disabled={recipe.steps.length === 0}
-      className="flex items-center justify-center gap-2 rounded-full bg-orange-500 px-5 py-4 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      <span>▶</span>
-      <span>Lancer la recette</span>
-    </button>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={openGuidedCooking}
+                    disabled={recipe.steps.length === 0}
+                    className="flex items-center justify-center gap-2 rounded-full bg-orange-500 px-5 py-4 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <span>▶</span>
+                    <span>Lancer la recette</span>
+                  </button>
 
-    <button
-      type="button"
-      onClick={handleToggleFavorite}
-      disabled={favoriteLoading}
-      className="flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-[#fffaf3] px-5 py-4 font-black text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      <span>{isFavorite ? '♥' : '♡'}</span>
-      <span>
-        {isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-      </span>
-    </button>
+                  <button
+                    type="button"
+                    onClick={handleToggleFavorite}
+                    disabled={favoriteLoading}
+                    className="flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-[#fffaf3] px-5 py-4 font-black text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <span>{isFavorite ? '♥' : '♡'}</span>
 
-    <button
-      type="button"
-      onClick={handleCopyLink}
-      className="flex items-center justify-center gap-2 rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
-    >
-      🔗 Copier le lien
-    </button>
+                    <span>
+                      {isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                    </span>
+                  </button>
 
-    <button
-      type="button"
-      onClick={handlePrint}
-      className="flex items-center justify-center gap-2 rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
-    >
-      🖨️ Imprimer
-    </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="flex items-center justify-center gap-2 rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
+                  >
+                    🔗 Copier le lien
+                  </button>
 
-    {isOwner && (
-      <>
-        <Link
-          to={`/recipes/${recipe.id}/edit`}
-          className="flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-5 py-3 text-center font-bold text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-100"
-        >
-          ✏️ Modifier
-        </Link>
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    className="flex items-center justify-center gap-2 rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
+                  >
+                    🖨️ Imprimer
+                  </button>
 
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="flex items-center justify-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-3 font-bold text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          🗑️ {isDeleting ? 'Suppression...' : 'Supprimer'}
-        </button>
-      </>
-    )}
-  </div>
-</div>
+                  {isOwner && (
+                    <>
+                      <Link
+                        to={`/recipes/${recipe.id}/edit`}
+                        className="flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-5 py-3 text-center font-bold text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-100"
+                      >
+                        ✏️ Modifier
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="flex items-center justify-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-3 font-bold text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        🗑️ {isDeleting ? 'Suppression...' : 'Supprimer'}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
 
               <div className="mt-8 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 print:hidden">
                 <div className="flex flex-wrap items-center justify-between gap-4">

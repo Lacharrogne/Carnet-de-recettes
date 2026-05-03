@@ -18,6 +18,10 @@ type ShoppingListItemRow = {
   created_at: string
 }
 
+type AddRecipeIngredientsOptions = {
+  allowDuplicates?: boolean
+}
+
 function mapShoppingListItem(row: ShoppingListItemRow): ShoppingListItem {
   return {
     id: row.id,
@@ -98,49 +102,55 @@ export async function addShoppingListItem(text: string) {
 export async function addRecipeIngredientsToShoppingList(
   recipeId: number,
   ingredients: string[],
+  options: AddRecipeIngredientsOptions = {},
 ) {
   const userId = await getCurrentUserId()
+  const allowDuplicates = options.allowDuplicates ?? false
 
   const cleanedIngredients = ingredients
     .map((ingredient) => ingredient.trim())
     .filter((ingredient) => ingredient.length > 0)
 
   if (cleanedIngredients.length === 0) {
-    throw new Error('Aucun ingrédient à ajouter.')
+    return []
   }
 
-  const { data: existingItems, error: existingItemsError } = await supabase
-    .from('shopping_list_items')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('recipe_id', recipeId)
+  let ingredientsToAdd = cleanedIngredients
 
-  if (existingItemsError) {
-    throw existingItemsError
-  }
+  if (!allowDuplicates) {
+    const { data: existingItems, error: existingItemsError } = await supabase
+      .from('shopping_list_items')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('recipe_id', recipeId)
 
-  const existingTexts = new Set(
-    (existingItems ?? []).map((item) =>
-      normalizeText((item as ShoppingListItemRow).text),
-    ),
-  )
-
-  const uniqueIngredients = cleanedIngredients.filter((ingredient) => {
-    const normalizedIngredient = normalizeText(ingredient)
-
-    if (existingTexts.has(normalizedIngredient)) {
-      return false
+    if (existingItemsError) {
+      throw existingItemsError
     }
 
-    existingTexts.add(normalizedIngredient)
-    return true
-  })
+    const existingTexts = new Set(
+      (existingItems ?? []).map((item) =>
+        normalizeText((item as ShoppingListItemRow).text),
+      ),
+    )
 
-  if (uniqueIngredients.length === 0) {
-    throw new Error('Tous les ingrédients de cette recette sont déjà dans la liste.')
+    ingredientsToAdd = cleanedIngredients.filter((ingredient) => {
+      const normalizedIngredient = normalizeText(ingredient)
+
+      if (existingTexts.has(normalizedIngredient)) {
+        return false
+      }
+
+      existingTexts.add(normalizedIngredient)
+      return true
+    })
   }
 
-  const rows = uniqueIngredients.map((ingredient) => ({
+  if (ingredientsToAdd.length === 0) {
+    return []
+  }
+
+  const rows = ingredientsToAdd.map((ingredient) => ({
     user_id: userId,
     recipe_id: recipeId,
     text: ingredient,
