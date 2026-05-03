@@ -210,3 +210,66 @@ export async function deleteAdminProfile(userId: string) {
 
   if (error) throw error
 }
+
+export async function searchAdminProfiles(
+  searchTerm: string,
+): Promise<AdminProfilePreview[]> {
+  const cleanedSearch = searchTerm.trim()
+
+  if (!cleanedSearch) {
+    return getRecentAdminProfiles()
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('user_id, username, avatar_url, created_at')
+    .ilike('username', `%${cleanedSearch}%`)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  if (error) throw error
+
+  return (data ?? []).map((row) => mapProfile(row as ProfileRow))
+}
+
+export async function searchAdminRecipes(
+  searchTerm: string,
+): Promise<AdminRecipePreview[]> {
+  const cleanedSearch = searchTerm.trim()
+
+  if (!cleanedSearch) {
+    return getRecentAdminRecipes()
+  }
+
+  const { data, error } = await supabase
+    .from('recipes')
+    .select('id, title, category, user_id, created_at')
+    .or(`title.ilike.%${cleanedSearch}%,category.ilike.%${cleanedSearch}%`)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  if (error) throw error
+
+  return (data ?? []).map((row) => mapRecipe(row as RecipeRow))
+}
+
+export async function searchAdminReviews(
+  searchTerm: string,
+): Promise<AdminReviewPreview[]> {
+  const cleanedSearch = searchTerm.trim()
+
+  if (!cleanedSearch) {
+    return getRecentAdminReviews()
+  }
+
+  const { data, error } = await supabase
+    .from('recipe_reviews')
+    .select('id, recipe_id, user_id, rating, comment, created_at')
+    .ilike('comment', `%${cleanedSearch}%`)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  if (error) throw error
+
+  return (data ?? []).map((row) => mapReview(row as ReviewRow))
+}

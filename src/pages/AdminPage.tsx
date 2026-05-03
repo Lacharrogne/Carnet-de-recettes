@@ -11,6 +11,9 @@ import {
   getRecentAdminProfiles,
   getRecentAdminRecipes,
   getRecentAdminReviews,
+  searchAdminProfiles,
+  searchAdminRecipes,
+  searchAdminReviews,
   type AdminProfilePreview,
   type AdminRecipePreview,
   type AdminReviewPreview,
@@ -42,6 +45,14 @@ export default function AdminPage() {
   const [actionLoading, setActionLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+
+  const [profileSearch, setProfileSearch] = useState('')
+const [recipeSearch, setRecipeSearch] = useState('')
+const [reviewSearch, setReviewSearch] = useState('')
+
+const [profileSearchLoading, setProfileSearchLoading] = useState(false)
+const [recipeSearchLoading, setRecipeSearchLoading] = useState(false)
+const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
 
   useEffect(() => {
     let ignore = false
@@ -163,6 +174,51 @@ export default function AdminPage() {
       setErrorMessage('Impossible de recharger les données administrateur.')
     }
   }
+
+  async function handleSearchProfiles() {
+  try {
+    setProfileSearchLoading(true)
+    setErrorMessage('')
+
+    const results = await searchAdminProfiles(profileSearch)
+    setProfiles(results)
+  } catch (error) {
+    console.error(error)
+    setErrorMessage('Impossible de rechercher les profils.')
+  } finally {
+    setProfileSearchLoading(false)
+  }
+}
+
+async function handleSearchRecipes() {
+  try {
+    setRecipeSearchLoading(true)
+    setErrorMessage('')
+
+    const results = await searchAdminRecipes(recipeSearch)
+    setRecipes(results)
+  } catch (error) {
+    console.error(error)
+    setErrorMessage('Impossible de rechercher les recettes.')
+  } finally {
+    setRecipeSearchLoading(false)
+  }
+}
+
+async function handleSearchReviews() {
+  try {
+    setReviewSearchLoading(true)
+    setErrorMessage('')
+
+    const results = await searchAdminReviews(reviewSearch)
+    setReviews(results)
+  } catch (error) {
+    console.error(error)
+    setErrorMessage('Impossible de rechercher les commentaires.')
+  } finally {
+    setReviewSearchLoading(false)
+  }
+}
 
   async function handleDeleteReview(review: AdminReviewPreview) {
     const confirmDelete = window.confirm(
@@ -357,6 +413,29 @@ export default function AdminPage() {
               Profils récents
             </h2>
 
+            <form
+  onSubmit={(event) => {
+    event.preventDefault()
+    void handleSearchProfiles()
+  }}
+  className="mt-5 flex gap-2"
+>
+  <input
+    value={profileSearch}
+    onChange={(event) => setProfileSearch(event.target.value)}
+    placeholder="Rechercher un profil..."
+    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+  />
+
+  <button
+    type="submit"
+    disabled={profileSearchLoading}
+    className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    {profileSearchLoading ? '...' : 'OK'}
+  </button>
+</form>
+
             <div className="mt-6 space-y-3">
               {profiles.length === 0 ? (
                 <p className="text-stone-500">Aucun profil trouvé.</p>
@@ -413,6 +492,29 @@ export default function AdminPage() {
               Recettes récentes
             </h2>
 
+            <form
+  onSubmit={(event) => {
+    event.preventDefault()
+    void handleSearchRecipes()
+  }}
+  className="mt-5 flex gap-2"
+>
+  <input
+    value={recipeSearch}
+    onChange={(event) => setRecipeSearch(event.target.value)}
+    placeholder="Rechercher une recette..."
+    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+  />
+
+  <button
+    type="submit"
+    disabled={recipeSearchLoading}
+    className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    {recipeSearchLoading ? '...' : 'OK'}
+  </button>
+</form>
+
             <div className="mt-6 space-y-3">
               {recipes.length === 0 ? (
                 <p className="text-stone-500">Aucune recette trouvée.</p>
@@ -463,6 +565,29 @@ export default function AdminPage() {
             <h2 className="mt-2 text-2xl font-black text-stone-950">
               Avis récents
             </h2>
+
+            <form
+  onSubmit={(event) => {
+    event.preventDefault()
+    void handleSearchReviews()
+  }}
+  className="mt-5 flex gap-2"
+>
+  <input
+    value={reviewSearch}
+    onChange={(event) => setReviewSearch(event.target.value)}
+    placeholder="Rechercher un commentaire..."
+    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+  />
+
+  <button
+    type="submit"
+    disabled={reviewSearchLoading}
+    className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    {reviewSearchLoading ? '...' : 'OK'}
+  </button>
+</form>
 
             <div className="mt-6 space-y-3">
               {reviews.length === 0 ? (
