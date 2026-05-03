@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+
 import { useAuth } from '../../context/useAuth'
 import { getProfile, type UserProfile } from '../../services/profiles'
 import {
@@ -22,6 +23,14 @@ function renderStars(rating: number) {
   }).join('')
 }
 
+function formatComment(comment: string) {
+  return comment
+    .replace(/\s*\/{3,}\s*/g, '\n')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
 export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
   const { user } = useAuth()
   const userId = user?.id
@@ -31,14 +40,11 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
   const [reviewProfiles, setReviewProfiles] = useState<
     Record<string, UserProfile | null>
   >({})
-
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
-
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
-
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -53,6 +59,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       try {
         setLoading(true)
         setErrorMessage('')
+        setSuccessMessage('')
 
         const loadedReviews = await getRecipeReviews(recipeId)
 
@@ -77,21 +84,25 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
         if (userId) {
           loadedMyReview = await getMyReviewForRecipe(recipeId)
-
-          if (loadedMyReview) {
-            setRating(loadedMyReview.rating)
-            setComment(loadedMyReview.comment)
-          }
         }
 
         if (!ignore) {
           setReviews(loadedReviews)
           setMyReview(loadedMyReview)
           setReviewProfiles(profilesByUserId)
+
+          if (loadedMyReview) {
+            setRating(loadedMyReview.rating)
+            setComment(loadedMyReview.comment)
+          } else {
+            setRating(5)
+            setComment('')
+          }
         }
       } catch (error) {
+        console.error(error)
+
         if (!ignore) {
-          console.error(error)
           setErrorMessage('Impossible de charger les avis.')
         }
       } finally {
@@ -101,7 +112,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       }
     }
 
-    loadReviews()
+    void loadReviews()
 
     return () => {
       ignore = true
@@ -118,10 +129,12 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       setErrorMessage('')
       setSuccessMessage('')
 
+      const cleanComment = comment.trim()
+
       const savedReview = await saveRecipeReview({
         recipeId,
         rating,
-        comment,
+        comment: cleanComment,
       })
 
       const currentUserProfile = await getProfile(userId).catch((error) => {
@@ -135,6 +148,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       }))
 
       setMyReview(savedReview)
+      setComment(savedReview.comment)
 
       setReviews((currentReviews) => {
         const reviewAlreadyExists = currentReviews.some(
@@ -180,7 +194,6 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       setReviews((currentReviews) =>
         currentReviews.filter((review) => review.id !== myReview.id),
       )
-
       setMyReview(null)
       setRating(5)
       setComment('')
@@ -195,23 +208,23 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
   if (loading) {
     return (
-      <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 print:hidden">
-        <p className="font-medium text-stone-600">Chargement des avis...</p>
+      <section className="rounded-[2rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100">
+        Chargement des avis...
       </section>
     )
   }
 
   return (
-    <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 print:hidden">
-      <div className="mb-7 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+    <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-7">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="font-bold text-orange-600">Avis de la famille</p>
 
-          <h2 className="text-2xl font-black text-stone-950">
+          <h2 className="mt-1 text-2xl font-black text-stone-950 md:text-3xl">
             Notes et commentaires
           </h2>
 
-          <p className="mt-2 text-stone-600">
+          <p className="mt-2 text-sm font-medium text-stone-500 md:text-base">
             {reviews.length === 0
               ? 'Aucun avis pour le moment.'
               : `${reviews.length} avis · moyenne ${averageRating}/5`}
@@ -219,8 +232,8 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
         </div>
 
         {reviews.length > 0 && (
-          <div className="rounded-[1.5rem] bg-[#fff5ec] px-5 py-4 text-right ring-1 ring-orange-100">
-            <p className="text-2xl font-black text-orange-500">
+          <div className="rounded-[1.5rem] bg-[#fff5ec] px-5 py-4 text-left md:text-right">
+            <p className="text-xl font-black text-orange-500">
               {renderStars(Math.round(averageRating))}
             </p>
 
@@ -232,13 +245,13 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       </div>
 
       {errorMessage && (
-        <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700">
+        <p className="mb-5 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700">
           {errorMessage}
         </p>
       )}
 
       {successMessage && (
-        <p className="mb-4 rounded-2xl bg-green-50 px-4 py-3 font-medium text-green-700">
+        <p className="mb-5 rounded-2xl bg-green-50 px-4 py-3 text-sm font-semibold leading-6 text-green-700">
           {successMessage}
         </p>
       )}
@@ -246,20 +259,20 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       {user ? (
         <form
           onSubmit={handleSubmit}
-          className="mb-8 rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100"
+          className="mb-7 rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100"
         >
-          <div className="mb-5">
-            <p className="text-lg font-black text-stone-950">
-              {myReview ? 'Modifier mon avis' : 'Donner mon avis'}
-            </p>
+          <h3 className="text-xl font-black text-stone-950">
+            {myReview ? 'Modifier mon avis' : 'Donner mon avis'}
+          </h3>
 
-            <p className="mt-1 text-sm text-stone-600">
-              Laisse une note et un petit commentaire sur cette recette.
-            </p>
-          </div>
+          <p className="mt-1 text-sm font-medium text-stone-500">
+            Laisse une note et un petit commentaire sur cette recette.
+          </p>
 
-          <div className="mb-5">
-            <label className="mb-3 block font-bold text-stone-800">Note</label>
+          <div className="mt-5">
+            <label className="mb-2 block text-sm font-black text-stone-800">
+              Note
+            </label>
 
             <div className="flex flex-wrap gap-2">
               {[1, 2, 3, 4, 5].map((value) => (
@@ -272,7 +285,9 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       ? 'bg-orange-500 text-white hover:bg-orange-600'
                       : 'bg-white text-stone-300 ring-1 ring-orange-100 hover:bg-orange-50 hover:text-orange-400'
                   }`}
-                  aria-label={`Mettre ${value} étoile${value > 1 ? 's' : ''}`}
+                  aria-label={`Mettre ${value} étoile${
+                    value > 1 ? 's' : ''
+                  }`}
                 >
                   ★
                 </button>
@@ -280,8 +295,8 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
             </div>
           </div>
 
-          <div>
-            <label className="mb-2 block font-bold text-stone-800">
+          <div className="mt-5">
+            <label className="mb-2 block text-sm font-black text-stone-800">
               Commentaire
             </label>
 
@@ -290,7 +305,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
               onChange={(event) => setComment(event.target.value)}
               rows={4}
               placeholder="Exemple : recette facile, très bonne, parfaite pour le soir..."
-              className="w-full rounded-[1.4rem] border border-orange-100 bg-white px-4 py-3 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+              className="w-full rounded-[1.4rem] border border-orange-100 bg-white px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 md:text-[15px]"
             />
           </div>
 
@@ -320,7 +335,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
           </div>
         </form>
       ) : (
-        <div className="mb-8 rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100">
+        <div className="mb-7 rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100">
           <p className="font-bold text-stone-900">
             Connecte-toi pour donner ton avis.
           </p>
@@ -362,14 +377,15 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
             const authorAvatarUrl = profile?.avatarUrl ?? ''
             const authorLetter = authorName.charAt(0).toUpperCase() || 'U'
+            const formattedComment = formatComment(review.comment)
 
             return (
               <article
                 key={review.id}
-                className="rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100"
+                className="rounded-[2rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100 md:p-5"
               >
-                <div className="mb-4 flex items-center gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-lg font-black text-white ring-2 ring-white">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-base font-black text-white ring-2 ring-white md:h-12 md:w-12">
                     {authorAvatarUrl ? (
                       <img
                         src={authorAvatarUrl}
@@ -393,15 +409,19 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                 </div>
 
                 <div className="mb-3">
-                  <p className="text-lg font-black text-orange-500">
+                  <p className="text-base font-black text-orange-500 md:text-lg">
                     {renderStars(review.rating)}
                   </p>
                 </div>
 
-                {review.comment ? (
-                  <p className="leading-7 text-stone-700">{review.comment}</p>
+                {formattedComment.length > 0 ? (
+                  <div className="space-y-3 break-words text-sm leading-7 text-stone-700 md:text-[15px]">
+                    {formattedComment.map((paragraph, index) => (
+                      <p key={`${review.id}-${index}`}>{paragraph}</p>
+                    ))}
+                  </div>
                 ) : (
-                  <p className="italic text-stone-400">
+                  <p className="text-sm italic text-stone-400 md:text-[15px]">
                     Aucun commentaire écrit.
                   </p>
                 )}
