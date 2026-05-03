@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/useAuth'
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
 import { supabase } from '../../lib/supabase'
 import { getProfile, type UserProfile } from '../../services/profiles'
+
+type DropdownName = 'recipes' | 'profile' | null
 
 const personalLinks = [
   {
@@ -63,10 +65,15 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   navPillClass(isActive)
 
 function dropdownPanelClass(
+  isOpen: boolean,
   width = 'w-[420px]',
   align = 'left-1/2 -translate-x-1/2',
 ) {
-  return `pointer-events-none absolute ${align} top-full z-50 mt-3 ${width} max-h-[calc(100vh-8rem)] overflow-y-auto rounded-[1.5rem] bg-white p-3 opacity-0 shadow-xl ring-1 ring-orange-100 transition duration-200 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100`
+  return `absolute ${align} top-full z-50 mt-2 ${width} origin-top rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100 transition duration-150 before:absolute before:-top-3 before:left-0 before:h-3 before:w-full before:content-[''] ${
+    isOpen
+      ? 'pointer-events-auto translate-y-0 opacity-100'
+      : 'pointer-events-none -translate-y-1 opacity-0'
+  }`
 }
 
 export default function Header() {
@@ -74,7 +81,11 @@ export default function Header() {
   const location = useLocation()
   const { user } = useAuth()
 
+  const closeDropdownTimeoutRef = useRef<number | null>(null)
+
   const [menuOpen, setMenuOpen] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState<DropdownName>(null)
+
   const [profileState, setProfileState] = useState<{
     userId: string
     profile: UserProfile | null
@@ -87,30 +98,43 @@ export default function Header() {
 
   const isRecipesActive = location.pathname.startsWith('/recipes')
 
+useEffect(() => {
+  if (!userId) {
+    return
+  }
+
+  const currentUserId = userId
+  let ignore = false
+
+  async function loadProfile() {
+    try {
+      const data = await getProfile(currentUserId)
+
+      if (!ignore) {
+        setProfileState({
+          userId: currentUserId,
+          profile: data,
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  void loadProfile()
+
+  return () => {
+    ignore = true
+  }
+}, [userId])
+
   useEffect(() => {
-    if (!userId) {
-      return
-    }
-
-    let ignore = false
-
-    getProfile(userId)
-      .then((data) => {
-        if (!ignore) {
-          setProfileState({
-            userId,
-            profile: data,
-          })
-        }
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-
     return () => {
-      ignore = true
+      if (closeDropdownTimeoutRef.current) {
+        window.clearTimeout(closeDropdownTimeoutRef.current)
+      }
     }
-  }, [userId])
+  }, [])
 
   const displayedName =
     profile?.username || user?.email?.split('@')[0] || 'Profil'
@@ -118,14 +142,42 @@ export default function Header() {
   const displayedAvatarUrl = profile?.avatarUrl ?? ''
   const avatarLetter = displayedName.charAt(0).toUpperCase()
 
+  function openDropdownMenu(dropdownName: DropdownName) {
+    if (closeDropdownTimeoutRef.current) {
+      window.clearTimeout(closeDropdownTimeoutRef.current)
+    }
+
+    setOpenDropdown(dropdownName)
+  }
+
+  function scheduleCloseDropdown() {
+    if (closeDropdownTimeoutRef.current) {
+      window.clearTimeout(closeDropdownTimeoutRef.current)
+    }
+
+    closeDropdownTimeoutRef.current = window.setTimeout(() => {
+      setOpenDropdown(null)
+    }, 120)
+  }
+
+  function closeDropdowns() {
+    if (closeDropdownTimeoutRef.current) {
+      window.clearTimeout(closeDropdownTimeoutRef.current)
+    }
+
+    setOpenDropdown(null)
+  }
+
   function closeMenu() {
     setMenuOpen(false)
+    closeDropdowns()
   }
 
   async function handleLogout() {
     await supabase.auth.signOut()
     setProfileState(null)
     setMenuOpen(false)
+    setOpenDropdown(null)
     navigate('/')
   }
 
@@ -157,19 +209,31 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-2 rounded-full bg-white/70 px-2 py-2 shadow-sm ring-1 ring-orange-100 lg:flex">
-          <NavLink to="/" className={navLinkClass}>
+          <NavLink to="/" onClick={closeDropdowns} className={navLinkClass}>
             Accueil
           </NavLink>
 
-          <div className="group relative">
+          <div
+            className="relative"
+            onMouseEnter={() => openDropdownMenu('recipes')}
+            onMouseLeave={scheduleCloseDropdown}
+          >
             <NavLink
               to="/recipes"
+              onClick={closeDropdowns}
               className={() => navPillClass(isRecipesActive)}
             >
               Recettes
             </NavLink>
 
-            <div className={dropdownPanelClass('w-[520px]')}>
+            <div
+              onMouseEnter={() => openDropdownMenu('recipes')}
+              onMouseLeave={scheduleCloseDropdown}
+              className={dropdownPanelClass(
+                openDropdown === 'recipes',
+                'w-[520px]',
+              )}
+            >
               <div className="mb-3 flex items-center justify-between gap-4 px-2">
                 <div>
                   <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -183,6 +247,7 @@ export default function Header() {
 
                 <Link
                   to="/recipes?view=all"
+                  onClick={closeDropdowns}
                   className="rounded-full bg-orange-500 px-4 py-2 text-sm font-black text-white transition hover:bg-orange-600"
                 >
                   Tout voir
@@ -196,6 +261,7 @@ export default function Header() {
                     to={`/recipes?category=${encodeURIComponent(
                       category.value,
                     )}`}
+                    onClick={closeDropdowns}
                     className="group/item rounded-2xl p-3 transition hover:bg-orange-50"
                   >
                     <div className="flex items-center gap-3">
@@ -219,16 +285,25 @@ export default function Header() {
             </div>
           </div>
 
-          <NavLink to="/frigo" className={navLinkClass}>
+          <NavLink
+            to="/frigo"
+            onClick={closeDropdowns}
+            className={navLinkClass}
+          >
             Mode frigo
           </NavLink>
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
           {user ? (
-            <div className="group relative">
+            <div
+              className="relative"
+              onMouseEnter={() => openDropdownMenu('profile')}
+              onMouseLeave={scheduleCloseDropdown}
+            >
               <Link
                 to="/profile"
+                onClick={closeDropdowns}
                 className="flex items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 font-bold text-stone-900 shadow-sm transition hover:bg-orange-50 hover:text-orange-600"
               >
                 <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
@@ -247,10 +322,18 @@ export default function Header() {
                 <span className="text-xs text-stone-500">▾</span>
               </Link>
 
-              <div className={dropdownPanelClass('w-[390px]', 'right-0')}>
-                <div className="mb-3 rounded-[1.3rem] bg-[#fffaf3] p-3 ring-1 ring-orange-100">
+              <div
+                onMouseEnter={() => openDropdownMenu('profile')}
+                onMouseLeave={scheduleCloseDropdown}
+                className={dropdownPanelClass(
+                  openDropdown === 'profile',
+                  'w-[390px]',
+                  'right-0',
+                )}
+              >
+                <div className="mb-3 rounded-[1.5rem] bg-[#fffaf3] p-3 ring-1 ring-orange-100">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
+                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-lg font-black text-white ring-2 ring-white">
                       {displayedAvatarUrl ? (
                         <img
                           src={displayedAvatarUrl}
@@ -279,6 +362,7 @@ export default function Header() {
                     <Link
                       key={link.to}
                       to={link.to}
+                      onClick={closeDropdowns}
                       className="group/item rounded-2xl p-2.5 transition hover:bg-orange-50"
                     >
                       <div className="flex items-center gap-3">
@@ -287,7 +371,7 @@ export default function Header() {
                         </span>
 
                         <div className="min-w-0">
-                          <p className="truncate font-black leading-tight text-stone-950">
+                          <p className="truncate font-black text-stone-950">
                             {link.label}
                           </p>
 
@@ -298,25 +382,21 @@ export default function Header() {
                       </div>
                     </Link>
                   ))}
-                </div>
 
-                <div className="mt-3 border-t border-orange-100 pt-3">
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="w-full rounded-2xl border border-red-100 bg-red-50 p-2.5 text-left transition hover:bg-red-100"
+                    className="mt-2 rounded-2xl border border-orange-200 bg-white p-2.5 text-left transition hover:bg-orange-50"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-xl">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-xl">
                         🚪
                       </span>
 
                       <div>
-                        <p className="font-black leading-tight text-red-700">
-                          Déconnexion
-                        </p>
+                        <p className="font-black text-red-700">Déconnexion</p>
 
-                        <p className="text-xs font-semibold text-red-500">
+                        <p className="text-xs font-semibold text-stone-500">
                           Quitter ton compte
                         </p>
                       </div>
@@ -403,7 +483,7 @@ export default function Header() {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-left font-black text-red-700"
+                    className="rounded-2xl border border-orange-200 bg-white px-4 py-3 text-left font-black text-orange-600"
                   >
                     🚪 Déconnexion
                   </button>
