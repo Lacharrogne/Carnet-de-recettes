@@ -20,6 +20,17 @@ type CategoryVisualStyle = {
   miniIcons: string[]
 }
 
+type CategoryPageAmbience = {
+  pageBg: string
+  ring: string
+  accentText: string
+  buttonText: string
+  buttonHover: string
+  glowOne: string
+  glowTwo: string
+  emojis: string[]
+}
+
 const DEFAULT_CATEGORY_STYLE: CategoryVisualStyle = {
   cardBg: 'bg-gradient-to-br from-[#fffaf3] to-white',
   border: 'border-orange-100',
@@ -141,11 +152,96 @@ const FALLBACK_CATEGORY_STYLES: CategoryVisualStyle[] = [
   },
 ]
 
+const DEFAULT_CATEGORY_PAGE_AMBIENCE: CategoryPageAmbience = {
+  pageBg: 'bg-white/95',
+  ring: 'ring-orange-100',
+  accentText: 'text-orange-600',
+  buttonText: 'text-orange-700',
+  buttonHover: 'hover:bg-orange-50',
+  glowOne: 'bg-orange-100/50',
+  glowTwo: 'bg-amber-100/50',
+  emojis: ['🍽️', '✨', '🥄'],
+}
+
+const CATEGORY_PAGE_AMBIENCES: Record<string, CategoryPageAmbience> = {
+  'Apéritifs & entrées': {
+    pageBg: 'bg-gradient-to-br from-[#f6fbef] via-[#fffdf8] to-[#fff3e8]',
+    ring: 'ring-[#d9eacb]',
+    accentText: 'text-[#4f8a3b]',
+    buttonText: 'text-[#4f8a3b]',
+    buttonHover: 'hover:bg-[#eef8e8]',
+    glowOne: 'bg-[#b7df9a]/45',
+    glowTwo: 'bg-[#ffb18a]/35',
+    emojis: ['🫒', '🍅', '🥖', '🧀'],
+  },
+
+  'Plats & accompagnements': {
+    pageBg: 'bg-gradient-to-br from-[#fff5e9] via-[#fffdf9] to-[#ffe8d2]',
+    ring: 'ring-[#efd1b4]',
+    accentText: 'text-[#c76525]',
+    buttonText: 'text-[#c76525]',
+    buttonHover: 'hover:bg-[#fff0df]',
+    glowOne: 'bg-[#ffb879]/45',
+    glowTwo: 'bg-[#f5c39c]/35',
+    emojis: ['🍝', '🥘', '🧄', '🥔'],
+  },
+
+  'Desserts & goûters': {
+    pageBg: 'bg-gradient-to-br from-[#fff3f6] via-[#fffdf9] to-[#ffe8f0]',
+    ring: 'ring-[#f0cdd8]',
+    accentText: 'text-[#cc5f7d]',
+    buttonText: 'text-[#cc5f7d]',
+    buttonHover: 'hover:bg-[#fff0f4]',
+    glowOne: 'bg-[#ffb5c8]/45',
+    glowTwo: 'bg-[#ffd6a5]/35',
+    emojis: ['🍓', '🧁', '🍫', '🍰'],
+  },
+
+  'Petit-déjeuner & brunch': {
+    pageBg: 'bg-gradient-to-br from-[#fff8dc] via-[#fffdf7] to-[#fff0c2]',
+    ring: 'ring-[#ecd99b]',
+    accentText: 'text-[#b47a12]',
+    buttonText: 'text-[#b47a12]',
+    buttonHover: 'hover:bg-[#fff4cf]',
+    glowOne: 'bg-[#ffd970]/45',
+    glowTwo: 'bg-[#f4b76b]/35',
+    emojis: ['☕', '🥐', '🍯', '🥞'],
+  },
+
+  Boissons: {
+    pageBg: 'bg-gradient-to-br from-[#eef9ff] via-[#fbffff] to-[#e8fff8]',
+    ring: 'ring-[#cce8f2]',
+    accentText: 'text-[#2f83a3]',
+    buttonText: 'text-[#2f83a3]',
+    buttonHover: 'hover:bg-[#eaf8ff]',
+    glowOne: 'bg-[#a7ddf3]/45',
+    glowTwo: 'bg-[#b7f0da]/35',
+    emojis: ['🍋', '🧊', '🥤', '🍹'],
+  },
+
+  Healthy: {
+    pageBg: 'bg-gradient-to-br from-[#effbea] via-[#fcfffb] to-[#e2f7dc]',
+    ring: 'ring-[#cce5c5]',
+    accentText: 'text-[#4d8f48]',
+    buttonText: 'text-[#4d8f48]',
+    buttonHover: 'hover:bg-[#eff9eb]',
+    glowOne: 'bg-[#aad99f]/45',
+    glowTwo: 'bg-[#d7efc7]/40',
+    emojis: ['🥑', '🥦', '🌿', '🥬'],
+  },
+}
+
 function getCategoryVisualStyle(categoryLabel: string, index: number) {
   return (
     CATEGORY_STYLES[categoryLabel] ??
     FALLBACK_CATEGORY_STYLES[index % FALLBACK_CATEGORY_STYLES.length]
   )
+}
+
+function getCategoryPageAmbience(categoryLabel: string | null) {
+  if (!categoryLabel) return null
+
+  return CATEGORY_PAGE_AMBIENCES[categoryLabel] ?? DEFAULT_CATEGORY_PAGE_AMBIENCE
 }
 
 export default function RecipesPage() {
@@ -280,6 +376,20 @@ export default function RecipesPage() {
 
   const hasActiveFilters =
     search.trim().length > 0 || selectedCategory !== null || showAllRecipes
+
+  const activeCategoryAmbience = selectedCategory
+    ? getCategoryPageAmbience(selectedCategory.label)
+    : null
+
+  const wallpaperEmojis = activeCategoryAmbience
+    ? Array.from(
+        { length: 72 },
+        (_, index) =>
+          activeCategoryAmbience.emojis[
+            index % activeCategoryAmbience.emojis.length
+          ],
+      )
+    : []
 
   function selectCategory(categoryValue: string) {
     setSearchParams({ category: categoryValue })
@@ -421,10 +531,7 @@ export default function RecipesPage() {
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {categoriesWithCount.map((category, index) => {
-              const visualStyle = getCategoryVisualStyle(
-                category.label,
-                index,
-              )
+              const visualStyle = getCategoryVisualStyle(category.label, index)
 
               return (
                 <button
@@ -472,7 +579,9 @@ export default function RecipesPage() {
                       {category.label}
                     </h3>
 
-                    <p className={`min-h-[84px] leading-7 ${visualStyle.subtleText}`}>
+                    <p
+                      className={`min-h-[84px] leading-7 ${visualStyle.subtleText}`}
+                    >
                       {category.description}
                     </p>
 
@@ -496,66 +605,117 @@ export default function RecipesPage() {
       )}
 
       {hasActiveFilters && (
-        <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="font-bold text-orange-600">
-                {selectedCategory
-                  ? selectedCategory.label
-                  : showAllRecipes
-                    ? 'Tout le carnet'
-                    : 'Recherche rapide'}
-              </p>
+        <div
+          className={`relative overflow-hidden rounded-[2.5rem] p-8 shadow-sm ring-1 md:p-10 ${
+            activeCategoryAmbience
+              ? `${activeCategoryAmbience.pageBg} ${activeCategoryAmbience.ring}`
+              : 'bg-white/95 ring-orange-100'
+          }`}
+        >
+          {activeCategoryAmbience && (
+            <>
+              <div
+                className={`pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full ${activeCategoryAmbience.glowOne} blur-3xl`}
+              />
 
-              <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
-                {selectedCategory
-                  ? `Recettes : ${selectedCategory.label}`
-                  : showAllRecipes
-                    ? 'Toutes les recettes'
-                    : 'Résultats'}
-              </h2>
+              <div
+                className={`pointer-events-none absolute -bottom-28 -left-24 h-80 w-80 rounded-full ${activeCategoryAmbience.glowTwo} blur-3xl`}
+              />
 
-              <p className="mt-2 text-stone-600">
-                {filteredRecipes.length} recette
-                {filteredRecipes.length > 1 ? 's' : ''} trouvée
-                {filteredRecipes.length > 1 ? 's' : ''}
-              </p>
-            </div>
+              <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.30]">
+                <div className="grid h-full min-h-[560px] grid-cols-4 gap-x-12 gap-y-10 px-6 py-8 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8">
+                  {wallpaperEmojis.map((emoji, index) => (
+                    <div
+                      key={`${emoji}-${index}`}
+                      className={`flex items-center justify-center text-3xl md:text-4xl ${
+                        index % 2 === 0 ? 'translate-y-3' : '-translate-y-3'
+                      } ${
+                        index % 3 === 0
+                          ? 'rotate-[-10deg]'
+                          : index % 3 === 1
+                            ? 'rotate-[8deg]'
+                            : 'rotate-[-4deg]'
+                      }`}
+                    >
+                      <span className="select-none">{emoji}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="w-fit rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
-            >
-              Revenir aux catégories
-            </button>
-          </div>
+              <div className="pointer-events-none absolute inset-0 bg-white/35" />
+            </>
+          )}
 
-          {filteredRecipes.length === 0 ? (
-            <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
-              <p className="text-lg font-bold text-stone-950">
-                Aucune recette trouvée
-              </p>
+          <div className="relative z-10">
+            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p
+                  className={`font-bold ${
+                    activeCategoryAmbience?.accentText ?? 'text-orange-600'
+                  }`}
+                >
+                  {selectedCategory
+                    ? selectedCategory.label
+                    : showAllRecipes
+                      ? 'Tout le carnet'
+                      : 'Recherche rapide'}
+                </p>
 
-              <p className="mt-2 text-stone-600">
-                Essaie une autre recherche ou une autre catégorie.
-              </p>
+                <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
+                  {selectedCategory
+                    ? `Recettes : ${selectedCategory.label}`
+                    : showAllRecipes
+                      ? 'Toutes les recettes'
+                      : 'Résultats'}
+                </h2>
+
+                <p className="mt-2 text-stone-600">
+                  {filteredRecipes.length} recette
+                  {filteredRecipes.length > 1 ? 's' : ''} trouvée
+                  {filteredRecipes.length > 1 ? 's' : ''}
+                </p>
+              </div>
 
               <button
                 type="button"
                 onClick={resetFilters}
-                className="mt-6 rounded-full bg-orange-500 px-7 py-4 font-bold text-white transition hover:bg-orange-600"
+                className={`w-fit rounded-full border px-6 py-3 font-bold transition ${
+                  activeCategoryAmbience
+                    ? `border-white/70 bg-white/80 ${activeCategoryAmbience.buttonText} ${activeCategoryAmbience.buttonHover}`
+                    : 'border-orange-200 bg-white text-orange-700 hover:bg-orange-50'
+                }`}
               >
                 Revenir aux catégories
               </button>
             </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredRecipes.map((recipe) => (
-                <RecipeCard key={recipe.id} recipe={recipe} />
-              ))}
-            </div>
-          )}
+
+            {filteredRecipes.length === 0 ? (
+              <div className="rounded-[2rem] bg-white/85 p-8 text-center shadow-sm ring-1 ring-white/70">
+                <p className="text-lg font-bold text-stone-950">
+                  Aucune recette trouvée
+                </p>
+
+                <p className="mt-2 text-stone-600">
+                  Essaie une autre recherche ou une autre catégorie.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="mt-6 rounded-full bg-orange-500 px-7 py-4 font-bold text-white transition hover:bg-orange-600"
+                >
+                  Revenir aux catégories
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredRecipes.map((recipe) => (
+                  <RecipeCard key={recipe.id} recipe={recipe} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </section>
