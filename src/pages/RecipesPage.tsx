@@ -7,6 +7,147 @@ import type { Recipe } from '../types/recipe'
 
 type SortOption = 'name' | 'time' | 'difficulty'
 
+type CategoryVisualStyle = {
+  cardBg: string
+  border: string
+  iconBg: string
+  badgeBg: string
+  badgeText: string
+  accentText: string
+  subtleText: string
+  topGlow: string
+  bottomGlow: string
+  miniIcons: string[]
+}
+
+const DEFAULT_CATEGORY_STYLE: CategoryVisualStyle = {
+  cardBg: 'bg-gradient-to-br from-[#fffaf3] to-white',
+  border: 'border-orange-100',
+  iconBg: 'bg-[#fff1e6]',
+  badgeBg: 'bg-[#f4e8dc]',
+  badgeText: 'text-stone-700',
+  accentText: 'text-orange-700',
+  subtleText: 'text-stone-600',
+  topGlow: 'bg-orange-100/70',
+  bottomGlow: 'bg-amber-50/80',
+  miniIcons: ['🍽️', '✨'],
+}
+
+const CATEGORY_STYLES: Record<string, CategoryVisualStyle> = {
+  'Apéritifs & entrées': {
+    cardBg: 'bg-gradient-to-br from-[#fffaf5] to-[#fffefb]',
+    border: 'border-[#f1dcc8]',
+    iconBg: 'bg-[#fff1e6]',
+    badgeBg: 'bg-[#f8e7d8]',
+    badgeText: 'text-[#8a5a35]',
+    accentText: 'text-[#d06a2f]',
+    subtleText: 'text-stone-600',
+    topGlow: 'bg-[#ffd8b5]/60',
+    bottomGlow: 'bg-[#ffe8d6]/80',
+    miniIcons: ['🫒', '🍅'],
+  },
+
+  'Plats & accompagnements': {
+    cardBg: 'bg-gradient-to-br from-[#fff8f1] to-[#fffdf9]',
+    border: 'border-[#ecd8c2]',
+    iconBg: 'bg-[#fff0df]',
+    badgeBg: 'bg-[#f8e5cf]',
+    badgeText: 'text-[#8b5e34]',
+    accentText: 'text-[#c96f30]',
+    subtleText: 'text-stone-600',
+    topGlow: 'bg-[#ffd3a8]/60',
+    bottomGlow: 'bg-[#ffe9d6]/80',
+    miniIcons: ['🍝', '🥘'],
+  },
+
+  'Desserts & goûters': {
+    cardBg: 'bg-gradient-to-br from-[#fff7f8] to-[#fffdfa]',
+    border: 'border-[#f2d9df]',
+    iconBg: 'bg-[#fff0f3]',
+    badgeBg: 'bg-[#fde4ea]',
+    badgeText: 'text-[#9b5a6d]',
+    accentText: 'text-[#d46b87]',
+    subtleText: 'text-stone-600',
+    topGlow: 'bg-[#ffc8d5]/55',
+    bottomGlow: 'bg-[#ffe3ea]/75',
+    miniIcons: ['🍓', '🧁'],
+  },
+
+  'Petit-déjeuner & brunch': {
+    cardBg: 'bg-gradient-to-br from-[#fffaf0] to-[#fffef9]',
+    border: 'border-[#f1e0b9]',
+    iconBg: 'bg-[#fff4d9]',
+    badgeBg: 'bg-[#f9edc8]',
+    badgeText: 'text-[#8a6a1e]',
+    accentText: 'text-[#c28a0c]',
+    subtleText: 'text-stone-600',
+    topGlow: 'bg-[#ffe08c]/55',
+    bottomGlow: 'bg-[#fff2c7]/75',
+    miniIcons: ['☕', '🥐'],
+  },
+
+  Boissons: {
+    cardBg: 'bg-gradient-to-br from-[#f3fbff] to-[#fbffff]',
+    border: 'border-[#d7ebf4]',
+    iconBg: 'bg-[#eaf7fd]',
+    badgeBg: 'bg-[#dff1fb]',
+    badgeText: 'text-[#46718a]',
+    accentText: 'text-[#3b87a8]',
+    subtleText: 'text-stone-600',
+    topGlow: 'bg-[#c5e8f8]/55',
+    bottomGlow: 'bg-[#dbf7f0]/70',
+    miniIcons: ['🍋', '🧊'],
+  },
+
+  Healthy: {
+    cardBg: 'bg-gradient-to-br from-[#f6fcf4] to-[#fcfffb]',
+    border: 'border-[#dcebd8]',
+    iconBg: 'bg-[#ebf7e7]',
+    badgeBg: 'bg-[#dff0d9]',
+    badgeText: 'text-[#53774f]',
+    accentText: 'text-[#5b9856]',
+    subtleText: 'text-stone-600',
+    topGlow: 'bg-[#cfe8c8]/55',
+    bottomGlow: 'bg-[#e8f8e3]/75',
+    miniIcons: ['🥑', '🌿'],
+  },
+}
+
+const FALLBACK_CATEGORY_STYLES: CategoryVisualStyle[] = [
+  DEFAULT_CATEGORY_STYLE,
+  {
+    cardBg: 'bg-gradient-to-br from-[#fff8f2] to-white',
+    border: 'border-[#f0dfcf]',
+    iconBg: 'bg-[#fff1e6]',
+    badgeBg: 'bg-[#f6e8db]',
+    badgeText: 'text-[#8a5f3d]',
+    accentText: 'text-[#cc6d2f]',
+    subtleText: 'text-stone-600',
+    topGlow: 'bg-[#ffd7bb]/60',
+    bottomGlow: 'bg-[#fff1e3]/80',
+    miniIcons: ['🍴', '✨'],
+  },
+  {
+    cardBg: 'bg-gradient-to-br from-[#f8fafc] to-white',
+    border: 'border-[#e4e9ef]',
+    iconBg: 'bg-[#eef3f7]',
+    badgeBg: 'bg-[#e6edf4]',
+    badgeText: 'text-[#566575]',
+    accentText: 'text-[#64748b]',
+    subtleText: 'text-stone-600',
+    topGlow: 'bg-[#dbe7f1]/60',
+    bottomGlow: 'bg-[#f1f5f9]/80',
+    miniIcons: ['🍽️', '⭐'],
+  },
+]
+
+function getCategoryVisualStyle(categoryLabel: string, index: number) {
+  return (
+    CATEGORY_STYLES[categoryLabel] ??
+    FALLBACK_CATEGORY_STYLES[index % FALLBACK_CATEGORY_STYLES.length]
+  )
+}
+
 export default function RecipesPage() {
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -279,36 +420,77 @@ export default function RecipesPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {categoriesWithCount.map((category) => (
-              <button
-                key={category.value}
-                type="button"
-                onClick={() => selectCategory(category.value)}
-                className="group rounded-[2rem] border border-orange-100 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-orange-200 hover:shadow-md"
-              >
-                <div className="mb-8 flex items-start justify-between gap-4">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-[#fff1e6] text-4xl transition group-hover:scale-105">
-                    {category.emoji}
+            {categoriesWithCount.map((category, index) => {
+              const visualStyle = getCategoryVisualStyle(
+                category.label,
+                index,
+              )
+
+              return (
+                <button
+                  key={category.value}
+                  type="button"
+                  onClick={() => selectCategory(category.value)}
+                  className={`group relative overflow-hidden rounded-[2rem] border ${visualStyle.border} ${visualStyle.cardBg} p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)]`}
+                >
+                  <div
+                    className={`pointer-events-none absolute right-0 top-0 h-28 w-28 -translate-y-6 translate-x-6 rounded-full blur-3xl ${visualStyle.topGlow}`}
+                  />
+
+                  <div
+                    className={`pointer-events-none absolute bottom-0 left-0 h-24 w-24 -translate-x-6 translate-y-6 rounded-full blur-3xl ${visualStyle.bottomGlow}`}
+                  />
+
+                  <div className="relative z-10">
+                    <div className="mb-6 flex items-start justify-between gap-4">
+                      <div
+                        className={`flex h-20 w-20 items-center justify-center rounded-[1.6rem] ${visualStyle.iconBg} text-4xl shadow-sm transition group-hover:scale-105`}
+                      >
+                        {category.emoji}
+                      </div>
+
+                      <span
+                        className={`rounded-full ${visualStyle.badgeBg} px-4 py-2 text-sm font-bold ${visualStyle.badgeText}`}
+                      >
+                        {category.count} recette
+                        {category.count > 1 ? 's' : ''}
+                      </span>
+                    </div>
+
+                    <div className="mb-4 flex gap-2">
+                      {visualStyle.miniIcons.map((icon) => (
+                        <span
+                          key={icon}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-base shadow-sm ring-1 ring-black/5"
+                        >
+                          {icon}
+                        </span>
+                      ))}
+                    </div>
+
+                    <h3 className="mb-3 text-2xl font-black leading-tight text-stone-950">
+                      {category.label}
+                    </h3>
+
+                    <p className={`min-h-[84px] leading-7 ${visualStyle.subtleText}`}>
+                      {category.description}
+                    </p>
+
+                    <div className="mt-6 flex items-center justify-between border-t border-black/5 pt-4">
+                      <span className={`font-bold ${visualStyle.accentText}`}>
+                        Voir les recettes
+                      </span>
+
+                      <span
+                        className={`flex h-10 w-10 items-center justify-center rounded-full ${visualStyle.badgeBg} ${visualStyle.badgeText} transition group-hover:translate-x-1`}
+                      >
+                        →
+                      </span>
+                    </div>
                   </div>
-
-                  <span className="rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-stone-700">
-                    {category.count} recette{category.count > 1 ? 's' : ''}
-                  </span>
-                </div>
-
-                <h3 className="mb-3 text-2xl font-black text-stone-950">
-                  {category.label}
-                </h3>
-
-                <p className="leading-7 text-stone-600">
-                  {category.description}
-                </p>
-
-                <p className="mt-6 font-bold text-orange-700">
-                  Voir les recettes →
-                </p>
-              </button>
-            ))}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}
