@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import RecipeCard from '../components/recipes/RecipeCard'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getRecipes } from '../services/recipes'
 import type { Recipe } from '../types/recipe'
@@ -338,13 +339,15 @@ export default function HomePage() {
           </p>
         )}
 
-        <div>
-          <div className="mb-6 flex items-end justify-between gap-4">
+        <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="font-bold text-orange-600">Explorer</p>
-              <h2 className="text-3xl font-black text-stone-950">
+
+              <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
                 Les grandes familles de recettes
               </h2>
+
               <p className="mt-2 text-stone-600">
                 Parcours le carnet selon tes envies du moment.
               </p>
@@ -352,7 +355,7 @@ export default function HomePage() {
 
             <Link
               to="/recipes"
-              className="hidden font-bold text-orange-600 hover:text-orange-700 md:block"
+              className="w-fit rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
             >
               Toutes les recettes →
             </Link>
@@ -363,9 +366,9 @@ export default function HomePage() {
               Chargement des catégories...
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {categoriesWithCount.map((category, index) => {
-                const categoryStyle = getCategoryVisualStyle(
+                const visualStyle = getCategoryVisualStyle(
                   category.label,
                   index,
                 )
@@ -376,34 +379,34 @@ export default function HomePage() {
                     to={`/recipes?category=${encodeURIComponent(
                       category.value,
                     )}`}
-                    className={`group relative overflow-hidden rounded-[2rem] border ${categoryStyle.border} ${categoryStyle.cardBg} p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)]`}
+                    className={`group relative overflow-hidden rounded-[2rem] border ${visualStyle.border} ${visualStyle.cardBg} p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)]`}
                   >
                     <div
-                      className={`pointer-events-none absolute right-0 top-0 h-28 w-28 -translate-y-6 translate-x-6 rounded-full blur-3xl ${categoryStyle.topGlow}`}
+                      className={`pointer-events-none absolute right-0 top-0 h-28 w-28 -translate-y-6 translate-x-6 rounded-full blur-3xl ${visualStyle.topGlow}`}
                     />
 
                     <div
-                      className={`pointer-events-none absolute bottom-0 left-0 h-24 w-24 -translate-x-6 translate-y-6 rounded-full blur-3xl ${categoryStyle.bottomGlow}`}
+                      className={`pointer-events-none absolute bottom-0 left-0 h-24 w-24 -translate-x-6 translate-y-6 rounded-full blur-3xl ${visualStyle.bottomGlow}`}
                     />
 
                     <div className="relative z-10">
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="mb-6 flex items-start justify-between gap-4">
                         <div
-                          className={`flex h-16 w-16 items-center justify-center rounded-[1.4rem] ${categoryStyle.iconBg} text-3xl shadow-sm transition group-hover:scale-105`}
+                          className={`flex h-20 w-20 items-center justify-center rounded-[1.6rem] ${visualStyle.iconBg} text-4xl shadow-sm transition group-hover:scale-105`}
                         >
                           {category.emoji}
                         </div>
 
                         <span
-                          className={`rounded-full ${categoryStyle.badgeBg} px-4 py-2 text-sm font-bold ${categoryStyle.badgeText}`}
+                          className={`rounded-full ${visualStyle.badgeBg} px-4 py-2 text-sm font-bold ${visualStyle.badgeText}`}
                         >
-                          {category.count}{' '}
-                          {category.count > 1 ? 'recettes' : 'recette'}
+                          {category.count} recette
+                          {category.count > 1 ? 's' : ''}
                         </span>
                       </div>
 
-                      <div className="mt-5 flex gap-2">
-                        {categoryStyle.miniIcons.map((icon) => (
+                      <div className="mb-4 flex gap-2">
+                        {visualStyle.miniIcons.map((icon) => (
                           <span
                             key={icon}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-base shadow-sm ring-1 ring-black/5"
@@ -413,25 +416,23 @@ export default function HomePage() {
                         ))}
                       </div>
 
-                      <h3 className="mt-6 text-2xl font-black leading-tight text-stone-950">
+                      <h3 className="mb-3 text-2xl font-black leading-tight text-stone-950">
                         {category.label}
                       </h3>
 
                       <p
-                        className={`mt-3 min-h-[84px] leading-7 ${categoryStyle.subtleText}`}
+                        className={`min-h-[84px] leading-7 ${visualStyle.subtleText}`}
                       >
                         {category.description}
                       </p>
 
                       <div className="mt-6 flex items-center justify-between border-t border-black/5 pt-4">
-                        <span
-                          className={`font-bold transition ${categoryStyle.accentText}`}
-                        >
+                        <span className={`font-bold ${visualStyle.accentText}`}>
                           Voir les recettes
                         </span>
 
                         <span
-                          className={`flex h-10 w-10 items-center justify-center rounded-full ${categoryStyle.badgeBg} ${categoryStyle.badgeText} transition group-hover:translate-x-1`}
+                          className={`flex h-10 w-10 items-center justify-center rounded-full ${visualStyle.badgeBg} ${visualStyle.badgeText} transition group-hover:translate-x-1`}
                         >
                           →
                         </span>
@@ -444,21 +445,23 @@ export default function HomePage() {
           )}
         </div>
 
-        <div>
-          <div className="mb-6 flex items-end justify-between gap-4">
+        <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="font-bold text-orange-600">Nouveautés</p>
-              <h2 className="text-3xl font-black text-stone-950">
+
+              <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
                 Les dernières recettes ajoutées
               </h2>
+
               <p className="mt-2 text-stone-600">
                 Les nouvelles idées à tester à la maison.
               </p>
             </div>
 
             <Link
-              to="/recipes"
-              className="hidden font-bold text-orange-600 hover:text-orange-700 md:block"
+              to="/recipes?view=all"
+              className="w-fit rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
             >
               Voir plus →
             </Link>
@@ -486,51 +489,9 @@ export default function HomePage() {
               </Link>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {latestRecipes.map((recipe) => (
-                <Link
-                  key={recipe.id}
-                  to={`/recipes/${recipe.id}`}
-                  className="group overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md"
-                >
-                  <div className="flex h-48 items-center justify-center bg-[#fff1e6]">
-                    {recipe.imageUrl ? (
-                      <img
-                        src={recipe.imageUrl}
-                        alt={recipe.title}
-                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                      />
-                    ) : (
-                      <span className="text-6xl">
-                        {recipe.image || '🍽️'}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="p-6">
-                    <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-bold text-orange-700">
-                      {recipe.category}
-                    </span>
-
-                    <h3 className="mt-4 text-xl font-black text-stone-950">
-                      {recipe.title}
-                    </h3>
-
-                    <p className="mt-3 line-clamp-2 leading-7 text-stone-600">
-                      {recipe.description ||
-                        'Aucune description pour cette recette.'}
-                    </p>
-
-                    <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold text-stone-500">
-                      <span>⏱️ {recipe.prepTime + recipe.cookTime} min</span>
-                      <span>🍽️ {recipe.servings} pers.</span>
-                    </div>
-
-                    <p className="mt-5 border-t border-orange-100 pt-4 font-bold text-orange-600">
-                      Voir la recette →
-                    </p>
-                  </div>
-                </Link>
+                <RecipeCard key={recipe.id} recipe={recipe} />
               ))}
             </div>
           )}
