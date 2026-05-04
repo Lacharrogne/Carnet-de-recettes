@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import {
   DEFAULT_RECIPE_CATEGORY,
   RECIPE_CATEGORIES,
@@ -39,7 +39,7 @@ const sectionClass =
   'rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-6'
 
 const smallButtonClass =
-  'rounded-full bg-[#fff1e6] px-4 py-2 text-sm font-bold text-orange-700 transition hover:bg-orange-100'
+  'inline-flex items-center justify-center rounded-full bg-[#fff1e6] px-4 py-2 text-sm font-bold text-orange-700 transition hover:bg-orange-100'
 
 export default function RecipeForm({
   initialValues,
@@ -48,6 +48,11 @@ export default function RecipeForm({
   errorMessage,
   onSubmit,
 }: RecipeFormProps) {
+  const ingredientInputRefs = useRef<Array<HTMLInputElement | null>>([])
+  const stepTextareaRefs = useRef<Array<HTMLTextAreaElement | null>>([])
+  const ingredientFocusIndexRef = useRef<number | null>(null)
+  const stepFocusIndexRef = useRef<number | null>(null)
+
   const [title, setTitle] = useState(initialValues?.title ?? '')
 
   const [category, setCategory] = useState<RecipeCategory>(
@@ -96,6 +101,40 @@ export default function RecipeForm({
     }
   }, [previewUrl])
 
+  useEffect(() => {
+    const indexToFocus = ingredientFocusIndexRef.current
+
+    if (indexToFocus === null) return
+
+    const inputToFocus = ingredientInputRefs.current[indexToFocus]
+
+    if (inputToFocus) {
+      inputToFocus.focus()
+      inputToFocus.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+      ingredientFocusIndexRef.current = null
+    }
+  }, [ingredients.length])
+
+  useEffect(() => {
+    const indexToFocus = stepFocusIndexRef.current
+
+    if (indexToFocus === null) return
+
+    const textareaToFocus = stepTextareaRefs.current[indexToFocus]
+
+    if (textareaToFocus) {
+      textareaToFocus.focus()
+      textareaToFocus.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+      stepFocusIndexRef.current = null
+    }
+  }, [steps.length])
+
   const totalTime = useMemo(() => {
     return prepTime + cookTime
   }, [prepTime, cookTime])
@@ -134,6 +173,7 @@ export default function RecipeForm({
   }
 
   function addIngredient() {
+    ingredientFocusIndexRef.current = ingredients.length
     setIngredients((currentIngredients) => [...currentIngredients, ''])
   }
 
@@ -156,6 +196,7 @@ export default function RecipeForm({
   }
 
   function addStep() {
+    stepFocusIndexRef.current = steps.length
     setSteps((currentSteps) => [...currentSteps, ''])
   }
 
@@ -453,18 +494,12 @@ export default function RecipeForm({
       </div>
 
       <div className={sectionClass}>
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="font-bold text-orange-600">Liste de courses</p>
+        <div className="mb-6">
+          <p className="font-bold text-orange-600">Liste de courses</p>
 
-            <h3 className="mt-1 text-2xl font-black text-stone-950">
-              Ingrédients
-            </h3>
-          </div>
-
-          <button type="button" onClick={addIngredient} className={smallButtonClass}>
-            + Ajouter un ingrédient
-          </button>
+          <h3 className="mt-1 text-2xl font-black text-stone-950">
+            Ingrédients
+          </h3>
         </div>
 
         <div className="space-y-3">
@@ -474,6 +509,9 @@ export default function RecipeForm({
               className="flex flex-col gap-3 rounded-[1.5rem] bg-[#fffaf3] p-3 sm:flex-row"
             >
               <input
+                ref={(element) => {
+                  ingredientInputRefs.current[index] = element
+                }}
                 value={ingredient}
                 onChange={(event) =>
                   updateIngredient(index, event.target.value)
@@ -493,21 +531,23 @@ export default function RecipeForm({
             </div>
           ))}
         </div>
+
+        <button
+          type="button"
+          onClick={addIngredient}
+          className={`${smallButtonClass} mt-4 w-full rounded-[1.25rem] py-3 text-base`}
+        >
+          + Ajouter un ingrédient
+        </button>
       </div>
 
       <div className={sectionClass}>
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="font-bold text-orange-600">Préparation</p>
+        <div className="mb-6">
+          <p className="font-bold text-orange-600">Préparation</p>
 
-            <h3 className="mt-1 text-2xl font-black text-stone-950">
-              Étapes de la recette
-            </h3>
-          </div>
-
-          <button type="button" onClick={addStep} className={smallButtonClass}>
-            + Ajouter une étape
-          </button>
+          <h3 className="mt-1 text-2xl font-black text-stone-950">
+            Étapes de la recette
+          </h3>
         </div>
 
         <div className="space-y-3">
@@ -521,6 +561,9 @@ export default function RecipeForm({
               </div>
 
               <textarea
+                ref={(element) => {
+                  stepTextareaRefs.current[index] = element
+                }}
                 value={step}
                 onChange={(event) => updateStep(index, event.target.value)}
                 placeholder={`Étape ${index + 1}`}
@@ -539,6 +582,14 @@ export default function RecipeForm({
             </div>
           ))}
         </div>
+
+        <button
+          type="button"
+          onClick={addStep}
+          className={`${smallButtonClass} mt-4 w-full rounded-[1.25rem] py-3 text-base`}
+        >
+          + Ajouter une étape
+        </button>
       </div>
 
       <button
