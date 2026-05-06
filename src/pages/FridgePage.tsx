@@ -272,20 +272,20 @@ function FridgeResultCard({
 
   return (
     <article className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md">
-      <div className="border-b border-orange-100 bg-[#fffaf3] p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="border-b border-orange-100 bg-[#fffaf3] p-5 sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-wide text-orange-600">
               Compatibilité
             </p>
 
-            <p className="mt-1 text-3xl font-black text-stone-950">
+            <p className="mt-1 text-3xl font-black text-stone-950 sm:text-4xl">
               {match.score} %
             </p>
           </div>
 
           <span
-            className={`rounded-full px-4 py-2 text-sm font-black ${
+            className={`w-fit rounded-full px-4 py-2 text-sm font-black ${
               match.missingCount === 0
                 ? 'bg-green-100 text-green-700'
                 : match.missingCount <= 2
@@ -301,7 +301,7 @@ function FridgeResultCard({
           </span>
         </div>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
             <p className="text-xs font-black uppercase tracking-wide text-green-700">
               Tu as déjà
@@ -312,7 +312,7 @@ function FridgeResultCard({
                 {match.matchedIngredients.slice(0, 5).map((ingredient) => (
                   <span
                     key={ingredient}
-                    className="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700"
+                    className="rounded-full bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700"
                   >
                     {ingredient}
                   </span>
@@ -335,7 +335,7 @@ function FridgeResultCard({
                 {match.missingIngredients.slice(0, 5).map((ingredient) => (
                   <span
                     key={ingredient}
-                    className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700"
+                    className="rounded-full bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-700"
                   >
                     {ingredient}
                   </span>
@@ -352,10 +352,10 @@ function FridgeResultCard({
 
       <Link
         to={`/recipes/${match.recipe.id}`}
-        className="block p-5 transition hover:bg-orange-50/40"
+        className="block p-5 transition hover:bg-orange-50/40 sm:p-6"
       >
-        <div className="flex gap-5">
-          <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#fff1e6] text-5xl">
+        <div className="flex flex-col gap-4 sm:flex-row sm:gap-5">
+          <div className="flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#fff1e6] text-6xl sm:h-24 sm:w-24 sm:text-5xl">
             {imageToDisplay && imageToDisplay.startsWith('http') ? (
               <img
                 src={imageToDisplay}
@@ -378,7 +378,7 @@ function FridgeResultCard({
               </span>
             </div>
 
-            <h3 className="mt-3 text-xl font-black text-stone-950">
+            <h3 className="mt-3 text-xl font-black leading-tight text-stone-950 sm:text-2xl">
               {match.recipe.title}
             </h3>
 
@@ -396,12 +396,12 @@ function FridgeResultCard({
       </Link>
 
       {match.missingIngredients.length > 0 && (
-        <div className="border-t border-orange-100 p-5">
+        <div className="border-t border-orange-100 p-5 sm:p-6">
           <button
             type="button"
             onClick={() => onAddMissingIngredients(match)}
             disabled={adding}
-            className="w-full rounded-full bg-orange-500 px-5 py-3 text-sm font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-full bg-orange-500 px-5 py-3.5 text-sm font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {adding
               ? 'Ajout en cours...'
@@ -589,30 +589,30 @@ export default function FridgePage() {
   }
 
   return (
-    <section className="space-y-12">
-      <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
-        <div className="grid gap-10 px-6 py-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-12 lg:py-12">
+    <section className="space-y-8 sm:space-y-12">
+      <div className="overflow-hidden rounded-[2rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+        <div className="grid gap-7 px-5 py-7 sm:px-6 sm:py-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-12 lg:py-12">
           <div className="flex flex-col justify-center">
-            <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+            <div className="mb-5 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700 sm:mb-6">
               <span>🥕</span>
               <span>Mode Frigo</span>
             </div>
 
-            <h1 className="max-w-3xl text-4xl font-black leading-tight text-stone-950 md:text-6xl">
+            <h1 className="max-w-3xl text-3xl font-black leading-tight text-stone-950 sm:text-4xl md:text-6xl">
               Que peux-tu cuisiner avec ce que tu as déjà ?
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-600">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600 sm:mt-6 sm:text-lg sm:leading-8">
               Écris les ingrédients disponibles dans ton frigo, tes placards ou
               ton congélateur. Le carnet te propose ensuite les recettes les
               plus simples à faire maintenant.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-6 grid gap-3 sm:mt-8 sm:flex sm:flex-wrap">
               <button
                 type="button"
                 onClick={useExampleFridge}
-                className="rounded-full bg-orange-500 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-orange-600"
+                className="rounded-full bg-orange-500 px-6 py-3.5 font-bold text-white shadow-sm transition hover:bg-orange-600"
               >
                 Essayer un exemple
               </button>
@@ -620,7 +620,7 @@ export default function FridgePage() {
               <button
                 type="button"
                 onClick={clearFridge}
-                className="rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+                className="rounded-full border border-orange-200 bg-white px-6 py-3.5 font-bold text-orange-700 transition hover:bg-orange-50"
               >
                 Vider mon frigo
               </button>
@@ -628,8 +628,8 @@ export default function FridgePage() {
           </div>
 
           <div className="space-y-5">
-            <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
                     Ton frigo
@@ -640,7 +640,7 @@ export default function FridgePage() {
                   </p>
                 </div>
 
-                <span className="rounded-full bg-[#fffaf3] px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-orange-100">
+                <span className="w-fit rounded-full bg-[#fffaf3] px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-orange-100">
                   {fridgeIngredients.length} ingrédient
                   {fridgeIngredients.length > 1 ? 's' : ''}
                 </span>
@@ -653,10 +653,10 @@ export default function FridgePage() {
                   clearMessages()
                 }}
                 placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
-                className="mt-4 min-h-36 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-[#fffaf3] px-5 py-4 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                className="mt-4 min-h-36 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-[#fffaf3] px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 sm:px-5"
               />
 
-              <p className="mt-3 text-sm text-stone-500">
+              <p className="mt-3 text-sm leading-6 text-stone-500">
                 Sépare les ingrédients avec une virgule ou écris-les sur
                 plusieurs lignes.
               </p>
@@ -677,16 +677,16 @@ export default function FridgePage() {
               )}
             </div>
 
-            <div className="rounded-[2rem] bg-green-50 p-6 shadow-sm ring-1 ring-green-100">
+            <div className="rounded-[1.75rem] bg-green-50 p-5 shadow-sm ring-1 ring-green-100 sm:rounded-[2rem] sm:p-6">
               <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-xl shadow-sm">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-xl shadow-sm">
                   ♻️
                 </span>
 
                 <div>
                   <p className="font-black text-green-800">Mode anti-gaspi</p>
 
-                  <p className="text-sm text-green-700">
+                  <p className="text-sm leading-6 text-green-700">
                     Mets en priorité un ingrédient à finir.
                   </p>
                 </div>
@@ -699,7 +699,7 @@ export default function FridgePage() {
                   clearMessages()
                 }}
                 placeholder="Exemple : courgettes"
-                className="mt-5 w-full rounded-[1.4rem] border border-green-100 bg-white px-5 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-green-300 focus:ring-4 focus:ring-green-100"
+                className="mt-5 w-full rounded-[1.4rem] border border-green-100 bg-white px-4 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-green-300 focus:ring-4 focus:ring-green-100 sm:px-5"
               />
 
               <div className="mt-4 flex flex-wrap gap-2">
@@ -764,51 +764,51 @@ export default function FridgePage() {
       )}
 
       {loading ? (
-        <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100 sm:p-8">
           Chargement des recettes...
         </div>
       ) : effectiveAvailableIngredients.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:p-8">
           <p className="text-xl font-black text-stone-950">
             Commence par remplir ton frigo.
           </p>
 
-          <p className="mt-2 text-stone-600">
+          <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
             Ajoute quelques ingrédients ou choisis un ingrédient anti-gaspi pour
             découvrir les recettes possibles.
           </p>
         </div>
       ) : analyzedRecipes.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:p-8">
           <p className="text-xl font-black text-stone-950">
             Aucune recette trouvée avec ces ingrédients.
           </p>
 
-          <p className="mt-2 text-stone-600">
+          <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
             Essaie avec des ingrédients plus simples, comme œufs, pâtes, riz,
             tomates ou fromage.
           </p>
         </div>
       ) : (
-        <section className="rounded-[2.5rem] bg-[#fffaf3]/95 p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <section className="rounded-[2rem] bg-[#fffaf3]/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-6 md:p-8">
+          <div className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-wide text-orange-600">
                 Résultats
               </p>
 
-              <h2 className="mt-2 text-3xl font-black text-stone-950 md:text-4xl">
+              <h2 className="mt-2 text-2xl font-black text-stone-950 sm:text-3xl md:text-4xl">
                 Recettes proposées
               </h2>
 
-              <p className="mt-2 max-w-3xl leading-7 text-stone-600">
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base sm:leading-7">
                 Les recettes sont triées automatiquement : d’abord celles qui
                 utilisent ton ingrédient anti-gaspi, puis celles avec le moins
                 d’ingrédients manquants.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm ring-1 ring-orange-100">
                 {analyzedRecipes.length} recette
                 {analyzedRecipes.length > 1 ? 's' : ''}
@@ -826,7 +826,7 @@ export default function FridgePage() {
             </div>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-2">
+          <div className="grid gap-5 sm:gap-6 xl:grid-cols-2">
             {analyzedRecipes.map((match) => (
               <FridgeResultCard
                 key={match.recipe.id}

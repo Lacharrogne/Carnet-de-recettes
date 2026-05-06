@@ -61,6 +61,12 @@ type UnitDefinition = {
   kind: Exclude<UnitKind, 'piece'>
 }
 
+const FALLBACK_CATEGORY: ShoppingCategory = {
+  label: 'Autres',
+  emoji: '🛒',
+  terms: [],
+}
+
 const CATEGORIES: ShoppingCategory[] = [
   {
     label: 'Fruits et légumes',
@@ -176,11 +182,7 @@ const CATEGORIES: ShoppingCategory[] = [
     emoji: '🥤',
     terms: ['cafe', 'coca', 'eau', 'jus', 'limonade', 'sirop', 'the'],
   },
-  {
-    label: 'Autres',
-    emoji: '🛒',
-    terms: [],
-  },
+  FALLBACK_CATEGORY,
 ]
 
 const UNIT_DEFINITIONS: UnitDefinition[] = [
@@ -451,12 +453,11 @@ function formatDisplayName(value: string) {
 function getCategoryForItem(value: string) {
   const normalizedValue = cleanIngredientName(value)
 
-  const category =
+  return (
     CATEGORIES.find((currentCategory) =>
       currentCategory.terms.some((term) => normalizedValue.includes(term)),
-    ) ?? CATEGORIES[CATEGORIES.length - 1]
-
-  return category
+    ) ?? FALLBACK_CATEGORY
+  )
 }
 
 function parseQuantityValue(value: string) {
@@ -492,8 +493,14 @@ function parseQuantityInfo(
     return null
   }
 
-  const quantity = parseQuantityValue(quantityMatch[1])
+  const quantityValue = quantityMatch[1]
   const rest = quantityMatch[2]?.trim() ?? ''
+
+  if (!quantityValue) {
+    return null
+  }
+
+  const quantity = parseQuantityValue(quantityValue)
 
   if (!quantity || quantity <= 0) {
     return null
@@ -594,6 +601,11 @@ function getLineDisplayText(items: ParsedShoppingItem[]) {
 
   if (quantityInfos.length === items.length && quantityInfos.length > 0) {
     const firstQuantity = quantityInfos[0]
+
+    if (!firstQuantity) {
+      return items[0]?.displayName ?? 'Ingrédient'
+    }
+
     const totalBaseValue = quantityInfos.reduce(
       (sum, quantityInfo) => sum + quantityInfo.baseValue,
       0,
@@ -642,17 +654,23 @@ function buildShoppingLines(items: ShoppingListItem[]) {
   })
 
   return Array.from(linesByKey.entries())
-    .map(([key, parsedItems]) => {
+    .flatMap(([key, parsedItems]) => {
       const firstItem = parsedItems[0]
 
-      return {
-        key,
-        category: firstItem.category,
-        categoryEmoji: firstItem.categoryEmoji,
-        displayText: getLineDisplayText(parsedItems),
-        checked: firstItem.checked,
-        items: parsedItems,
+      if (!firstItem) {
+        return []
       }
+
+      return [
+        {
+          key,
+          category: firstItem.category,
+          categoryEmoji: firstItem.categoryEmoji,
+          displayText: getLineDisplayText(parsedItems),
+          checked: firstItem.checked,
+          items: parsedItems,
+        },
+      ]
     })
     .sort((firstLine, secondLine) => {
       const firstCategoryIndex = CATEGORIES.findIndex(
@@ -703,10 +721,11 @@ function getCurrentDateLabel() {
 
 export default function ShoppingListPage() {
   const { user } = useAuth()
+  const userId = user?.id ?? null
 
   const [items, setItems] = useState<ShoppingListItem[]>([])
   const [newItemText, setNewItemText] = useState('')
-  const [hasLoaded, setHasLoaded] = useState(false)
+  const [loadedUserId, setLoadedUserId] = useState<string | null>(null)
 
   const [adding, setAdding] = useState(false)
   const [bulkActionLoading, setBulkActionLoading] = useState(false)
@@ -715,45 +734,47 @@ export default function ShoppingListPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [showCheckedItems, setShowCheckedItems] = useState(true)
 
- useEffect(() => {
-  let ignore = false
+  useEffect(() => {
+    let ignore = false
 
-  if (!user) {
-    return
-  }
-
-  getShoppingListItems()
-    .then((data) => {
-      if (!ignore) {
-        setItems(data)
-        setErrorMessage('')
+    if (!userId) {
+      return () => {
+        ignore = true
       }
-    })
-    .catch((error) => {
-      console.error(error)
+    }
 
-      if (!ignore) {
-        setErrorMessage('Impossible de charger la liste de courses.')
-      }
-    })
-    .finally(() => {
-      if (!ignore) {
-        setHasLoaded(true)
-      }
-    })
+    getShoppingListItems()
+      .then((data) => {
+        if (!ignore) {
+          setItems(data)
+          setLoadedUserId(userId)
+          setErrorMessage('')
+        }
+      })
+      .catch((error) => {
+        console.error(error)
 
-  return () => {
-    ignore = true
-  }
-}, [user])
+        if (!ignore) {
+          setItems([])
+          setLoadedUserId(userId)
+          setErrorMessage('Impossible de charger la liste de courses.')
+        }
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [userId])
+
+  const visibleItems = userId && loadedUserId === userId ? items : []
 
   const activeItems = useMemo(() => {
-    return items.filter((item) => !item.checked)
-  }, [items])
+    return visibleItems.filter((item) => !item.checked)
+  }, [visibleItems])
 
   const checkedItems = useMemo(() => {
-    return items.filter((item) => item.checked)
-  }, [items])
+    return visibleItems.filter((item) => item.checked)
+  }, [visibleItems])
 
   const activeLines = useMemo(() => {
     return buildShoppingLines(activeItems)
@@ -775,7 +796,7 @@ export default function ShoppingListPage() {
     return activeSections.length
   }, [activeSections])
 
-  const loading = !!user && !hasLoaded
+  const loading = !!userId && loadedUserId !== userId
 
   async function handleAddItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -932,7 +953,7 @@ export default function ShoppingListPage() {
   }
 
   async function handleDeleteAllItems() {
-    if (items.length === 0) {
+    if (visibleItems.length === 0) {
       return
     }
 
@@ -1082,7 +1103,7 @@ export default function ShoppingListPage() {
               <button
                 type="button"
                 onClick={handlePrint}
-                disabled={items.length === 0}
+                disabled={visibleItems.length === 0}
                 className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Imprimer la liste
@@ -1108,7 +1129,7 @@ export default function ShoppingListPage() {
               <button
                 type="button"
                 onClick={handleDeleteAllItems}
-                disabled={items.length === 0 || bulkActionLoading}
+                disabled={visibleItems.length === 0 || bulkActionLoading}
                 className="rounded-full border border-red-100 bg-white px-6 py-3 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Vider la liste
@@ -1178,7 +1199,7 @@ export default function ShoppingListPage() {
           <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
             Chargement de la liste de courses...
           </div>
-        ) : items.length === 0 ? (
+        ) : visibleItems.length === 0 ? (
           <div className="rounded-[2.5rem] bg-white p-10 text-center shadow-sm ring-1 ring-orange-100">
             <p className="text-5xl">🧺</p>
 

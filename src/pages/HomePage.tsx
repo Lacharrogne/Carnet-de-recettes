@@ -222,36 +222,36 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="space-y-14">
-        <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
-          <div className="grid gap-10 px-6 py-10 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
+      <section className="space-y-8 sm:space-y-10 lg:space-y-14">
+        <div className="overflow-hidden rounded-[2rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+          <div className="grid gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
             <div className="flex flex-col justify-center">
-              <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+              <div className="mb-5 flex w-fit items-center gap-2 rounded-full bg-[#f4e8dc] px-4 py-2 text-xs font-bold text-orange-700 sm:gap-3 sm:text-sm">
                 <span>🍲</span>
                 <span>Carnet de cuisine familial</span>
               </div>
 
-              <h1 className="max-w-3xl text-4xl font-black leading-tight text-stone-950 md:text-6xl">
+              <h1 className="max-w-3xl text-3xl font-black leading-tight text-stone-950 sm:text-5xl md:text-6xl">
                 Les recettes de la maison, toujours sous la main.
               </h1>
 
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-600">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-stone-600 sm:mt-6 sm:text-lg sm:leading-8">
                 Un petit carnet chaleureux pour retrouver vos plats préférés,
                 garder les idées de Chloé & Maxime et préparer facilement les
                 prochains repas.
               </p>
 
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
                 <Link
                   to="/recipes"
-                  className="rounded-full bg-orange-500 px-7 py-4 font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md"
+                  className="rounded-full bg-orange-500 px-7 py-4 text-center font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md"
                 >
                   Voir les recettes
                 </Link>
 
                 <Link
                   to="/add-recipe"
-                  className="rounded-full border border-orange-200 bg-white px-7 py-4 font-bold text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
+                  className="rounded-full border border-orange-200 bg-white px-7 py-4 text-center font-bold text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
                 >
                   Ajouter une recette
                 </Link>
@@ -262,21 +262,21 @@ export default function HomePage() {
               <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-orange-100/70 blur-2xl" />
               <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-amber-100/80 blur-2xl" />
 
-              <div className="relative rounded-[2.25rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-                <div className="mb-6 flex items-center gap-5">
-                  <div className="relative h-24 w-24 shrink-0 overflow-visible">
+              <div className="relative rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.25rem] sm:p-6">
+                <div className="mb-5 flex items-center gap-4 sm:mb-6 sm:gap-5">
+                  <div className="relative h-20 w-20 shrink-0 overflow-visible sm:h-24 sm:w-24">
                     <img
                       src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
                       alt="Logo Carnet de recettes"
-                      className="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-md"
+                      className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-md sm:h-32 sm:w-32"
                     />
                   </div>
 
-                  <div>
-                    <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-wide text-orange-600 sm:text-sm">
                       Aujourd’hui
                     </p>
-                    <p className="text-xl font-black text-stone-950">
+                    <p className="text-lg font-black text-stone-950 sm:text-xl">
                       On cuisine quoi ?
                     </p>
                   </div>
@@ -286,45 +286,45 @@ export default function HomePage() {
                   type="button"
                   onClick={launchRandomRecipe}
                   disabled={loading || recipes.length === 0 || randomizing}
-                  className="group w-full rounded-[2rem] bg-orange-500 p-7 text-left text-white shadow-sm transition hover:-translate-y-1 hover:bg-orange-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
+                  className="group w-full rounded-[1.75rem] bg-orange-500 p-5 text-left text-white shadow-sm transition hover:-translate-y-1 hover:bg-orange-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 sm:rounded-[2rem] sm:p-7"
                 >
-                  <div className="flex items-center justify-between gap-5">
-                    <div>
-                      <p className="text-sm font-black uppercase tracking-wide text-orange-100">
+                  <div className="flex items-center justify-between gap-4 sm:gap-5">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-wide text-orange-100 sm:text-sm">
                         Bouton magique
                       </p>
 
-                      <p className="mt-4 text-3xl font-black leading-tight">
+                      <p className="mt-3 text-2xl font-black leading-tight sm:mt-4 sm:text-3xl">
                         Me proposer une recette
                       </p>
 
-                      <p className="mt-4 max-w-sm text-base font-bold leading-7 text-orange-50">
+                      <p className="mt-3 max-w-sm text-sm font-bold leading-6 text-orange-50 sm:mt-4 sm:text-base sm:leading-7">
                         Clique ici et le carnet choisit une recette au hasard.
                       </p>
                     </div>
 
-                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[1.5rem] bg-white/20 text-4xl transition group-hover:rotate-12 group-hover:scale-105">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.25rem] bg-white/20 text-3xl transition group-hover:rotate-12 group-hover:scale-105 sm:h-20 sm:w-20 sm:rounded-[1.5rem] sm:text-4xl">
                       🎲
                     </div>
                   </div>
                 </button>
 
-                <div className="mt-5 rounded-[1.5rem] bg-[#f7eee6] p-5">
+                <div className="mt-5 rounded-[1.5rem] bg-[#f7eee6] p-4 sm:p-5">
                   <p className="text-sm font-bold text-stone-500">
                     Dernière recette ajoutée
                   </p>
 
-                  <p className="mt-2 text-2xl font-black text-stone-950">
+                  <p className="mt-2 line-clamp-2 text-xl font-black text-stone-950 sm:text-2xl">
                     {latestRecipes[0]?.title ?? 'Aucune recette pour le moment'}
                   </p>
 
-                  <p className="mt-3 text-sm leading-6 text-stone-600">
+                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-stone-600">
                     {latestRecipes[0]?.description ??
                       'Ajoute une première recette pour commencer ton carnet.'}
                   </p>
                 </div>
 
-                <div className="mt-6 rounded-[1.5rem] border border-dashed border-orange-200 bg-orange-50/60 p-4 text-sm font-medium text-stone-600">
+                <div className="mt-5 rounded-[1.5rem] border border-dashed border-orange-200 bg-orange-50/60 p-4 text-sm font-medium leading-6 text-stone-600 sm:mt-6">
                   💡 Astuce : ajoute tes recettes du quotidien, tes favoris et
                   les ingrédients à ta liste de courses.
                 </div>
@@ -339,34 +339,34 @@ export default function HomePage() {
           </p>
         )}
 
-        <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+          <div className="mb-6 flex flex-col gap-4 sm:mb-8 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="font-bold text-orange-600">Nouveautés</p>
 
-              <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
+              <h2 className="text-2xl font-black text-stone-950 sm:text-3xl md:text-4xl">
                 Les dernières recettes ajoutées
               </h2>
 
-              <p className="mt-2 text-stone-600">
+              <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
                 Les nouvelles idées à tester à la maison.
               </p>
             </div>
 
             <Link
               to="/recipes?view=all"
-              className="w-fit rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+              className="w-full rounded-full border border-orange-200 bg-white px-6 py-3 text-center font-bold text-orange-700 transition hover:bg-orange-50 sm:w-fit"
             >
               Voir plus →
             </Link>
           </div>
 
           {loading ? (
-            <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-8">
               Chargement des recettes...
             </div>
           ) : latestRecipes.length === 0 ? (
-            <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-8">
               <p className="text-lg font-bold text-stone-950">
                 Aucune recette pour le moment.
               </p>
@@ -377,13 +377,13 @@ export default function HomePage() {
 
               <Link
                 to="/add-recipe"
-                className="mt-6 inline-block rounded-full bg-orange-500 px-7 py-4 font-bold text-white transition hover:bg-orange-600"
+                className="mt-6 inline-block w-full rounded-full bg-orange-500 px-7 py-4 font-bold text-white transition hover:bg-orange-600 sm:w-auto"
               >
                 Ajouter une recette
               </Link>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {latestRecipes.map((recipe) => (
                 <RecipeCard key={recipe.id} recipe={recipe} />
               ))}
@@ -391,34 +391,34 @@ export default function HomePage() {
           )}
         </div>
 
-        <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+          <div className="mb-6 flex flex-col gap-4 sm:mb-8 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="font-bold text-orange-600">Explorer</p>
 
-              <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
+              <h2 className="text-2xl font-black text-stone-950 sm:text-3xl md:text-4xl">
                 Les grandes familles de recettes
               </h2>
 
-              <p className="mt-2 text-stone-600">
+              <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
                 Parcours le carnet selon tes envies du moment.
               </p>
             </div>
 
             <Link
               to="/recipes"
-              className="w-fit rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+              className="w-full rounded-full border border-orange-200 bg-white px-6 py-3 text-center font-bold text-orange-700 transition hover:bg-orange-50 sm:w-fit"
             >
               Toutes les recettes →
             </Link>
           </div>
 
           {loading ? (
-            <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-8">
               Chargement des catégories...
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {categoriesWithCount.map((category, index) => {
                 const visualStyle = getCategoryVisualStyle(
                   category.label,
@@ -431,26 +431,26 @@ export default function HomePage() {
                     to={`/recipes?category=${encodeURIComponent(
                       category.value,
                     )}`}
-                    className={`group relative overflow-hidden rounded-[2rem] border ${visualStyle.border} ${visualStyle.cardBg} p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)]`}
+                    className={`group relative overflow-hidden rounded-[1.75rem] border ${visualStyle.border} ${visualStyle.cardBg} p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)] sm:rounded-[2rem] sm:p-6`}
                   >
                     <div
-                      className={`pointer-events-none absolute right-0 top-0 h-28 w-28 -translate-y-6 translate-x-6 rounded-full blur-3xl ${visualStyle.topGlow}`}
+                      className={`pointer-events-none absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full blur-3xl sm:h-28 sm:w-28 ${visualStyle.topGlow}`}
                     />
 
                     <div
-                      className={`pointer-events-none absolute bottom-0 left-0 h-24 w-24 -translate-x-6 translate-y-6 rounded-full blur-3xl ${visualStyle.bottomGlow}`}
+                      className={`pointer-events-none absolute bottom-0 left-0 h-20 w-20 -translate-x-6 translate-y-6 rounded-full blur-3xl sm:h-24 sm:w-24 ${visualStyle.bottomGlow}`}
                     />
 
                     <div className="relative z-10">
-                      <div className="mb-6 flex items-start justify-between gap-4">
+                      <div className="mb-5 flex items-start justify-between gap-3 sm:mb-6 sm:gap-4">
                         <div
-                          className={`flex h-20 w-20 items-center justify-center rounded-[1.6rem] ${visualStyle.iconBg} text-4xl shadow-sm transition group-hover:scale-105`}
+                          className={`flex h-16 w-16 items-center justify-center rounded-[1.35rem] ${visualStyle.iconBg} text-3xl shadow-sm transition group-hover:scale-105 sm:h-20 sm:w-20 sm:rounded-[1.6rem] sm:text-4xl`}
                         >
                           {category.emoji}
                         </div>
 
                         <span
-                          className={`rounded-full ${visualStyle.badgeBg} px-4 py-2 text-sm font-bold ${visualStyle.badgeText}`}
+                          className={`shrink-0 rounded-full ${visualStyle.badgeBg} px-3 py-2 text-xs font-bold ${visualStyle.badgeText} sm:px-4 sm:text-sm`}
                         >
                           {category.count} recette
                           {category.count > 1 ? 's' : ''}
@@ -461,19 +461,19 @@ export default function HomePage() {
                         {visualStyle.miniIcons.map((icon) => (
                           <span
                             key={icon}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-base shadow-sm ring-1 ring-black/5"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-sm shadow-sm ring-1 ring-black/5 sm:h-9 sm:w-9 sm:text-base"
                           >
                             {icon}
                           </span>
                         ))}
                       </div>
 
-                      <h3 className="mb-3 text-2xl font-black leading-tight text-stone-950">
+                      <h3 className="mb-3 text-xl font-black leading-tight text-stone-950 sm:text-2xl">
                         {category.label}
                       </h3>
 
                       <p
-                        className={`min-h-[84px] leading-7 ${visualStyle.subtleText}`}
+                        className={`leading-7 ${visualStyle.subtleText} sm:min-h-[84px]`}
                       >
                         {category.description}
                       </p>
@@ -499,20 +499,20 @@ export default function HomePage() {
       </section>
 
       {randomModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/45 px-5 py-8 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg rounded-[2.5rem] bg-white p-6 shadow-2xl ring-1 ring-orange-100">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/45 px-4 py-5 backdrop-blur-sm sm:px-5 sm:py-8">
+          <div className="relative max-h-[calc(100dvh-40px)] w-full max-w-lg overflow-y-auto rounded-[2rem] bg-white p-5 shadow-2xl ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-6">
             <button
               type="button"
               onClick={closeRandomModal}
-              className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#fff5ec] text-xl font-black text-stone-700 transition hover:bg-orange-100"
+              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[#fff5ec] text-xl font-black text-stone-700 transition hover:bg-orange-100 sm:right-5 sm:top-5"
               aria-label="Fermer"
             >
               ×
             </button>
 
             {randomizing ? (
-              <div className="flex min-h-[360px] flex-col items-center justify-center text-center">
-                <div className="mb-8 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-orange-500 text-6xl shadow-lg">
+              <div className="flex min-h-[320px] flex-col items-center justify-center text-center sm:min-h-[360px]">
+                <div className="mb-7 flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-orange-500 text-5xl shadow-lg sm:mb-8 sm:h-28 sm:w-28 sm:rounded-[2rem] sm:text-6xl">
                   <span className="animate-spin">🎲</span>
                 </div>
 
@@ -520,7 +520,7 @@ export default function HomePage() {
                   Le carnet choisit...
                 </p>
 
-                <h2 className="mt-3 text-3xl font-black text-stone-950">
+                <h2 className="mt-3 text-2xl font-black text-stone-950 sm:text-3xl">
                   On mélange les idées
                 </h2>
 
@@ -530,7 +530,7 @@ export default function HomePage() {
               </div>
             ) : randomRecipe ? (
               <div>
-                <div className="mb-5 flex items-center gap-4 pr-12">
+                <div className="mb-5 flex items-center gap-4 pr-10 sm:pr-12">
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#fff1e6] text-4xl">
                     {randomRecipe.imageUrl ? (
                       <img
@@ -543,12 +543,12 @@ export default function HomePage() {
                     )}
                   </div>
 
-                  <div>
-                    <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
                       Recette surprise
                     </p>
 
-                    <h2 className="text-2xl font-black text-stone-950">
+                    <h2 className="line-clamp-2 text-xl font-black text-stone-950 sm:text-2xl">
                       {randomRecipe.title}
                     </h2>
                   </div>
@@ -568,7 +568,7 @@ export default function HomePage() {
                     <p className="text-sm font-bold text-stone-500">
                       Temps total
                     </p>
-                    <p className="mt-1 text-xl font-black text-stone-950">
+                    <p className="mt-1 text-lg font-black text-stone-950 sm:text-xl">
                       {randomRecipe.prepTime + randomRecipe.cookTime} min
                     </p>
                   </div>
@@ -577,17 +577,17 @@ export default function HomePage() {
                     <p className="text-sm font-bold text-stone-500">
                       Portions
                     </p>
-                    <p className="mt-1 text-xl font-black text-stone-950">
+                    <p className="mt-1 text-lg font-black text-stone-950 sm:text-xl">
                       {randomRecipe.servings} pers.
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-7 flex flex-wrap gap-3">
+                <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
                   <Link
                     to={`/recipes/${randomRecipe.id}`}
                     onClick={closeRandomModal}
-                    className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
+                    className="rounded-full bg-orange-500 px-6 py-3 text-center font-black text-white shadow-sm transition hover:bg-orange-600"
                   >
                     Voir la recette
                   </Link>

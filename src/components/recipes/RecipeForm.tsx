@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+
 import {
   DEFAULT_RECIPE_CATEGORY,
   RECIPE_CATEGORIES,
@@ -31,12 +32,12 @@ type RecipeFormProps = {
 }
 
 const inputClass =
-  'w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100'
+  'w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100 sm:px-4 sm:py-3'
 
-const labelClass = 'mb-2 block font-bold text-stone-800'
+const labelClass = 'mb-2 block text-sm font-bold text-stone-800 sm:text-base'
 
 const sectionClass =
-  'rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-6'
+  'rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] md:p-6'
 
 const smallButtonClass =
   'inline-flex items-center justify-center rounded-full bg-[#fff1e6] px-4 py-2 text-sm font-bold text-orange-700 transition hover:bg-orange-100'
@@ -234,31 +235,35 @@ export default function RecipeForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-7">
+    <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-7">
       {errorMessage && (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700 ring-1 ring-red-100">
+        <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium leading-6 text-red-700 ring-1 ring-red-100 sm:text-base">
           {errorMessage}
         </p>
       )}
 
-      <div className="rounded-[2rem] bg-[#fff5ec] p-6 ring-1 ring-orange-100">
-        <p className="font-bold text-orange-600">Carnet familial</p>
+      <div className="rounded-[1.75rem] bg-[#fff5ec] p-5 ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
+        <p className="text-sm font-bold text-orange-600 sm:text-base">
+          Carnet familial
+        </p>
 
-        <h2 className="mt-2 text-2xl font-black text-stone-950">
+        <h2 className="mt-2 text-2xl font-black text-stone-950 sm:text-3xl">
           Informations principales
         </h2>
 
-        <p className="mt-2 max-w-2xl leading-7 text-stone-600">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base sm:leading-7">
           Ajoute les détails essentiels de la recette pour pouvoir la retrouver,
           la refaire et la partager facilement.
         </p>
       </div>
 
       <div className={sectionClass}>
-        <div className="mb-6">
-          <p className="font-bold text-orange-600">Base de la recette</p>
+        <div className="mb-5 sm:mb-6">
+          <p className="text-sm font-bold text-orange-600 sm:text-base">
+            Base de la recette
+          </p>
 
-          <h3 className="mt-1 text-2xl font-black text-stone-950">
+          <h3 className="mt-1 text-xl font-black text-stone-950 sm:text-2xl">
             Nom, catégorie et difficulté
           </h3>
         </div>
@@ -315,10 +320,12 @@ export default function RecipeForm({
       </div>
 
       <div className={sectionClass}>
-        <div className="mb-6">
-          <p className="font-bold text-orange-600">Temps et portions</p>
+        <div className="mb-5 sm:mb-6">
+          <p className="text-sm font-bold text-orange-600 sm:text-base">
+            Temps et portions
+          </p>
 
-          <h3 className="mt-1 text-2xl font-black text-stone-950">
+          <h3 className="mt-1 text-xl font-black text-stone-950 sm:text-2xl">
             Organisation en cuisine
           </h3>
         </div>
@@ -377,10 +384,12 @@ export default function RecipeForm({
       </div>
 
       <div className={sectionClass}>
-        <div className="mb-6">
-          <p className="font-bold text-orange-600">Image</p>
+        <div className="mb-5 sm:mb-6">
+          <p className="text-sm font-bold text-orange-600 sm:text-base">
+            Image
+          </p>
 
-          <h3 className="mt-1 text-2xl font-black text-stone-950">
+          <h3 className="mt-1 text-xl font-black text-stone-950 sm:text-2xl">
             Photo et emoji de secours
           </h3>
         </div>
@@ -396,7 +405,7 @@ export default function RecipeForm({
               className={inputClass}
             />
 
-            <p className="mt-2 text-sm text-stone-500">
+            <p className="mt-2 text-sm leading-6 text-stone-500">
               Il s’affiche quand aucune photo n’est ajoutée.
             </p>
           </div>
@@ -410,11 +419,11 @@ export default function RecipeForm({
               onChange={(event) =>
                 setImageFile(event.target.files ? event.target.files[0] : null)
               }
-              className={`${inputClass} file:mr-4 file:rounded-full file:border-0 file:bg-orange-100 file:px-4 file:py-2 file:font-bold file:text-orange-700`}
+              className={`${inputClass} file:mr-4 file:rounded-full file:border-0 file:bg-orange-100 file:px-4 file:py-2 file:text-sm file:font-bold file:text-orange-700`}
             />
 
             {initialValues?.imageUrl && !previewUrl && (
-              <p className="mt-2 text-sm text-stone-500">
+              <p className="mt-2 text-sm leading-6 text-stone-500">
                 Tu peux laisser vide pour garder l’image actuelle.
               </p>
             )}
@@ -425,16 +434,18 @@ export default function RecipeForm({
           <img
             src={previewUrl}
             alt="Aperçu de la recette"
-            className="mt-5 h-56 w-full rounded-[1.5rem] object-cover ring-1 ring-orange-100"
+            className="mt-5 h-44 w-full rounded-[1.5rem] object-cover ring-1 ring-orange-100 sm:h-56"
           />
         )}
       </div>
 
       <div className={sectionClass}>
-        <div className="mb-6">
-          <p className="font-bold text-orange-600">Présentation</p>
+        <div className="mb-5 sm:mb-6">
+          <p className="text-sm font-bold text-orange-600 sm:text-base">
+            Présentation
+          </p>
 
-          <h3 className="mt-1 text-2xl font-black text-stone-950">
+          <h3 className="mt-1 text-xl font-black text-stone-950 sm:text-2xl">
             Petite description
           </h3>
         </div>
@@ -452,20 +463,27 @@ export default function RecipeForm({
       </div>
 
       <div className={sectionClass}>
-        <div className="mb-6">
-          <p className="font-bold text-orange-600">Classement</p>
+        <div className="mb-5 sm:mb-6">
+          <p className="text-sm font-bold text-orange-600 sm:text-base">
+            Classement
+          </p>
 
-          <h3 className="mt-1 text-2xl font-black text-stone-950">Tags</h3>
+          <h3 className="mt-1 text-xl font-black text-stone-950 sm:text-2xl">
+            Tags
+          </h3>
 
-          <p className="mt-2 leading-7 text-stone-600">
+          <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base sm:leading-7">
             Les tags permettent de retrouver rapidement une recette selon
             l’envie, le moment ou le type de plat.
           </p>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-5 sm:space-y-6">
           {RECIPE_TAG_GROUPS.map((group) => (
-            <div key={group.title} className="rounded-[1.5rem] bg-[#fffaf3] p-4">
+            <div
+              key={group.title}
+              className="rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-50"
+            >
               <p className="mb-3 font-black text-stone-800">{group.title}</p>
 
               <div className="flex flex-wrap gap-2">
@@ -477,7 +495,7 @@ export default function RecipeForm({
                       key={tag.value}
                       type="button"
                       onClick={() => toggleTag(tag.value)}
-                      className={`rounded-full px-4 py-2 text-sm font-bold transition ${
+                      className={`rounded-full px-4 py-2.5 text-sm font-bold transition ${
                         isSelected
                           ? 'bg-orange-600 text-white shadow-sm'
                           : 'bg-white text-stone-600 ring-1 ring-orange-100 hover:bg-orange-50 hover:text-orange-700'
@@ -494,10 +512,12 @@ export default function RecipeForm({
       </div>
 
       <div className={sectionClass}>
-        <div className="mb-6">
-          <p className="font-bold text-orange-600">Liste de courses</p>
+        <div className="mb-5 sm:mb-6">
+          <p className="text-sm font-bold text-orange-600 sm:text-base">
+            Liste de courses
+          </p>
 
-          <h3 className="mt-1 text-2xl font-black text-stone-950">
+          <h3 className="mt-1 text-xl font-black text-stone-950 sm:text-2xl">
             Ingrédients
           </h3>
         </div>
@@ -506,7 +526,7 @@ export default function RecipeForm({
           {ingredients.map((ingredient, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 rounded-[1.5rem] bg-[#fffaf3] p-3 sm:flex-row"
+              className="flex flex-col gap-3 rounded-[1.5rem] bg-[#fffaf3] p-3 ring-1 ring-orange-50 sm:flex-row sm:items-center"
             >
               <input
                 ref={(element) => {
@@ -524,7 +544,7 @@ export default function RecipeForm({
                 type="button"
                 onClick={() => removeIngredient(index)}
                 disabled={ingredients.length === 1}
-                className="rounded-2xl border border-red-100 bg-white px-4 py-3 font-bold text-stone-500 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                className="w-full rounded-2xl border border-red-100 bg-white px-4 py-3 font-bold text-stone-500 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
               >
                 Supprimer
               </button>
@@ -542,10 +562,12 @@ export default function RecipeForm({
       </div>
 
       <div className={sectionClass}>
-        <div className="mb-6">
-          <p className="font-bold text-orange-600">Préparation</p>
+        <div className="mb-5 sm:mb-6">
+          <p className="text-sm font-bold text-orange-600 sm:text-base">
+            Préparation
+          </p>
 
-          <h3 className="mt-1 text-2xl font-black text-stone-950">
+          <h3 className="mt-1 text-xl font-black text-stone-950 sm:text-2xl">
             Étapes de la recette
           </h3>
         </div>
@@ -554,7 +576,7 @@ export default function RecipeForm({
           {steps.map((step, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 rounded-[1.5rem] bg-[#fffaf3] p-3 sm:flex-row"
+              className="flex flex-col gap-3 rounded-[1.5rem] bg-[#fffaf3] p-3 ring-1 ring-orange-50 sm:flex-row"
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-600 font-black text-white">
                 {index + 1}
@@ -575,7 +597,7 @@ export default function RecipeForm({
                 type="button"
                 onClick={() => removeStep(index)}
                 disabled={steps.length === 1}
-                className="h-fit rounded-2xl border border-red-100 bg-white px-4 py-3 font-bold text-stone-500 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                className="h-fit w-full rounded-2xl border border-red-100 bg-white px-4 py-3 font-bold text-stone-500 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
               >
                 Supprimer
               </button>
@@ -592,13 +614,15 @@ export default function RecipeForm({
         </button>
       </div>
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full rounded-[1.5rem] bg-orange-600 px-6 py-4 text-lg font-black text-white shadow-sm transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {isSubmitting ? 'Enregistrement...' : submitLabel}
-      </button>
+      <div className="sticky bottom-4 z-20 rounded-[1.75rem] bg-[#fffaf3]/90 p-2 shadow-lg ring-1 ring-orange-100 backdrop-blur print:static sm:bottom-6">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full rounded-[1.5rem] bg-orange-600 px-6 py-4 text-lg font-black text-white shadow-sm transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? 'Enregistrement...' : submitLabel}
+        </button>
+      </div>
     </form>
   )
 }

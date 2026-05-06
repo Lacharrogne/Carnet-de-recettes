@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+
 import { useAuth } from '../../context/useAuth'
 import { isRecipeFavorite, toggleFavorite } from '../../services/favorites'
 import { getAverageRating, getRecipeReviews } from '../../services/reviews'
@@ -29,7 +30,8 @@ const DEFAULT_RECIPE_STYLE: RecipeVisualStyle = {
   badgeBg: 'bg-white/95',
   badgeText: 'text-orange-700',
   accentText: 'text-orange-700',
-  arrowBg: 'bg-orange-100 text-orange-700 group-hover:bg-orange-500 group-hover:text-white',
+  arrowBg:
+    'bg-orange-100 text-orange-700 group-hover:bg-orange-500 group-hover:text-white',
   blob: 'bg-orange-200/50',
   decorations: ['🍽️', '✨'],
 }
@@ -42,7 +44,8 @@ const RECIPE_CATEGORY_STYLES: Record<string, RecipeVisualStyle> = {
     badgeBg: 'bg-[#f0faec]/95',
     badgeText: 'text-[#4d7b45]',
     accentText: 'text-[#4d8a45]',
-    arrowBg: 'bg-[#e6f5e1] text-[#4d8a45] group-hover:bg-[#69a85f] group-hover:text-white',
+    arrowBg:
+      'bg-[#e6f5e1] text-[#4d8a45] group-hover:bg-[#69a85f] group-hover:text-white',
     blob: 'bg-[#bde5b3]/50',
     decorations: ['🫒', '🍅'],
   },
@@ -54,7 +57,8 @@ const RECIPE_CATEGORY_STYLES: Record<string, RecipeVisualStyle> = {
     badgeBg: 'bg-[#fff0df]/95',
     badgeText: 'text-[#a85c24]',
     accentText: 'text-[#d96d1e]',
-    arrowBg: 'bg-[#ffe3c7] text-[#d96d1e] group-hover:bg-[#ff6b00] group-hover:text-white',
+    arrowBg:
+      'bg-[#ffe3c7] text-[#d96d1e] group-hover:bg-[#ff6b00] group-hover:text-white',
     blob: 'bg-[#ffc38c]/50',
     decorations: ['🍝', '🥘'],
   },
@@ -66,7 +70,8 @@ const RECIPE_CATEGORY_STYLES: Record<string, RecipeVisualStyle> = {
     badgeBg: 'bg-[#ffedf3]/95',
     badgeText: 'text-[#a8566b]',
     accentText: 'text-[#d86f8f]',
-    arrowBg: 'bg-[#ffe0e9] text-[#d86f8f] group-hover:bg-[#ef7e9e] group-hover:text-white',
+    arrowBg:
+      'bg-[#ffe0e9] text-[#d86f8f] group-hover:bg-[#ef7e9e] group-hover:text-white',
     blob: 'bg-[#ffbdd0]/50',
     decorations: ['🍓', '🧁'],
   },
@@ -78,7 +83,8 @@ const RECIPE_CATEGORY_STYLES: Record<string, RecipeVisualStyle> = {
     badgeBg: 'bg-[#fff0c8]/95',
     badgeText: 'text-[#876619]',
     accentText: 'text-[#c28a0c]',
-    arrowBg: 'bg-[#ffe8a8] text-[#b77f08] group-hover:bg-[#d99a13] group-hover:text-white',
+    arrowBg:
+      'bg-[#ffe8a8] text-[#b77f08] group-hover:bg-[#d99a13] group-hover:text-white',
     blob: 'bg-[#ffe08c]/50',
     decorations: ['☕', '🥐'],
   },
@@ -90,7 +96,8 @@ const RECIPE_CATEGORY_STYLES: Record<string, RecipeVisualStyle> = {
     badgeBg: 'bg-[#e8f5ff]/95',
     badgeText: 'text-[#3f6f8c]',
     accentText: 'text-[#3f8cbb]',
-    arrowBg: 'bg-[#d9efff] text-[#3f8cbb] group-hover:bg-[#4b9ac9] group-hover:text-white',
+    arrowBg:
+      'bg-[#d9efff] text-[#3f8cbb] group-hover:bg-[#4b9ac9] group-hover:text-white',
     blob: 'bg-[#b8dcf7]/50',
     decorations: ['🍋', '🧊'],
   },
@@ -102,7 +109,8 @@ const RECIPE_CATEGORY_STYLES: Record<string, RecipeVisualStyle> = {
     badgeBg: 'bg-[#eaf7e7]/95',
     badgeText: 'text-[#4d7548]',
     accentText: 'text-[#4d934d]',
-    arrowBg: 'bg-[#ddf2d8] text-[#4d934d] group-hover:bg-[#63a85f] group-hover:text-white',
+    arrowBg:
+      'bg-[#ddf2d8] text-[#4d934d] group-hover:bg-[#63a85f] group-hover:text-white',
     blob: 'bg-[#bfe2b8]/50',
     decorations: ['🥑', '🌿'],
   },
@@ -199,17 +207,17 @@ export default function RecipeCard({
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-[2rem] ${visualStyle.cardBg} shadow-sm ring-1 ${visualStyle.ring} transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_18px_40px_rgba(28,25,23,0.1)]`}
+      className={`group relative h-full overflow-hidden rounded-[1.75rem] ${visualStyle.cardBg} shadow-sm ring-1 ${visualStyle.ring} transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(28,25,23,0.1)] sm:rounded-[2rem] sm:hover:-translate-y-1.5`}
     >
       <div
-        className={`pointer-events-none absolute -right-14 -top-14 h-36 w-36 rounded-full blur-3xl ${visualStyle.blob}`}
+        className={`pointer-events-none absolute -right-14 -top-14 h-32 w-32 rounded-full blur-3xl sm:h-36 sm:w-36 ${visualStyle.blob}`}
       />
 
       <button
         type="button"
         onClick={handleFavoriteClick}
         disabled={loadingFavorite}
-        className={`absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full text-xl shadow-sm transition ${
+        className={`absolute right-3 top-3 z-20 flex h-12 w-12 items-center justify-center rounded-full text-2xl shadow-sm transition sm:right-4 sm:top-4 sm:h-11 sm:w-11 sm:text-xl ${
           displayedFavorite
             ? 'bg-red-500 text-white hover:bg-red-600'
             : 'bg-white/95 text-stone-500 hover:bg-white hover:text-red-500'
@@ -221,29 +229,29 @@ export default function RecipeCard({
         {displayedFavorite ? '♥' : '♡'}
       </button>
 
-      <Link to={`/recipes/${recipe.id}`} className="relative z-10 block">
+      <Link to={`/recipes/${recipe.id}`} className="relative z-10 block h-full">
         <div className={`relative overflow-hidden ${visualStyle.imageBg}`}>
           {recipe.imageUrl ? (
             <img
               src={recipe.imageUrl}
               alt={recipe.title}
-              className="h-56 w-full object-cover transition duration-300 group-hover:scale-105"
+              className="h-44 w-full object-cover transition duration-300 group-hover:scale-105 sm:h-56"
             />
           ) : (
-            <div className="relative flex h-56 items-center justify-center overflow-hidden">
+            <div className="relative flex h-44 items-center justify-center overflow-hidden sm:h-56">
               <div
-                className={`absolute h-32 w-32 rounded-full blur-2xl ${visualStyle.blob}`}
+                className={`absolute h-28 w-28 rounded-full blur-2xl sm:h-32 sm:w-32 ${visualStyle.blob}`}
               />
 
-              <div className="relative flex h-28 w-28 items-center justify-center rounded-[2rem] bg-white/65 text-7xl shadow-sm ring-1 ring-white/80 backdrop-blur-sm transition duration-300 group-hover:scale-105">
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-white/65 text-5xl shadow-sm ring-1 ring-white/80 backdrop-blur-sm transition duration-300 group-hover:scale-105 sm:h-28 sm:w-28 sm:rounded-[2rem] sm:text-7xl">
                 {recipe.image || '🍽️'}
               </div>
 
-              <div className="absolute bottom-4 right-4 flex gap-2">
+              <div className="absolute bottom-3 right-3 flex gap-1.5 sm:bottom-4 sm:right-4 sm:gap-2">
                 {visualStyle.decorations.map((decoration) => (
                   <span
                     key={decoration}
-                    className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/70 text-lg shadow-sm ring-1 ring-white/70 backdrop-blur"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/70 text-base shadow-sm ring-1 ring-white/70 backdrop-blur sm:h-10 sm:w-10 sm:rounded-2xl sm:text-lg"
                   >
                     {decoration}
                   </span>
@@ -252,10 +260,10 @@ export default function RecipeCard({
             </div>
           )}
 
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-stone-950/40 to-transparent px-4 pb-4 pt-12">
-            <div className="flex flex-wrap gap-2">
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-stone-950/45 to-transparent px-3 pb-3 pt-12 sm:px-4 sm:pb-4">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               <span
-                className={`rounded-full ${visualStyle.badgeBg} px-3 py-1 text-xs font-black ${visualStyle.badgeText} shadow-sm`}
+                className={`max-w-[180px] truncate rounded-full ${visualStyle.badgeBg} px-3 py-1 text-xs font-black ${visualStyle.badgeText} shadow-sm sm:max-w-none`}
               >
                 {recipe.category}
               </span>
@@ -273,16 +281,16 @@ export default function RecipeCard({
           </div>
         </div>
 
-        <div className="p-5">
+        <div className="flex h-full flex-col p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
-            <div>
+            <div className="min-w-0">
               <p
-                className={`mb-1 text-xs font-black uppercase tracking-wide ${visualStyle.accentText}`}
+                className={`mb-1 text-[0.7rem] font-black uppercase tracking-wide sm:text-xs ${visualStyle.accentText}`}
               >
                 Recette maison
               </p>
 
-              <h3 className="text-xl font-black leading-tight text-stone-950 transition group-hover:text-orange-700">
+              <h3 className="line-clamp-2 text-lg font-black leading-tight text-stone-950 transition group-hover:text-orange-700 sm:text-xl">
                 {recipe.title}
               </h3>
             </div>
@@ -310,21 +318,21 @@ export default function RecipeCard({
             {recipe.description || 'Une recette à retrouver dans le carnet.'}
           </p>
 
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="rounded-[1.25rem] bg-white/80 px-4 py-3 shadow-sm ring-1 ring-white/80 backdrop-blur">
+          <div className="mt-5 grid grid-cols-2 gap-2.5 sm:gap-3">
+            <div className="rounded-[1.15rem] bg-white/80 px-3 py-3 shadow-sm ring-1 ring-white/80 backdrop-blur sm:rounded-[1.25rem] sm:px-4">
               <p className="text-xs font-medium text-stone-500">
                 Temps total
               </p>
 
-              <p className="mt-1 font-black text-stone-950">
+              <p className="mt-1 text-sm font-black text-stone-950 sm:text-base">
                 ⏱️ {totalTime} min
               </p>
             </div>
 
-            <div className="rounded-[1.25rem] bg-white/80 px-4 py-3 shadow-sm ring-1 ring-white/80 backdrop-blur">
+            <div className="rounded-[1.15rem] bg-white/80 px-3 py-3 shadow-sm ring-1 ring-white/80 backdrop-blur sm:rounded-[1.25rem] sm:px-4">
               <p className="text-xs font-medium text-stone-500">Portions</p>
 
-              <p className="mt-1 font-black text-stone-950">
+              <p className="mt-1 text-sm font-black text-stone-950 sm:text-base">
                 🍽️ {recipe.servings} pers.
               </p>
             </div>
@@ -335,7 +343,7 @@ export default function RecipeCard({
               {visibleTags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-stone-600 ring-1 ring-white/80"
+                  className="max-w-full truncate rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-stone-600 ring-1 ring-white/80"
                 >
                   #{tag}
                 </span>
@@ -349,7 +357,7 @@ export default function RecipeCard({
             </div>
           )}
 
-          <div className="mt-5 flex items-center justify-between border-t border-white/80 pt-4">
+          <div className="mt-auto flex items-center justify-between border-t border-white/80 pt-4">
             <span className={`text-sm font-black ${visualStyle.accentText}`}>
               Voir la recette
             </span>

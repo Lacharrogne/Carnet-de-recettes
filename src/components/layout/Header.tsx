@@ -73,6 +73,17 @@ function navPillClass(isActive: boolean) {
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   navPillClass(isActive)
 
+function mobileNavClass(isActive: boolean) {
+  return `flex items-center justify-between rounded-2xl px-4 py-4 text-base font-black shadow-sm ring-1 transition ${
+    isActive
+      ? 'bg-orange-500 text-white ring-orange-200'
+      : 'bg-white text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
+  }`
+}
+
+const mobileLinkClass =
+  'rounded-2xl bg-[#fffaf3] px-4 py-3.5 font-bold text-stone-800 transition hover:bg-orange-50'
+
 function dropdownPanelClass(
   isOpen: boolean,
   width = 'w-[420px]',
@@ -166,26 +177,26 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-orange-100/80 bg-[#fffaf3]/95 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-2">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-5">
         <Link
           to="/"
           onClick={closeMenu}
-          className="group flex items-center gap-6"
+          className="group flex min-w-0 items-center gap-3 sm:gap-5"
         >
-          <div className="relative h-12 w-24 shrink-0 overflow-visible">
+          <div className="relative h-11 w-14 shrink-0 overflow-visible sm:h-12 sm:w-20 lg:w-24">
             <img
               src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
               alt="Logo Carnet de recettes"
-              className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-lg transition group-hover:-rotate-2 group-hover:scale-105 lg:h-32 lg:w-32"
+              className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-lg transition group-hover:-rotate-2 group-hover:scale-105 sm:h-28 sm:w-28 lg:h-32 lg:w-32"
             />
           </div>
 
-          <div>
-            <p className="text-2xl font-black leading-tight text-stone-950">
+          <div className="min-w-0">
+            <p className="truncate text-lg font-black leading-tight text-stone-950 sm:text-2xl">
               Carnet de recettes
             </p>
 
-            <p className="text-sm font-semibold text-stone-500">
+            <p className="hidden truncate text-sm font-semibold text-stone-500 sm:block">
               Cuisine maison & petits plats
             </p>
           </div>
@@ -468,32 +479,69 @@ export default function Header() {
         <button
           type="button"
           onClick={() => setMenuOpen((current) => !current)}
-          className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-2xl font-bold text-stone-900 shadow-sm lg:hidden"
-          aria-label="Ouvrir le menu"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-orange-100 bg-white text-2xl font-black text-stone-900 shadow-sm transition hover:bg-orange-50 lg:hidden"
+          aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+          aria-expanded={menuOpen}
         >
           {menuOpen ? '✕' : '☰'}
         </button>
       </div>
 
       {menuOpen && (
-        <div className="border-t border-orange-100 bg-[#fffaf3] px-5 py-5 lg:hidden">
-          <nav className="mx-auto grid max-w-7xl gap-3">
-            <NavLink to="/" onClick={closeMenu} className={navLinkClass}>
-              Accueil
+        <div className="max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-orange-100 bg-[#fffaf3] px-4 py-5 shadow-xl lg:hidden">
+          <nav className="mx-auto grid max-w-7xl gap-3 pb-4">
+            <NavLink
+              to="/"
+              onClick={closeMenu}
+              className={({ isActive }) => mobileNavClass(isActive)}
+            >
+              <span>🏠 Accueil</span>
+              <span>→</span>
             </NavLink>
 
-            <details className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">
-              <summary className="cursor-pointer rounded-xl px-2 py-2 font-black text-stone-900">
-                Recettes
+            {user && (
+              <Link
+                to="/add-recipe"
+                onClick={closeMenu}
+                className={`flex items-center justify-between rounded-2xl px-4 py-4 font-black shadow-sm ring-1 transition ${
+                  isAddRecipeActive
+                    ? 'bg-orange-500 text-white ring-orange-200'
+                    : 'bg-[#f4e8dc] text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
+                }`}
+              >
+                <span className="flex items-center gap-3">
+                  <span
+                    className={`flex h-10 w-10 items-center justify-center rounded-full text-xl ring-2 ring-white ${
+                      isAddRecipeActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-orange-500 text-white'
+                    }`}
+                  >
+                    +
+                  </span>
+                  Ajouter une recette
+                </span>
+
+                <span>→</span>
+              </Link>
+            )}
+
+            <details
+              open={isRecipesActive}
+              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden"
+            >
+              <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
+                <span>📖 Recettes</span>
+                <span className="text-stone-400">▾</span>
               </summary>
 
-              <div className="mt-2 grid gap-2">
+              <div className="mt-3 grid gap-2">
                 <Link
                   to="/recipes?view=all"
                   onClick={closeMenu}
-                  className="rounded-2xl bg-orange-500 px-4 py-3 font-black text-white"
+                  className="rounded-2xl bg-orange-500 px-4 py-3.5 font-black text-white shadow-sm"
                 >
-                  📖 Toutes les recettes
+                  Toutes les recettes
                 </Link>
 
                 {RECIPE_CATEGORIES.map((category) => (
@@ -503,26 +551,31 @@ export default function Header() {
                       category.value,
                     )}`}
                     onClick={closeMenu}
-                    className="rounded-2xl bg-[#fffaf3] px-4 py-3 font-bold text-stone-800"
+                    className={mobileLinkClass}
                   >
-                    {category.emoji} {category.label}
+                    <span className="mr-2">{category.emoji}</span>
+                    {category.label}
                   </Link>
                 ))}
               </div>
             </details>
 
-            <details className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">
-              <summary className="cursor-pointer rounded-xl px-2 py-2 font-black text-stone-900">
-                Outils
+            <details
+              open={isToolsActive}
+              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden"
+            >
+              <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
+                <span>🧰 Outils</span>
+                <span className="text-stone-400">▾</span>
               </summary>
 
-              <div className="mt-2 grid gap-2">
+              <div className="mt-3 grid gap-2">
                 <Link
                   to="/tools"
                   onClick={closeMenu}
-                  className="rounded-2xl bg-orange-500 px-4 py-3 font-black text-white"
+                  className="rounded-2xl bg-orange-500 px-4 py-3.5 font-black text-white shadow-sm"
                 >
-                  🧰 Tous les outils
+                  Tous les outils
                 </Link>
 
                 {toolLinks.map((link) => (
@@ -530,50 +583,93 @@ export default function Header() {
                     key={link.to}
                     to={link.to}
                     onClick={closeMenu}
-                    className="rounded-2xl bg-[#fffaf3] px-4 py-3 font-bold text-stone-800"
+                    className="rounded-2xl bg-[#fffaf3] px-4 py-3.5 transition hover:bg-orange-50"
                   >
-                    {link.emoji} {link.label}
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#fff1e6] text-xl">
+                        {link.emoji}
+                      </span>
+
+                      <div className="min-w-0">
+                        <p className="font-black text-stone-900">
+                          {link.label}
+                        </p>
+
+                        <p className="truncate text-sm font-semibold text-stone-500">
+                          {link.description}
+                        </p>
+                      </div>
+                    </div>
                   </Link>
                 ))}
               </div>
             </details>
 
-            {user && (
-              <details className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">
-                <summary className="cursor-pointer rounded-xl px-2 py-2 font-black text-stone-900">
-                  {displayedName}
+            {user ? (
+              <details className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">
+                <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
+                  <span className="flex min-w-0 items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
+                      {displayedAvatarUrl ? (
+                        <img
+                          src={displayedAvatarUrl}
+                          alt={displayedName}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        avatarLetter
+                      )}
+                    </span>
+
+                    <span className="min-w-0 truncate">{displayedName}</span>
+                  </span>
+
+                  <span className="text-stone-400">▾</span>
                 </summary>
 
-                <div className="mt-2 grid gap-2">
+                <div className="mt-3 grid gap-2">
                   {personalLinks.map((link) => (
                     <Link
                       key={link.to}
                       to={link.to}
                       onClick={closeMenu}
-                      className="rounded-2xl bg-[#fffaf3] px-4 py-3 font-bold text-stone-800"
+                      className="rounded-2xl bg-[#fffaf3] px-4 py-3.5 transition hover:bg-orange-50"
                     >
-                      {link.emoji} {link.label}
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#fff1e6] text-xl">
+                          {link.emoji}
+                        </span>
+
+                        <div className="min-w-0">
+                          <p className="font-black text-stone-900">
+                            {link.label}
+                          </p>
+
+                          <p className="truncate text-sm font-semibold text-stone-500">
+                            {link.description}
+                          </p>
+                        </div>
+                      </div>
                     </Link>
                   ))}
 
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="rounded-2xl border border-orange-200 bg-white px-4 py-3 text-left font-black text-orange-600"
+                    className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3.5 text-left font-black text-red-700 transition hover:bg-red-100"
                   >
                     🚪 Déconnexion
                   </button>
                 </div>
               </details>
-            )}
-
-            {!user && (
+            ) : (
               <NavLink
                 to="/auth"
                 onClick={closeMenu}
-                className={navLinkClass}
+                className={({ isActive }) => mobileNavClass(isActive)}
               >
-                Connexion
+                <span>👤 Connexion</span>
+                <span>→</span>
               </NavLink>
             )}
           </nav>

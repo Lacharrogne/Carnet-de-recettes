@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+
 import RecipeCard from '../components/recipes/RecipeCard'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getRecipes } from '../services/recipes'
@@ -383,7 +384,7 @@ export default function RecipesPage() {
 
   const wallpaperEmojis = activeCategoryAmbience
     ? Array.from(
-        { length: 72 },
+        { length: 56 },
         (_, index) =>
           activeCategoryAmbience.emojis[
             index % activeCategoryAmbience.emojis.length
@@ -407,33 +408,33 @@ export default function RecipesPage() {
 
   if (loading) {
     return (
-      <section className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100 sm:p-8">
         Chargement des recettes...
       </section>
     )
   }
 
   return (
-    <section className="space-y-10">
-      <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3]/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1fr] lg:items-center">
+    <section className="space-y-8 sm:space-y-10">
+      <div className="overflow-hidden rounded-[2rem] bg-[#fffaf3]/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+        <div className="grid gap-7 lg:grid-cols-[0.9fr_1fr] lg:items-center">
           <div>
-            <div className="mb-4 flex w-fit items-center gap-2 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+            <div className="mb-4 flex w-fit items-center gap-2 rounded-full bg-[#f4e8dc] px-4 py-2 text-xs font-bold text-orange-700 sm:text-sm">
               <span>📖</span>
               <span>Le carnet</span>
             </div>
 
-            <h1 className="text-5xl font-black leading-tight text-stone-950 md:text-7xl">
+            <h1 className="text-3xl font-black leading-tight text-stone-950 sm:text-5xl md:text-7xl">
               Trouver une recette
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-600">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600 sm:mt-6 sm:text-lg sm:leading-8">
               Recherche par nom, ingrédient ou catégorie, puis retrouve
               rapidement tous les petits plats de la maison.
             </p>
           </div>
 
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
             <input
               type="text"
               value={search}
@@ -445,10 +446,10 @@ export default function RecipesPage() {
                 }
               }}
               placeholder="Exemple : tarte, poulet, chocolat..."
-              className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-5 py-4 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+              className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
             />
 
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="mt-4 grid gap-3 md:grid-cols-2 md:gap-4">
               <select
                 value={selectedCategory?.value ?? ''}
                 onChange={(event) => {
@@ -466,7 +467,7 @@ export default function RecipesPage() {
 
                   selectCategory(value)
                 }}
-                className="rounded-2xl border border-orange-100 bg-[#fffdf9] px-5 py-4 text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
               >
                 <option value="">Toutes les catégories</option>
 
@@ -480,7 +481,7 @@ export default function RecipesPage() {
               <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortOption)}
-                className="rounded-2xl border border-orange-100 bg-[#fffdf9] px-5 py-4 text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
               >
                 <option value="name">Trier par nom</option>
                 <option value="time">Temps le plus court</option>
@@ -506,16 +507,16 @@ export default function RecipesPage() {
       )}
 
       {!hasActiveFilters && (
-        <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+          <div className="mb-6 flex flex-col gap-4 sm:mb-8 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="font-bold text-orange-600">Catégories</p>
 
-              <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
+              <h2 className="text-2xl font-black text-stone-950 sm:text-3xl md:text-4xl">
                 Parcourir par grandes familles
               </h2>
 
-              <p className="mt-2 text-stone-600">
+              <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
                 Choisis une famille pour découvrir les recettes associées.
               </p>
             </div>
@@ -523,13 +524,13 @@ export default function RecipesPage() {
             <button
               type="button"
               onClick={showAll}
-              className="w-fit rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+              className="w-full rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50 sm:w-fit"
             >
               Afficher toutes les recettes
             </button>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {categoriesWithCount.map((category, index) => {
               const visualStyle = getCategoryVisualStyle(category.label, index)
 
@@ -538,26 +539,26 @@ export default function RecipesPage() {
                   key={category.value}
                   type="button"
                   onClick={() => selectCategory(category.value)}
-                  className={`group relative overflow-hidden rounded-[2rem] border ${visualStyle.border} ${visualStyle.cardBg} p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)]`}
+                  className={`group relative overflow-hidden rounded-[1.75rem] border ${visualStyle.border} ${visualStyle.cardBg} p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)] sm:rounded-[2rem] sm:p-6`}
                 >
                   <div
-                    className={`pointer-events-none absolute right-0 top-0 h-28 w-28 -translate-y-6 translate-x-6 rounded-full blur-3xl ${visualStyle.topGlow}`}
+                    className={`pointer-events-none absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full blur-3xl sm:h-28 sm:w-28 ${visualStyle.topGlow}`}
                   />
 
                   <div
-                    className={`pointer-events-none absolute bottom-0 left-0 h-24 w-24 -translate-x-6 translate-y-6 rounded-full blur-3xl ${visualStyle.bottomGlow}`}
+                    className={`pointer-events-none absolute bottom-0 left-0 h-20 w-20 -translate-x-6 translate-y-6 rounded-full blur-3xl sm:h-24 sm:w-24 ${visualStyle.bottomGlow}`}
                   />
 
                   <div className="relative z-10">
-                    <div className="mb-6 flex items-start justify-between gap-4">
+                    <div className="mb-5 flex items-start justify-between gap-3 sm:mb-6 sm:gap-4">
                       <div
-                        className={`flex h-20 w-20 items-center justify-center rounded-[1.6rem] ${visualStyle.iconBg} text-4xl shadow-sm transition group-hover:scale-105`}
+                        className={`flex h-16 w-16 items-center justify-center rounded-[1.35rem] ${visualStyle.iconBg} text-3xl shadow-sm transition group-hover:scale-105 sm:h-20 sm:w-20 sm:rounded-[1.6rem] sm:text-4xl`}
                       >
                         {category.emoji}
                       </div>
 
                       <span
-                        className={`rounded-full ${visualStyle.badgeBg} px-4 py-2 text-sm font-bold ${visualStyle.badgeText}`}
+                        className={`shrink-0 rounded-full ${visualStyle.badgeBg} px-3 py-2 text-xs font-bold ${visualStyle.badgeText} sm:px-4 sm:text-sm`}
                       >
                         {category.count} recette
                         {category.count > 1 ? 's' : ''}
@@ -568,19 +569,19 @@ export default function RecipesPage() {
                       {visualStyle.miniIcons.map((icon) => (
                         <span
                           key={icon}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-base shadow-sm ring-1 ring-black/5"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-sm shadow-sm ring-1 ring-black/5 sm:h-9 sm:w-9 sm:text-base"
                         >
                           {icon}
                         </span>
                       ))}
                     </div>
 
-                    <h3 className="mb-3 text-2xl font-black leading-tight text-stone-950">
+                    <h3 className="mb-3 text-xl font-black leading-tight text-stone-950 sm:text-2xl">
                       {category.label}
                     </h3>
 
                     <p
-                      className={`min-h-[84px] leading-7 ${visualStyle.subtleText}`}
+                      className={`leading-7 ${visualStyle.subtleText} sm:min-h-[84px]`}
                     >
                       {category.description}
                     </p>
@@ -606,7 +607,7 @@ export default function RecipesPage() {
 
       {hasActiveFilters && (
         <div
-          className={`relative overflow-hidden rounded-[2.5rem] p-8 shadow-sm ring-1 md:p-10 ${
+          className={`relative overflow-hidden rounded-[2rem] p-5 shadow-sm ring-1 sm:rounded-[2.5rem] sm:p-8 md:p-10 ${
             activeCategoryAmbience
               ? `${activeCategoryAmbience.pageBg} ${activeCategoryAmbience.ring}`
               : 'bg-white/95 ring-orange-100'
@@ -615,19 +616,19 @@ export default function RecipesPage() {
           {activeCategoryAmbience && (
             <>
               <div
-                className={`pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full ${activeCategoryAmbience.glowOne} blur-3xl`}
+                className={`pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full blur-3xl sm:h-80 sm:w-80 ${activeCategoryAmbience.glowOne}`}
               />
 
               <div
-                className={`pointer-events-none absolute -bottom-28 -left-24 h-80 w-80 rounded-full ${activeCategoryAmbience.glowTwo} blur-3xl`}
+                className={`pointer-events-none absolute -bottom-28 -left-24 h-64 w-64 rounded-full blur-3xl sm:h-80 sm:w-80 ${activeCategoryAmbience.glowTwo}`}
               />
 
-              <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.30]">
-                <div className="grid h-full min-h-[560px] grid-cols-4 gap-x-12 gap-y-10 px-6 py-8 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8">
+              <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.18] sm:opacity-[0.26]">
+                <div className="grid h-full min-h-[460px] grid-cols-4 gap-x-8 gap-y-8 px-4 py-6 sm:min-h-[560px] sm:grid-cols-5 sm:gap-x-10 sm:gap-y-10 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8">
                   {wallpaperEmojis.map((emoji, index) => (
                     <div
                       key={`${emoji}-${index}`}
-                      className={`flex items-center justify-center text-3xl md:text-4xl ${
+                      className={`flex items-center justify-center text-2xl sm:text-3xl md:text-4xl ${
                         index % 2 === 0 ? 'translate-y-3' : '-translate-y-3'
                       } ${
                         index % 3 === 0
@@ -648,7 +649,7 @@ export default function RecipesPage() {
           )}
 
           <div className="relative z-10">
-            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="mb-6 flex flex-col gap-4 sm:mb-8 md:flex-row md:items-end md:justify-between">
               <div>
                 <p
                   className={`font-bold ${
@@ -662,7 +663,7 @@ export default function RecipesPage() {
                       : 'Recherche rapide'}
                 </p>
 
-                <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
+                <h2 className="text-2xl font-black text-stone-950 sm:text-3xl md:text-4xl">
                   {selectedCategory
                     ? `Recettes : ${selectedCategory.label}`
                     : showAllRecipes
@@ -670,7 +671,7 @@ export default function RecipesPage() {
                       : 'Résultats'}
                 </h2>
 
-                <p className="mt-2 text-stone-600">
+                <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
                   {filteredRecipes.length} recette
                   {filteredRecipes.length > 1 ? 's' : ''} trouvée
                   {filteredRecipes.length > 1 ? 's' : ''}
@@ -680,7 +681,7 @@ export default function RecipesPage() {
               <button
                 type="button"
                 onClick={resetFilters}
-                className={`w-fit rounded-full border px-6 py-3 font-bold transition ${
+                className={`w-full rounded-full border px-6 py-3 font-bold transition sm:w-fit ${
                   activeCategoryAmbience
                     ? `border-white/70 bg-white/80 ${activeCategoryAmbience.buttonText} ${activeCategoryAmbience.buttonHover}`
                     : 'border-orange-200 bg-white text-orange-700 hover:bg-orange-50'
@@ -691,7 +692,7 @@ export default function RecipesPage() {
             </div>
 
             {filteredRecipes.length === 0 ? (
-              <div className="rounded-[2rem] bg-white/85 p-8 text-center shadow-sm ring-1 ring-white/70">
+              <div className="rounded-[1.75rem] bg-white/85 p-6 text-center shadow-sm ring-1 ring-white/70 sm:rounded-[2rem] sm:p-8">
                 <p className="text-lg font-bold text-stone-950">
                   Aucune recette trouvée
                 </p>
@@ -703,13 +704,13 @@ export default function RecipesPage() {
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="mt-6 rounded-full bg-orange-500 px-7 py-4 font-bold text-white transition hover:bg-orange-600"
+                  className="mt-6 w-full rounded-full bg-orange-500 px-7 py-4 font-bold text-white transition hover:bg-orange-600 sm:w-auto"
                 >
                   Revenir aux catégories
                 </button>
               </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredRecipes.map((recipe) => (
                   <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
