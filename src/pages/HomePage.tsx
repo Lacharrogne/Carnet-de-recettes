@@ -354,10 +354,10 @@ export default function HomePage() {
             </div>
 
             <Link
-              to="/recipes?view=all"
+              to="/recipes"
               className="w-full rounded-full border border-orange-200 bg-white px-6 py-3 text-center font-bold text-orange-700 transition hover:bg-orange-50 sm:w-fit"
             >
-              Voir plus →
+              Explorer les catégories →
             </Link>
           </div>
 

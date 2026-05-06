@@ -255,9 +255,6 @@ export default function RecipesPage() {
   const [sort, setSort] = useState<SortOption>('name')
 
   const categoryParam = searchParams.get('category')
-  const viewParam = searchParams.get('view')
-
-  const showAllRecipes = viewParam === 'all'
 
   const selectedCategory = useMemo(() => {
     if (!categoryParam) return null
@@ -375,8 +372,7 @@ export default function RecipesPage() {
     return result
   }, [recipes, search, selectedCategory, sort])
 
-  const hasActiveFilters =
-    search.trim().length > 0 || selectedCategory !== null || showAllRecipes
+  const hasActiveFilters = search.trim().length > 0 || selectedCategory !== null
 
   const activeCategoryAmbience = selectedCategory
     ? getCategoryPageAmbience(selectedCategory.label)
@@ -394,10 +390,6 @@ export default function RecipesPage() {
 
   function selectCategory(categoryValue: string) {
     setSearchParams({ category: categoryValue })
-  }
-
-  function showAll() {
-    setSearchParams({ view: 'all' })
   }
 
   function resetFilters() {
@@ -441,8 +433,8 @@ export default function RecipesPage() {
               onChange={(event) => {
                 setSearch(event.target.value)
 
-                if (!event.target.value.trim() && !selectedCategory) {
-                  setSearchParams(showAllRecipes ? { view: 'all' } : {})
+               if (!event.target.value.trim() && !selectedCategory) {
+                  setSearchParams({})
                 }
               }}
               placeholder="Exemple : tarte, poulet, chocolat..."
@@ -455,13 +447,8 @@ export default function RecipesPage() {
                 onChange={(event) => {
                   const value = event.target.value
 
-                  if (!value) {
-                    if (showAllRecipes || search.trim()) {
-                      setSearchParams(showAllRecipes ? { view: 'all' } : {})
-                    } else {
-                      setSearchParams({})
-                    }
-
+                 if (!value) {
+                    setSearchParams({})
                     return
                   }
 
@@ -488,14 +475,6 @@ export default function RecipesPage() {
                 <option value="difficulty">Difficulté</option>
               </select>
             </div>
-
-            <button
-              type="button"
-              onClick={showAll}
-              className="mt-5 w-full rounded-full bg-orange-500 px-7 py-4 font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md"
-            >
-              Voir tout le carnet
-            </button>
           </div>
         </div>
       </div>
@@ -520,14 +499,6 @@ export default function RecipesPage() {
                 Choisis une famille pour découvrir les recettes associées.
               </p>
             </div>
-
-            <button
-              type="button"
-              onClick={showAll}
-              className="w-full rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50 sm:w-fit"
-            >
-              Afficher toutes les recettes
-            </button>
           </div>
 
           <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -656,19 +627,11 @@ export default function RecipesPage() {
                     activeCategoryAmbience?.accentText ?? 'text-orange-600'
                   }`}
                 >
-                  {selectedCategory
-                    ? selectedCategory.label
-                    : showAllRecipes
-                      ? 'Tout le carnet'
-                      : 'Recherche rapide'}
+                  {selectedCategory ? selectedCategory.label : 'Recherche rapide'}
                 </p>
 
                 <h2 className="text-2xl font-black text-stone-950 sm:text-3xl md:text-4xl">
-                  {selectedCategory
-                    ? `Recettes : ${selectedCategory.label}`
-                    : showAllRecipes
-                      ? 'Toutes les recettes'
-                      : 'Résultats'}
+                  {selectedCategory ? `Recettes : ${selectedCategory.label}` : 'Résultats'}
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
