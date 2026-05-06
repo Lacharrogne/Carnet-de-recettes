@@ -342,6 +342,58 @@ export default function HomePage() {
         <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
+              <p className="font-bold text-orange-600">Nouveautés</p>
+
+              <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
+                Les dernières recettes ajoutées
+              </h2>
+
+              <p className="mt-2 text-stone-600">
+                Les nouvelles idées à tester à la maison.
+              </p>
+            </div>
+
+            <Link
+              to="/recipes?view=all"
+              className="w-fit rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+            >
+              Voir plus →
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
+              Chargement des recettes...
+            </div>
+          ) : latestRecipes.length === 0 ? (
+            <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+              <p className="text-lg font-bold text-stone-950">
+                Aucune recette pour le moment.
+              </p>
+
+              <p className="mt-2 text-stone-600">
+                Ajoute ta première recette pour la voir apparaître ici.
+              </p>
+
+              <Link
+                to="/add-recipe"
+                className="mt-6 inline-block rounded-full bg-orange-500 px-7 py-4 font-bold text-white transition hover:bg-orange-600"
+              >
+                Ajouter une recette
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {latestRecipes.map((recipe) => (
+                <RecipeCard key={recipe.id} recipe={recipe} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
               <p className="font-bold text-orange-600">Explorer</p>
 
               <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
@@ -441,58 +493,6 @@ export default function HomePage() {
                   </Link>
                 )
               })}
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="font-bold text-orange-600">Nouveautés</p>
-
-              <h2 className="text-3xl font-black text-stone-950 md:text-4xl">
-                Les dernières recettes ajoutées
-              </h2>
-
-              <p className="mt-2 text-stone-600">
-                Les nouvelles idées à tester à la maison.
-              </p>
-            </div>
-
-            <Link
-              to="/recipes?view=all"
-              className="w-fit rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
-            >
-              Voir plus →
-            </Link>
-          </div>
-
-          {loading ? (
-            <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
-              Chargement des recettes...
-            </div>
-          ) : latestRecipes.length === 0 ? (
-            <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
-              <p className="text-lg font-bold text-stone-950">
-                Aucune recette pour le moment.
-              </p>
-
-              <p className="mt-2 text-stone-600">
-                Ajoute ta première recette pour la voir apparaître ici.
-              </p>
-
-              <Link
-                to="/add-recipe"
-                className="mt-6 inline-block rounded-full bg-orange-500 px-7 py-4 font-bold text-white transition hover:bg-orange-600"
-              >
-                Ajouter une recette
-              </Link>
-            </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {latestRecipes.map((recipe) => (
-                <RecipeCard key={recipe.id} recipe={recipe} />
-              ))}
             </div>
           )}
         </div>
