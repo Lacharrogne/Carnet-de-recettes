@@ -20,8 +20,14 @@ type DayKey =
   | 'sunday'
 
 type MealKey = 'lunch' | 'dinner'
+type ExtraMealKey = 'breakfast' | 'snack' | 'dessert'
 
-type MealPlannerState = Record<DayKey, Record<MealKey, string>>
+type DayPlannerState = Record<DayKey, Record<MealKey, string>>
+type WeeklyExtrasState = Record<ExtraMealKey, string[]>
+
+type MealPlannerState = DayPlannerState & {
+  weeklyExtras: WeeklyExtrasState
+}
 
 type StepTimer = {
   label: string
@@ -54,7 +60,22 @@ function createEmptyPlanner(): MealPlannerState {
     friday: { lunch: '', dinner: '' },
     saturday: { lunch: '', dinner: '' },
     sunday: { lunch: '', dinner: '' },
+    weeklyExtras: {
+      breakfast: [],
+      snack: [],
+      dessert: [],
+    },
   }
+}
+
+function cleanRecipeIds(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .map((item) => String(item))
+    .filter((item) => item.trim().length > 0)
 }
 
 function getSavedPlanner(): MealPlannerState {
@@ -80,6 +101,11 @@ function getSavedPlanner(): MealPlannerState {
       friday: { ...emptyPlanner.friday, ...parsedPlanner.friday },
       saturday: { ...emptyPlanner.saturday, ...parsedPlanner.saturday },
       sunday: { ...emptyPlanner.sunday, ...parsedPlanner.sunday },
+      weeklyExtras: {
+        breakfast: cleanRecipeIds(parsedPlanner.weeklyExtras?.breakfast),
+        snack: cleanRecipeIds(parsedPlanner.weeklyExtras?.snack),
+        dessert: cleanRecipeIds(parsedPlanner.weeklyExtras?.dessert),
+      },
     }
   } catch {
     return createEmptyPlanner()
@@ -716,13 +742,14 @@ export default function RecipeDetailsPage() {
 
       saveRecipeToPlanner(selectedPlanningDay, selectedPlanningMeal, recipe.id)
 
+      const ingredientsToAdd = recipe.ingredients.map((ingredient) =>
+        scaleIngredientText(ingredient, recipe.servings, selectedServings),
+      )
+
       const addedItems = await addRecipeIngredientsToShoppingList(
-  recipe.id,
-  scaledIngredients,
-  {
-    allowDuplicates: true,
-  },
-)
+        recipe.id,
+        ingredientsToAdd,
+      )
 
       if (currentRecipeId && currentRecipeId !== String(recipe.id)) {
         showSuccessMessage(
@@ -1337,43 +1364,63 @@ export default function RecipeDetailsPage() {
                   </Link>
                 </div>
 
-                <div className="mt-5 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-                  <select
-                    value={selectedPlanningDay}
-                    onChange={(event) =>
-                      setSelectedPlanningDay(event.target.value as DayKey)
-                    }
-                    className="w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-                  >
-                    {DAYS.map((day) => (
-                      <option key={day.key} value={day.key}>
-                        {day.label}
-                      </option>
-                    ))}
-                  </select>
+                <div className="mt-5 space-y-4">
+  <div>
+    <p className="mb-2 text-sm font-black uppercase tracking-wide text-stone-500">
+      Jour
+    </p>
 
-                  <select
-                    value={selectedPlanningMeal}
-                    onChange={(event) =>
-                      setSelectedPlanningMeal(event.target.value as MealKey)
-                    }
-                    className="w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-                  >
-                    {MEALS.map((meal) => (
-                      <option key={meal.key} value={meal.key}>
-                        {meal.emoji} {meal.label}
-                      </option>
-                    ))}
-                  </select>
+    <select
+      value={selectedPlanningDay}
+      onChange={(event) =>
+        setSelectedPlanningDay(event.target.value as DayKey)
+      }
+      className="w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-4 font-bold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+    >
+      {DAYS.map((day) => (
+        <option key={day.key} value={day.key}>
+          {day.label}
+        </option>
+      ))}
+    </select>
+  </div>
 
-                  <button
-                    type="button"
-                    onClick={handleAddRecipeToPlanning}
-                    className="rounded-2xl bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-                  >
-                    Ajouter
-                  </button>
-                </div>
+  <div>
+    <p className="mb-2 text-sm font-black uppercase tracking-wide text-stone-500">
+      Repas
+    </p>
+
+    <div className="grid grid-cols-2 gap-3">
+      {MEALS.map((meal) => {
+        const isSelected = selectedPlanningMeal === meal.key
+
+        return (
+          <button
+            key={meal.key}
+            type="button"
+            onClick={() => setSelectedPlanningMeal(meal.key)}
+            className={`rounded-2xl px-4 py-4 text-left font-black transition ${
+              isSelected
+                ? 'bg-orange-500 text-white shadow-sm'
+                : 'bg-[#fffaf3] text-stone-800 ring-1 ring-orange-100 hover:bg-orange-50'
+            }`}
+          >
+            <span className="block text-2xl">{meal.emoji}</span>
+            <span className="mt-2 block">{meal.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  </div>
+
+  <button
+    type="button"
+    onClick={handleAddRecipeToPlanning}
+    className="w-full rounded-2xl bg-orange-500 px-6 py-4 font-black text-white shadow-sm transition hover:bg-orange-600"
+  >
+    Ajouter au planning
+  </button>
+</div>
               </div>
             </div>
           </div>

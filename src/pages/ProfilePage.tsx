@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+
+import RecipeBadgesPanel, {
+  RecipeBadgePill,
+} from '../components/badges/RecipeBadgesPanel'
 import { useAuth } from '../context/useAuth'
+import { supabase } from '../lib/supabase'
 import { getFavoriteRecipes } from '../services/favorites'
-import { getRecipes } from '../services/recipes'
 import {
   getProfile,
   saveProfile,
   uploadProfileAvatar,
   type UserProfile,
 } from '../services/profiles'
-import { supabase } from '../lib/supabase'
+import { getRecipes } from '../services/recipes'
 import type { Recipe } from '../types/recipe'
 
 export default function ProfilePage() {
@@ -36,6 +40,7 @@ export default function ProfilePage() {
 
   const avatarPreviewUrl = useMemo(() => {
     if (!avatarFile) return null
+
     return URL.createObjectURL(avatarFile)
   }, [avatarFile])
 
@@ -227,6 +232,10 @@ export default function ProfilePage() {
               <h1 className="mt-2 text-4xl font-black leading-tight text-stone-950">
                 {displayedName}
               </h1>
+
+              <div className="mt-3">
+                <RecipeBadgePill recipeCount={myRecipes.length} />
+              </div>
 
               <p className="mt-3 text-stone-600">
                 Connecté avec :{' '}
@@ -423,6 +432,8 @@ export default function ProfilePage() {
           </p>
         </div>
       </div>
+
+      <RecipeBadgesPanel recipeCount={myRecipes.length} />
 
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <Link
