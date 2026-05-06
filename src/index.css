@@ -290,3 +290,21 @@ textarea {
     background: white !important;
   }
 }
+html,
+body,
+a,
+button,
+select,
+summary,
+[role='button'] {
+  cursor: url('/cursor-gant-cuisine.cur'), pointer !important;
+}
+
+* {
+  cursor: url('/cursor-gant-cuisine.cur'), auto;
+}
+
+input,
+textarea {
+  cursor: text !important;
+}
