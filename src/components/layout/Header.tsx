@@ -537,11 +537,11 @@ export default function Header() {
 
               <div className="mt-3 grid gap-2">
                 <Link
-                  to="/recipes?view=all"
+                  to="/recipes"
                   onClick={closeMenu}
                   className="rounded-2xl bg-orange-500 px-4 py-3.5 font-black text-white shadow-sm"
                 >
-                  Toutes les recettes
+                  Toutes les catégories
                 </Link>
 
                 {RECIPE_CATEGORIES.map((category) => (
