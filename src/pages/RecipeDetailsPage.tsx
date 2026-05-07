@@ -667,6 +667,16 @@ export default function RecipeDetailsPage() {
   }, [])
 
   useEffect(() => {
+  if (invalidRecipeId) return
+
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'auto',
+  })
+}, [invalidRecipeId, recipeId])
+
+  useEffect(() => {
     let ignore = false
 
     if (invalidRecipeId) return
