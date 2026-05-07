@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import RecipeBadgesPanel, {
   RecipeBadgePill,
 } from '../components/badges/RecipeBadgesPanel'
+import { getRecipePublicationBadge } from '../data/recipeBadges'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { getFavoriteRecipes } from '../services/favorites'
@@ -107,6 +108,10 @@ export default function ProfilePage() {
   const displayedName = profile?.username || username || user?.email || 'Profil'
   const displayedAvatarUrl = avatarPreviewUrl ?? profile?.avatarUrl ?? ''
   const avatarLetter = displayedName.charAt(0).toUpperCase()
+
+  const currentBadge = getRecipePublicationBadge(myRecipes.length)
+  const profileBadgeEmoji = currentBadge?.emoji ?? '🍳'
+  const profileBadgeName = currentBadge?.name ?? 'Aucun badge débloqué'
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -221,8 +226,11 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              <div className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-sm ring-1 ring-orange-100">
-                🍳
+              <div
+                title={profileBadgeName}
+                className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-sm ring-1 ring-orange-100"
+              >
+                {profileBadgeEmoji}
               </div>
             </div>
 
