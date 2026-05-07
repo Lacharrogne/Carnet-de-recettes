@@ -71,9 +71,17 @@ export default function RecipeForm({
     initialValues?.difficulty ?? 'Facile',
   )
 
-  const [prepTime, setPrepTime] = useState(initialValues?.prepTime ?? 0)
-  const [cookTime, setCookTime] = useState(initialValues?.cookTime ?? 0)
-  const [servings, setServings] = useState(initialValues?.servings ?? 1)
+  const [prepTime, setPrepTime] = useState(
+    initialValues ? String(initialValues.prepTime) : '',
+  )
+
+  const [cookTime, setCookTime] = useState(
+    initialValues ? String(initialValues.cookTime) : '',
+  )
+
+  const [servings, setServings] = useState(
+    initialValues ? String(initialValues.servings) : '1',
+  )
 
   const [description, setDescription] = useState(
     initialValues?.description ?? '',
@@ -144,7 +152,10 @@ export default function RecipeForm({
   }, [steps.length])
 
   const totalTime = useMemo(() => {
-    return prepTime + cookTime
+    const prepTimeNumber = Number(prepTime) || 0
+    const cookTimeNumber = Number(cookTime) || 0
+
+    return prepTimeNumber + cookTimeNumber
   }, [prepTime, cookTime])
 
   function focusIngredientInput(index: number) {
@@ -305,9 +316,9 @@ export default function RecipeForm({
       title: title.trim(),
       category,
       difficulty,
-      prepTime,
-      cookTime,
-      servings,
+      prepTime: Math.max(0, Number(prepTime) || 0),
+      cookTime: Math.max(0, Number(cookTime) || 0),
+      servings: Math.max(1, Number(servings) || 1),
       description: description.trim(),
       image: image.trim() || '🍽️',
       tags: selectedTags,
@@ -417,13 +428,15 @@ export default function RecipeForm({
           <div>
             <label className={labelClass}>Préparation</label>
 
-            <input
-              type="number"
-              min="0"
-              value={prepTime}
-              onChange={(event) => setPrepTime(Number(event.target.value))}
-              className={inputClass}
-            />
+              <input
+                type="number"
+                min="0"
+                value={prepTime}
+                onChange={(event) => setPrepTime(event.target.value)}
+                onFocus={(event) => event.currentTarget.select()}
+                placeholder="0"
+                className={inputClass}
+              />
 
             <p className="mt-2 text-sm text-stone-500">En minutes</p>
           </div>
@@ -431,13 +444,15 @@ export default function RecipeForm({
           <div>
             <label className={labelClass}>Cuisson</label>
 
-            <input
-              type="number"
-              min="0"
-              value={cookTime}
-              onChange={(event) => setCookTime(Number(event.target.value))}
-              className={inputClass}
-            />
+              <input
+                type="number"
+                min="0"
+                value={cookTime}
+                onChange={(event) => setCookTime(event.target.value)}
+                onFocus={(event) => event.currentTarget.select()}
+                placeholder="0"
+                className={inputClass}
+              />
 
             <p className="mt-2 text-sm text-stone-500">En minutes</p>
           </div>
@@ -445,13 +460,15 @@ export default function RecipeForm({
           <div>
             <label className={labelClass}>Portions</label>
 
-            <input
-              type="number"
-              min="1"
-              value={servings}
-              onChange={(event) => setServings(Number(event.target.value))}
-              className={inputClass}
-            />
+              <input
+                type="number"
+                min="1"
+                value={servings}
+                onChange={(event) => setServings(event.target.value)}
+                onFocus={(event) => event.currentTarget.select()}
+                placeholder="1"
+                className={inputClass}
+              />
 
             <p className="mt-2 text-sm text-stone-500">Nombre de personnes</p>
           </div>
