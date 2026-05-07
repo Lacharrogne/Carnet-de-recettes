@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react'
 
 import {
   DEFAULT_RECIPE_CATEGORY,
@@ -140,6 +147,78 @@ export default function RecipeForm({
     return prepTime + cookTime
   }, [prepTime, cookTime])
 
+  function focusIngredientInput(index: number) {
+    const inputToFocus = ingredientInputRefs.current[index]
+
+    if (inputToFocus) {
+      inputToFocus.focus()
+      inputToFocus.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+      return
+    }
+
+    ingredientFocusIndexRef.current = index
+  }
+
+  function focusStepTextarea(index: number) {
+    const textareaToFocus = stepTextareaRefs.current[index]
+
+    if (textareaToFocus) {
+      textareaToFocus.focus()
+      textareaToFocus.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+      return
+    }
+
+    stepFocusIndexRef.current = index
+  }
+
+  function handleIngredientKeyDown(
+    event: KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) {
+    if (event.key !== 'Enter') return
+
+    event.preventDefault()
+
+    const nextIndex = index + 1
+
+    if (nextIndex < ingredients.length) {
+      focusIngredientInput(nextIndex)
+      return
+    }
+
+    ingredientFocusIndexRef.current = nextIndex
+    setIngredients((currentIngredients) => [...currentIngredients, ''])
+  }
+
+  function handleStepKeyDown(
+    event: KeyboardEvent<HTMLTextAreaElement>,
+    index: number,
+  ) {
+    if (event.key !== 'Enter') return
+
+    if (event.shiftKey) {
+      return
+    }
+
+    event.preventDefault()
+
+    const nextIndex = index + 1
+
+    if (nextIndex < steps.length) {
+      focusStepTextarea(nextIndex)
+      return
+    }
+
+    stepFocusIndexRef.current = nextIndex
+    setSteps((currentSteps) => [...currentSteps, ''])
+  }
+
   function isTagSelected(tagValue: string) {
     return selectedTags.some(
       (selectedTag) =>
@@ -174,8 +253,10 @@ export default function RecipeForm({
   }
 
   function addIngredient() {
-    ingredientFocusIndexRef.current = ingredients.length
-    setIngredients((currentIngredients) => [...currentIngredients, ''])
+    setIngredients((currentIngredients) => {
+      ingredientFocusIndexRef.current = currentIngredients.length
+      return [...currentIngredients, '']
+    })
   }
 
   function removeIngredient(index: number) {
@@ -197,8 +278,10 @@ export default function RecipeForm({
   }
 
   function addStep() {
-    stepFocusIndexRef.current = steps.length
-    setSteps((currentSteps) => [...currentSteps, ''])
+    setSteps((currentSteps) => {
+      stepFocusIndexRef.current = currentSteps.length
+      return [...currentSteps, '']
+    })
   }
 
   function removeStep(index: number) {
@@ -520,6 +603,10 @@ export default function RecipeForm({
           <h3 className="mt-1 text-xl font-black text-stone-950 sm:text-2xl">
             Ingrédients
           </h3>
+
+          <p className="mt-2 text-sm leading-6 text-stone-500">
+            Appuie sur Entrée pour passer à l’ingrédient suivant.
+          </p>
         </div>
 
         <div className="space-y-3">
@@ -536,6 +623,7 @@ export default function RecipeForm({
                 onChange={(event) =>
                   updateIngredient(index, event.target.value)
                 }
+                onKeyDown={(event) => handleIngredientKeyDown(event, index)}
                 placeholder={`Ingrédient ${index + 1}`}
                 className={inputClass}
               />
@@ -570,6 +658,11 @@ export default function RecipeForm({
           <h3 className="mt-1 text-xl font-black text-stone-950 sm:text-2xl">
             Étapes de la recette
           </h3>
+
+          <p className="mt-2 text-sm leading-6 text-stone-500">
+            Appuie sur Entrée pour passer à l’étape suivante. Utilise Shift +
+            Entrée pour faire un retour à la ligne dans une étape.
+          </p>
         </div>
 
         <div className="space-y-3">
@@ -588,6 +681,7 @@ export default function RecipeForm({
                 }}
                 value={step}
                 onChange={(event) => updateStep(index, event.target.value)}
+                onKeyDown={(event) => handleStepKeyDown(event, index)}
                 placeholder={`Étape ${index + 1}`}
                 rows={3}
                 className={inputClass}
@@ -614,7 +708,7 @@ export default function RecipeForm({
         </button>
       </div>
 
-      <div className="sticky bottom-4 z-20 rounded-[1.75rem] bg-[#fffaf3]/90 p-2 shadow-lg ring-1 ring-orange-100 backdrop-blur print:static sm:bottom-6">
+      <div className="bottom-4 z-20 rounded-[1.75rem] bg-[#fffaf3]/90 p-2 shadow-lg ring-1 ring-orange-100 backdrop-blur print:static sm:bottom-6">
         <button
           type="submit"
           disabled={isSubmitting}
