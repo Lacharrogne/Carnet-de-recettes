@@ -21,6 +21,85 @@
   --color-cream-300: #f4e8dc;
   --color-cream-input: #fffdf9;
 
+  /* ----------------------------------------------------------------- */
+  /* Direction "Chalet premium" — tokens sémantiques                    */
+  /* ----------------------------------------------------------------- */
+
+  /* Blanc réchauffé d'un cheveu : tous les bg-white deviennent crème */
+  --color-white: #fffcf7;
+
+  /* Surfaces : papier & bois clair */
+  --color-paper: #fbf6ee;
+  --color-card: #fffcf7;
+  --color-linen: #f4eadb;
+  --color-sand: #ead9c5;
+
+  /* Bois : texte & structure */
+  --color-espresso: #2b1f18;
+  --color-cacao: #4a372c;
+  --color-hazel: #8a6f5c;
+  --color-bark: #e7d7c4;
+
+  /* Accents */
+  --color-terracotta: #c2683d;
+  --color-terracotta-deep: #a8552f;
+  --color-terracotta-soft: #f3dac8;
+  --color-honey: #d99a4e;
+  --color-honey-soft: #fbe9cb;
+  --color-sage: #7e8a5a;
+  --color-sage-deep: #5f6b41;
+  --color-sage-soft: #e8ebdc;
+
+  /* Polices */
+  --font-sans:
+    "Mulish", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display:
+    "Fraunces", "Georgia", "Times New Roman", serif;
+  --font-hand: "Caveat", "Segoe Script", cursive;
+
+  /* Rayons */
+  --radius-card: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-2xl: 2.5rem;
+
+  /* Ombres teintées brun (jamais noires) */
+  --shadow-soft: 0 1px 2px rgba(67, 44, 30, 0.05);
+  --shadow-card: 0 2px 4px rgba(67, 44, 30, 0.04),
+    0 14px 30px -14px rgba(120, 80, 50, 0.18);
+  --shadow-lift: 0 6px 12px rgba(67, 44, 30, 0.07),
+    0 24px 48px -18px rgba(120, 80, 50, 0.26);
+
+  /* ----------------------------------------------------------------- */
+  /* Remap des rampes Tailwind déjà utilisées partout                   */
+  /* -> réchauffe tout le site sans toucher aux composants.             */
+  /* ----------------------------------------------------------------- */
+
+  /* Accent : orange Tailwind -> terracotta caramélisée */
+  --color-orange-50: #fbf1ea;
+  --color-orange-100: #f3dac8;
+  --color-orange-200: #e9c0a6;
+  --color-orange-300: #dca07c;
+  --color-orange-400: #ce7e50;
+  --color-orange-500: #c2683d;
+  --color-orange-600: #a8552f;
+  --color-orange-700: #8c4526;
+  --color-orange-800: #6f371e;
+  --color-orange-900: #5a2d19;
+  --color-orange-950: #3f1f12;
+
+  /* Neutres : stone -> bois chaud */
+  --color-stone-50: #faf5ee;
+  --color-stone-100: #f3ebe0;
+  --color-stone-200: #e7dbcc;
+  --color-stone-300: #d6c3ad;
+  --color-stone-400: #a89684;
+  --color-stone-500: #8a6f5c;
+  --color-stone-600: #6f584a;
+  --color-stone-700: #574437;
+  --color-stone-800: #3d2f26;
+  --color-stone-900: #2f231c;
+  --color-stone-950: #241a14;
+
   /* Petite touche verte douce du logo */
   --color-green-50: #f3f8ef;
   --color-green-100: #dcebd3;
@@ -35,13 +114,28 @@
 }
 
 :root {
-  color: #2f211d;
-  background-color: #fff8f3;
+  color: #2b1f18;
+  background-color: #fbf6ee;
   font-family:
-    "Trebuchet MS",
+    "Mulish",
     "Segoe UI",
     system-ui,
+    -apple-system,
     sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Titres en serif éditoriale "carnet premium" */
+h1,
+h2,
+h3,
+h4 {
+  font-family:
+    "Fraunces",
+    "Georgia",
+    "Times New Roman",
+    serif;
 }
 
 html {
@@ -58,7 +152,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #fff8f3;
+  background: #fbf6ee;
 }
 
 * {
@@ -86,8 +180,8 @@ button:disabled {
 }
 
 ::selection {
-  background-color: #b6533b;
-  color: white;
+  background-color: #c2683d;
+  color: #fffcf7;
 }
 
 /* Donne un côté plus doux aux champs */
