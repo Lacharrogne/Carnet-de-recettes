@@ -1298,7 +1298,7 @@ export default function RecipeDetailsPage() {
         </div>
 
         {successMessage && (
-          <div className="fixed bottom-4 left-4 right-4 z-[90] rounded-2xl bg-stone-950 px-5 py-4 text-sm font-bold text-white shadow-xl print:hidden sm:left-auto sm:right-6 sm:max-w-sm">
+          <div className="fixed bottom-24 left-4 right-4 z-[90] rounded-2xl bg-espresso px-5 py-4 text-sm font-bold text-white shadow-lift print:hidden sm:bottom-6 sm:left-auto sm:right-6 sm:max-w-sm">
             ✅ {successMessage}
           </div>
         )}
@@ -1309,9 +1309,9 @@ export default function RecipeDetailsPage() {
           </p>
         )}
 
-        <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+        <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-card ring-1 ring-bark sm:rounded-[2.5rem]">
           <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="min-h-[260px] bg-cream-200 sm:min-h-[340px]">
+            <div className="relative min-h-[260px] bg-cream-200 sm:min-h-[340px]">
               {typeof imageToDisplay === 'string' &&
               imageToDisplay.startsWith('http') ? (
                 <img
@@ -1328,16 +1328,16 @@ export default function RecipeDetailsPage() {
 
             <div className="flex flex-col justify-center px-5 py-7 sm:px-6 sm:py-8 lg:px-10">
               <div className="mb-5 flex flex-wrap items-center gap-2 sm:gap-3">
-                <span className="rounded-full bg-orange-100 px-4 py-2 text-xs font-black text-orange-700 sm:text-sm">
+                <span className="rounded-full bg-terracotta-soft px-4 py-2 text-xs font-bold text-terracotta-deep sm:text-sm">
                   {recipe.category}
                 </span>
 
-                <span className="rounded-full bg-white px-4 py-2 text-xs font-bold text-stone-700 shadow-sm ring-1 ring-orange-100 sm:text-sm">
+                <span className="rounded-full bg-card px-4 py-2 text-xs font-bold text-cacao shadow-soft ring-1 ring-bark sm:text-sm">
                   {recipe.difficulty}
                 </span>
               </div>
 
-              <p className="mb-2 text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-terracotta sm:text-sm">
                 Recette maison
               </p>
 
