@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import RecipeCard from '../components/recipes/RecipeCard'
 import RecipeReviews from '../components/reviews/RecipeReviews'
+import Button from '../components/ui/Button'
 import { useAuth } from '../context/useAuth'
 import { isRecipeFavorite, toggleFavorite } from '../services/favorites'
 import { getProfile, type UserProfile } from '../services/profiles'
@@ -1124,7 +1125,7 @@ export default function RecipeDetailsPage() {
       totalTime={totalTime}
     />
       {guidedCookingOpen && currentStep && (
-        <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#fffaf3] px-4 py-4 print:hidden sm:px-5 sm:py-6">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-cream-50 px-4 py-4 print:hidden sm:px-5 sm:py-6">
           <div className="mx-auto flex min-h-full max-w-5xl flex-col">
             <div className="mb-5 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -1166,7 +1167,7 @@ export default function RecipeDetailsPage() {
                   {scaledIngredients.map((ingredient, index) => (
                     <li
                       key={`${ingredient}-${index}`}
-                      className="rounded-2xl bg-[#fffaf3] px-4 py-3 text-sm font-semibold text-stone-700 sm:text-base"
+                      className="rounded-2xl bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-700 sm:text-base"
                     >
                       {ingredient}
                     </li>
@@ -1181,7 +1182,7 @@ export default function RecipeDetailsPage() {
                       Étape {currentStepIndex + 1} sur {recipe.steps.length}
                     </span>
 
-                    <span className="rounded-full bg-[#fffaf3] px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 sm:px-5">
+                    <span className="rounded-full bg-cream-50 px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 sm:px-5">
                       {guidedProgress} %
                     </span>
                   </div>
@@ -1191,7 +1192,7 @@ export default function RecipeDetailsPage() {
                   </p>
 
                   {currentStepTimers.length > 0 && (
-                    <div className="mt-6 rounded-[1.75rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100 sm:mt-8 sm:rounded-[2rem]">
+                    <div className="mt-6 rounded-[1.75rem] bg-cream-50 p-5 ring-1 ring-orange-100 sm:mt-8 sm:rounded-[2rem]">
                       <p className="font-black text-orange-600">
                         Minuteur détecté
                       </p>
@@ -1308,9 +1309,9 @@ export default function RecipeDetailsPage() {
           </p>
         )}
 
-        <article className="overflow-hidden rounded-[2rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+        <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
           <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="min-h-[260px] bg-[#fff1e6] sm:min-h-[340px]">
+            <div className="min-h-[260px] bg-cream-200 sm:min-h-[340px]">
               {typeof imageToDisplay === 'string' &&
               imageToDisplay.startsWith('http') ? (
                 <img
@@ -1436,7 +1437,7 @@ export default function RecipeDetailsPage() {
                   {recipe.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full bg-[#f4e8dc] px-3 py-1 text-sm font-semibold text-stone-600"
+                      className="rounded-full bg-cream-300 px-3 py-1 text-sm font-semibold text-stone-600"
                     >
                       #{tag}
                     </span>
@@ -1458,21 +1459,22 @@ export default function RecipeDetailsPage() {
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={openGuidedCooking}
                     disabled={recipe.steps.length === 0}
-                    className="flex items-center justify-center gap-2 rounded-full bg-orange-500 px-5 py-4 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                    fullWidth
                   >
                     <span>▶</span>
                     <span>Lancer la recette</span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={handleToggleFavorite}
                     disabled={favoriteLoading}
-                    className="flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-[#fffaf3] px-5 py-4 font-black text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    variant="secondary"
+                    fullWidth
                   >
                     <span>{isFavorite ? '♥' : '♡'}</span>
 
@@ -1481,41 +1483,45 @@ export default function RecipeDetailsPage() {
                         ? 'Retirer des favoris'
                         : 'Ajouter aux favoris'}
                     </span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={handleCopyLink}
-                    className="flex items-center justify-center gap-2 rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
+                    variant="ghost"
+                    fullWidth
                   >
                     🔗 Copier le lien
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={handlePrint}
-                    className="flex items-center justify-center gap-2 rounded-full border border-orange-100 bg-white px-5 py-3 font-bold text-stone-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
+                    variant="ghost"
+                    fullWidth
                   >
                     🖨️ Imprimer
-                  </button>
+                  </Button>
 
                   {isOwner && (
                     <>
-                      <Link
+                      <Button
                         to={`/recipes/${recipe.id}/edit`}
-                        className="flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-5 py-3 text-center font-bold text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-100"
+                        variant="secondary"
+                        fullWidth
                       >
                         ✏️ Modifier
-                      </Link>
+                      </Button>
 
-                      <button
+                      <Button
                         type="button"
                         onClick={handleDelete}
                         disabled={isDeleting}
-                        className="flex items-center justify-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-3 font-bold text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        variant="danger"
+                        fullWidth
                       >
                         🗑️ {isDeleting ? 'Suppression...' : 'Supprimer'}
-                      </button>
+                      </Button>
                     </>
                   )}
                 </div>
@@ -1540,7 +1546,7 @@ export default function RecipeDetailsPage() {
 
                   <Link
                     to="/planning"
-                    className="w-full rounded-full border border-orange-200 bg-[#fffaf3] px-5 py-3 text-center text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
+                    className="w-full rounded-full border border-orange-200 bg-cream-50 px-5 py-3 text-center text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
                   >
                     Voir le planning
                   </Link>
@@ -1557,7 +1563,7 @@ export default function RecipeDetailsPage() {
       onChange={(event) =>
         setSelectedPlanningDay(event.target.value as DayKey)
       }
-      className="w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-4 font-bold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+      className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-4 font-bold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
     >
       {DAYS.map((day) => (
         <option key={day.key} value={day.key}>
@@ -1584,7 +1590,7 @@ export default function RecipeDetailsPage() {
             className={`rounded-2xl px-4 py-4 text-left font-black transition ${
               isSelected
                 ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-[#fffaf3] text-stone-800 ring-1 ring-orange-100 hover:bg-orange-50'
+                : 'bg-cream-50 text-stone-800 ring-1 ring-orange-100 hover:bg-orange-50'
             }`}
           >
             <span className="block text-2xl">{meal.emoji}</span>
@@ -1623,7 +1629,7 @@ export default function RecipeDetailsPage() {
               </p>
             </div>
 
-            <div className="mt-6 rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100 print:hidden sm:p-5">
+            <div className="mt-6 rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100 print:hidden sm:p-5">
               <p className="text-sm font-black uppercase tracking-wide text-orange-600">
                 Adapter les portions
               </p>
@@ -1688,7 +1694,7 @@ export default function RecipeDetailsPage() {
                 {scaledIngredients.map((ingredient, index) => (
                   <li
                     key={`${ingredient}-${index}`}
-                    className="flex items-center gap-3 rounded-[1.4rem] bg-[#fff5ec] px-4 py-3 text-stone-700"
+                    className="flex items-center gap-3 rounded-[1.4rem] bg-cream-100 px-4 py-3 text-stone-700"
                   >
                     <span className="font-black text-orange-600">•</span>
 
@@ -1741,7 +1747,7 @@ export default function RecipeDetailsPage() {
                 {recipe.steps.map((step, index) => (
                   <li
                     key={`${step}-${index}`}
-                    className="flex gap-3 rounded-[1.4rem] bg-[#fffaf3] px-4 py-4 text-stone-700 ring-1 ring-orange-50 sm:gap-4"
+                    className="flex gap-3 rounded-[1.4rem] bg-cream-50 px-4 py-4 text-stone-700 ring-1 ring-orange-50 sm:gap-4"
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white">
                       {index + 1}

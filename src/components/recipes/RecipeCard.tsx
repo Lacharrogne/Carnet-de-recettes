@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/useAuth'
+import { getRecipeCardStyle } from '../../data/categoryStyles'
 import { isRecipeFavorite, toggleFavorite } from '../../services/favorites'
 import { getAverageRating, getRecipeReviews } from '../../services/reviews'
 import type { Recipe } from '../../types/recipe'
@@ -9,115 +10,6 @@ import type { Recipe } from '../../types/recipe'
 type RecipeCardProps = {
   recipe: Recipe
   onFavoriteChange?: () => void
-}
-
-type RecipeVisualStyle = {
-  cardBg: string
-  imageBg: string
-  ring: string
-  badgeBg: string
-  badgeText: string
-  accentText: string
-  arrowBg: string
-  blob: string
-  decorations: string[]
-}
-
-const DEFAULT_RECIPE_STYLE: RecipeVisualStyle = {
-  cardBg: 'bg-[#fffaf3]',
-  imageBg: 'bg-[#fff1e6]',
-  ring: 'ring-orange-100',
-  badgeBg: 'bg-white/95',
-  badgeText: 'text-orange-700',
-  accentText: 'text-orange-700',
-  arrowBg:
-    'bg-orange-100 text-orange-700 group-hover:bg-orange-500 group-hover:text-white',
-  blob: 'bg-orange-200/50',
-  decorations: ['🍽️', '✨'],
-}
-
-const RECIPE_CATEGORY_STYLES: Record<string, RecipeVisualStyle> = {
-  'Apéritifs & entrées': {
-    cardBg: 'bg-gradient-to-br from-[#f7fff5] via-[#fffdf9] to-[#fff3eb]',
-    imageBg: 'bg-[#edf8e9]',
-    ring: 'ring-[#d9ecd3]',
-    badgeBg: 'bg-[#f0faec]/95',
-    badgeText: 'text-[#4d7b45]',
-    accentText: 'text-[#4d8a45]',
-    arrowBg:
-      'bg-[#e6f5e1] text-[#4d8a45] group-hover:bg-[#69a85f] group-hover:text-white',
-    blob: 'bg-[#bde5b3]/50',
-    decorations: ['🫒', '🍅'],
-  },
-
-  'Plats & accompagnements': {
-    cardBg: 'bg-gradient-to-br from-[#fff6ec] via-[#fffdf9] to-[#fff1df]',
-    imageBg: 'bg-[#fff0df]',
-    ring: 'ring-[#ffd9b8]',
-    badgeBg: 'bg-[#fff0df]/95',
-    badgeText: 'text-[#a85c24]',
-    accentText: 'text-[#d96d1e]',
-    arrowBg:
-      'bg-[#ffe3c7] text-[#d96d1e] group-hover:bg-[#ff6b00] group-hover:text-white',
-    blob: 'bg-[#ffc38c]/50',
-    decorations: ['🍝', '🥘'],
-  },
-
-  'Desserts & goûters': {
-    cardBg: 'bg-gradient-to-br from-[#fff4f7] via-[#fffdfc] to-[#fff2ed]',
-    imageBg: 'bg-[#ffedf2]',
-    ring: 'ring-[#ffd8e3]',
-    badgeBg: 'bg-[#ffedf3]/95',
-    badgeText: 'text-[#a8566b]',
-    accentText: 'text-[#d86f8f]',
-    arrowBg:
-      'bg-[#ffe0e9] text-[#d86f8f] group-hover:bg-[#ef7e9e] group-hover:text-white',
-    blob: 'bg-[#ffbdd0]/50',
-    decorations: ['🍓', '🧁'],
-  },
-
-  'Petit-déjeuner & brunch': {
-    cardBg: 'bg-gradient-to-br from-[#fff9ec] via-[#fffdf8] to-[#fff2d5]',
-    imageBg: 'bg-[#fff3cf]',
-    ring: 'ring-[#f4dda4]',
-    badgeBg: 'bg-[#fff0c8]/95',
-    badgeText: 'text-[#876619]',
-    accentText: 'text-[#c28a0c]',
-    arrowBg:
-      'bg-[#ffe8a8] text-[#b77f08] group-hover:bg-[#d99a13] group-hover:text-white',
-    blob: 'bg-[#ffe08c]/50',
-    decorations: ['☕', '🥐'],
-  },
-
-  Boissons: {
-    cardBg: 'bg-gradient-to-br from-[#eef8ff] via-[#fbfeff] to-[#edfdf7]',
-    imageBg: 'bg-[#e8f5ff]',
-    ring: 'ring-[#cde8f8]',
-    badgeBg: 'bg-[#e8f5ff]/95',
-    badgeText: 'text-[#3f6f8c]',
-    accentText: 'text-[#3f8cbb]',
-    arrowBg:
-      'bg-[#d9efff] text-[#3f8cbb] group-hover:bg-[#4b9ac9] group-hover:text-white',
-    blob: 'bg-[#b8dcf7]/50',
-    decorations: ['🍋', '🧊'],
-  },
-
-  Healthy: {
-    cardBg: 'bg-gradient-to-br from-[#f1fbef] via-[#fffefb] to-[#eef9ec]',
-    imageBg: 'bg-[#e7f6e3]',
-    ring: 'ring-[#d6ecd1]',
-    badgeBg: 'bg-[#eaf7e7]/95',
-    badgeText: 'text-[#4d7548]',
-    accentText: 'text-[#4d934d]',
-    arrowBg:
-      'bg-[#ddf2d8] text-[#4d934d] group-hover:bg-[#63a85f] group-hover:text-white',
-    blob: 'bg-[#bfe2b8]/50',
-    decorations: ['🥑', '🌿'],
-  },
-}
-
-function getRecipeVisualStyle(category: string) {
-  return RECIPE_CATEGORY_STYLES[category] ?? DEFAULT_RECIPE_STYLE
 }
 
 export default function RecipeCard({
@@ -138,7 +30,7 @@ export default function RecipeCard({
   const hiddenTagsCount = recipe.tags.length - visibleTags.length
 
   const displayedFavorite = user ? favorite : false
-  const visualStyle = getRecipeVisualStyle(recipe.category)
+  const visualStyle = getRecipeCardStyle(recipe.category)
 
   useEffect(() => {
     let ignore = false
