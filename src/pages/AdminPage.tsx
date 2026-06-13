@@ -334,8 +334,8 @@ async function handleSearchReviews() {
 
   return (
     <section className="space-y-8">
-      <div className="rounded-[2.5rem] bg-[#fffaf3] p-8 shadow-sm ring-1 ring-orange-100">
-        <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+      <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100">
+        <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
           <span>🛡️</span>
           <span>Mode administrateur</span>
         </div>
@@ -424,7 +424,7 @@ async function handleSearchReviews() {
     value={profileSearch}
     onChange={(event) => setProfileSearch(event.target.value)}
     placeholder="Rechercher un profil..."
-    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
   />
 
   <button
@@ -443,7 +443,7 @@ async function handleSearchReviews() {
                 profiles.map((profile) => (
                   <div
                     key={profile.userId}
-                    className="rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100"
+                    className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 font-black text-white">
@@ -503,7 +503,7 @@ async function handleSearchReviews() {
     value={recipeSearch}
     onChange={(event) => setRecipeSearch(event.target.value)}
     placeholder="Rechercher une recette..."
-    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
   />
 
   <button
@@ -522,7 +522,7 @@ async function handleSearchReviews() {
                 recipes.map((recipe) => (
                   <div
                     key={recipe.id}
-                    className="rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100"
+                    className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100"
                   >
                     <p className="font-black text-stone-950">{recipe.title}</p>
 
@@ -577,7 +577,7 @@ async function handleSearchReviews() {
     value={reviewSearch}
     onChange={(event) => setReviewSearch(event.target.value)}
     placeholder="Rechercher un commentaire..."
-    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
   />
 
   <button
@@ -596,7 +596,7 @@ async function handleSearchReviews() {
                 reviews.map((review) => (
                   <div
                     key={review.id}
-                    className="rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100"
+                    className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100"
                   >
                     <p className="font-black text-orange-600">
                       Note : {review.rating}/5

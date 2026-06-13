@@ -179,7 +179,7 @@ export default function AuthPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Exemple : Toudou"
-                className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                 required
               />
             </div>
@@ -227,7 +227,7 @@ export default function AuthPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+            className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
             required
           />
         </div>
@@ -242,7 +242,7 @@ export default function AuthPage() {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3 pr-14 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+              className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 pr-14 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
               required
             />
 

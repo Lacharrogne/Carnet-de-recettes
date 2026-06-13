@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import RecipeCard from '../components/recipes/RecipeCard'
+import Button from '../components/ui/Button'
+import EmptyState from '../components/ui/EmptyState'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getFavoriteRecipes } from '../services/favorites'
 import type { Recipe, RecipeCategory } from '../types/recipe'
@@ -141,7 +143,7 @@ export default function FavoritesPage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-[#fff5ec] p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-orange-100">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-5">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-orange-100">
@@ -293,49 +295,24 @@ export default function FavoritesPage() {
       </div>
 
       {recipes.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
-            ❤️
-          </div>
-
-          <p className="mt-5 text-lg font-black text-stone-950">
-            Aucune recette favorite pour le moment
-          </p>
-
-          <p className="mt-2 text-stone-600">
-            Ajoute des recettes en favori avec le bouton cœur pour les retrouver
-            ici facilement.
-          </p>
-
-          <Link
-            to="/recipes"
-            className="mt-6 inline-block rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-          >
-            Explorer les recettes
-          </Link>
-        </div>
+        <EmptyState
+          emoji="❤️"
+          tone="plum"
+          title="Aucune recette favorite pour le moment"
+          description="Ajoute des recettes en favori avec le bouton cœur pour les retrouver ici facilement."
+          action={<Button to="/recipes">Explorer les recettes</Button>}
+        />
       ) : filteredRecipes.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
-            🔎
-          </div>
-
-          <p className="mt-5 text-lg font-black text-stone-950">
-            Aucun favori trouvé
-          </p>
-
-          <p className="mt-2 text-stone-600">
-            Essaie une autre recherche ou une autre catégorie.
-          </p>
-
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="mt-6 rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-          >
-            Voir tous mes favoris
-          </button>
-        </div>
+        <EmptyState
+          emoji="🔎"
+          title="Aucun favori trouvé"
+          description="Essaie une autre recherche ou une autre catégorie."
+          action={
+            <Button type="button" onClick={resetFilters}>
+              Voir tous mes favoris
+            </Button>
+          }
+        />
       ) : (
         <div>
           <div className="mb-6">

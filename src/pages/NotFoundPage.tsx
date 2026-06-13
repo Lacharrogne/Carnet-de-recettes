@@ -1,39 +1,27 @@
-import { Link } from 'react-router-dom'
+import Button from '../components/ui/Button'
+import EmptyState from '../components/ui/EmptyState'
 
 export default function NotFoundPage() {
   return (
     <section className="flex min-h-[60vh] items-center justify-center">
-      <div className="max-w-2xl rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
-        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-orange-50 text-5xl">
-          🍽️
-        </div>
-
-        <p className="mt-6 font-medium text-orange-500">Erreur 404</p>
-
-        <h1 className="mt-3 text-4xl font-black text-slate-950">
-          Cette page n’existe pas
-        </h1>
-
-        <p className="mt-4 leading-7 text-slate-600">
-          La page que tu cherches est introuvable. Elle a peut-être été
-          déplacée, supprimée ou l’adresse est incorrecte.
+      <div className="w-full max-w-2xl">
+        <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.14em] text-terracotta">
+          Erreur 404
         </p>
 
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link
-            to="/"
-            className="rounded-2xl bg-orange-500 px-6 py-3 font-semibold text-white transition hover:bg-orange-600"
-          >
-            Retour à l’accueil
-          </Link>
-
-          <Link
-            to="/recipes"
-            className="rounded-2xl border border-orange-200 px-6 py-3 font-semibold text-orange-600 transition hover:bg-orange-50"
-          >
-            Voir les recettes
-          </Link>
-        </div>
+        <EmptyState
+          emoji="🍽️"
+          title="Cette page n’existe pas"
+          description="La page que tu cherches est introuvable. Elle a peut-être été déplacée, supprimée, ou l’adresse est incorrecte."
+          action={
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button to="/">Retour à l’accueil</Button>
+              <Button to="/recipes" variant="secondary">
+                Voir les recettes
+              </Button>
+            </div>
+          }
+        />
       </div>
     </section>
   )

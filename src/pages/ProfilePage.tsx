@@ -210,7 +210,7 @@ export default function ProfilePage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-[#fff5ec] shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-100 shadow-sm ring-1 ring-orange-100">
         <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <div className="relative">
@@ -520,7 +520,7 @@ export default function ProfilePage() {
         </div>
 
         {latestRecipes.length === 0 ? (
-          <div className="rounded-[2rem] bg-[#fff5ec] p-6 text-center">
+          <div className="rounded-[2rem] bg-cream-100 p-6 text-center">
             <p className="font-bold text-stone-900">
               Aucune recette créée pour le moment.
             </p>

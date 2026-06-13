@@ -134,10 +134,10 @@ export default function SocialPage() {
 
   return (
     <section className="space-y-10">
-      <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3]/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="overflow-hidden rounded-[2.5rem] bg-cream-50/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-4 flex w-fit items-center gap-2 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+            <div className="mb-4 flex w-fit items-center gap-2 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
               <span>👥</span>
               <span>Réseau</span>
             </div>
