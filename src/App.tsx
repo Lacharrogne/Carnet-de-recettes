@@ -2,6 +2,7 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
+import BottomNav from './components/layout/BottomNav'
 import ProtectedRoute from './components/ProtectedRoute'
 
 import HomePage from './pages/HomePage'
@@ -159,6 +160,10 @@ export default function App() {
       </main>
 
       <Footer />
+
+      <div className="pb-[calc(env(safe-area-inset-bottom)+4.5rem)] lg:hidden" />
+
+      <BottomNav />
     </div>
   )
 }

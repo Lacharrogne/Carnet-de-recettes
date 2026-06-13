@@ -65,8 +65,8 @@ const toolLinks = [
 function navPillClass(isActive: boolean) {
   return `rounded-full px-5 py-3 text-sm font-bold transition ${
     isActive
-      ? 'bg-orange-500 text-white shadow-sm'
-      : 'text-stone-800 hover:bg-orange-50 hover:text-orange-600'
+      ? 'bg-terracotta-soft text-terracotta-deep'
+      : 'text-cacao hover:bg-linen hover:text-terracotta'
   }`
 }
 
@@ -74,15 +74,15 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   navPillClass(isActive)
 
 function mobileNavClass(isActive: boolean) {
-  return `flex items-center justify-between rounded-2xl px-4 py-4 text-base font-black shadow-sm ring-1 transition ${
+  return `flex items-center justify-between rounded-2xl px-4 py-4 text-base font-bold shadow-soft ring-1 transition ${
     isActive
-      ? 'bg-orange-500 text-white ring-orange-200'
-      : 'bg-white text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
+      ? 'bg-terracotta-soft text-terracotta-deep ring-terracotta-soft'
+      : 'bg-card text-espresso ring-bark hover:bg-linen'
   }`
 }
 
 const mobileLinkClass =
-  'rounded-2xl bg-cream-50 px-4 py-3.5 font-bold text-stone-800 transition hover:bg-orange-50'
+  'rounded-2xl bg-cream-50 px-4 py-3.5 font-bold text-cacao transition hover:bg-linen'
 
 function dropdownPanelClass(
   isOpen: boolean,
@@ -192,11 +192,11 @@ export default function Header() {
           </div>
 
           <div className="min-w-0">
-            <p className="truncate text-lg font-black leading-tight text-stone-950 sm:text-2xl">
+            <p className="truncate font-display text-xl font-black leading-tight text-espresso sm:text-2xl">
               Carnet de recettes
             </p>
 
-            <p className="hidden truncate text-sm font-semibold text-stone-500 sm:block">
+            <p className="hidden truncate text-sm font-semibold text-hazel sm:block">
               Cuisine maison & petits plats
             </p>
           </div>
