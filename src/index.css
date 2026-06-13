@@ -14,6 +14,13 @@
   --color-slate-900: #231714;
   --color-slate-950: #170e0b;
 
+  /* Surfaces "crème" du carnet (anciennes valeurs en dur centralisées) */
+  --color-cream-50: #fffaf3;
+  --color-cream-100: #fff5ec;
+  --color-cream-200: #fff1e6;
+  --color-cream-300: #f4e8dc;
+  --color-cream-input: #fffdf9;
+
   /* Petite touche verte douce du logo */
   --color-green-50: #f3f8ef;
   --color-green-100: #dcebd3;

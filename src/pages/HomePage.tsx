@@ -2,150 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import RecipeCard from '../components/recipes/RecipeCard'
+import Button from '../components/ui/Button'
+import Chip from '../components/ui/Chip'
+import SectionHeader from '../components/ui/SectionHeader'
+import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
+import { getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getRecipes } from '../services/recipes'
 import type { Recipe } from '../types/recipe'
-
-type CategoryVisualStyle = {
-  cardBg: string
-  border: string
-  iconBg: string
-  badgeBg: string
-  badgeText: string
-  accentText: string
-  subtleText: string
-  topGlow: string
-  bottomGlow: string
-  miniIcons: string[]
-}
-
-const DEFAULT_CATEGORY_STYLE: CategoryVisualStyle = {
-  cardBg: 'bg-gradient-to-br from-[#fffaf3] to-white',
-  border: 'border-orange-100',
-  iconBg: 'bg-[#fff1e6]',
-  badgeBg: 'bg-[#f4e8dc]',
-  badgeText: 'text-stone-700',
-  accentText: 'text-orange-700',
-  subtleText: 'text-stone-600',
-  topGlow: 'bg-orange-100/70',
-  bottomGlow: 'bg-amber-50/80',
-  miniIcons: ['🍽️', '✨'],
-}
-
-const CATEGORY_STYLES: Record<string, CategoryVisualStyle> = {
-  'Apéritifs & entrées': {
-    cardBg: 'bg-gradient-to-br from-[#fffaf5] to-[#fffefb]',
-    border: 'border-[#f1dcc8]',
-    iconBg: 'bg-[#fff1e6]',
-    badgeBg: 'bg-[#f8e7d8]',
-    badgeText: 'text-[#8a5a35]',
-    accentText: 'text-[#d06a2f]',
-    subtleText: 'text-stone-600',
-    topGlow: 'bg-[#ffd8b5]/60',
-    bottomGlow: 'bg-[#ffe8d6]/80',
-    miniIcons: ['🫒', '🍅'],
-  },
-
-  'Plats & accompagnements': {
-    cardBg: 'bg-gradient-to-br from-[#fff8f1] to-[#fffdf9]',
-    border: 'border-[#ecd8c2]',
-    iconBg: 'bg-[#fff0df]',
-    badgeBg: 'bg-[#f8e5cf]',
-    badgeText: 'text-[#8b5e34]',
-    accentText: 'text-[#c96f30]',
-    subtleText: 'text-stone-600',
-    topGlow: 'bg-[#ffd3a8]/60',
-    bottomGlow: 'bg-[#ffe9d6]/80',
-    miniIcons: ['🍝', '🥘'],
-  },
-
-  'Desserts & goûters': {
-    cardBg: 'bg-gradient-to-br from-[#fff7f8] to-[#fffdfa]',
-    border: 'border-[#f2d9df]',
-    iconBg: 'bg-[#fff0f3]',
-    badgeBg: 'bg-[#fde4ea]',
-    badgeText: 'text-[#9b5a6d]',
-    accentText: 'text-[#d46b87]',
-    subtleText: 'text-stone-600',
-    topGlow: 'bg-[#ffc8d5]/55',
-    bottomGlow: 'bg-[#ffe3ea]/75',
-    miniIcons: ['🍓', '🧁'],
-  },
-
-  'Petit-déjeuner & brunch': {
-    cardBg: 'bg-gradient-to-br from-[#fffaf0] to-[#fffef9]',
-    border: 'border-[#f1e0b9]',
-    iconBg: 'bg-[#fff4d9]',
-    badgeBg: 'bg-[#f9edc8]',
-    badgeText: 'text-[#8a6a1e]',
-    accentText: 'text-[#c28a0c]',
-    subtleText: 'text-stone-600',
-    topGlow: 'bg-[#ffe08c]/55',
-    bottomGlow: 'bg-[#fff2c7]/75',
-    miniIcons: ['☕', '🥐'],
-  },
-
-  Boissons: {
-    cardBg: 'bg-gradient-to-br from-[#f3fbff] to-[#fbffff]',
-    border: 'border-[#d7ebf4]',
-    iconBg: 'bg-[#eaf7fd]',
-    badgeBg: 'bg-[#dff1fb]',
-    badgeText: 'text-[#46718a]',
-    accentText: 'text-[#3b87a8]',
-    subtleText: 'text-stone-600',
-    topGlow: 'bg-[#c5e8f8]/55',
-    bottomGlow: 'bg-[#dbf7f0]/70',
-    miniIcons: ['🍋', '🧊'],
-  },
-
-  Healthy: {
-    cardBg: 'bg-gradient-to-br from-[#f6fcf4] to-[#fcfffb]',
-    border: 'border-[#dcebd8]',
-    iconBg: 'bg-[#ebf7e7]',
-    badgeBg: 'bg-[#dff0d9]',
-    badgeText: 'text-[#53774f]',
-    accentText: 'text-[#5b9856]',
-    subtleText: 'text-stone-600',
-    topGlow: 'bg-[#cfe8c8]/55',
-    bottomGlow: 'bg-[#e8f8e3]/75',
-    miniIcons: ['🥑', '🌿'],
-  },
-}
-
-const FALLBACK_CATEGORY_STYLES: CategoryVisualStyle[] = [
-  DEFAULT_CATEGORY_STYLE,
-  {
-    cardBg: 'bg-gradient-to-br from-[#fff8f2] to-white',
-    border: 'border-[#f0dfcf]',
-    iconBg: 'bg-[#fff1e6]',
-    badgeBg: 'bg-[#f6e8db]',
-    badgeText: 'text-[#8a5f3d]',
-    accentText: 'text-[#cc6d2f]',
-    subtleText: 'text-stone-600',
-    topGlow: 'bg-[#ffd7bb]/60',
-    bottomGlow: 'bg-[#fff1e3]/80',
-    miniIcons: ['🍴', '✨'],
-  },
-  {
-    cardBg: 'bg-gradient-to-br from-[#f8fafc] to-white',
-    border: 'border-[#e4e9ef]',
-    iconBg: 'bg-[#eef3f7]',
-    badgeBg: 'bg-[#e6edf4]',
-    badgeText: 'text-[#566575]',
-    accentText: 'text-[#64748b]',
-    subtleText: 'text-stone-600',
-    topGlow: 'bg-[#dbe7f1]/60',
-    bottomGlow: 'bg-[#f1f5f9]/80',
-    miniIcons: ['🍽️', '⭐'],
-  },
-]
-
-function getCategoryVisualStyle(categoryLabel: string, index: number) {
-  return (
-    CATEGORY_STYLES[categoryLabel] ??
-    FALLBACK_CATEGORY_STYLES[index % FALLBACK_CATEGORY_STYLES.length]
-  )
-}
 
 export default function HomePage() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -223,13 +87,12 @@ export default function HomePage() {
   return (
     <>
       <section className="space-y-8 sm:space-y-10 lg:space-y-14">
-        <div className="overflow-hidden rounded-[2rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+        <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
           <div className="grid gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
             <div className="flex flex-col justify-center">
-              <div className="mb-5 flex w-fit items-center gap-2 rounded-full bg-[#f4e8dc] px-4 py-2 text-xs font-bold text-orange-700 sm:gap-3 sm:text-sm">
-                <span>🍲</span>
-                <span>Carnet de cuisine familial</span>
-              </div>
+              <Chip emoji="🍲" className="mb-5">
+                Carnet de cuisine familial
+              </Chip>
 
               <h1 className="max-w-3xl text-3xl font-black leading-tight text-stone-950 sm:text-5xl md:text-6xl">
                 Les recettes de la maison, toujours sous la main.
@@ -242,19 +105,19 @@ export default function HomePage() {
               </p>
 
               <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
-                <Link
-                  to="/recipes"
-                  className="rounded-full bg-orange-500 px-7 py-4 text-center font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md"
-                >
+                <Button to="/recipes" size="lg" fullWidth className="sm:w-auto">
                   Voir les recettes
-                </Link>
+                </Button>
 
-                <Link
+                <Button
                   to="/add-recipe"
-                  className="rounded-full border border-orange-200 bg-white px-7 py-4 text-center font-bold text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  className="sm:w-auto"
                 >
                   Ajouter une recette
-                </Link>
+                </Button>
               </div>
             </div>
 
@@ -340,31 +203,25 @@ export default function HomePage() {
         )}
 
         <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
-          <div className="mb-6 flex flex-col gap-4 sm:mb-8 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="font-bold text-orange-600">Nouveautés</p>
-
-              <h2 className="text-2xl font-black text-stone-950 sm:text-3xl md:text-4xl">
-                Les dernières recettes ajoutées
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
-                Les nouvelles idées à tester à la maison.
-              </p>
-            </div>
-
-            <Link
-              to="/recipes"
-              className="w-full rounded-full border border-orange-200 bg-white px-6 py-3 text-center font-bold text-orange-700 transition hover:bg-orange-50 sm:w-fit"
-            >
-              Explorer les catégories →
-            </Link>
-          </div>
+          <SectionHeader
+            className="mb-6 sm:mb-8"
+            eyebrow="Nouveautés"
+            title="Les dernières recettes ajoutées"
+            subtitle="Les nouvelles idées à tester à la maison."
+            action={
+              <Button
+                to="/recipes"
+                variant="secondary"
+                fullWidth
+                className="sm:w-fit"
+              >
+                Explorer les catégories →
+              </Button>
+            }
+          />
 
           {loading ? (
-            <div className="rounded-[1.5rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-8">
-              Chargement des recettes...
-            </div>
+            <RecipeCardGridSkeleton count={3} />
           ) : latestRecipes.length === 0 ? (
             <div className="rounded-[1.5rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-8">
               <p className="text-lg font-bold text-stone-950">
@@ -375,12 +232,14 @@ export default function HomePage() {
                 Ajoute ta première recette pour la voir apparaître ici.
               </p>
 
-              <Link
+              <Button
                 to="/add-recipe"
-                className="mt-6 inline-block w-full rounded-full bg-orange-500 px-7 py-4 font-bold text-white transition hover:bg-orange-600 sm:w-auto"
+                size="lg"
+                fullWidth
+                className="mt-6 sm:w-auto"
               >
                 Ajouter une recette
-              </Link>
+              </Button>
             </div>
           ) : (
             <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -392,38 +251,29 @@ export default function HomePage() {
         </div>
 
         <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
-          <div className="mb-6 flex flex-col gap-4 sm:mb-8 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="font-bold text-orange-600">Explorer</p>
-
-              <h2 className="text-2xl font-black text-stone-950 sm:text-3xl md:text-4xl">
-                Les grandes familles de recettes
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
-                Parcours le carnet selon tes envies du moment.
-              </p>
-            </div>
-
-            <Link
-              to="/recipes"
-              className="w-full rounded-full border border-orange-200 bg-white px-6 py-3 text-center font-bold text-orange-700 transition hover:bg-orange-50 sm:w-fit"
-            >
-              Toutes les recettes →
-            </Link>
-          </div>
+          <SectionHeader
+            className="mb-6 sm:mb-8"
+            eyebrow="Explorer"
+            title="Les grandes familles de recettes"
+            subtitle="Parcours le carnet selon tes envies du moment."
+            action={
+              <Button
+                to="/recipes"
+                variant="secondary"
+                fullWidth
+                className="sm:w-fit"
+              >
+                Toutes les recettes →
+              </Button>
+            }
+          />
 
           {loading ? (
-            <div className="rounded-[1.5rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-8">
-              Chargement des catégories...
-            </div>
+            <RecipeCardGridSkeleton count={6} />
           ) : (
             <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {categoriesWithCount.map((category, index) => {
-                const visualStyle = getCategoryVisualStyle(
-                  category.label,
-                  index,
-                )
+                const visualStyle = getHomeCardStyle(category.label, index)
 
                 return (
                   <Link
@@ -504,7 +354,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={closeRandomModal}
-              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[#fff5ec] text-xl font-black text-stone-700 transition hover:bg-orange-100 sm:right-5 sm:top-5"
+              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-cream-100 text-xl font-black text-stone-700 transition hover:bg-orange-100 sm:right-5 sm:top-5"
               aria-label="Fermer"
             >
               ×
@@ -564,7 +414,7 @@ export default function HomePage() {
                 </p>
 
                 <div className="mt-6 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-[#fff5ec] p-4">
+                  <div className="rounded-2xl bg-cream-100 p-4">
                     <p className="text-sm font-bold text-stone-500">
                       Temps total
                     </p>
@@ -573,7 +423,7 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-[#fff5ec] p-4">
+                  <div className="rounded-2xl bg-cream-100 p-4">
                     <p className="text-sm font-bold text-stone-500">
                       Portions
                     </p>

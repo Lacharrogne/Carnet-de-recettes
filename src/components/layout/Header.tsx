@@ -82,7 +82,7 @@ function mobileNavClass(isActive: boolean) {
 }
 
 const mobileLinkClass =
-  'rounded-2xl bg-[#fffaf3] px-4 py-3.5 font-bold text-stone-800 transition hover:bg-orange-50'
+  'rounded-2xl bg-cream-50 px-4 py-3.5 font-bold text-stone-800 transition hover:bg-orange-50'
 
 function dropdownPanelClass(
   isOpen: boolean,
@@ -176,7 +176,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-orange-100/80 bg-[#fffaf3]/95 backdrop-blur-xl print:hidden">
+    <header className="sticky top-0 z-50 border-b border-orange-100/80 bg-cream-50/95 backdrop-blur-xl print:hidden">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-5">
         <Link
           to="/"
@@ -250,7 +250,7 @@ export default function Header() {
                       className="group/item rounded-2xl p-3 transition hover:bg-orange-50"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#fff1e6] text-2xl transition group-hover/item:scale-105">
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-2xl transition group-hover/item:scale-105">
                           {category.emoji}
                         </span>
 
@@ -310,7 +310,7 @@ export default function Header() {
                       className="group/item rounded-2xl p-3 transition hover:bg-orange-50"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#fff1e6] text-2xl transition group-hover/item:scale-105">
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-2xl transition group-hover/item:scale-105">
                           {link.emoji}
                         </span>
 
@@ -341,7 +341,7 @@ export default function Header() {
                 className={`group flex items-center gap-3 rounded-full px-4 py-2 font-black shadow-sm ring-1 transition ${
                   isAddRecipeActive
                     ? 'bg-orange-500 text-white ring-orange-200'
-                    : 'bg-[#f4e8dc] text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
+                    : 'bg-cream-300 text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
                 }`}
               >
                 <span
@@ -365,7 +365,7 @@ export default function Header() {
                 <Link
                   to="/profile"
                   onClick={closeDropdowns}
-                  className="flex items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 font-bold text-stone-900 shadow-sm transition hover:bg-orange-50 hover:text-orange-600"
+                  className="flex items-center gap-3 rounded-full bg-cream-300 px-4 py-2 font-bold text-stone-900 shadow-sm transition hover:bg-orange-50 hover:text-orange-600"
                 >
                   <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
                     {displayedAvatarUrl ? (
@@ -391,7 +391,7 @@ export default function Header() {
                   )}
                 >
                   <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100">
-                    <div className="mb-3 rounded-[1.5rem] bg-[#fffaf3] p-3 ring-1 ring-orange-100">
+                    <div className="mb-3 rounded-[1.5rem] bg-cream-50 p-3 ring-1 ring-orange-100">
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-lg font-black text-white ring-2 ring-white">
                           {displayedAvatarUrl ? (
@@ -426,7 +426,7 @@ export default function Header() {
                           className="group/item rounded-2xl p-2.5 transition hover:bg-orange-50"
                         >
                           <div className="flex items-center gap-3">
-                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#fff1e6] text-xl transition group-hover/item:scale-105">
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-xl transition group-hover/item:scale-105">
                               {link.emoji}
                             </span>
 
@@ -488,7 +488,7 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <div className="max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-orange-100 bg-[#fffaf3] px-4 py-5 shadow-xl lg:hidden">
+        <div className="max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-orange-100 bg-cream-50 px-4 py-5 shadow-xl lg:hidden">
           <nav className="mx-auto grid max-w-7xl gap-3 pb-4">
             <NavLink
               to="/"
@@ -506,7 +506,7 @@ export default function Header() {
                 className={`flex items-center justify-between rounded-2xl px-4 py-4 font-black shadow-sm ring-1 transition ${
                   isAddRecipeActive
                     ? 'bg-orange-500 text-white ring-orange-200'
-                    : 'bg-[#f4e8dc] text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
+                    : 'bg-cream-300 text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
                 }`}
               >
                 <span className="flex items-center gap-3">
@@ -583,10 +583,10 @@ export default function Header() {
                     key={link.to}
                     to={link.to}
                     onClick={closeMenu}
-                    className="rounded-2xl bg-[#fffaf3] px-4 py-3.5 transition hover:bg-orange-50"
+                    className="rounded-2xl bg-cream-50 px-4 py-3.5 transition hover:bg-orange-50"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#fff1e6] text-xl">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-xl">
                         {link.emoji}
                       </span>
 
@@ -633,10 +633,10 @@ export default function Header() {
                       key={link.to}
                       to={link.to}
                       onClick={closeMenu}
-                      className="rounded-2xl bg-[#fffaf3] px-4 py-3.5 transition hover:bg-orange-50"
+                      className="rounded-2xl bg-cream-50 px-4 py-3.5 transition hover:bg-orange-50"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#fff1e6] text-xl">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-xl">
                           {link.emoji}
                         </span>
 

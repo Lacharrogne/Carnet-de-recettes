@@ -1,6 +1,7 @@
 import { Route, Routes, useLocation } from 'react-router-dom'
 
 import Header from './components/layout/Header'
+import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 
 import HomePage from './pages/HomePage'
@@ -156,6 +157,8 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
+
+      <Footer />
     </div>
   )
 }
