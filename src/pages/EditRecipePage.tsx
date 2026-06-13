@@ -128,7 +128,7 @@ export default function EditRecipePage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-[#fff5ec] p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-linen p-8 shadow-sm ring-1 ring-orange-100">
         <Link
           to={`/recipes/${recipe.id}`}
           className="font-bold text-orange-700 transition hover:text-orange-800"

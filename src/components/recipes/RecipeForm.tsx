@@ -39,15 +39,15 @@ type RecipeFormProps = {
 }
 
 const inputClass =
-  'w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100 sm:px-4 sm:py-3'
+  'w-full rounded-2xl bg-linen px-4 py-3.5 text-base text-cacao outline-none ring-1 ring-bark transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40 sm:px-4 sm:py-3'
 
-const labelClass = 'mb-2 block text-sm font-bold text-stone-800 sm:text-base'
+const labelClass = 'mb-2 block text-sm font-semibold text-hazel sm:text-base'
 
 const sectionClass =
-  'rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] md:p-6'
+  'rounded-[1.75rem] bg-card p-5 shadow-card ring-1 ring-bark sm:rounded-[2rem] md:p-6'
 
 const smallButtonClass =
-  'inline-flex items-center justify-center rounded-full bg-[#fff1e6] px-4 py-2 text-sm font-bold text-orange-700 transition hover:bg-orange-100'
+  'inline-flex items-center justify-center rounded-full bg-terracotta-soft px-4 py-2 text-sm font-bold text-terracotta-deep transition hover:bg-[#eecbb4]'
 
 export default function RecipeForm({
   initialValues,
@@ -331,13 +331,13 @@ export default function RecipeForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-7">
       {errorMessage && (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium leading-6 text-red-700 ring-1 ring-red-100 sm:text-base">
+        <p className="rounded-2xl bg-[#f7e3de] px-4 py-3 text-sm font-medium leading-6 text-[#b23b2e] ring-1 ring-[#e9c4bc] sm:text-base">
           {errorMessage}
         </p>
       )}
 
-      <div className="rounded-[1.75rem] bg-[#fff5ec] p-5 ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
-        <p className="text-sm font-bold text-orange-600 sm:text-base">
+      <div className="rounded-[1.75rem] bg-honey-soft/60 p-5 ring-1 ring-honey/30 sm:rounded-[2rem] sm:p-6">
+        <p className="text-sm font-bold text-terracotta sm:text-base">
           Carnet familial
         </p>
 
@@ -353,7 +353,7 @@ export default function RecipeForm({
 
       <div className={sectionClass}>
         <div className="mb-5 sm:mb-6">
-          <p className="text-sm font-bold text-orange-600 sm:text-base">
+          <p className="text-sm font-bold text-terracotta sm:text-base">
             Base de la recette
           </p>
 
@@ -415,7 +415,7 @@ export default function RecipeForm({
 
       <div className={sectionClass}>
         <div className="mb-5 sm:mb-6">
-          <p className="text-sm font-bold text-orange-600 sm:text-base">
+          <p className="text-sm font-bold text-terracotta sm:text-base">
             Temps et portions
           </p>
 
@@ -474,7 +474,7 @@ export default function RecipeForm({
           </div>
         </div>
 
-        <div className="mt-5 rounded-[1.5rem] bg-[#fff5ec] px-5 py-4 ring-1 ring-orange-100">
+        <div className="mt-5 rounded-[1.5rem] bg-linen px-5 py-4 ring-1 ring-orange-100">
           <p className="text-sm font-bold text-stone-600">Temps total</p>
 
           <p className="mt-1 text-3xl font-black text-stone-950">
@@ -485,7 +485,7 @@ export default function RecipeForm({
 
       <div className={sectionClass}>
         <div className="mb-5 sm:mb-6">
-          <p className="text-sm font-bold text-orange-600 sm:text-base">
+          <p className="text-sm font-bold text-terracotta sm:text-base">
             Image
           </p>
 
@@ -534,14 +534,14 @@ export default function RecipeForm({
           <img
             src={previewUrl}
             alt="Aperçu de la recette"
-            className="mt-5 h-44 w-full rounded-[1.5rem] object-cover ring-1 ring-orange-100 sm:h-56"
+            className="mt-5 h-44 w-full rounded-[1.5rem] object-cover ring-1 ring-bark sm:h-56"
           />
         )}
       </div>
 
       <div className={sectionClass}>
         <div className="mb-5 sm:mb-6">
-          <p className="text-sm font-bold text-orange-600 sm:text-base">
+          <p className="text-sm font-bold text-terracotta sm:text-base">
             Présentation
           </p>
 
@@ -564,7 +564,7 @@ export default function RecipeForm({
 
       <div className={sectionClass}>
         <div className="mb-5 sm:mb-6">
-          <p className="text-sm font-bold text-orange-600 sm:text-base">
+          <p className="text-sm font-bold text-terracotta sm:text-base">
             Classement
           </p>
 
@@ -582,9 +582,9 @@ export default function RecipeForm({
           {RECIPE_TAG_GROUPS.map((group) => (
             <div
               key={group.title}
-              className="rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-50"
+              className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark/50"
             >
-              <p className="mb-3 font-black text-stone-800">{group.title}</p>
+              <p className="mb-3 font-black text-espresso">{group.title}</p>
 
               <div className="flex flex-wrap gap-2">
                 {group.tags.map((tag) => {
@@ -597,8 +597,8 @@ export default function RecipeForm({
                       onClick={() => toggleTag(tag.value)}
                       className={`rounded-full px-4 py-2.5 text-sm font-bold transition ${
                         isSelected
-                          ? 'bg-orange-600 text-white shadow-sm'
-                          : 'bg-white text-stone-600 ring-1 ring-orange-100 hover:bg-orange-50 hover:text-orange-700'
+                          ? 'bg-terracotta text-white shadow-sm'
+                          : 'bg-card text-cacao ring-1 ring-bark hover:bg-linen hover:text-terracotta'
                       }`}
                     >
                       #{tag.label}
@@ -613,7 +613,7 @@ export default function RecipeForm({
 
       <div className={sectionClass}>
         <div className="mb-5 sm:mb-6">
-          <p className="text-sm font-bold text-orange-600 sm:text-base">
+          <p className="text-sm font-bold text-terracotta sm:text-base">
             Liste de courses
           </p>
 
@@ -630,7 +630,7 @@ export default function RecipeForm({
           {ingredients.map((ingredient, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 rounded-[1.5rem] bg-[#fffaf3] p-3 ring-1 ring-orange-50 sm:flex-row sm:items-center"
+              className="flex flex-col gap-3 rounded-[1.5rem] bg-cream-50 p-3 ring-1 ring-bark/50 sm:flex-row sm:items-center"
             >
               <input
                 ref={(element) => {
@@ -649,7 +649,7 @@ export default function RecipeForm({
                 type="button"
                 onClick={() => removeIngredient(index)}
                 disabled={ingredients.length === 1}
-                className="w-full rounded-2xl border border-red-100 bg-white px-4 py-3 font-bold text-stone-500 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+                className="w-full rounded-2xl border border-[#e9c4bc] bg-card px-4 py-3 font-bold text-hazel transition hover:bg-[#f7e3de] hover:text-[#b23b2e] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
               >
                 Supprimer
               </button>
@@ -668,7 +668,7 @@ export default function RecipeForm({
 
       <div className={sectionClass}>
         <div className="mb-5 sm:mb-6">
-          <p className="text-sm font-bold text-orange-600 sm:text-base">
+          <p className="text-sm font-bold text-terracotta sm:text-base">
             Préparation
           </p>
 
@@ -686,9 +686,9 @@ export default function RecipeForm({
           {steps.map((step, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 rounded-[1.5rem] bg-[#fffaf3] p-3 ring-1 ring-orange-50 sm:flex-row"
+              className="flex flex-col gap-3 rounded-[1.5rem] bg-cream-50 p-3 ring-1 ring-bark/50 sm:flex-row"
             >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-600 font-black text-white">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-terracotta font-black text-white">
                 {index + 1}
               </div>
 
@@ -708,7 +708,7 @@ export default function RecipeForm({
                 type="button"
                 onClick={() => removeStep(index)}
                 disabled={steps.length === 1}
-                className="h-fit w-full rounded-2xl border border-red-100 bg-white px-4 py-3 font-bold text-stone-500 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+                className="h-fit w-full rounded-2xl border border-[#e9c4bc] bg-card px-4 py-3 font-bold text-hazel transition hover:bg-[#f7e3de] hover:text-[#b23b2e] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
               >
                 Supprimer
               </button>
@@ -725,11 +725,11 @@ export default function RecipeForm({
         </button>
       </div>
 
-      <div className="bottom-4 z-20 rounded-[1.75rem] bg-[#fffaf3]/90 p-2 shadow-lg ring-1 ring-orange-100 backdrop-blur print:static sm:bottom-6">
+      <div className="z-20 rounded-[1.75rem] bg-cream-50/90 p-2 shadow-lift ring-1 ring-bark backdrop-blur print:static">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-[1.5rem] bg-orange-600 px-6 py-4 text-lg font-black text-white shadow-sm transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-[1.5rem] bg-terracotta px-6 py-4 text-lg font-bold text-white shadow-soft transition hover:bg-terracotta-deep disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? 'Enregistrement...' : submitLabel}
         </button>
