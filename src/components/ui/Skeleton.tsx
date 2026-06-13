@@ -5,15 +5,15 @@ type SkeletonProps = {
 // Bloc fantôme animé générique.
 export function Skeleton({ className = '' }: SkeletonProps) {
   return (
-    <div className={`animate-pulse rounded-xl bg-stone-200/70 ${className}`} />
+    <div className={`animate-pulse rounded-xl bg-sand/60 ${className}`} />
   )
 }
 
 // Carte fantôme reprenant la silhouette d'une RecipeCard.
 export function RecipeCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-[1.75rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem]">
-      <Skeleton className="h-44 w-full rounded-none sm:h-56" />
+    <div className="overflow-hidden rounded-card bg-card shadow-card ring-1 ring-bark">
+      <Skeleton className="aspect-[4/3] w-full rounded-none" />
 
       <div className="space-y-3 p-4 sm:p-5">
         <Skeleton className="h-3 w-24" />
