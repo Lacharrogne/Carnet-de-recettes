@@ -227,8 +227,8 @@ export default function IdeasPage() {
 
   return (
     <section className="space-y-8">
-      <div className="rounded-[2.5rem] bg-[#fffaf3] p-8 shadow-sm ring-1 ring-orange-100">
-        <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+      <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100">
+        <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
           <span>💡</span>
           <span>Boîte à idées</span>
         </div>
@@ -264,7 +264,7 @@ export default function IdeasPage() {
                   <select
                     value={category}
                     onChange={(event) => setCategory(event.target.value)}
-                    className="w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                    className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                   >
                     {IDEA_CATEGORIES.map((currentCategory) => (
                       <option
@@ -289,7 +289,7 @@ export default function IdeasPage() {
                       setErrorMessage('')
                     }}
                     placeholder="Exemple : Ajouter un mode anti-gaspillage"
-                    className="w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                    className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                   />
                 </div>
 
@@ -306,7 +306,7 @@ export default function IdeasPage() {
                     }}
                     rows={5}
                     placeholder="Explique ton idée en quelques phrases..."
-                    className="w-full rounded-[1.4rem] border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm font-semibold leading-7 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                    className="w-full rounded-[1.4rem] border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold leading-7 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                   />
                 </div>
 
@@ -319,7 +319,7 @@ export default function IdeasPage() {
                 </button>
               </form>
             ) : (
-              <div className="mt-5 rounded-[1.5rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100">
+              <div className="mt-5 rounded-[1.5rem] bg-cream-50 p-5 ring-1 ring-orange-100">
                 <p className="font-bold text-stone-900">
                   Connecte-toi pour proposer une idée.
                 </p>
@@ -371,11 +371,11 @@ export default function IdeasPage() {
         </div>
 
         {loading ? (
-          <div className="rounded-[2rem] bg-[#fffaf3] p-6 text-stone-600 ring-1 ring-orange-100">
+          <div className="rounded-[2rem] bg-cream-50 p-6 text-stone-600 ring-1 ring-orange-100">
             Chargement des idées...
           </div>
         ) : ideas.length === 0 ? (
-          <div className="rounded-[2rem] bg-[#fffaf3] p-8 text-center ring-1 ring-orange-100">
+          <div className="rounded-[2rem] bg-cream-50 p-8 text-center ring-1 ring-orange-100">
             <p className="text-5xl">💭</p>
 
             <h3 className="mt-4 text-2xl font-black text-stone-950">
@@ -401,7 +401,7 @@ export default function IdeasPage() {
               return (
                 <article
                   key={idea.id}
-                  className="rounded-[2rem] bg-[#fffaf3] p-5 shadow-sm ring-1 ring-orange-100"
+                  className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-orange-100"
                 >
                   <div className="mb-4 flex items-start justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-3">

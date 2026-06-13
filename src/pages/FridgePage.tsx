@@ -272,7 +272,7 @@ function FridgeResultCard({
 
   return (
     <article className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md">
-      <div className="border-b border-orange-100 bg-[#fffaf3] p-5 sm:p-6">
+      <div className="border-b border-orange-100 bg-cream-50 p-5 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-wide text-orange-600">
@@ -355,7 +355,7 @@ function FridgeResultCard({
         className="block p-5 transition hover:bg-orange-50/40 sm:p-6"
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:gap-5">
-          <div className="flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#fff1e6] text-6xl sm:h-24 sm:w-24 sm:text-5xl">
+          <div className="flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-cream-200 text-6xl sm:h-24 sm:w-24 sm:text-5xl">
             {imageToDisplay && imageToDisplay.startsWith('http') ? (
               <img
                 src={imageToDisplay}
@@ -590,10 +590,10 @@ export default function FridgePage() {
 
   return (
     <section className="space-y-8 sm:space-y-12">
-      <div className="overflow-hidden rounded-[2rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
         <div className="grid gap-7 px-5 py-7 sm:px-6 sm:py-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-12 lg:py-12">
           <div className="flex flex-col justify-center">
-            <div className="mb-5 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700 sm:mb-6">
+            <div className="mb-5 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700 sm:mb-6">
               <span>🥕</span>
               <span>Mode Frigo</span>
             </div>
@@ -640,7 +640,7 @@ export default function FridgePage() {
                   </p>
                 </div>
 
-                <span className="w-fit rounded-full bg-[#fffaf3] px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-orange-100">
+                <span className="w-fit rounded-full bg-cream-50 px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-orange-100">
                   {fridgeIngredients.length} ingrédient
                   {fridgeIngredients.length > 1 ? 's' : ''}
                 </span>
@@ -653,7 +653,7 @@ export default function FridgePage() {
                   clearMessages()
                 }}
                 placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
-                className="mt-4 min-h-36 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-[#fffaf3] px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 sm:px-5"
+                className="mt-4 min-h-36 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-cream-50 px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 sm:px-5"
               />
 
               <p className="mt-3 text-sm leading-6 text-stone-500">
@@ -790,7 +790,7 @@ export default function FridgePage() {
           </p>
         </div>
       ) : (
-        <section className="rounded-[2rem] bg-[#fffaf3]/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-6 md:p-8">
+        <section className="rounded-[2rem] bg-cream-50/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-6 md:p-8">
           <div className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-wide text-orange-600">

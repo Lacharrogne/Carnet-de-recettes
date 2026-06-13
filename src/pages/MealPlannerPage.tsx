@@ -613,7 +613,7 @@ export default function MealPlannerPage() {
       <div className="group/card flex items-center gap-4 rounded-[1.6rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-0.5 hover:shadow-md">
         <Link
           to={`/recipes/${recipe.id}`}
-          className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.25rem] bg-[#fff1e6] text-3xl"
+          className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.25rem] bg-cream-200 text-3xl"
         >
           {isImageUrl ? (
             <img
@@ -739,7 +739,7 @@ export default function MealPlannerPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3">
+          <div className="flex items-center gap-3 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3">
             <img
               src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
               alt="Carnet de recettes"
@@ -872,13 +872,13 @@ export default function MealPlannerPage() {
       </div>
 
       <section className="space-y-10">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-cream-50 shadow-sm ring-1 ring-orange-100">
           <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-orange-100/80 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-amber-100/80 blur-3xl" />
 
           <div className="relative z-10 grid gap-10 px-6 py-10 xl:grid-cols-[0.9fr_1.1fr] xl:px-10">
             <div>
-              <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+              <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
                 <span>🗓️</span>
                 <span>Planning de semaine</span>
               </div>
@@ -910,7 +910,7 @@ export default function MealPlannerPage() {
                   </span>
                 </div>
 
-                <div className="mt-5 rounded-full bg-[#fff1e6] p-1.5">
+                <div className="mt-5 rounded-full bg-cream-200 p-1.5">
                   <div
                     className="h-4 rounded-full bg-orange-500 transition-all"
                     style={{ width: `${weekCompletion}%` }}
@@ -1025,7 +1025,7 @@ export default function MealPlannerPage() {
                   return (
                     <div
                       key={extraMeal.key}
-                      className="rounded-[1.8rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100"
+                      className="rounded-[1.8rem] bg-cream-50 p-5 ring-1 ring-orange-100"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
@@ -1161,7 +1161,7 @@ export default function MealPlannerPage() {
                   className="rounded-[2.5rem] bg-white shadow-sm ring-1 ring-orange-100"
                 >
                   <div className="grid gap-6 p-6 xl:grid-cols-[260px_minmax(0,1fr)_minmax(0,1fr)]">
-                    <div className="relative overflow-hidden rounded-[1.8rem] bg-[#fffaf3] p-6 ring-1 ring-orange-100">
+                    <div className="relative overflow-hidden rounded-[1.8rem] bg-cream-50 p-6 ring-1 ring-orange-100">
                       <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-orange-100 blur-3xl" />
 
                       <div className="relative z-10">
@@ -1190,7 +1190,7 @@ export default function MealPlannerPage() {
                       return (
                         <div
                           key={meal.key}
-                          className="rounded-[1.8rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100"
+                          className="rounded-[1.8rem] bg-cream-50 p-5 ring-1 ring-orange-100"
                         >
                           <div className="mb-4 flex items-center justify-between gap-3">
                             <div>
@@ -1272,7 +1272,7 @@ export default function MealPlannerPage() {
 
       {openPickerSlot && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/40 px-4 py-6 backdrop-blur-sm">
-          <div className="flex max-h-[88vh] w-full max-w-5xl flex-col rounded-[2rem] bg-[#fffaf3] p-6 shadow-2xl ring-1 ring-orange-100 md:p-8">
+          <div className="flex max-h-[88vh] w-full max-w-5xl flex-col rounded-[2rem] bg-cream-50 p-6 shadow-2xl ring-1 ring-orange-100 md:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -1378,7 +1378,7 @@ export default function MealPlannerPage() {
                         disabled={isSyncing}
                         className="group flex w-full items-center gap-4 rounded-[1.5rem] bg-white p-4 text-left shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-0.5 hover:bg-orange-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-[#fff1e6] text-3xl">
+                        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-cream-200 text-3xl">
                           {isImageUrl ? (
                             <img
                               src={image}

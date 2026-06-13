@@ -49,7 +49,7 @@ const tools: ToolCard[] = [
     buttonLabel: 'Voir ma liste',
     badge: 'Pratique',
     cardBg: 'bg-gradient-to-br from-[#fff8f0] via-white to-[#fff2df]',
-    iconBg: 'bg-[#fff0df]',
+    iconBg: 'bg-cream-200',
     badgeBg: 'bg-orange-100',
     badgeText: 'text-orange-800',
     accentText: 'text-orange-700',
@@ -107,13 +107,13 @@ const tools: ToolCard[] = [
 export default function ToolsPage() {
   return (
     <section className="space-y-10">
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-[#fffaf3] p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
         <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-orange-100/80 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-amber-100/80 blur-3xl" />
 
         <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_0.75fr] lg:items-center">
           <div>
-            <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+            <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
               <span>🧰</span>
               <span>Outils du carnet</span>
             </div>
@@ -155,21 +155,21 @@ export default function ToolsPage() {
             </h2>
 
             <div className="mt-5 grid gap-3">
-              <div className="rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
                 <p className="text-2xl">🥕</p>
                 <p className="mt-2 font-black text-stone-950">
                   Tu pars de ce que tu as déjà.
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
                 <p className="text-2xl">🛒</p>
                 <p className="mt-2 font-black text-stone-950">
                   Les courses se préparent toutes seules.
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
                 <p className="text-2xl">📅</p>
                 <p className="mt-2 font-black text-stone-950">
                   Tu organises tes repas sans prise de tête.
@@ -274,7 +274,7 @@ export default function ToolsPage() {
 
             <Link
               to="/recipes"
-              className="rounded-full border border-orange-200 bg-[#fffaf3] px-6 py-3 text-center font-black text-orange-700 transition hover:bg-orange-50"
+              className="rounded-full border border-orange-200 bg-cream-50 px-6 py-3 text-center font-black text-orange-700 transition hover:bg-orange-50"
             >
               Parcourir les catégories
             </Link>

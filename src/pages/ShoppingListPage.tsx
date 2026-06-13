@@ -1055,8 +1055,8 @@ export default function ShoppingListPage() {
 
       <section className="screen-shopping-list space-y-8">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[2.5rem] bg-[#fffaf3] p-8 shadow-sm ring-1 ring-orange-100">
-            <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+          <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100">
+            <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
               <span>🛒</span>
               <span>Liste de courses</span>
             </div>
@@ -1160,7 +1160,7 @@ export default function ShoppingListPage() {
                   setSuccessMessage('')
                 }}
                 placeholder="Exemple : 6 œufs, 500 g pâtes, lait..."
-                className="rounded-[1.5rem] border border-orange-100 bg-[#fffaf3] px-5 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                className="rounded-[1.5rem] border border-orange-100 bg-cream-50 px-5 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
               />
 
               <button
@@ -1252,7 +1252,7 @@ export default function ShoppingListPage() {
                   {activeSections.map((section) => (
                     <article
                       key={section.category}
-                      className="rounded-[2rem] bg-[#fffaf3] p-5 shadow-sm ring-1 ring-orange-100"
+                      className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-orange-100"
                     >
                       <div className="mb-4 flex items-center justify-between gap-4">
                         <div>
