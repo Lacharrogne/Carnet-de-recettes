@@ -19,6 +19,7 @@ function makeRecipe(id: number, title: string): Recipe {
     tags: [],
     ingredients: [],
     steps: [],
+    relatedRecipeIds: [],
   }
 }
 

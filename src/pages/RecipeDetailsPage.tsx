@@ -532,6 +532,11 @@ export default function RecipeDetailsPage() {
     scaleIngredientText(ingredient, recipe.servings, selectedServings),
   )
 
+  // Liens créés manuellement dans le formulaire, résolus en recettes.
+  const manualLinkedRecipes = recipe.relatedRecipeIds
+    .map((relatedId) => allRecipes.find((item) => item.id === relatedId))
+    .filter((item): item is Recipe => Boolean(item))
+
   const authorName = authorProfile?.username || 'Utilisateur'
   const authorBio = authorProfile?.bio ?? ''
   const authorAvatarUrl = authorProfile?.avatarUrl ?? ''
@@ -1217,6 +1222,28 @@ export default function RecipeDetailsPage() {
         </div>
 
         <RecipeReviews recipeId={recipe.id} />
+
+        {manualLinkedRecipes.length > 0 && (
+          <section className="print:hidden">
+            <div className="mb-6">
+              <p className="font-bold text-orange-600">Recettes liées</p>
+
+              <h2 className="text-2xl font-black text-stone-950 sm:text-3xl">
+                À préparer avec cette recette
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
+                Les recettes-composants reliées à cette fiche.
+              </p>
+            </div>
+
+            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {manualLinkedRecipes.map((linkedRecipe) => (
+                <RecipeCard key={linkedRecipe.id} recipe={linkedRecipe} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {similarRecipes.length > 0 && (
           <section className="print:hidden">

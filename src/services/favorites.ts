@@ -17,6 +17,7 @@ type FavoriteRecipeRow = {
     tags: string[] | null
     ingredients: string[] | null
     steps: string[] | null
+    related_recipe_ids: number[] | null
   } | null
 }
 
@@ -38,6 +39,7 @@ function mapFavoriteRecipe(row: FavoriteRecipeRow): Recipe | null {
     tags: row.recipes.tags ?? [],
     ingredients: row.recipes.ingredients ?? [],
     steps: row.recipes.steps ?? [],
+    relatedRecipeIds: row.recipes.related_recipe_ids ?? [],
   }
 }
 
@@ -87,7 +89,8 @@ export async function getFavoriteRecipes(): Promise<Recipe[]> {
         image_url,
         tags,
         ingredients,
-        steps
+        steps,
+        related_recipe_ids
       )
     `,
     )

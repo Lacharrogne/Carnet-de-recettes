@@ -27,6 +27,7 @@ export type RecipeFormValues = {
   tags: string[]
   ingredients: string[]
   steps: string[]
+  relatedRecipeIds: number[]
   imageFile: File | null
 }
 
@@ -35,6 +36,8 @@ type RecipeFormProps = {
   submitLabel: string
   isSubmitting: boolean
   errorMessage: string
+  // Autres recettes proposées pour créer des liens manuels.
+  availableRecipes?: Recipe[]
   onSubmit: (values: RecipeFormValues) => Promise<void>
 }
 
@@ -54,6 +57,7 @@ export default function RecipeForm({
   submitLabel,
   isSubmitting,
   errorMessage,
+  availableRecipes = [],
   onSubmit,
 }: RecipeFormProps) {
   const ingredientInputRefs = useRef<Array<HTMLInputElement | null>>([])
@@ -100,6 +104,12 @@ export default function RecipeForm({
   const [steps, setSteps] = useState<string[]>(
     initialValues?.steps?.length ? initialValues.steps : [''],
   )
+
+  const [relatedRecipeIds, setRelatedRecipeIds] = useState<number[]>(
+    initialValues?.relatedRecipeIds ?? [],
+  )
+
+  const [relatedSearch, setRelatedSearch] = useState('')
 
   const [imageFile, setImageFile] = useState<File | null>(null)
 
@@ -157,6 +167,44 @@ export default function RecipeForm({
 
     return prepTimeNumber + cookTimeNumber
   }, [prepTime, cookTime])
+
+  // Recettes pouvant être liées (toutes sauf celle en cours d'édition).
+  const linkableRecipes = useMemo(
+    () =>
+      availableRecipes.filter((recipe) => recipe.id !== initialValues?.id),
+    [availableRecipes, initialValues?.id],
+  )
+
+  const selectedRelatedRecipes = useMemo(
+    () =>
+      relatedRecipeIds
+        .map((id) => linkableRecipes.find((recipe) => recipe.id === id))
+        .filter((recipe): recipe is Recipe => Boolean(recipe)),
+    [relatedRecipeIds, linkableRecipes],
+  )
+
+  const relatedSearchResults = useMemo(() => {
+    const query = relatedSearch.trim().toLowerCase()
+    if (!query) return []
+
+    return linkableRecipes
+      .filter((recipe) => !relatedRecipeIds.includes(recipe.id))
+      .filter((recipe) => recipe.title.toLowerCase().includes(query))
+      .slice(0, 6)
+  }, [relatedSearch, linkableRecipes, relatedRecipeIds])
+
+  function addRelatedRecipe(id: number) {
+    setRelatedRecipeIds((current) =>
+      current.includes(id) ? current : [...current, id],
+    )
+    setRelatedSearch('')
+  }
+
+  function removeRelatedRecipe(id: number) {
+    setRelatedRecipeIds((current) =>
+      current.filter((relatedId) => relatedId !== id),
+    )
+  }
 
   function focusIngredientInput(index: number) {
     const inputToFocus = ingredientInputRefs.current[index]
@@ -324,6 +372,7 @@ export default function RecipeForm({
       tags: selectedTags,
       ingredients: cleanList(ingredients),
       steps: cleanList(steps),
+      relatedRecipeIds,
       imageFile,
     })
   }
@@ -724,6 +773,77 @@ export default function RecipeForm({
           + Ajouter une étape
         </button>
       </div>
+
+      {linkableRecipes.length > 0 && (
+        <div className={sectionClass}>
+          <p className="text-sm font-bold text-terracotta sm:text-base">
+            Recettes liées
+          </p>
+
+          <h2 className="mt-2 text-2xl font-black text-stone-950 sm:text-3xl">
+            Relier des recettes-composants
+          </h2>
+
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base sm:leading-7">
+            Pointe vers une autre recette utilisée ici (par exemple une pâte
+            brisée maison). Les liens s'affichent sur la fiche de la recette.
+          </p>
+
+          {selectedRelatedRecipes.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {selectedRelatedRecipes.map((recipe) => (
+                <span
+                  key={recipe.id}
+                  className="inline-flex items-center gap-2 rounded-full bg-terracotta-soft px-3 py-1.5 text-sm font-bold text-terracotta-deep"
+                >
+                  {recipe.title}
+                  <button
+                    type="button"
+                    onClick={() => removeRelatedRecipe(recipe.id)}
+                    aria-label={`Retirer le lien vers ${recipe.title}`}
+                    className="flex h-5 w-5 items-center justify-center rounded-full bg-card/70 text-xs font-black text-hazel transition hover:bg-card hover:text-[#b23b2e]"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="relative mt-4">
+            <input
+              type="text"
+              value={relatedSearch}
+              onChange={(event) => setRelatedSearch(event.target.value)}
+              aria-label="Rechercher une recette à lier"
+              placeholder="Rechercher une recette à lier..."
+              className={inputClass}
+            />
+
+            {relatedSearchResults.length > 0 && (
+              <ul className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl bg-card shadow-lift ring-1 ring-bark">
+                {relatedSearchResults.map((recipe) => (
+                  <li key={recipe.id}>
+                    <button
+                      type="button"
+                      onClick={() => addRelatedRecipe(recipe.id)}
+                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-cacao transition hover:bg-cream-50"
+                    >
+                      <span>{recipe.image || '🍽️'}</span>
+                      <span className="min-w-0 flex-1 truncate">
+                        {recipe.title}
+                      </span>
+                      <span className="text-xs font-bold text-terracotta">
+                        + Lier
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="z-20 rounded-[1.75rem] bg-cream-50/90 p-2 shadow-lift ring-1 ring-bark backdrop-blur print:static">
         <button

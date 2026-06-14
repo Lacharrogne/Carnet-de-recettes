@@ -1,14 +1,30 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RecipeForm from '../components/recipes/RecipeForm'
 import type { RecipeFormValues } from '../components/recipes/RecipeForm'
-import { createRecipe, uploadRecipeImage } from '../services/recipes'
+import { createRecipe, getRecipes, uploadRecipeImage } from '../services/recipes'
+import type { Recipe } from '../types/recipe'
 
 export default function AddRecipePage() {
   const navigate = useNavigate()
 
+  const [availableRecipes, setAvailableRecipes] = useState<Recipe[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    let ignore = false
+
+    getRecipes()
+      .then((recipes) => {
+        if (!ignore) setAvailableRecipes(recipes)
+      })
+      .catch((error) => console.error(error))
+
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   async function handleSubmit(values: RecipeFormValues) {
     setErrorMessage('')
@@ -98,6 +114,7 @@ export default function AddRecipePage() {
         </div>
 
         <RecipeForm
+          availableRecipes={availableRecipes}
           submitLabel="Ajouter la recette"
           isSubmitting={isSubmitting}
           errorMessage={errorMessage}

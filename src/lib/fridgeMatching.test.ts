@@ -28,6 +28,7 @@ function makeRecipe(ingredients: string[]): Recipe {
     tags: [],
     ingredients,
     steps: [],
+    relatedRecipeIds: [],
   }
 }
 

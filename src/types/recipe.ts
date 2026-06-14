@@ -23,4 +23,5 @@ export type Recipe = {
   tags: string[]
   ingredients: string[]
   steps: string[]
+  relatedRecipeIds: number[]
 }
