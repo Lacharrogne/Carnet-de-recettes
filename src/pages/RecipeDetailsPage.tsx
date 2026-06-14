@@ -9,137 +9,24 @@ import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { useFavorites } from '../context/useFavorites'
 import { scaleIngredientText } from '../lib/ingredientScaling'
+import {
+  DAYS,
+  MEALS,
+  getDayLabel,
+  getMealLabel,
+  getSavedPlanner,
+  saveRecipeToPlanner,
+  type DayKey,
+  type MealKey,
+} from '../lib/weeklyPlanner'
 import { getProfile, type UserProfile } from '../services/profiles'
 import { deleteRecipe, getRecipeById, getRecipes } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
 
-type DayKey =
-  | 'monday'
-  | 'tuesday'
-  | 'wednesday'
-  | 'thursday'
-  | 'friday'
-  | 'saturday'
-  | 'sunday'
-
-type MealKey = 'lunch' | 'dinner'
-type ExtraMealKey = 'breakfast' | 'snack' | 'dessert'
-
-type DayPlannerState = Record<DayKey, Record<MealKey, string>>
-type WeeklyExtrasState = Record<ExtraMealKey, string[]>
-
-type MealPlannerState = DayPlannerState & {
-  weeklyExtras: WeeklyExtrasState
-}
-
 type StepTimer = {
   label: string
   seconds: number
-}
-
-const STORAGE_KEY = 'carnet-recettes-weekly-planner'
-
-const DAYS: { key: DayKey; label: string }[] = [
-  { key: 'monday', label: 'Lundi' },
-  { key: 'tuesday', label: 'Mardi' },
-  { key: 'wednesday', label: 'Mercredi' },
-  { key: 'thursday', label: 'Jeudi' },
-  { key: 'friday', label: 'Vendredi' },
-  { key: 'saturday', label: 'Samedi' },
-  { key: 'sunday', label: 'Dimanche' },
-]
-
-const MEALS: { key: MealKey; label: string; emoji: string }[] = [
-  { key: 'lunch', label: 'Déjeuner', emoji: '☀️' },
-  { key: 'dinner', label: 'Dîner', emoji: '🌙' },
-]
-
-function createEmptyPlanner(): MealPlannerState {
-  return {
-    monday: { lunch: '', dinner: '' },
-    tuesday: { lunch: '', dinner: '' },
-    wednesday: { lunch: '', dinner: '' },
-    thursday: { lunch: '', dinner: '' },
-    friday: { lunch: '', dinner: '' },
-    saturday: { lunch: '', dinner: '' },
-    sunday: { lunch: '', dinner: '' },
-    weeklyExtras: {
-      breakfast: [],
-      snack: [],
-      dessert: [],
-    },
-  }
-}
-
-function cleanRecipeIds(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value
-    .map((item) => String(item))
-    .filter((item) => item.trim().length > 0)
-}
-
-function getSavedPlanner(): MealPlannerState {
-  if (typeof window === 'undefined') {
-    return createEmptyPlanner()
-  }
-
-  try {
-    const savedPlanner = window.localStorage.getItem(STORAGE_KEY)
-    const emptyPlanner = createEmptyPlanner()
-
-    if (!savedPlanner) {
-      return emptyPlanner
-    }
-
-    const parsedPlanner = JSON.parse(savedPlanner) as Partial<MealPlannerState>
-
-    return {
-      monday: { ...emptyPlanner.monday, ...parsedPlanner.monday },
-      tuesday: { ...emptyPlanner.tuesday, ...parsedPlanner.tuesday },
-      wednesday: { ...emptyPlanner.wednesday, ...parsedPlanner.wednesday },
-      thursday: { ...emptyPlanner.thursday, ...parsedPlanner.thursday },
-      friday: { ...emptyPlanner.friday, ...parsedPlanner.friday },
-      saturday: { ...emptyPlanner.saturday, ...parsedPlanner.saturday },
-      sunday: { ...emptyPlanner.sunday, ...parsedPlanner.sunday },
-      weeklyExtras: {
-        breakfast: cleanRecipeIds(parsedPlanner.weeklyExtras?.breakfast),
-        snack: cleanRecipeIds(parsedPlanner.weeklyExtras?.snack),
-        dessert: cleanRecipeIds(parsedPlanner.weeklyExtras?.dessert),
-      },
-    }
-  } catch {
-    return createEmptyPlanner()
-  }
-}
-
-function saveRecipeToPlanner(
-  day: DayKey,
-  meal: MealKey,
-  recipeId: Recipe['id'],
-) {
-  const currentPlanner = getSavedPlanner()
-
-  const nextPlanner: MealPlannerState = {
-    ...currentPlanner,
-    [day]: {
-      ...currentPlanner[day],
-      [meal]: String(recipeId),
-    },
-  }
-
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextPlanner))
-}
-
-function getDayLabel(day: DayKey) {
-  return DAYS.find((currentDay) => currentDay.key === day)?.label ?? day
-}
-
-function getMealLabel(meal: MealKey) {
-  return MEALS.find((currentMeal) => currentMeal.key === meal)?.label ?? meal
 }
 
 function formatTimerTime(seconds: number) {
