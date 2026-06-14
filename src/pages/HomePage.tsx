@@ -18,9 +18,8 @@ import { getProfile } from '../services/profiles'
 import { getRecipes } from '../services/recipes'
 import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import { getShoppingListItems } from '../services/shoppingList'
+import { PLANNER_STORAGE_KEY } from '../lib/weeklyPlanner'
 import type { Recipe } from '../types/recipe'
-
-const PLANNER_STORAGE_KEY = 'carnet-recettes-weekly-planner'
 
 const WEEK_DAY_KEYS = [
   'sunday',
