@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
+import { Skeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import {
   addShoppingListItem,
@@ -766,7 +767,10 @@ export default function ShoppingListPage() {
     }
   }, [userId])
 
-  const visibleItems = userId && loadedUserId === userId ? items : []
+  const visibleItems = useMemo(
+    () => (userId && loadedUserId === userId ? items : []),
+    [userId, loadedUserId, items],
+  )
 
   const activeItems = useMemo(() => {
     return visibleItems.filter((item) => !item.checked)
@@ -1196,8 +1200,14 @@ export default function ShoppingListPage() {
         )}
 
         {loading ? (
-          <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
-            Chargement de la liste de courses...
+          <div className="space-y-3 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 sm:p-8">
+            {Array.from({ length: 5 }, (_, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <Skeleton className="h-6 w-6 rounded-md" />
+                <Skeleton className="h-4 flex-1" />
+                <Skeleton className="h-4 w-12" />
+              </div>
+            ))}
           </div>
         ) : visibleItems.length === 0 ? (
           <div className="rounded-[2.5rem] bg-white p-10 text-center shadow-sm ring-1 ring-orange-100">

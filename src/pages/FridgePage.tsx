@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { getRecipes } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
@@ -764,9 +765,7 @@ export default function FridgePage() {
       )}
 
       {loading ? (
-        <div className="rounded-[2rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100 sm:p-8">
-          Chargement des recettes...
-        </div>
+        <RecipeCardGridSkeleton count={3} />
       ) : effectiveAvailableIngredients.length === 0 ? (
         <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:p-8">
           <p className="text-xl font-black text-stone-950">

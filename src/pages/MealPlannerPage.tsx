@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
+import { Skeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { supabase } from '../lib/supabase'
@@ -1145,8 +1146,19 @@ export default function MealPlannerPage() {
         )}
 
         {loading ? (
-          <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
-            Chargement du planning...
+          <div className="space-y-4">
+            {Array.from({ length: 4 }, (_, index) => (
+              <div
+                key={index}
+                className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
+              >
+                <Skeleton className="h-5 w-32" />
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <Skeleton className="h-16" />
+                  <Skeleton className="h-16" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="space-y-6">
