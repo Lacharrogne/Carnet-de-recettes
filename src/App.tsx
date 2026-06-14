@@ -5,6 +5,7 @@ import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import BottomNav from './components/layout/BottomNav'
 import ProtectedRoute from './components/ProtectedRoute'
+import ScrollToTop from './components/ScrollToTop'
 import PageSkeleton from './components/ui/PageSkeleton'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -81,6 +82,8 @@ export default function App() {
     <div
       className={`min-h-screen text-slate-900 transition-colors duration-500 ${pageBackgroundClass}`}
     >
+      <ScrollToTop />
+
       <Header />
 
       <main className="mx-auto max-w-6xl px-4 py-8">

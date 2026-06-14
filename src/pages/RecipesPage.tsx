@@ -96,7 +96,7 @@ export default function RecipesPage() {
         ...category,
         count,
       }
-    }).filter((category) => category.count > 0)
+    })
   }, [recipes])
 
   const filteredRecipes = useMemo(() => {
