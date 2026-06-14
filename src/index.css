@@ -226,16 +226,16 @@ textarea {
   background-attachment: fixed;
 }
 
-/* Mode frigo : ambiance froide, propre, bleutée */
+/* Mode frigo : frais & propre, mais dans la palette chaude (sauge + givre) */
 .page-background-fridge {
-  background-color: #def7ff;
+  background-color: #f3f7ec;
   background-image:
-    radial-gradient(circle at 15% 18%, rgba(255, 255, 255, 0.9) 0 14px, transparent 15px),
-    radial-gradient(circle at 82% 24%, rgba(255, 255, 255, 0.65) 0 10px, transparent 11px),
+    radial-gradient(circle at 15% 18%, rgba(255, 255, 255, 0.85) 0 14px, transparent 15px),
+    radial-gradient(circle at 82% 24%, rgba(255, 255, 255, 0.6) 0 10px, transparent 11px),
     radial-gradient(circle at 70% 76%, rgba(255, 255, 255, 0.5) 0 18px, transparent 19px),
-    linear-gradient(90deg, rgba(14, 165, 233, 0.13) 1px, transparent 1px),
-    linear-gradient(rgba(14, 165, 233, 0.13) 1px, transparent 1px),
-    linear-gradient(135deg, #e8fbff 0%, #d8f5ff 45%, #f8feff 100%);
+    linear-gradient(90deg, rgba(126, 138, 90, 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(126, 138, 90, 0.12) 1px, transparent 1px),
+    linear-gradient(135deg, #f7faf0 0%, #eef3e3 45%, #fbfdf6 100%);
   background-size:
     260px 260px,
     310px 310px,
@@ -297,14 +297,14 @@ textarea {
   background-attachment: fixed;
 }
 
-/* Favoris : doux, chaleureux, un peu plus personnel */
+/* Favoris : doux et affectif, en terracotta tendre (et non rose froid) */
 .page-background-favorites {
-  background-color: #fff0f3;
+  background-color: #fff1e8;
   background-image:
     radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.85), transparent 24%),
-    radial-gradient(circle at 78% 18%, rgba(255, 190, 205, 0.45), transparent 28%),
-    radial-gradient(circle at 55% 80%, rgba(255, 220, 226, 0.5), transparent 28%),
-    linear-gradient(135deg, #fff7f8 0%, #ffe5eb 100%);
+    radial-gradient(circle at 78% 18%, rgba(194, 104, 61, 0.16), transparent 28%),
+    radial-gradient(circle at 55% 80%, rgba(243, 218, 200, 0.6), transparent 28%),
+    linear-gradient(135deg, #fff7f0 0%, #ffe6d6 100%);
   background-attachment: fixed;
 }
 
@@ -344,13 +344,13 @@ textarea {
   background-attachment: fixed;
 }
 
-/* Profil public / profil perso */
+/* Profil public / profil perso : chaleureux et personnel (miel doux) */
 .page-background-profile {
-  background-color: #f6f1ff;
+  background-color: #fff6ea;
   background-image:
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.9), transparent 25%),
-    radial-gradient(circle at 80% 20%, rgba(221, 205, 255, 0.55), transparent 28%),
-    linear-gradient(135deg, #fbf8ff 0%, #eee5ff 100%);
+    radial-gradient(circle at 80% 20%, rgba(217, 154, 78, 0.2), transparent 28%),
+    linear-gradient(135deg, #fffaf1 0%, #ffeccf 100%);
   background-attachment: fixed;
 }
 
@@ -391,6 +391,22 @@ textarea {
     background: white !important;
   }
 }
+/* Focus clavier visible et cohérent partout (a11y).
+   :where() garde une spécificité nulle : les anneaux propres aux
+   composants (Button, champs…) restent prioritaires. */
+:where(a, button, [role='button'], input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 2px;
+}
+
+/* Mobile / écrans tactiles : on retire le background-attachment: fixed
+   (repaints coûteux et scroll saccadé sur iOS Safari). */
+@media (max-width: 768px) {
+  [class*='page-background-'] {
+    background-attachment: scroll;
+  }
+}
+
 html,
 body,
 a,
