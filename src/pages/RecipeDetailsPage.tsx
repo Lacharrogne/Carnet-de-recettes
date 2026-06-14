@@ -9,6 +9,7 @@ import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { useFavorites } from '../context/useFavorites'
 import { scaleIngredientText } from '../lib/ingredientScaling'
+import { findLinkedRecipe } from '../lib/recipeLinks'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import {
   DAYS,
@@ -118,6 +119,7 @@ export default function RecipeDetailsPage() {
 
   useDocumentTitle(recipe?.title)
   const [similarRecipes, setSimilarRecipes] = useState<Recipe[]>([])
+  const [allRecipes, setAllRecipes] = useState<Recipe[]>([])
 
   const [loading, setLoading] = useState(!invalidRecipeId)
   const [errorMessage, setErrorMessage] = useState('')
@@ -256,6 +258,7 @@ export default function RecipeDetailsPage() {
           setSelectedServings(Math.max(1, data.servings))
           setAuthorProfile(loadedAuthorProfile)
           setSimilarRecipes(relatedRecipes)
+          setAllRecipes(allRecipes)
           setCurrentStepIndex(0)
           setGuidedCookingOpen(false)
           setActiveTimerSeconds(null)
@@ -1189,31 +1192,51 @@ export default function RecipeDetailsPage() {
 
             {recipe.ingredients.length > 0 ? (
               <ul className="mt-6 space-y-3">
-                {scaledIngredients.map((ingredient, index) => (
-                  <li
-                    key={`${ingredient}-${index}`}
-                    className="flex items-center gap-3 rounded-[1.4rem] bg-cream-100 px-4 py-3 text-stone-700"
-                  >
-                    <span className="font-black text-orange-600">•</span>
+                {scaledIngredients.map((ingredient, index) => {
+                  const linkedRecipe = findLinkedRecipe(
+                    ingredient,
+                    allRecipes,
+                    recipe.id,
+                  )
 
-                    <span className="min-w-0 flex-1 text-sm font-medium leading-6 sm:text-base">
-                      {ingredient}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleAddIngredientToShoppingList(ingredient, index)
-                      }
-                      disabled={addingIngredientIndex === index}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500 text-lg font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden"
-                      aria-label={`Ajouter ${ingredient} à la liste de courses`}
-                      title="Ajouter à la liste de courses"
+                  return (
+                    <li
+                      key={`${ingredient}-${index}`}
+                      className="rounded-[1.4rem] bg-cream-100 px-4 py-3 text-stone-700"
                     >
-                      {addingIngredientIndex === index ? '…' : '+'}
-                    </button>
-                  </li>
-                ))}
+                      <div className="flex items-center gap-3">
+                        <span className="font-black text-orange-600">•</span>
+
+                        <span className="min-w-0 flex-1 text-sm font-medium leading-6 sm:text-base">
+                          {ingredient}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleAddIngredientToShoppingList(ingredient, index)
+                          }
+                          disabled={addingIngredientIndex === index}
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500 text-lg font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden"
+                          aria-label={`Ajouter ${ingredient} à la liste de courses`}
+                          title="Ajouter à la liste de courses"
+                        >
+                          {addingIngredientIndex === index ? '…' : '+'}
+                        </button>
+                      </div>
+
+                      {linkedRecipe && (
+                        <Link
+                          to={`/recipes/${linkedRecipe.id}`}
+                          className="mt-2 ml-6 inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700 transition hover:bg-orange-200 print:hidden"
+                          title={`Voir la recette « ${linkedRecipe.title} »`}
+                        >
+                          🔗 Voir la recette « {linkedRecipe.title} »
+                        </Link>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             ) : (
               <p className="mt-4 text-stone-500">Aucun ingrédient renseigné.</p>
