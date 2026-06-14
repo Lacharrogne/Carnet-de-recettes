@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import PlannerPrintView from '../components/planner/PlannerPrintView'
+import RecipeMiniCard from '../components/planner/RecipeMiniCard'
 import RecipePickerModal from '../components/planner/RecipePickerModal'
 import { Skeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
@@ -550,55 +551,6 @@ export default function MealPlannerPage() {
     window.print()
   }
 
-  function renderRecipeMiniCard(recipe: Recipe, actions?: ReactNode) {
-    const image = getRecipeImage(recipe)
-    const isImageUrl = typeof image === 'string' && image.startsWith('http')
-
-    return (
-      <div className="group/card flex items-center gap-4 rounded-[1.6rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-0.5 hover:shadow-md">
-        <Link
-          to={`/recipes/${recipe.id}`}
-          className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.25rem] bg-cream-200 text-3xl"
-        >
-          {isImageUrl ? (
-            <img
-              src={image}
-              alt={recipe.title}
-              className="h-full w-full object-cover transition group-hover/card:scale-105"
-            />
-          ) : (
-            image
-          )}
-        </Link>
-
-        <div className="min-w-0 flex-1">
-          <Link
-            to={`/recipes/${recipe.id}`}
-            className="block truncate text-lg font-black text-stone-950 transition hover:text-orange-700"
-          >
-            {recipe.title}
-          </Link>
-
-          <p className="mt-1 text-sm font-bold text-stone-500">
-            {recipe.prepTime + recipe.cookTime} min · {recipe.servings} pers.
-          </p>
-
-          <div className="mt-2 flex flex-wrap gap-2">
-            <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700">
-              {recipe.category}
-            </span>
-
-            <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-bold text-stone-600">
-              {recipe.difficulty}
-            </span>
-          </div>
-
-          {actions && <div className="mt-3 flex flex-wrap gap-2">{actions}</div>}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <>
       <PlannerPrintView
@@ -798,20 +750,24 @@ export default function MealPlannerPage() {
                         {extraRecipes.length > 0 ? (
                           extraRecipes.map((recipe) => (
                             <div key={`${extraMeal.key}-${recipe.id}`}>
-                              {renderRecipeMiniCard(recipe, (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleRemoveExtraRecipe(
-                                      extraMeal.key,
-                                      String(recipe.id),
-                                    )
-                                  }
-                                  className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
-                                >
-                                  Retirer
-                                </button>
-                              ))}
+                              <RecipeMiniCard
+                                recipe={recipe}
+                                getRecipeImage={getRecipeImage}
+                                actions={
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleRemoveExtraRecipe(
+                                        extraMeal.key,
+                                        String(recipe.id),
+                                      )
+                                    }
+                                    className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                                  >
+                                    Retirer
+                                  </button>
+                                }
+                              />
                             </div>
                           ))
                         ) : (
@@ -879,9 +835,13 @@ export default function MealPlannerPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {uniquePlannedRecipes.map((recipe) =>
-                renderRecipeMiniCard(recipe),
-              )}
+              {uniquePlannedRecipes.map((recipe) => (
+                <RecipeMiniCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  getRecipeImage={getRecipeImage}
+                />
+              ))}
             </div>
           </section>
         )}
@@ -964,33 +924,37 @@ export default function MealPlannerPage() {
                           </div>
 
                           {recipe ? (
-                            renderRecipeMiniCard(recipe, (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    openRecipePicker({
-                                      type: 'main',
-                                      day: day.key,
-                                      meal: meal.key,
-                                    })
-                                  }
-                                  className="rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700 transition hover:bg-orange-200"
-                                >
-                                  Changer
-                                </button>
+                            <RecipeMiniCard
+                              recipe={recipe}
+                              getRecipeImage={getRecipeImage}
+                              actions={
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      openRecipePicker({
+                                        type: 'main',
+                                        day: day.key,
+                                        meal: meal.key,
+                                      })
+                                    }
+                                    className="rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700 transition hover:bg-orange-200"
+                                  >
+                                    Changer
+                                  </button>
 
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleRemoveMainRecipe(day.key, meal.key)
-                                  }
-                                  className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
-                                >
-                                  Retirer
-                                </button>
-                              </>
-                            ))
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleRemoveMainRecipe(day.key, meal.key)
+                                    }
+                                    className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                                  >
+                                    Retirer
+                                  </button>
+                                </>
+                              }
+                            />
                           ) : (
                             <button
                               type="button"
