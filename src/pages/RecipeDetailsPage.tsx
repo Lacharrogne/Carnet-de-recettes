@@ -5,7 +5,7 @@ import RecipeCard from '../components/recipes/RecipeCard'
 import RecipeReviews from '../components/reviews/RecipeReviews'
 import Button from '../components/ui/Button'
 import { useAuth } from '../context/useAuth'
-import { isRecipeFavorite, toggleFavorite } from '../services/favorites'
+import { useFavorites } from '../context/useFavorites'
 import { getProfile, type UserProfile } from '../services/profiles'
 import { deleteRecipe, getRecipeById, getRecipes } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
@@ -596,10 +596,13 @@ export default function RecipeDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { isFavorite: isFavoriteCtx, toggleFavorite: toggleFavoriteCtx } =
+    useFavorites()
 
   const recipeId = Number(id)
   const invalidRecipeId = !id || Number.isNaN(recipeId)
   const viewerId = user?.id
+  const isFavorite = !!viewerId && isFavoriteCtx(recipeId)
 
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [authorProfile, setAuthorProfile] = useState<UserProfile | null>(null)
@@ -610,7 +613,6 @@ export default function RecipeDetailsPage() {
   const [successMessage, setSuccessMessage] = useState('')
 
   const [isDeleting, setIsDeleting] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteLoading, setFavoriteLoading] = useState(false)
   const [addingIngredientIndex, setAddingIngredientIndex] = useState<
     number | null
@@ -695,24 +697,15 @@ export default function RecipeDetailsPage() {
             })
           : Promise.resolve(null)
 
-        const favoriteStatusPromise = viewerId
-          ? isRecipeFavorite(recipeId).catch((error) => {
-              console.error(error)
-              return false
-            })
-          : Promise.resolve(false)
-
         const recipesPromise = getRecipes().catch((error) => {
           console.error(error)
           return []
         })
 
-        const [loadedAuthorProfile, loadedFavoriteStatus, allRecipes] =
-          await Promise.all([
-            authorProfilePromise,
-            favoriteStatusPromise,
-            recipesPromise,
-          ])
+        const [loadedAuthorProfile, allRecipes] = await Promise.all([
+          authorProfilePromise,
+          recipesPromise,
+        ])
 
         const currentRecipeTags = data.tags.map((tag) => tag.toLowerCase())
 
@@ -751,7 +744,6 @@ export default function RecipeDetailsPage() {
           setRecipe(data)
           setSelectedServings(Math.max(1, data.servings))
           setAuthorProfile(loadedAuthorProfile)
-          setIsFavorite(loadedFavoriteStatus)
           setSimilarRecipes(relatedRecipes)
           setCurrentStepIndex(0)
           setGuidedCookingOpen(false)
@@ -832,8 +824,7 @@ export default function RecipeDetailsPage() {
       setErrorMessage('')
       hideSuccessMessage()
 
-      const newValue = await toggleFavorite(recipe.id)
-      setIsFavorite(newValue)
+      const newValue = await toggleFavoriteCtx(recipe.id)
 
       showSuccessMessage(
         newValue

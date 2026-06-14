@@ -2,79 +2,70 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/useAuth'
+import { useFavorites } from '../../context/useFavorites'
+import { useToast } from '../../context/useToast'
 import { getRecipeCardStyle } from '../../data/categoryStyles'
-import { isRecipeFavorite, toggleFavorite } from '../../services/favorites'
-import { getAverageRating, getRecipeReviews } from '../../services/reviews'
+import {
+  getAverageRating,
+  getRecipeReviews,
+  type RecipeRating,
+} from '../../services/reviews'
 import type { Recipe } from '../../types/recipe'
 
 type RecipeCardProps = {
   recipe: Recipe
+  // Note agrégée fournie par la page (évite une requête par carte).
+  rating?: RecipeRating
   onFavoriteChange?: () => void
 }
 
 export default function RecipeCard({
   recipe,
+  rating,
   onFavoriteChange,
 }: RecipeCardProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { isFavorite, toggleFavorite } = useFavorites()
+  const { showToast } = useToast()
 
-  const [favorite, setFavorite] = useState(false)
   const [loadingFavorite, setLoadingFavorite] = useState(false)
-
-  const [averageRating, setAverageRating] = useState(0)
-  const [reviewsCount, setReviewsCount] = useState(0)
+  const [fetchedRating, setFetchedRating] = useState<RecipeRating | null>(null)
 
   const totalTime = recipe.prepTime + recipe.cookTime
   const visibleTags = recipe.tags.slice(0, 3)
   const hiddenTagsCount = recipe.tags.length - visibleTags.length
 
-  const displayedFavorite = user ? favorite : false
+  const displayedFavorite = user ? isFavorite(recipe.id) : false
   const visualStyle = getRecipeCardStyle(recipe.category)
 
+  const effectiveRating = rating ?? fetchedRating
+  const averageRating = effectiveRating?.average ?? 0
+  const reviewsCount = effectiveRating?.count ?? 0
+
+  // Repli : si la page ne fournit pas la note, on la charge pour cette carte.
   useEffect(() => {
     let ignore = false
 
-    if (!user) return
-
-    isRecipeFavorite(recipe.id)
-      .then((result) => {
-        if (!ignore) {
-          setFavorite(result)
-        }
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-
-    return () => {
-      ignore = true
-    }
-  }, [recipe.id, user])
-
-  useEffect(() => {
-    let ignore = false
+    if (rating) return
 
     getRecipeReviews(recipe.id)
       .then((reviews) => {
         if (!ignore) {
-          setReviewsCount(reviews.length)
-          setAverageRating(getAverageRating(reviews))
+          setFetchedRating({
+            average: getAverageRating(reviews),
+            count: reviews.length,
+          })
         }
       })
       .catch((error) => {
         console.error(error)
-
-        if (!ignore) {
-          setReviewsCount(0)
-          setAverageRating(0)
-        }
       })
 
     return () => {
       ignore = true
     }
-  }, [recipe.id])
+  }, [recipe.id, rating])
 
   async function handleFavoriteClick() {
     if (!user) {
@@ -87,11 +78,16 @@ export default function RecipeCard({
 
       const newValue = await toggleFavorite(recipe.id)
 
-      setFavorite(newValue)
       onFavoriteChange?.()
+      showToast({
+        message: newValue
+          ? 'Recette ajoutée à tes favoris ❤️'
+          : 'Recette retirée de tes favoris',
+        tone: 'success',
+      })
     } catch (error) {
       console.error(error)
-      alert('Impossible de modifier le favori.')
+      showToast({ message: 'Impossible de modifier le favori.', tone: 'error' })
     } finally {
       setLoadingFavorite(false)
     }

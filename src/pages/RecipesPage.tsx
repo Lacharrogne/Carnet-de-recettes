@@ -9,6 +9,7 @@ import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { getCategoryAmbience, getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getRecipes } from '../services/recipes'
+import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import type { Recipe } from '../types/recipe'
 
 type SortOption = 'name' | 'time' | 'difficulty'
@@ -17,6 +18,7 @@ export default function RecipesPage() {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
+  const [ratings, setRatings] = useState<Map<number, RecipeRating>>(new Map())
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [search, setSearch] = useState('')
@@ -58,6 +60,26 @@ export default function RecipesPage() {
       ignore = true
     }
   }, [])
+
+  useEffect(() => {
+    if (recipes.length === 0) return
+
+    let ignore = false
+
+    getRecipeRatings(recipes.map((recipe) => recipe.id))
+      .then((map) => {
+        if (!ignore) {
+          setRatings(map)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [recipes])
 
   const categoriesWithCount = useMemo(() => {
     return RECIPE_CATEGORIES.map((category) => {
@@ -434,7 +456,11 @@ export default function RecipesPage() {
             ) : (
               <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredRecipes.map((recipe) => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    rating={ratings.get(recipe.id)}
+                  />
                 ))}
               </div>
             )}

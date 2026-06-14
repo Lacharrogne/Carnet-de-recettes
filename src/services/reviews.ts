@@ -372,3 +372,47 @@ export function getAverageRating(reviews: RecipeReview[]) {
 
   return Math.round((total / reviews.length) * 10) / 10
 }
+
+export type RecipeRating = {
+  average: number
+  count: number
+}
+
+// Récupère les notes agrégées de plusieurs recettes en une seule requête
+// (évite le N+1 sur les grilles de recettes).
+export async function getRecipeRatings(
+  recipeIds: number[],
+): Promise<Map<number, RecipeRating>> {
+  const result = new Map<number, RecipeRating>()
+
+  if (recipeIds.length === 0) {
+    return result
+  }
+
+  const { data, error } = await supabase
+    .from('recipe_reviews')
+    .select('recipe_id, rating')
+    .in('recipe_id', recipeIds)
+
+  if (error) {
+    throw error
+  }
+
+  const totals = new Map<number, { total: number; count: number }>()
+
+  for (const row of (data ?? []) as { recipe_id: number; rating: number }[]) {
+    const current = totals.get(row.recipe_id) ?? { total: 0, count: 0 }
+    current.total += row.rating
+    current.count += 1
+    totals.set(row.recipe_id, current)
+  }
+
+  totals.forEach((value, recipeId) => {
+    result.set(recipeId, {
+      average: Math.round((value.total / value.count) * 10) / 10,
+      count: value.count,
+    })
+  })
+
+  return result
+}

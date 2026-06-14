@@ -11,6 +11,7 @@ import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getRecipes } from '../services/recipes'
+import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import type { Recipe } from '../types/recipe'
 
 const QUICK_LINKS: {
@@ -48,6 +49,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
+  const [ratings, setRatings] = useState<Map<number, RecipeRating>>(new Map())
+
   const [randomRecipe, setRandomRecipe] = useState<Recipe | null>(null)
   const [randomModalOpen, setRandomModalOpen] = useState(false)
   const [randomizing, setRandomizing] = useState(false)
@@ -78,6 +81,26 @@ export default function HomePage() {
       ignore = true
     }
   }, [])
+
+  useEffect(() => {
+    if (recipes.length === 0) return
+
+    let ignore = false
+
+    getRecipeRatings(recipes.slice(0, 3).map((recipe) => recipe.id))
+      .then((map) => {
+        if (!ignore) {
+          setRatings(map)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [recipes])
 
   const latestRecipes = useMemo(() => {
     return recipes.slice(0, 3)
@@ -301,7 +324,11 @@ export default function HomePage() {
           ) : (
             <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {latestRecipes.map((recipe) => (
-                <RecipeCard key={recipe.id} recipe={recipe} />
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  rating={ratings.get(recipe.id)}
+                />
               ))}
             </div>
           )}
