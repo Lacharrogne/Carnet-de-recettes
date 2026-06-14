@@ -254,6 +254,7 @@ export default function FavoritesPage() {
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
+            aria-label="Rechercher dans mes favoris"
             placeholder="Rechercher dans mes favoris..."
             className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           />
@@ -263,6 +264,7 @@ export default function FavoritesPage() {
             onChange={(event) =>
               setSelectedCategory(event.target.value as RecipeCategory | '')
             }
+            aria-label="Filtrer par catégorie"
             className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="">Toutes les catégories</option>
@@ -277,6 +279,7 @@ export default function FavoritesPage() {
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value as SortOption)}
+            aria-label="Trier les favoris"
             className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="recent">Plus récentes</option>

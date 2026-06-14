@@ -234,6 +234,7 @@ export default function RecipesPage() {
                     setSearchParams({})
                   }
                 }}
+                aria-label="Rechercher une recette"
                 placeholder="Exemple : tarte, poulet, chocolat..."
                 className="w-full rounded-2xl border border-orange-100 bg-cream-input py-4 pl-12 pr-12 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
               />
@@ -266,6 +267,7 @@ export default function RecipesPage() {
 
                   selectCategory(value)
                 }}
+                aria-label="Filtrer par catégorie"
                 className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
               >
                 <option value="">Toutes les catégories</option>
@@ -280,6 +282,7 @@ export default function RecipesPage() {
               <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortOption)}
+                aria-label="Trier les recettes"
                 className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
               >
                 <option value="name">Trier par nom</option>

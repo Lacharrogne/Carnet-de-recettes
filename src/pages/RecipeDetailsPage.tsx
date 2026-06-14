@@ -1064,6 +1064,7 @@ export default function RecipeDetailsPage() {
       onChange={(event) =>
         setSelectedPlanningDay(event.target.value as DayKey)
       }
+      aria-label="Jour du planning"
       className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-4 font-bold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
     >
       {DAYS.map((day) => (

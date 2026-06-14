@@ -247,6 +247,7 @@ export default function MyRecipesPage() {
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
+            aria-label="Rechercher dans mes recettes"
             placeholder="Rechercher dans mes recettes..."
             className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           />
@@ -256,6 +257,7 @@ export default function MyRecipesPage() {
             onChange={(event) =>
               setSelectedCategory(event.target.value as RecipeCategory | '')
             }
+            aria-label="Filtrer par catégorie"
             className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="">Toutes les catégories</option>
@@ -270,6 +272,7 @@ export default function MyRecipesPage() {
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value as SortOption)}
+            aria-label="Trier mes recettes"
             className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="recent">Plus récentes</option>

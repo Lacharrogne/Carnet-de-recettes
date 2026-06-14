@@ -265,6 +265,7 @@ export default function IdeasPage() {
                   <select
                     value={category}
                     onChange={(event) => setCategory(event.target.value)}
+                    aria-label="Type d’idée"
                     className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                   >
                     {IDEA_CATEGORIES.map((currentCategory) => (
