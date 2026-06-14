@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Search, X } from 'lucide-react'
 
 import RecipeCard from '../components/recipes/RecipeCard'
 import Button from '../components/ui/Button'
@@ -216,19 +217,37 @@ export default function RecipesPage() {
           </div>
 
           <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
-            <input
-              type="text"
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value)
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
 
-               if (!event.target.value.trim() && !selectedCategory) {
-                  setSearchParams({})
-                }
-              }}
-              placeholder="Exemple : tarte, poulet, chocolat..."
-              className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
-            />
+              <input
+                type="text"
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value)
+
+                 if (!event.target.value.trim() && !selectedCategory) {
+                    setSearchParams({})
+                  }
+                }}
+                placeholder="Exemple : tarte, poulet, chocolat..."
+                className="w-full rounded-2xl border border-orange-100 bg-cream-input py-4 pl-12 pr-12 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+              />
+
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch('')
+                    if (!selectedCategory) setSearchParams({})
+                  }}
+                  aria-label="Effacer la recherche"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-2 md:gap-4">
               <select

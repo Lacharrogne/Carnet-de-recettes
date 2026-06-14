@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
+import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getMyRecipes } from '../services/recipes'
 import type { Recipe, RecipeCategory } from '../types/recipe'
@@ -128,8 +129,8 @@ export default function MyRecipesPage() {
 
   if (loading) {
     return (
-      <section className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-orange-100">
-        <p className="font-medium text-stone-600">Chargement de tes recettes...</p>
+      <section className="space-y-8">
+        <RecipeCardGridSkeleton count={3} />
       </section>
     )
   }
