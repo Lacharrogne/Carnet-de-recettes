@@ -5,6 +5,7 @@ import RecipeCard from '../components/recipes/RecipeCard'
 import RecipeReviews from '../components/reviews/RecipeReviews'
 import Button from '../components/ui/Button'
 import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
+import { LOGO_SRC } from '../data/brand'
 import { useAuth } from '../context/useAuth'
 import { useFavorites } from '../context/useFavorites'
 import { getProfile, type UserProfile } from '../services/profiles'
@@ -454,7 +455,7 @@ function PrintableRecipeSheet({
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-50">
               <img
-                src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
+                src={LOGO_SRC}
                 alt="Carnet de recettes"
                 className="h-full w-full object-cover"
               />

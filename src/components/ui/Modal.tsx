@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { X } from 'lucide-react'
 
 type ModalProps = {
   open: boolean
@@ -74,9 +75,9 @@ export default function Modal({
             type="button"
             onClick={onClose}
             aria-label="Fermer"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linen text-xl font-bold text-cacao transition hover:bg-sand"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linen text-cacao transition hover:bg-sand"
           >
-            ×
+            <X className="h-5 w-5" />
           </button>
         </div>
 

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Skeleton } from '../components/ui/Skeleton'
+import { LOGO_SRC } from '../data/brand'
 import { useAuth } from '../context/useAuth'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { supabase } from '../lib/supabase'
@@ -742,7 +743,7 @@ export default function MealPlannerPage() {
 
           <div className="flex items-center gap-3 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3">
             <img
-              src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
+              src={LOGO_SRC}
               alt="Carnet de recettes"
               className="h-14 w-14 object-contain"
             />

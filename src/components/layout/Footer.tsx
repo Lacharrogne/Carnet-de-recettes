@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
 
+import { LOGO_SRC } from '../../data/brand'
+
 export default function Footer() {
   return (
     <footer className="mt-16 border-t border-orange-100 bg-cream-50 print:hidden">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <img
-            src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
+            src={LOGO_SRC}
             alt="Carnet de recettes"
             className="h-10 w-10 object-contain"
           />

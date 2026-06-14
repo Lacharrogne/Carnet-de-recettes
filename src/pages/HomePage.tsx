@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import DashboardHero from '../components/home/DashboardHero'
+import { LOGO_SRC } from '../data/brand'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Button from '../components/ui/Button'
 import Chip from '../components/ui/Chip'
@@ -278,7 +279,7 @@ export default function HomePage() {
                 <div className="mb-5 flex items-center gap-4 sm:mb-6 sm:gap-5">
                   <div className="relative h-20 w-20 shrink-0 overflow-visible sm:h-24 sm:w-24">
                     <img
-                      src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
+                      src={LOGO_SRC}
                       alt="Logo Carnet de recettes"
                       className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-md sm:h-32 sm:w-32"
                     />

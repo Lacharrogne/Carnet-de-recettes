@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Skeleton } from '../components/ui/Skeleton'
+import { LOGO_SRC } from '../data/brand'
 import { useAuth } from '../context/useAuth'
 import {
   addShoppingListItem,
@@ -1425,7 +1426,7 @@ export default function ShoppingListPage() {
       <section className="print-shopping-list">
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <img
-            src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
+            src={LOGO_SRC}
             alt="Carnet de recettes"
             style={{
               width: 58,

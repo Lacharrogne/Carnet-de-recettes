@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
+import { LOGO_SRC } from '../../data/brand'
 import { useAuth } from '../../context/useAuth'
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
 import { supabase } from '../../lib/supabase'
@@ -185,7 +186,7 @@ export default function Header() {
         >
           <div className="relative h-11 w-14 shrink-0 overflow-visible sm:h-12 sm:w-20 lg:w-24">
             <img
-              src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
+              src={LOGO_SRC}
               alt="Logo Carnet de recettes"
               className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-lg transition group-hover:-rotate-2 group-hover:scale-105 sm:h-28 sm:w-28 lg:h-32 lg:w-32"
             />

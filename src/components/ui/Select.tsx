@@ -1,4 +1,5 @@
 import { useId, type ReactNode, type SelectHTMLAttributes } from 'react'
+import { ChevronDown } from 'lucide-react'
 
 import FieldShell, { FIELD_CLASS } from './FieldShell'
 
@@ -41,12 +42,10 @@ export default function Select({
           {children}
         </select>
 
-        <span
+        <ChevronDown
           aria-hidden="true"
-          className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-hazel"
-        >
-          ▾
-        </span>
+          className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-hazel"
+        />
       </div>
     </FieldShell>
   )
