@@ -10,6 +10,11 @@ import { useAuth } from '../context/useAuth'
 import { useFavorites } from '../context/useFavorites'
 import { scaleIngredientText } from '../lib/ingredientScaling'
 import { findLinkedRecipe } from '../lib/recipeLinks'
+import {
+  formatTimerTime,
+  getStepTimers,
+  type StepTimer,
+} from '../lib/stepTimers'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import {
   DAYS,
@@ -25,82 +30,6 @@ import { getProfile, type UserProfile } from '../services/profiles'
 import { deleteRecipe, getRecipeById, getRecipes } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
-
-type StepTimer = {
-  label: string
-  seconds: number
-}
-
-function formatTimerTime(seconds: number) {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const remainingSeconds = seconds % 60
-
-  if (hours > 0) {
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
-      2,
-      '0',
-    )}:${String(remainingSeconds).padStart(2, '0')}`
-  }
-
-  return `${String(minutes).padStart(2, '0')}:${String(
-    remainingSeconds,
-  ).padStart(2, '0')}`
-}
-
-function getStepTimers(step: string): StepTimer[] {
-  const timers: StepTimer[] = []
-  const timerKeys = new Set<string>()
-  const normalizedStep = step.replace(/,/g, '.')
-
-  function addTimer(label: string, seconds: number) {
-    if (seconds <= 0) return
-
-    const cleanedLabel = label.replace(/\s+/g, ' ').trim()
-    const key = `${cleanedLabel}-${seconds}`
-
-    if (timerKeys.has(key)) return
-
-    timerKeys.add(key)
-
-    timers.push({
-      label: cleanedLabel,
-      seconds,
-    })
-  }
-
-  for (const match of normalizedStep.matchAll(/\b(\d+)\s*h\s*(\d{1,2})?\b/gi)) {
-    const hours = Number(match[1])
-    const minutes = Number(match[2] || 0)
-
-    addTimer(match[0], hours * 3600 + minutes * 60)
-  }
-
-  for (const match of normalizedStep.matchAll(/\b(\d+)\s*heures?\b/gi)) {
-    const hours = Number(match[1])
-
-    addTimer(match[0], hours * 3600)
-  }
-
-  for (const match of normalizedStep.matchAll(
-    /\b(\d+)(?:\s*(?:a|à|-)\s*(\d+))?\s*(minutes?|mins?|min)\b/gi,
-  )) {
-    const startMinutes = Number(match[1])
-    const endMinutes = match[2] ? Number(match[2]) : null
-
-    addTimer(match[0], (endMinutes ?? startMinutes) * 60)
-  }
-
-  for (const match of normalizedStep.matchAll(
-    /\b(\d+)\s*(secondes?|secs?|sec)\b/gi,
-  )) {
-    const seconds = Number(match[1])
-
-    addTimer(match[0], seconds)
-  }
-
-  return timers
-}
 
 export default function RecipeDetailsPage() {
   const { id } = useParams()
