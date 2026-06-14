@@ -6,6 +6,11 @@ import { LOGO_SRC } from '../data/brand'
 import { useAuth } from '../context/useAuth'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { supabase } from '../lib/supabase'
+import {
+  PLANNER_STORAGE_KEY,
+  createEmptyPlanner,
+  getSavedPlanner,
+} from '../lib/weeklyPlanner'
 import { getRecipes } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
@@ -40,7 +45,6 @@ type OpenPickerSlot =
       meal: ExtraMealKey
     }
 
-const STORAGE_KEY = 'carnet-recettes-weekly-planner'
 const ALL_CATEGORIES_VALUE = 'all'
 
 const DAYS: { key: DayKey; label: string; shortLabel: string; emoji: string }[] =
@@ -89,69 +93,8 @@ const EXTRA_MEALS: {
   },
 ]
 
-function createEmptyPlanner(): MealPlannerState {
-  return {
-    monday: { lunch: '', dinner: '' },
-    tuesday: { lunch: '', dinner: '' },
-    wednesday: { lunch: '', dinner: '' },
-    thursday: { lunch: '', dinner: '' },
-    friday: { lunch: '', dinner: '' },
-    saturday: { lunch: '', dinner: '' },
-    sunday: { lunch: '', dinner: '' },
-    weeklyExtras: {
-      breakfast: [],
-      snack: [],
-      dessert: [],
-    },
-  }
-}
-
-function cleanRecipeIds(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value
-    .map((item) => String(item))
-    .filter((item) => item.trim().length > 0)
-}
-
-function getSavedPlanner(): MealPlannerState {
-  if (typeof window === 'undefined') {
-    return createEmptyPlanner()
-  }
-
-  try {
-    const savedPlanner = window.localStorage.getItem(STORAGE_KEY)
-    const emptyPlanner = createEmptyPlanner()
-
-    if (!savedPlanner) {
-      return emptyPlanner
-    }
-
-    const parsedPlanner = JSON.parse(savedPlanner) as Partial<MealPlannerState>
-
-    return {
-      monday: { ...emptyPlanner.monday, ...parsedPlanner.monday },
-      tuesday: { ...emptyPlanner.tuesday, ...parsedPlanner.tuesday },
-      wednesday: { ...emptyPlanner.wednesday, ...parsedPlanner.wednesday },
-      thursday: { ...emptyPlanner.thursday, ...parsedPlanner.thursday },
-      friday: { ...emptyPlanner.friday, ...parsedPlanner.friday },
-      saturday: { ...emptyPlanner.saturday, ...parsedPlanner.saturday },
-      sunday: { ...emptyPlanner.sunday, ...parsedPlanner.sunday },
-      weeklyExtras: {
-        breakfast: cleanRecipeIds(parsedPlanner.weeklyExtras?.breakfast),
-        snack: cleanRecipeIds(parsedPlanner.weeklyExtras?.snack),
-        dessert: cleanRecipeIds(parsedPlanner.weeklyExtras?.dessert),
-      },
-    }
-  } catch {
-    return createEmptyPlanner()
-  }
-}
-
 function savePlanner(planner: MealPlannerState) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(planner))
+  window.localStorage.setItem(PLANNER_STORAGE_KEY, JSON.stringify(planner))
 }
 
 function getRecipeImage(recipe: Recipe) {
