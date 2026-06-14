@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import DashboardHero from '../components/home/DashboardHero'
+import LandingValue from '../components/home/LandingValue'
 import { LOGO_SRC } from '../data/brand'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Button from '../components/ui/Button'
@@ -526,6 +527,8 @@ export default function HomePage() {
             </div>
           )}
         </div>
+
+        {!user && <LandingValue />}
       </section>
 
       <Modal open={randomModalOpen} onClose={closeRandomModal}>
