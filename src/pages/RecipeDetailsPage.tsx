@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import RecipeCard from '../components/recipes/RecipeCard'
 import RecipeReviews from '../components/reviews/RecipeReviews'
 import Button from '../components/ui/Button'
+import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { useFavorites } from '../context/useFavorites'
 import { getProfile, type UserProfile } from '../services/profiles'
@@ -1062,11 +1063,7 @@ export default function RecipeDetailsPage() {
   }
 
   if (loading) {
-    return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="text-stone-600">Chargement de la recette...</p>
-      </section>
-    )
+    return <RecipeDetailSkeleton />
   }
 
   if (!recipe) {
