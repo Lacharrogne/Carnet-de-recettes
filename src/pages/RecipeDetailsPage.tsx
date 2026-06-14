@@ -9,6 +9,7 @@ import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { useFavorites } from '../context/useFavorites'
 import { scaleIngredientText } from '../lib/ingredientScaling'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 import {
   DAYS,
   MEALS,
@@ -114,6 +115,8 @@ export default function RecipeDetailsPage() {
 
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [authorProfile, setAuthorProfile] = useState<UserProfile | null>(null)
+
+  useDocumentTitle(recipe?.title)
   const [similarRecipes, setSimilarRecipes] = useState<Recipe[]>([])
 
   const [loading, setLoading] = useState(!invalidRecipeId)

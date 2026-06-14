@@ -5,12 +5,14 @@ import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { getFavoriteRecipes } from '../services/favorites'
 import type { Recipe, RecipeCategory } from '../types/recipe'
 
 type SortOption = 'recent' | 'name' | 'time' | 'difficulty'
 
 export default function FavoritesPage() {
+  useDocumentTitle('Mes favoris')
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')

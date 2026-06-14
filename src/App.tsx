@@ -1,28 +1,30 @@
+import { lazy, Suspense } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import BottomNav from './components/layout/BottomNav'
 import ProtectedRoute from './components/ProtectedRoute'
+import PageSkeleton from './components/ui/PageSkeleton'
 
-import HomePage from './pages/HomePage'
-import RecipesPage from './pages/RecipesPage'
-import RecipeDetailsPage from './pages/RecipeDetailsPage'
-import AddRecipePage from './pages/AddRecipePage'
-import EditRecipePage from './pages/EditRecipePage'
-import MyRecipesPage from './pages/MyRecipesPage'
-import FavoritesPage from './pages/FavoritesPage'
-import AuthPage from './pages/AuthPage'
-import ProfilePage from './pages/ProfilePage'
-import PublicProfilePage from './pages/PublicProfilePage'
-import NotFoundPage from './pages/NotFoundPage'
-import ShoppingListPage from './pages/ShoppingListPage'
-import FridgePage from './pages/FridgePage'
-import MealPlannerPage from './pages/MealPlannerPage'
-import SocialPage from './pages/SocialPage'
-import AdminPage from './pages/AdminPage'
-import IdeasPage from './pages/IdeasPage'
-import ToolsPage from './pages/ToolsPage'
+const HomePage = lazy(() => import('./pages/HomePage'))
+const RecipesPage = lazy(() => import('./pages/RecipesPage'))
+const RecipeDetailsPage = lazy(() => import('./pages/RecipeDetailsPage'))
+const AddRecipePage = lazy(() => import('./pages/AddRecipePage'))
+const EditRecipePage = lazy(() => import('./pages/EditRecipePage'))
+const MyRecipesPage = lazy(() => import('./pages/MyRecipesPage'))
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage'))
+const AuthPage = lazy(() => import('./pages/AuthPage'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const PublicProfilePage = lazy(() => import('./pages/PublicProfilePage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+const ShoppingListPage = lazy(() => import('./pages/ShoppingListPage'))
+const FridgePage = lazy(() => import('./pages/FridgePage'))
+const MealPlannerPage = lazy(() => import('./pages/MealPlannerPage'))
+const SocialPage = lazy(() => import('./pages/SocialPage'))
+const AdminPage = lazy(() => import('./pages/AdminPage'))
+const IdeasPage = lazy(() => import('./pages/IdeasPage'))
+const ToolsPage = lazy(() => import('./pages/ToolsPage'))
 
 function getPageBackgroundClass(pathname: string) {
   if (pathname === '/') {
@@ -82,6 +84,7 @@ export default function App() {
       <Header />
 
       <main className="mx-auto max-w-6xl px-4 py-8">
+        <Suspense fallback={<PageSkeleton />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
 
@@ -160,6 +163,7 @@ export default function App() {
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </Suspense>
       </main>
 
       <Footer />

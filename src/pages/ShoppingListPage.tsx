@@ -11,6 +11,7 @@ import {
   type ShoppingSection,
 } from '../lib/shoppingAggregation'
 import { useAuth } from '../context/useAuth'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 import {
   addShoppingListItem,
   deleteAllShoppingListItems,
@@ -22,6 +23,7 @@ import {
 } from '../services/shoppingList'
 
 export default function ShoppingListPage() {
+  useDocumentTitle('Liste de courses')
   const { user } = useAuth()
   const userId = user?.id ?? null
 

@@ -201,7 +201,7 @@ export default function HomePage() {
         ...category,
         count,
       }
-    })
+    }).filter((category) => category.count > 0)
   }, [recipes])
 
   function launchRandomRecipe() {

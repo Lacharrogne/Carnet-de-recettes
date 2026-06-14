@@ -9,6 +9,8 @@ import SectionHeader from '../components/ui/SectionHeader'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { getCategoryAmbience, getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
+import { useDebounce } from '../lib/useDebounce'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { getRecipes } from '../services/recipes'
 import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import type { Recipe } from '../types/recipe'
@@ -16,6 +18,7 @@ import type { Recipe } from '../types/recipe'
 type SortOption = 'name' | 'time' | 'difficulty'
 
 export default function RecipesPage() {
+  useDocumentTitle('Toutes les recettes')
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -23,6 +26,7 @@ export default function RecipesPage() {
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 200)
   const [sort, setSort] = useState<SortOption>('name')
 
   const categoryParam = searchParams.get('category')
@@ -92,7 +96,7 @@ export default function RecipesPage() {
         ...category,
         count,
       }
-    })
+    }).filter((category) => category.count > 0)
   }, [recipes])
 
   const filteredRecipes = useMemo(() => {
@@ -104,8 +108,8 @@ export default function RecipesPage() {
       )
     }
 
-    if (search.trim()) {
-      const normalizedSearch = search.toLowerCase().trim()
+    if (debouncedSearch.trim()) {
+      const normalizedSearch = debouncedSearch.toLowerCase().trim()
 
       result = result.filter((recipe) => {
         const titleMatch = recipe.title.toLowerCase().includes(normalizedSearch)
@@ -161,9 +165,9 @@ export default function RecipesPage() {
     }
 
     return result
-  }, [recipes, search, selectedCategory, sort])
+  }, [recipes, debouncedSearch, selectedCategory, sort])
 
-  const hasActiveFilters = search.trim().length > 0 || selectedCategory !== null
+  const hasActiveFilters = debouncedSearch.trim().length > 0 || selectedCategory !== null
 
   const activeCategoryAmbience = selectedCategory
     ? getCategoryAmbience(selectedCategory.label)

@@ -8,6 +8,7 @@ import RecipeMiniCard from '../components/planner/RecipeMiniCard'
 import RecipePickerModal from '../components/planner/RecipePickerModal'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 import {
   PLANNER_STORAGE_KEY,
   createEmptyPlanner,
@@ -170,6 +171,7 @@ async function deleteRecipeIngredientsFromShoppingList(recipeId: Recipe['id']) {
 }
 
 export default function MealPlannerPage() {
+  useDocumentTitle('Planning des repas')
   const { user } = useAuth()
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
