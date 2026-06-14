@@ -35,7 +35,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLink[] }[] = [
 
 const TRUST_SIGNALS: { icon: typeof Heart; label: string }[] = [
   { icon: Heart, label: 'Fait maison, avec amour' },
-  { icon: ShieldCheck, label: 'Sans publicité ni traceur' },
+  { icon: ShieldCheck, label: 'Sans publicité' },
   { icon: Leaf, label: 'Gratuit, sans engagement' },
 ]
 
