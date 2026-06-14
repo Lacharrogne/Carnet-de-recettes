@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import RecipeBadgesPanel, {
   RecipeBadgePill,
 } from '../components/badges/RecipeBadgesPanel'
+import { ProfileSkeleton } from '../components/ui/Skeleton'
 import { getRecipePublicationBadge } from '../data/recipeBadges'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
@@ -176,11 +177,7 @@ export default function ProfilePage() {
   }
 
   if (loading) {
-    return (
-      <section className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-orange-100">
-        <p className="font-medium text-stone-600">Chargement du profil...</p>
-      </section>
-    )
+    return <ProfileSkeleton />
   }
 
   if (!user) {

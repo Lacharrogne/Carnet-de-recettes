@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
+import { RowsSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { getProfile, type UserProfile } from '../services/profiles'
 import {
@@ -371,9 +372,7 @@ export default function IdeasPage() {
         </div>
 
         {loading ? (
-          <div className="rounded-[2rem] bg-cream-50 p-6 text-stone-600 ring-1 ring-orange-100">
-            Chargement des idées...
-          </div>
+          <RowsSkeleton rows={4} />
         ) : ideas.length === 0 ? (
           <div className="rounded-[2rem] bg-cream-50 p-8 text-center ring-1 ring-orange-100">
             <p className="text-5xl">💭</p>

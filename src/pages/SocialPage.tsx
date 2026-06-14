@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { RowsSkeleton } from '../components/ui/Skeleton'
 import {
   getFollowers,
   getFollowing,
@@ -240,9 +241,7 @@ export default function SocialPage() {
         </div>
 
         {loading ? (
-          <div className="rounded-[2rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100">
-            Chargement des relations...
-          </div>
+          <RowsSkeleton rows={4} />
         ) : displayedProfiles.length === 0 ? (
           <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
             <p className="text-lg font-black text-stone-950">

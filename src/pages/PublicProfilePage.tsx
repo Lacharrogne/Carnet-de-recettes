@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import RecipeCard from '../components/recipes/RecipeCard'
 import FollowButton from '../components/social/FollowButton'
+import { ProfileSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { getProfile, type UserProfile } from '../services/profiles'
 import { getRecipes } from '../services/recipes'
@@ -221,11 +222,7 @@ export default function PublicProfilePage() {
   }
 
   if (loading) {
-    return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="text-stone-600">Chargement du profil...</p>
-      </section>
-    )
+    return <ProfileSkeleton />
   }
 
   if (errorMessage) {

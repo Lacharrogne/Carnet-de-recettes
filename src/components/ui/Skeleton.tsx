@@ -43,3 +43,39 @@ export function RecipeCardGridSkeleton({ count = 3 }: GridSkeletonProps) {
     </div>
   )
 }
+
+// Lignes fantômes avec avatar (listes sociales, avis, idées).
+export function RowsSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <div className="space-y-4 rounded-[2rem] bg-card p-5 shadow-card ring-1 ring-bark sm:p-6">
+      {Array.from({ length: rows }, (_, index) => (
+        <div key={index} className="flex items-center gap-4">
+          <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-3 w-2/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// Silhouette d'une page profil : en-tête (avatar + nom) puis grille de recettes.
+export function ProfileSkeleton() {
+  return (
+    <section className="space-y-8">
+      <div className="rounded-[2rem] bg-card p-6 shadow-card ring-1 ring-bark sm:p-8">
+        <div className="flex items-center gap-5">
+          <Skeleton className="h-20 w-20 shrink-0 rounded-full" />
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-6 w-1/3" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+      </div>
+
+      <RecipeCardGridSkeleton count={3} />
+    </section>
+  )
+}

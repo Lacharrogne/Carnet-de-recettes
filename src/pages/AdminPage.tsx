@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { Skeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import {
@@ -399,8 +400,18 @@ async function handleSearchReviews() {
       )}
 
       {loadingData ? (
-        <div className="rounded-[2rem] bg-white p-8 text-stone-600 shadow-sm ring-1 ring-orange-100">
-          Chargement du tableau de bord...
+        <div className="grid gap-8 xl:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div
+              key={index}
+              className="space-y-4 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
+            >
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-9 w-20" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-2/3" />
+            </div>
+          ))}
         </div>
       ) : (
         <div className="grid gap-8 xl:grid-cols-3">

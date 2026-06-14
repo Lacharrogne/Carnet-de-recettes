@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
+import { RowsSkeleton } from '../ui/Skeleton'
 import { useAuth } from '../../context/useAuth'
 import { getProfile, type UserProfile } from '../../services/profiles'
 import {
@@ -424,11 +425,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
   }
 
   if (loading) {
-    return (
-      <section className="rounded-[2rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100">
-        Chargement des avis...
-      </section>
-    )
+    return <RowsSkeleton rows={3} />
   }
 
   return (
