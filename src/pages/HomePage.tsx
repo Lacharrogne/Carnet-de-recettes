@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import DashboardHero from '../components/home/DashboardHero'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Button from '../components/ui/Button'
 import Chip from '../components/ui/Chip'
@@ -8,11 +9,53 @@ import IconTile, { type IconTileTone } from '../components/ui/IconTile'
 import Modal from '../components/ui/Modal'
 import SectionHeader from '../components/ui/SectionHeader'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
+import { useAuth } from '../context/useAuth'
 import { getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
+import { getProfile } from '../services/profiles'
 import { getRecipes } from '../services/recipes'
 import { getRecipeRatings, type RecipeRating } from '../services/reviews'
+import { getShoppingListItems } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
+
+const PLANNER_STORAGE_KEY = 'carnet-recettes-weekly-planner'
+
+const WEEK_DAY_KEYS = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+] as const
+
+// Lit le planning local pour proposer le repas du jour sur le dashboard.
+function getTodayPlan(): { mealLabel: string; recipeId: string | null } {
+  const hour = new Date().getHours()
+  const fallbackLabel = hour < 14 ? 'Au déjeuner' : 'Au dîner'
+
+  try {
+    const raw = window.localStorage.getItem(PLANNER_STORAGE_KEY)
+    if (!raw) return { mealLabel: fallbackLabel, recipeId: null }
+
+    const planner = JSON.parse(raw) as Record<
+      string,
+      { lunch?: string; dinner?: string }
+    >
+    const day = planner[WEEK_DAY_KEYS[new Date().getDay()]] ?? {}
+
+    if (hour < 14 && day.lunch) {
+      return { mealLabel: 'Au déjeuner', recipeId: day.lunch }
+    }
+    if (day.dinner) return { mealLabel: 'Au dîner', recipeId: day.dinner }
+    if (day.lunch) return { mealLabel: 'Au déjeuner', recipeId: day.lunch }
+
+    return { mealLabel: fallbackLabel, recipeId: null }
+  } catch {
+    return { mealLabel: fallbackLabel, recipeId: null }
+  }
+}
 
 const QUICK_LINKS: {
   to: string
@@ -45,11 +88,17 @@ const QUICK_LINKS: {
 ]
 
 export default function HomePage() {
+  const { user } = useAuth()
+
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
   const [ratings, setRatings] = useState<Map<number, RecipeRating>>(new Map())
+
+  const [userName, setUserName] = useState('')
+  const [shoppingCount, setShoppingCount] = useState(0)
+  const todayPlan = getTodayPlan()
 
   const [randomRecipe, setRandomRecipe] = useState<Recipe | null>(null)
   const [randomModalOpen, setRandomModalOpen] = useState(false)
@@ -102,9 +151,44 @@ export default function HomePage() {
     }
   }, [recipes])
 
+  // Données du dashboard connecté : prénom + nombre d'articles de courses.
+  useEffect(() => {
+    if (!user) return
+
+    let ignore = false
+
+    getProfile(user.id)
+      .then((profile) => {
+        if (ignore) return
+        setUserName(
+          profile?.username || user.email?.split('@')[0] || 'chef',
+        )
+      })
+      .catch((error) => console.error(error))
+
+    getShoppingListItems()
+      .then((items) => {
+        if (!ignore) {
+          setShoppingCount(items.filter((item) => !item.checked).length)
+        }
+      })
+      .catch((error) => console.error(error))
+
+    return () => {
+      ignore = true
+    }
+  }, [user])
+
   const latestRecipes = useMemo(() => {
     return recipes.slice(0, 3)
   }, [recipes])
+
+  const todayRecipe = useMemo(() => {
+    if (!todayPlan.recipeId) return null
+    return (
+      recipes.find((recipe) => String(recipe.id) === todayPlan.recipeId) ?? null
+    )
+  }, [recipes, todayPlan.recipeId])
 
   const categoriesWithCount = useMemo(() => {
     return RECIPE_CATEGORIES.map((category) => {
@@ -142,7 +226,17 @@ export default function HomePage() {
   return (
     <>
       <section className="space-y-8 sm:space-y-10 lg:space-y-14">
-        <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+        {user ? (
+          <DashboardHero
+            userName={userName || 'chef'}
+            todayMealLabel={todayPlan.mealLabel}
+            todayRecipe={todayRecipe}
+            shoppingCount={shoppingCount}
+            onSurprise={launchRandomRecipe}
+            surpriseDisabled={loading || recipes.length === 0 || randomizing}
+          />
+        ) : (
+          <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
           <div className="grid gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
             <div className="flex flex-col justify-center">
               <Chip emoji="🍲" className="mb-5">
@@ -249,7 +343,8 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        )}
 
         <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
           {QUICK_LINKS.map((link) => (
