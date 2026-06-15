@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import DashboardHero from '../components/home/DashboardHero'
-import LandingHero from '../components/home/LandingHero'
 import LandingValue from '../components/home/LandingValue'
+import { LOGO_SRC } from '../data/brand'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import Chip from '../components/ui/Chip'
 import IconTile, { type IconTileTone } from '../components/ui/IconTile'
 import Modal from '../components/ui/Modal'
 import SectionHeader from '../components/ui/SectionHeader'
@@ -237,7 +238,132 @@ export default function HomePage() {
             surpriseDisabled={loading || recipes.length === 0 || randomizing}
           />
         ) : (
-          <LandingHero />
+          <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+          <div className="grid gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
+            <div className="flex flex-col justify-center">
+              <Chip emoji="🍲" className="mb-5">
+                Carnet de cuisine familial
+              </Chip>
+
+              <h1 className="max-w-3xl text-3xl font-black leading-tight text-stone-950 sm:text-5xl md:text-6xl">
+                Les recettes de la maison, toujours sous la main.
+              </h1>
+
+              <p className="mt-5 max-w-2xl text-base leading-7 text-stone-600 sm:mt-6 sm:text-lg sm:leading-8">
+                Un carnet de cuisine chaleureux pour réunir toutes vos recettes
+                de famille, planifier la semaine et préparer vos courses — sans
+                jamais rechercher où vous aviez noté ce bon petit plat.
+              </p>
+
+              <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
+                <Button to="/auth" size="lg" fullWidth className="sm:w-auto">
+                  Créer mon carnet
+                </Button>
+
+                <Button
+                  to="/recipes"
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  className="sm:w-auto"
+                >
+                  Voir les recettes
+                </Button>
+              </div>
+
+              <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-hazel">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-sage-deep">✓</span> Gratuit
+                </span>
+                <span aria-hidden="true" className="text-bark">
+                  ·
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-sage-deep">✓</span> Sans publicité
+                </span>
+                <span aria-hidden="true" className="text-bark">
+                  ·
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-sage-deep">✓</span> Prêt en 30 secondes
+                </span>
+              </p>
+            </div>
+
+            <div className="relative">
+              <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-orange-100/70 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-amber-100/80 blur-2xl" />
+
+              <div className="relative rounded-[2rem] bg-card p-5 shadow-card ring-1 ring-bark sm:rounded-[2.25rem] sm:p-6">
+                <div className="mb-5 flex items-center gap-4 sm:mb-6 sm:gap-5">
+                  <div className="relative h-20 w-20 shrink-0 overflow-visible sm:h-24 sm:w-24">
+                    <img
+                      src={LOGO_SRC}
+                      alt="Logo Carnet de recettes"
+                      className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-md sm:h-32 sm:w-32"
+                    />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-terracotta sm:text-sm">
+                      Aujourd’hui
+                    </p>
+                    <p className="font-display text-xl font-bold text-espresso sm:text-2xl">
+                      On cuisine quoi ?
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={launchRandomRecipe}
+                  disabled={loading || recipes.length === 0 || randomizing}
+                  className="group w-full rounded-[1.75rem] bg-orange-500 p-5 text-left text-white shadow-sm transition hover:-translate-y-1 hover:bg-orange-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 sm:rounded-[2rem] sm:p-7"
+                >
+                  <div className="flex items-center justify-between gap-4 sm:gap-5">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-wide text-orange-100 sm:text-sm">
+                        Bouton magique
+                      </p>
+
+                      <p className="mt-3 text-2xl font-black leading-tight sm:mt-4 sm:text-3xl">
+                        Me proposer une recette
+                      </p>
+
+                      <p className="mt-3 max-w-sm text-sm font-bold leading-6 text-orange-50 sm:mt-4 sm:text-base sm:leading-7">
+                        Clique ici et le carnet choisit une recette au hasard.
+                      </p>
+                    </div>
+
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.25rem] bg-white/20 text-3xl transition group-hover:rotate-12 group-hover:scale-105 sm:h-20 sm:w-20 sm:rounded-[1.5rem] sm:text-4xl">
+                      🎲
+                    </div>
+                  </div>
+                </button>
+
+                <div className="mt-5 rounded-[1.5rem] bg-linen p-4 sm:p-5">
+                  <p className="text-sm font-bold text-hazel">
+                    Dernière recette ajoutée
+                  </p>
+
+                  <p className="mt-2 line-clamp-2 font-display text-xl font-bold text-espresso sm:text-2xl">
+                    {latestRecipes[0]?.title ?? 'Aucune recette pour le moment'}
+                  </p>
+
+                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-cacao/80">
+                    {latestRecipes[0]?.description ??
+                      'Ajoute une première recette pour commencer ton carnet.'}
+                  </p>
+                </div>
+
+                <div className="mt-5 rounded-[1.5rem] border border-dashed border-honey/50 bg-honey-soft/50 p-4 text-sm font-medium leading-6 text-cacao sm:mt-6">
+                  💡 Astuce : ajoute tes recettes du quotidien, tes favoris et
+                  les ingrédients à ta liste de courses.
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
         )}
 
         <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
