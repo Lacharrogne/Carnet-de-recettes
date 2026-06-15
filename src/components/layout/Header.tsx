@@ -331,6 +331,19 @@ export default function Header() {
               </div>
             </div>
           </div>
+          <NavLink
+            to="/pricing"
+            onClick={closeDropdowns}
+            className={({ isActive }) =>
+              `rounded-full px-5 py-3 text-sm font-bold transition ${
+                isActive
+                  ? 'bg-honey text-espresso'
+                  : 'text-[#8a5a1e] hover:bg-honey-soft'
+              }`
+            }
+          >
+            ✨ Premium
+          </NavLink>
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -605,6 +618,21 @@ export default function Header() {
                 ))}
               </div>
             </details>
+
+            <NavLink
+              to="/pricing"
+              onClick={closeMenu}
+              className={({ isActive }) =>
+                `flex items-center justify-between rounded-2xl px-4 py-4 text-base font-black shadow-soft ring-1 transition ${
+                  isActive
+                    ? 'bg-honey text-espresso ring-honey'
+                    : 'bg-honey-soft text-[#8a5a1e] ring-honey/40 hover:bg-honey/30'
+                }`
+              }
+            >
+              <span>✨ Passer à Premium</span>
+              <span>→</span>
+            </NavLink>
 
             {user ? (
               <details className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">
