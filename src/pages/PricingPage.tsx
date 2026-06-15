@@ -152,18 +152,16 @@ export default function PricingPage() {
             </ul>
 
             <div className="mt-8">
-              <Button
-                to={user ? '/profile' : '/auth'}
-                size="lg"
-                fullWidth
-                className="bg-honey text-espresso hover:bg-[#e7a94e]"
+              <button
+                type="button"
+                disabled
+                className="w-full cursor-not-allowed rounded-full bg-honey/40 px-7 py-4 text-center font-bold text-white/50"
               >
-                Choisir Premium
-              </Button>
+                Bientôt disponible
+              </button>
 
-              <p className="mt-3 text-center text-xs font-semibold text-cream-100/70">
-                Paiement bientôt disponible · sans engagement, résiliable à tout
-                moment
+              <p className="mt-3 text-center text-xs font-semibold text-cream-100/60">
+                Paiement bientôt disponible · sans engagement
               </p>
             </div>
           </div>

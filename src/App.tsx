@@ -27,6 +27,8 @@ const AdminPage = lazy(() => import('./pages/AdminPage'))
 const IdeasPage = lazy(() => import('./pages/IdeasPage'))
 const ToolsPage = lazy(() => import('./pages/ToolsPage'))
 const PricingPage = lazy(() => import('./pages/PricingPage'))
+const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'))
+const PaymentCancelPage = lazy(() => import('./pages/PaymentCancelPage'))
 
 function getPageBackgroundClass(pathname: string) {
   if (pathname === '/') {
@@ -69,7 +71,7 @@ function getPageBackgroundClass(pathname: string) {
     return 'page-background-auth'
   }
 
-  if (pathname.startsWith('/pricing')) {
+  if (pathname.startsWith('/pricing') || pathname.startsWith('/payment')) {
     return 'page-background-profile'
   }
 
@@ -106,6 +108,8 @@ export default function App() {
           <Route path="/ideas" element={<IdeasPage />} />
           <Route path="/tools" element={<ToolsPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
+          <Route path="/payment/cancel" element={<PaymentCancelPage />} />
 
           <Route
             path="/profile"
