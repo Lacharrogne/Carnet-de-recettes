@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
+import { APP_NAME, LOGO_SRC } from '../data/brand'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { supabase } from '../lib/supabase'
 
 type SupabaseLikeError = {
@@ -17,6 +21,7 @@ export default function AuthPage() {
   const navigate = useNavigate()
 
   const [mode, setMode] = useState<'login' | 'signup'>('login')
+  useDocumentTitle(mode === 'login' ? 'Connexion' : 'Créer un compte')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -155,16 +160,24 @@ export default function AuthPage() {
   }
 
   return (
-    <section className="mx-auto max-w-md rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-orange-100">
-      <h2 className="mb-2 text-3xl font-black text-stone-950">
-        {mode === 'login' ? 'Connexion' : 'Créer un compte'}
-      </h2>
+    <section className="mx-auto max-w-md rounded-[2rem] bg-card p-8 shadow-card ring-1 ring-bark">
+      <div className="mb-6 flex flex-col items-center text-center">
+        <img
+          src={LOGO_SRC}
+          alt={APP_NAME}
+          className="h-16 w-16 object-contain drop-shadow-md"
+        />
 
-      <p className="mb-8 leading-7 text-stone-600">
-        {mode === 'login'
-          ? 'Connecte-toi pour retrouver ton carnet de recettes.'
-          : 'Crée ton espace avec un pseudo et une photo de profil.'}
-      </p>
+        <h2 className="mt-3 font-display text-3xl font-black text-espresso">
+          {mode === 'login' ? 'Bon retour !' : 'Crée ton carnet'}
+        </h2>
+
+        <p className="mt-2 leading-7 text-cacao/80">
+          {mode === 'login'
+            ? 'Connecte-toi pour retrouver tes recettes, tes courses et ton planning.'
+            : 'Quelques secondes suffisent pour commencer ton carnet de cuisine.'}
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit} className="grid gap-5">
         {mode === 'signup' && (
@@ -179,7 +192,7 @@ export default function AuthPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Exemple : Toudou"
-                className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                 required
               />
             </div>
@@ -227,7 +240,7 @@ export default function AuthPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+            className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
             required
           />
         </div>
@@ -242,7 +255,7 @@ export default function AuthPage() {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-2xl border border-orange-100 bg-[#fffdf9] px-4 py-3 pr-14 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+              className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 pr-14 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
               required
             />
 
@@ -261,29 +274,23 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {message && (
-          <p className="rounded-2xl bg-green-50 px-4 py-3 text-sm font-semibold leading-6 text-green-700">
-            {message}
-          </p>
-        )}
+        {message && <Alert tone="success">{message}</Alert>}
 
-        {errorMessage && (
-          <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700">
-            {errorMessage}
-          </p>
-        )}
+        {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-2xl bg-orange-500 px-5 py-3 font-bold text-white transition hover:bg-orange-600 disabled:opacity-70"
-        >
+        <Button type="submit" disabled={loading} size="lg" fullWidth>
           {loading
             ? 'Chargement...'
             : mode === 'login'
               ? 'Se connecter'
               : 'Créer le compte'}
-        </button>
+        </Button>
+
+        {mode === 'signup' && (
+          <p className="text-center text-xs font-semibold text-hazel">
+            ✓ Gratuit · ✓ Sans publicité · ✓ Sans engagement
+          </p>
+        )}
       </form>
 
       <button

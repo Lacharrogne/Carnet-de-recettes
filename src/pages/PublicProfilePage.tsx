@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 
 import RecipeCard from '../components/recipes/RecipeCard'
 import FollowButton from '../components/social/FollowButton'
+import Alert from '../components/ui/Alert'
+import { ProfileSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { getProfile, type UserProfile } from '../services/profiles'
 import { getRecipes } from '../services/recipes'
@@ -206,9 +208,9 @@ export default function PublicProfilePage() {
   if (!userId) {
     return (
       <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+        <Alert tone="error" className="mb-6">
           Profil introuvable.
-        </p>
+        </Alert>
 
         <Link
           to="/recipes"
@@ -221,19 +223,15 @@ export default function PublicProfilePage() {
   }
 
   if (loading) {
-    return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="text-stone-600">Chargement du profil...</p>
-      </section>
-    )
+    return <ProfileSkeleton />
   }
 
   if (errorMessage) {
     return (
       <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+        <Alert tone="error" className="mb-6">
           {errorMessage}
-        </p>
+        </Alert>
 
         <Link
           to="/recipes"
@@ -263,7 +261,7 @@ export default function PublicProfilePage() {
         </Link>
       </div>
 
-      <article className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
+      <article className="overflow-hidden rounded-[2.5rem] bg-cream-50 shadow-sm ring-1 ring-orange-100">
         <div className="grid gap-8 px-6 py-8 lg:grid-cols-[0.75fr_1.25fr] lg:px-10 lg:py-10">
           <div className="flex flex-col items-center justify-center rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
             <div className="relative">
@@ -292,7 +290,7 @@ export default function PublicProfilePage() {
               {displayedName}
             </h1>
 
-            <div className="mt-4 rounded-[1.5rem] bg-[#fffaf3] px-5 py-4 ring-1 ring-orange-100">
+            <div className="mt-4 rounded-[1.5rem] bg-cream-50 px-5 py-4 ring-1 ring-orange-100">
               {currentBadge ? (
                 <>
                   <p className="text-sm font-bold text-stone-500">
@@ -449,7 +447,7 @@ export default function PublicProfilePage() {
                   </p>
                 </div>
 
-                <div className="shrink-0 rounded-[1.5rem] bg-[#fffaf3] px-5 py-4 text-center ring-1 ring-orange-100">
+                <div className="shrink-0 rounded-[1.5rem] bg-cream-50 px-5 py-4 text-center ring-1 ring-orange-100">
                   <p className="text-4xl font-black text-orange-700">
                     {badgeProgress.progressPercent}%
                   </p>
@@ -506,7 +504,7 @@ export default function PublicProfilePage() {
           {unlockedBadges.map((badge) => (
             <div
               key={badge.name}
-              className="rounded-[2rem] bg-[#fffaf3] p-5 shadow-sm ring-1 ring-orange-100"
+              className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-orange-100"
             >
               <div className="flex items-start gap-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-3xl">

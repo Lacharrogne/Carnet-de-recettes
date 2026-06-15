@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import RecipeForm from '../components/recipes/RecipeForm'
 import type { RecipeFormValues } from '../components/recipes/RecipeForm'
+import Alert from '../components/ui/Alert'
 import {
   deleteRecipeImageByUrl,
   getRecipeById,
+  getRecipes,
   updateRecipe,
   uploadRecipeImage,
 } from '../services/recipes'
@@ -15,6 +17,7 @@ export default function EditRecipePage() {
   const navigate = useNavigate()
 
   const [recipe, setRecipe] = useState<Recipe | null>(null)
+  const [availableRecipes, setAvailableRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -27,7 +30,13 @@ export default function EditRecipePage() {
           return
         }
 
-        const data = await getRecipeById(Number(id))
+        const [data, allRecipes] = await Promise.all([
+          getRecipeById(Number(id)),
+          getRecipes().catch((error) => {
+            console.error(error)
+            return [] as Recipe[]
+          }),
+        ])
 
         if (!data) {
           setErrorMessage('Recette introuvable.')
@@ -35,6 +44,7 @@ export default function EditRecipePage() {
         }
 
         setRecipe(data)
+        setAvailableRecipes(allRecipes)
       } catch (error) {
         console.error(error)
         setErrorMessage('Impossible de charger la recette.')
@@ -111,9 +121,9 @@ export default function EditRecipePage() {
         </p>
 
         {errorMessage && (
-          <p className="mt-5 rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700 ring-1 ring-red-100">
+          <Alert tone="error" className="mt-5">
             {errorMessage}
-          </p>
+          </Alert>
         )}
 
         <Link
@@ -128,7 +138,7 @@ export default function EditRecipePage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-[#fff5ec] p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-linen p-8 shadow-sm ring-1 ring-orange-100">
         <Link
           to={`/recipes/${recipe.id}`}
           className="font-bold text-orange-700 transition hover:text-orange-800"
@@ -153,6 +163,7 @@ export default function EditRecipePage() {
       <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-8">
         <RecipeForm
           initialValues={recipe}
+          availableRecipes={availableRecipes}
           submitLabel="Enregistrer les modifications"
           isSubmitting={isSubmitting}
           errorMessage={errorMessage}

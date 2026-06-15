@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
+import Alert from '../ui/Alert'
+import { RowsSkeleton } from '../ui/Skeleton'
 import { useAuth } from '../../context/useAuth'
 import { getProfile, type UserProfile } from '../../services/profiles'
 import {
@@ -424,11 +426,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
   }
 
   if (loading) {
-    return (
-      <section className="rounded-[2rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100">
-        Chargement des avis...
-      </section>
-    )
+    return <RowsSkeleton rows={3} />
   }
 
   return (
@@ -449,7 +447,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
         </div>
 
         {reviews.length > 0 && (
-          <div className="rounded-[1.5rem] bg-[#fff5ec] px-5 py-4 text-left md:text-right">
+          <div className="rounded-[1.5rem] bg-cream-100 px-5 py-4 text-left md:text-right">
             <p className="text-xl font-black text-orange-500">
               {renderStars(Math.round(averageRating))}
             </p>
@@ -462,21 +460,21 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       </div>
 
       {errorMessage && (
-        <p className="mb-5 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700">
+        <Alert tone="error" className="mb-5">
           {errorMessage}
-        </p>
+        </Alert>
       )}
 
       {successMessage && (
-        <p className="mb-5 rounded-2xl bg-green-50 px-4 py-3 text-sm font-semibold leading-6 text-green-700">
+        <Alert tone="success" className="mb-5">
           {successMessage}
-        </p>
+        </Alert>
       )}
 
       {user ? (
         <form
           onSubmit={handleSubmit}
-          className="mb-7 rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100"
+          className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-orange-100"
         >
           <h3 className="text-xl font-black text-stone-950">
             {myReview ? 'Modifier mon avis' : 'Donner mon avis'}
@@ -552,7 +550,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
           </div>
         </form>
       ) : (
-        <div className="mb-7 rounded-[2rem] bg-[#fffaf3] p-5 ring-1 ring-orange-100">
+        <div className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-orange-100">
           <p className="font-bold text-stone-900">
             Connecte-toi pour donner ton avis.
           </p>
@@ -572,7 +570,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       )}
 
       {reviews.length === 0 ? (
-        <div className="rounded-[2rem] bg-[#fffaf3] p-6 text-center ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-cream-50 p-6 text-center ring-1 ring-orange-100">
           <p className="font-bold text-stone-900">
             Aucun commentaire pour le moment.
           </p>
@@ -597,7 +595,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
             return (
               <article
                 key={review.id}
-                className="rounded-[2rem] bg-[#fffaf3] p-4 ring-1 ring-orange-100 md:p-5"
+                className="rounded-[2rem] bg-cream-50 p-4 ring-1 ring-orange-100 md:p-5"
               >
                 <div className="mb-4 flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-base font-black text-white ring-2 ring-white md:h-12 md:w-12">
@@ -698,7 +696,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                         ' · toi',
                         '',
                       )}...`}
-                      className="w-full rounded-[1.2rem] border border-orange-100 bg-[#fffdf9] px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                      className="w-full rounded-[1.2rem] border border-orange-100 bg-cream-input px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                     />
 
                     <div className="mt-3 flex flex-wrap gap-3">

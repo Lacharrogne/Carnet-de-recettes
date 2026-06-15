@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import Alert from '../components/ui/Alert'
+import { RowsSkeleton } from '../components/ui/Skeleton'
 import {
   getFollowers,
   getFollowing,
@@ -134,10 +136,10 @@ export default function SocialPage() {
 
   return (
     <section className="space-y-10">
-      <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3]/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="overflow-hidden rounded-[2.5rem] bg-cream-50/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-4 flex w-fit items-center gap-2 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700">
+            <div className="mb-4 flex w-fit items-center gap-2 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
               <span>👥</span>
               <span>Réseau</span>
             </div>
@@ -162,9 +164,9 @@ export default function SocialPage() {
       </div>
 
       {errorMessage && (
-        <div className="rounded-2xl bg-red-50 px-5 py-4 text-red-700">
+        <Alert tone="error">
           <p className="font-bold">{errorMessage}</p>
-        </div>
+        </Alert>
       )}
 
       <div className="grid gap-5 md:grid-cols-3">
@@ -240,9 +242,7 @@ export default function SocialPage() {
         </div>
 
         {loading ? (
-          <div className="rounded-[2rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100">
-            Chargement des relations...
-          </div>
+          <RowsSkeleton rows={4} />
         ) : displayedProfiles.length === 0 ? (
           <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
             <p className="text-lg font-black text-stone-950">

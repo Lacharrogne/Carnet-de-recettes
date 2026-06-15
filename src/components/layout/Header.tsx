@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
+import { LOGO_SRC } from '../../data/brand'
 import { useAuth } from '../../context/useAuth'
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
 import { supabase } from '../../lib/supabase'
@@ -65,8 +66,8 @@ const toolLinks = [
 function navPillClass(isActive: boolean) {
   return `rounded-full px-5 py-3 text-sm font-bold transition ${
     isActive
-      ? 'bg-orange-500 text-white shadow-sm'
-      : 'text-stone-800 hover:bg-orange-50 hover:text-orange-600'
+      ? 'bg-terracotta-soft text-terracotta-deep'
+      : 'text-cacao hover:bg-linen hover:text-terracotta'
   }`
 }
 
@@ -74,15 +75,15 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   navPillClass(isActive)
 
 function mobileNavClass(isActive: boolean) {
-  return `flex items-center justify-between rounded-2xl px-4 py-4 text-base font-black shadow-sm ring-1 transition ${
+  return `flex items-center justify-between rounded-2xl px-4 py-4 text-base font-bold shadow-soft ring-1 transition ${
     isActive
-      ? 'bg-orange-500 text-white ring-orange-200'
-      : 'bg-white text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
+      ? 'bg-terracotta-soft text-terracotta-deep ring-terracotta-soft'
+      : 'bg-card text-espresso ring-bark hover:bg-linen'
   }`
 }
 
 const mobileLinkClass =
-  'rounded-2xl bg-cream-50 px-4 py-3.5 font-bold text-stone-800 transition hover:bg-orange-50'
+  'rounded-2xl bg-cream-50 px-4 py-3.5 font-bold text-cacao transition hover:bg-linen'
 
 function dropdownPanelClass(
   isOpen: boolean,
@@ -185,18 +186,18 @@ export default function Header() {
         >
           <div className="relative h-11 w-14 shrink-0 overflow-visible sm:h-12 sm:w-20 lg:w-24">
             <img
-              src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
+              src={LOGO_SRC}
               alt="Logo Carnet de recettes"
               className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-lg transition group-hover:-rotate-2 group-hover:scale-105 sm:h-28 sm:w-28 lg:h-32 lg:w-32"
             />
           </div>
 
           <div className="min-w-0">
-            <p className="truncate text-lg font-black leading-tight text-stone-950 sm:text-2xl">
+            <p className="truncate font-display text-xl font-black leading-tight text-espresso sm:text-2xl">
               Carnet de recettes
             </p>
 
-            <p className="hidden truncate text-sm font-semibold text-stone-500 sm:block">
+            <p className="hidden truncate text-sm font-semibold text-hazel sm:block">
               Cuisine maison & petits plats
             </p>
           </div>
@@ -330,6 +331,19 @@ export default function Header() {
               </div>
             </div>
           </div>
+          <NavLink
+            to="/pricing"
+            onClick={closeDropdowns}
+            className={({ isActive }) =>
+              `rounded-full px-5 py-3 text-sm font-bold transition ${
+                isActive
+                  ? 'bg-honey text-espresso'
+                  : 'text-[#8a5a1e] hover:bg-honey-soft'
+              }`
+            }
+          >
+            ✨ Premium
+          </NavLink>
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -604,6 +618,21 @@ export default function Header() {
                 ))}
               </div>
             </details>
+
+            <NavLink
+              to="/pricing"
+              onClick={closeMenu}
+              className={({ isActive }) =>
+                `flex items-center justify-between rounded-2xl px-4 py-4 text-base font-black shadow-soft ring-1 transition ${
+                  isActive
+                    ? 'bg-honey text-espresso ring-honey'
+                    : 'bg-honey-soft text-[#8a5a1e] ring-honey/40 hover:bg-honey/30'
+                }`
+              }
+            >
+              <span>✨ Passer à Premium</span>
+              <span>→</span>
+            </NavLink>
 
             {user ? (
               <details className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">

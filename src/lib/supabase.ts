@@ -6,9 +6,6 @@ const supabaseKey =
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
-console.log('SUPABASE URL:', supabaseUrl)
-console.log('SUPABASE KEY PRESENTE:', !!supabaseKey)
-
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Variables Supabase manquantes dans .env.local')
 }

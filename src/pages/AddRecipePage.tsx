@@ -1,14 +1,30 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RecipeForm from '../components/recipes/RecipeForm'
 import type { RecipeFormValues } from '../components/recipes/RecipeForm'
-import { createRecipe, uploadRecipeImage } from '../services/recipes'
+import { createRecipe, getRecipes, uploadRecipeImage } from '../services/recipes'
+import type { Recipe } from '../types/recipe'
 
 export default function AddRecipePage() {
   const navigate = useNavigate()
 
+  const [availableRecipes, setAvailableRecipes] = useState<Recipe[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    let ignore = false
+
+    getRecipes()
+      .then((recipes) => {
+        if (!ignore) setAvailableRecipes(recipes)
+      })
+      .catch((error) => console.error(error))
+
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   async function handleSubmit(values: RecipeFormValues) {
     setErrorMessage('')
@@ -38,7 +54,7 @@ export default function AddRecipePage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2.5rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2.5rem] bg-cream-50 shadow-sm ring-1 ring-orange-100">
         <div className="grid gap-8 p-6 md:grid-cols-[1fr_0.7fr] md:p-10">
           <div className="flex flex-col justify-center">
             <p className="font-bold text-orange-600">Nouvelle recette</p>
@@ -56,7 +72,7 @@ export default function AddRecipePage() {
           <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
             <div className="flex h-full flex-col justify-between gap-6">
               <div>
-                <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-orange-50 text-4xl">
+                <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-terracotta-soft text-4xl">
                   🍲
                 </div>
 
@@ -70,7 +86,7 @@ export default function AddRecipePage() {
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-[#fff5ec] p-4 ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-linen p-4 ring-1 ring-orange-100">
                 <p className="font-bold text-stone-900">Petit conseil</p>
 
                 <p className="mt-1 text-sm leading-6 text-stone-600">
@@ -98,6 +114,7 @@ export default function AddRecipePage() {
         </div>
 
         <RecipeForm
+          availableRecipes={availableRecipes}
           submitLabel="Ajouter la recette"
           isSubmitting={isSubmitting}
           errorMessage={errorMessage}

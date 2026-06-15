@@ -1,25 +1,34 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Search, X } from 'lucide-react'
 
 import RecipeCard from '../components/recipes/RecipeCard'
+import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import Chip from '../components/ui/Chip'
+import EmptyState from '../components/ui/EmptyState'
 import SectionHeader from '../components/ui/SectionHeader'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { getCategoryAmbience, getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
+import { useDebounce } from '../lib/useDebounce'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { getRecipes } from '../services/recipes'
+import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import type { Recipe } from '../types/recipe'
 
 type SortOption = 'name' | 'time' | 'difficulty'
 
 export default function RecipesPage() {
+  useDocumentTitle('Toutes les recettes')
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
+  const [ratings, setRatings] = useState<Map<number, RecipeRating>>(new Map())
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 200)
   const [sort, setSort] = useState<SortOption>('name')
 
   const categoryParam = searchParams.get('category')
@@ -59,6 +68,26 @@ export default function RecipesPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (recipes.length === 0) return
+
+    let ignore = false
+
+    getRecipeRatings(recipes.map((recipe) => recipe.id))
+      .then((map) => {
+        if (!ignore) {
+          setRatings(map)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [recipes])
+
   const categoriesWithCount = useMemo(() => {
     return RECIPE_CATEGORIES.map((category) => {
       const count = recipes.filter(
@@ -81,8 +110,8 @@ export default function RecipesPage() {
       )
     }
 
-    if (search.trim()) {
-      const normalizedSearch = search.toLowerCase().trim()
+    if (debouncedSearch.trim()) {
+      const normalizedSearch = debouncedSearch.toLowerCase().trim()
 
       result = result.filter((recipe) => {
         const titleMatch = recipe.title.toLowerCase().includes(normalizedSearch)
@@ -138,9 +167,9 @@ export default function RecipesPage() {
     }
 
     return result
-  }, [recipes, search, selectedCategory, sort])
+  }, [recipes, debouncedSearch, selectedCategory, sort])
 
-  const hasActiveFilters = search.trim().length > 0 || selectedCategory !== null
+  const hasActiveFilters = debouncedSearch.trim().length > 0 || selectedCategory !== null
 
   const activeCategoryAmbience = selectedCategory
     ? getCategoryAmbience(selectedCategory.label)
@@ -194,19 +223,38 @@ export default function RecipesPage() {
           </div>
 
           <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
-            <input
-              type="text"
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value)
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
 
-               if (!event.target.value.trim() && !selectedCategory) {
-                  setSearchParams({})
-                }
-              }}
-              placeholder="Exemple : tarte, poulet, chocolat..."
-              className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
-            />
+              <input
+                type="text"
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value)
+
+                 if (!event.target.value.trim() && !selectedCategory) {
+                    setSearchParams({})
+                  }
+                }}
+                aria-label="Rechercher une recette"
+                placeholder="Exemple : tarte, poulet, chocolat..."
+                className="w-full rounded-2xl border border-orange-100 bg-cream-input py-4 pl-12 pr-12 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+              />
+
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch('')
+                    if (!selectedCategory) setSearchParams({})
+                  }}
+                  aria-label="Effacer la recherche"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-2 md:gap-4">
               <select
@@ -221,6 +269,7 @@ export default function RecipesPage() {
 
                   selectCategory(value)
                 }}
+                aria-label="Filtrer par catégorie"
                 className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
               >
                 <option value="">Toutes les catégories</option>
@@ -235,6 +284,7 @@ export default function RecipesPage() {
               <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortOption)}
+                aria-label="Trier les recettes"
                 className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
               >
                 <option value="name">Trier par nom</option>
@@ -246,11 +296,7 @@ export default function RecipesPage() {
         </div>
       </div>
 
-      {errorMessage && (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 text-red-700">
-          {errorMessage}
-        </p>
-      )}
+      {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
       {!hasActiveFilters && (
         <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
@@ -354,7 +400,10 @@ export default function RecipesPage() {
                 className={`pointer-events-none absolute -bottom-28 -left-24 h-64 w-64 rounded-full blur-3xl sm:h-80 sm:w-80 ${activeCategoryAmbience.glowTwo}`}
               />
 
-              <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.18] sm:opacity-[0.26]">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.18] sm:opacity-[0.26]"
+              >
                 <div className="grid h-full min-h-[460px] grid-cols-4 gap-x-8 gap-y-8 px-4 py-6 sm:min-h-[560px] sm:grid-cols-5 sm:gap-x-10 sm:gap-y-10 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8">
                   {wallpaperEmojis.map((emoji, index) => (
                     <div
@@ -412,29 +461,25 @@ export default function RecipesPage() {
             />
 
             {filteredRecipes.length === 0 ? (
-              <div className="rounded-[1.75rem] bg-white/85 p-6 text-center shadow-sm ring-1 ring-white/70 sm:rounded-[2rem] sm:p-8">
-                <p className="text-lg font-bold text-stone-950">
-                  Aucune recette trouvée
-                </p>
-
-                <p className="mt-2 text-stone-600">
-                  Essaie une autre recherche ou une autre catégorie.
-                </p>
-
-                <Button
-                  type="button"
-                  onClick={resetFilters}
-                  size="lg"
-                  fullWidth
-                  className="mt-6 sm:w-auto"
-                >
-                  Revenir aux catégories
-                </Button>
-              </div>
+              <EmptyState
+                tone="honey"
+                emoji="🔍"
+                title="Aucune recette trouvée"
+                description="Essaie une autre recherche ou une autre catégorie."
+                action={
+                  <Button type="button" onClick={resetFilters} size="lg">
+                    Revenir aux catégories
+                  </Button>
+                }
+              />
             ) : (
               <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredRecipes.map((recipe) => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    rating={ratings.get(recipe.id)}
+                  />
                 ))}
               </div>
             )}

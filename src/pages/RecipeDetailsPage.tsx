@@ -1,616 +1,61 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
+import PrintableRecipeSheet from '../components/recipes/PrintableRecipeSheet'
 import RecipeCard from '../components/recipes/RecipeCard'
 import RecipeReviews from '../components/reviews/RecipeReviews'
+import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
-import { isRecipeFavorite, toggleFavorite } from '../services/favorites'
+import { useFavorites } from '../context/useFavorites'
+import { scaleIngredientText } from '../lib/ingredientScaling'
+import { findLinkedRecipe } from '../lib/recipeLinks'
+import {
+  formatTimerTime,
+  getStepTimers,
+  type StepTimer,
+} from '../lib/stepTimers'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
+import {
+  DAYS,
+  MEALS,
+  getDayLabel,
+  getMealLabel,
+  getSavedPlanner,
+  saveRecipeToPlanner,
+  type DayKey,
+  type MealKey,
+} from '../lib/weeklyPlanner'
 import { getProfile, type UserProfile } from '../services/profiles'
 import { deleteRecipe, getRecipeById, getRecipes } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
 
-type DayKey =
-  | 'monday'
-  | 'tuesday'
-  | 'wednesday'
-  | 'thursday'
-  | 'friday'
-  | 'saturday'
-  | 'sunday'
-
-type MealKey = 'lunch' | 'dinner'
-type ExtraMealKey = 'breakfast' | 'snack' | 'dessert'
-
-type DayPlannerState = Record<DayKey, Record<MealKey, string>>
-type WeeklyExtrasState = Record<ExtraMealKey, string[]>
-
-type MealPlannerState = DayPlannerState & {
-  weeklyExtras: WeeklyExtrasState
-}
-
-type StepTimer = {
-  label: string
-  seconds: number
-}
-
-const STORAGE_KEY = 'carnet-recettes-weekly-planner'
-
-const DAYS: { key: DayKey; label: string }[] = [
-  { key: 'monday', label: 'Lundi' },
-  { key: 'tuesday', label: 'Mardi' },
-  { key: 'wednesday', label: 'Mercredi' },
-  { key: 'thursday', label: 'Jeudi' },
-  { key: 'friday', label: 'Vendredi' },
-  { key: 'saturday', label: 'Samedi' },
-  { key: 'sunday', label: 'Dimanche' },
-]
-
-const MEALS: { key: MealKey; label: string; emoji: string }[] = [
-  { key: 'lunch', label: 'Déjeuner', emoji: '☀️' },
-  { key: 'dinner', label: 'Dîner', emoji: '🌙' },
-]
-
-function createEmptyPlanner(): MealPlannerState {
-  return {
-    monday: { lunch: '', dinner: '' },
-    tuesday: { lunch: '', dinner: '' },
-    wednesday: { lunch: '', dinner: '' },
-    thursday: { lunch: '', dinner: '' },
-    friday: { lunch: '', dinner: '' },
-    saturday: { lunch: '', dinner: '' },
-    sunday: { lunch: '', dinner: '' },
-    weeklyExtras: {
-      breakfast: [],
-      snack: [],
-      dessert: [],
-    },
-  }
-}
-
-function cleanRecipeIds(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value
-    .map((item) => String(item))
-    .filter((item) => item.trim().length > 0)
-}
-
-function getSavedPlanner(): MealPlannerState {
-  if (typeof window === 'undefined') {
-    return createEmptyPlanner()
-  }
-
-  try {
-    const savedPlanner = window.localStorage.getItem(STORAGE_KEY)
-    const emptyPlanner = createEmptyPlanner()
-
-    if (!savedPlanner) {
-      return emptyPlanner
-    }
-
-    const parsedPlanner = JSON.parse(savedPlanner) as Partial<MealPlannerState>
-
-    return {
-      monday: { ...emptyPlanner.monday, ...parsedPlanner.monday },
-      tuesday: { ...emptyPlanner.tuesday, ...parsedPlanner.tuesday },
-      wednesday: { ...emptyPlanner.wednesday, ...parsedPlanner.wednesday },
-      thursday: { ...emptyPlanner.thursday, ...parsedPlanner.thursday },
-      friday: { ...emptyPlanner.friday, ...parsedPlanner.friday },
-      saturday: { ...emptyPlanner.saturday, ...parsedPlanner.saturday },
-      sunday: { ...emptyPlanner.sunday, ...parsedPlanner.sunday },
-      weeklyExtras: {
-        breakfast: cleanRecipeIds(parsedPlanner.weeklyExtras?.breakfast),
-        snack: cleanRecipeIds(parsedPlanner.weeklyExtras?.snack),
-        dessert: cleanRecipeIds(parsedPlanner.weeklyExtras?.dessert),
-      },
-    }
-  } catch {
-    return createEmptyPlanner()
-  }
-}
-
-function saveRecipeToPlanner(
-  day: DayKey,
-  meal: MealKey,
-  recipeId: Recipe['id'],
-) {
-  const currentPlanner = getSavedPlanner()
-
-  const nextPlanner: MealPlannerState = {
-    ...currentPlanner,
-    [day]: {
-      ...currentPlanner[day],
-      [meal]: String(recipeId),
-    },
-  }
-
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextPlanner))
-}
-
-function getDayLabel(day: DayKey) {
-  return DAYS.find((currentDay) => currentDay.key === day)?.label ?? day
-}
-
-function getMealLabel(meal: MealKey) {
-  return MEALS.find((currentMeal) => currentMeal.key === meal)?.label ?? meal
-}
-
-function formatTimerTime(seconds: number) {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const remainingSeconds = seconds % 60
-
-  if (hours > 0) {
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
-      2,
-      '0',
-    )}:${String(remainingSeconds).padStart(2, '0')}`
-  }
-
-  return `${String(minutes).padStart(2, '0')}:${String(
-    remainingSeconds,
-  ).padStart(2, '0')}`
-}
-
-function getStepTimers(step: string): StepTimer[] {
-  const timers: StepTimer[] = []
-  const timerKeys = new Set<string>()
-  const normalizedStep = step.replace(/,/g, '.')
-
-  function addTimer(label: string, seconds: number) {
-    if (seconds <= 0) return
-
-    const cleanedLabel = label.replace(/\s+/g, ' ').trim()
-    const key = `${cleanedLabel}-${seconds}`
-
-    if (timerKeys.has(key)) return
-
-    timerKeys.add(key)
-
-    timers.push({
-      label: cleanedLabel,
-      seconds,
-    })
-  }
-
-  for (const match of normalizedStep.matchAll(/\b(\d+)\s*h\s*(\d{1,2})?\b/gi)) {
-    const hours = Number(match[1])
-    const minutes = Number(match[2] || 0)
-
-    addTimer(match[0], hours * 3600 + minutes * 60)
-  }
-
-  for (const match of normalizedStep.matchAll(/\b(\d+)\s*heures?\b/gi)) {
-    const hours = Number(match[1])
-
-    addTimer(match[0], hours * 3600)
-  }
-
-  for (const match of normalizedStep.matchAll(
-    /\b(\d+)(?:\s*(?:a|à|-)\s*(\d+))?\s*(minutes?|mins?|min)\b/gi,
-  )) {
-    const startMinutes = Number(match[1])
-    const endMinutes = match[2] ? Number(match[2]) : null
-
-    addTimer(match[0], (endMinutes ?? startMinutes) * 60)
-  }
-
-  for (const match of normalizedStep.matchAll(
-    /\b(\d+)\s*(secondes?|secs?|sec)\b/gi,
-  )) {
-    const seconds = Number(match[1])
-
-    addTimer(match[0], seconds)
-  }
-
-  return timers
-}
-
-function formatScaledQuantity(value: number) {
-  if (Number.isInteger(value)) {
-    return String(value)
-  }
-
-  const roundedValue = Math.round(value * 100) / 100
-
-  return String(roundedValue).replace('.', ',')
-}
-
-function parseFraction(value: string) {
-  const [topValue, bottomValue] = value.split('/').map(Number)
-
-  if (!topValue || !bottomValue) {
-    return null
-  }
-
-  return topValue / bottomValue
-}
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-const INGREDIENT_AGREEMENTS = [
-  {
-    singular: 'œuf',
-    plural: 'œufs',
-    variants: ['œuf', 'œufs', 'oeuf', 'oeufs'],
-  },
-  {
-    singular: 'tomate',
-    plural: 'tomates',
-    variants: ['tomate', 'tomates'],
-  },
-  {
-    singular: 'oignon',
-    plural: 'oignons',
-    variants: ['oignon', 'oignons'],
-  },
-  {
-    singular: 'courgette',
-    plural: 'courgettes',
-    variants: ['courgette', 'courgettes'],
-  },
-  {
-    singular: 'carotte',
-    plural: 'carottes',
-    variants: ['carotte', 'carottes'],
-  },
-  {
-    singular: 'pomme',
-    plural: 'pommes',
-    variants: ['pomme', 'pommes'],
-  },
-  {
-    singular: 'pomme de terre',
-    plural: 'pommes de terre',
-    variants: ['pomme de terre', 'pommes de terre', 'patate', 'patates'],
-  },
-  {
-    singular: 'citron',
-    plural: 'citrons',
-    variants: ['citron', 'citrons'],
-  },
-  {
-    singular: 'banane',
-    plural: 'bananes',
-    variants: ['banane', 'bananes'],
-  },
-  {
-    singular: 'gousse',
-    plural: 'gousses',
-    variants: ['gousse', 'gousses'],
-  },
-  {
-    singular: 'tranche',
-    plural: 'tranches',
-    variants: ['tranche', 'tranches'],
-  },
-  {
-    singular: 'boîte',
-    plural: 'boîtes',
-    variants: ['boîte', 'boîtes', 'boite', 'boites'],
-  },
-  {
-    singular: 'sachet',
-    plural: 'sachets',
-    variants: ['sachet', 'sachets'],
-  },
-  {
-    singular: 'verre',
-    plural: 'verres',
-    variants: ['verre', 'verres'],
-  },
-  {
-    singular: 'cuillère',
-    plural: 'cuillères',
-    variants: ['cuillère', 'cuillères', 'cuillere', 'cuilleres'],
-  },
-  {
-    singular: 'pincée',
-    plural: 'pincées',
-    variants: ['pincée', 'pincées', 'pincee', 'pincees'],
-  },
-  {
-    singular: 'filet',
-    plural: 'filets',
-    variants: ['filet', 'filets'],
-  },
-  {
-    singular: 'escalope',
-    plural: 'escalopes',
-    variants: ['escalope', 'escalopes'],
-  },
-  {
-    singular: 'boule',
-    plural: 'boules',
-    variants: ['boule', 'boules'],
-  },
-  {
-    singular: 'dé',
-    plural: 'dés',
-    variants: ['dé', 'dés', 'de', 'des'],
-  },
-  {
-    singular: 'gramme',
-    plural: 'grammes',
-    variants: ['gramme', 'grammes'],
-  },
-  {
-    singular: 'litre',
-    plural: 'litres',
-    variants: ['litre', 'litres'],
-  },
-]
-
-function adjustIngredientAgreement(quantity: number, ingredientRest: string) {
-  const shouldUsePlural = quantity > 1
-
-  for (const agreement of INGREDIENT_AGREEMENTS) {
-    const variants = [...agreement.variants].sort(
-      (firstVariant, secondVariant) =>
-        secondVariant.length - firstVariant.length,
-    )
-
-    const variantPattern = variants.map(escapeRegExp).join('|')
-
-    const pattern = new RegExp(
-      `^(\\s*)(${variantPattern})(?=\\s|$|,|\\.|-)`,
-      'iu',
-    )
-
-    if (pattern.test(ingredientRest)) {
-      return ingredientRest.replace(
-        pattern,
-        `$1${shouldUsePlural ? agreement.plural : agreement.singular}`,
-      )
-    }
-  }
-
-  return ingredientRest
-}
-
-function scaleIngredientText(
-  ingredient: string,
-  originalServings: number,
-  selectedServings: number,
-) {
-  if (originalServings <= 0 || selectedServings <= 0) {
-    return ingredient
-  }
-
-  const multiplier = selectedServings / originalServings
-  const trimmedIngredient = ingredient.trim()
-
-  const fractionMatch = trimmedIngredient.match(/^(\d+)\/(\d+)(.*)$/)
-
-  if (fractionMatch) {
-    const quantity = parseFraction(`${fractionMatch[1]}/${fractionMatch[2]}`)
-
-    if (!quantity) {
-      return ingredient
-    }
-
-    const scaledQuantity = quantity * multiplier
-    const restOfIngredient = fractionMatch[3] ?? ''
-    const adjustedRest = adjustIngredientAgreement(
-      scaledQuantity,
-      restOfIngredient,
-    )
-
-    return `${formatScaledQuantity(scaledQuantity)}${adjustedRest}`
-  }
-
-  const decimalMatch = trimmedIngredient.match(/^(\d+(?:[.,]\d+)?)(.*)$/)
-
-  if (!decimalMatch) {
-    return ingredient
-  }
-
-  const quantity = Number(decimalMatch[1].replace(',', '.'))
-
-  if (Number.isNaN(quantity)) {
-    return ingredient
-  }
-
-  const scaledQuantity = quantity * multiplier
-  const restOfIngredient = decimalMatch[2] ?? ''
-  const adjustedRest = adjustIngredientAgreement(
-    scaledQuantity,
-    restOfIngredient,
-  )
-
-  return `${formatScaledQuantity(scaledQuantity)}${adjustedRest}`
-}
-
-type PrintableRecipeSheetProps = {
-  recipe: Recipe
-  imageToDisplay: string | undefined
-  scaledIngredients: string[]
-  selectedServings: number
-  totalTime: number
-}
-
-function PrintableRecipeSheet({
-  recipe,
-  imageToDisplay,
-  scaledIngredients,
-  selectedServings,
-  totalTime,
-}: PrintableRecipeSheetProps) {
-  const hasImage =
-    typeof imageToDisplay === 'string' && imageToDisplay.startsWith('http')
-
-  return (
-  <div className="hidden print:block print:bg-white print:p-0 print:text-black">
-    <article className="mx-auto max-w-[760px] text-[10.5pt] leading-relaxed">
-      <header className="mb-5 border-b border-stone-200 pb-4">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-50">
-              <img
-                src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
-                alt="Carnet de recettes"
-                className="h-full w-full object-cover"
-              />
-            </div>
-
-            <div>
-              <p className="text-base font-black leading-tight text-stone-950">
-                Carnet de recettes
-              </p>
-
-              <p className="text-xs font-medium text-stone-500">
-                Cuisine maison & petits plats
-              </p>
-            </div>
-          </div>
-
-          <p className="text-xs font-bold uppercase tracking-wide text-orange-700">
-            Fiche recette
-          </p>
-        </div>
-
-        <div className="flex items-start gap-5">
-          <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-orange-50 text-4xl">
-            {hasImage ? (
-              <img
-                src={imageToDisplay}
-                alt={recipe.title}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <span>{recipe.image || '🍽️'}</span>
-            )}
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="mb-2 flex flex-wrap gap-2 text-[10pt] font-bold">
-              <span className="rounded-full bg-orange-50 px-3 py-1 text-orange-700">
-                {recipe.category}
-              </span>
-
-              <span className="rounded-full bg-stone-50 px-3 py-1 text-stone-700">
-                {recipe.difficulty}
-              </span>
-
-              <span className="rounded-full bg-stone-50 px-3 py-1 text-stone-700">
-                {selectedServings} pers.
-              </span>
-            </div>
-
-            <h1 className="text-3xl font-black leading-tight text-stone-950">
-              {recipe.title}
-            </h1>
-
-            {recipe.description && (
-              <p className="mt-2 max-w-[580px] text-sm leading-6 text-stone-700">
-                {recipe.description}
-              </p>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <section className="mb-5 grid grid-cols-4 gap-3 break-inside-avoid">
-        <div className="rounded-xl border border-stone-200 p-3">
-          <p className="text-xs font-medium text-stone-500">Préparation</p>
-          <p className="mt-1 font-black text-stone-950">
-            {recipe.prepTime} min
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-stone-200 p-3">
-          <p className="text-xs font-medium text-stone-500">Cuisson</p>
-          <p className="mt-1 font-black text-stone-950">
-            {recipe.cookTime} min
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-stone-200 p-3">
-          <p className="text-xs font-medium text-stone-500">Total</p>
-          <p className="mt-1 font-black text-stone-950">{totalTime} min</p>
-        </div>
-
-        <div className="rounded-xl border border-stone-200 p-3">
-          <p className="text-xs font-medium text-stone-500">Portions</p>
-          <p className="mt-1 font-black text-stone-950">
-            {selectedServings}
-          </p>
-        </div>
-      </section>
-
-      <section className="mb-5 break-inside-avoid">
-        <h2 className="mb-3 text-xl font-black text-stone-950">
-          Ingrédients
-        </h2>
-
-        {scaledIngredients.length > 0 ? (
-          <ul className="grid grid-cols-2 gap-x-8 gap-y-2">
-            {scaledIngredients.map((ingredient, index) => (
-              <li key={`${ingredient}-${index}`} className="flex gap-2">
-                <span className="font-black text-orange-700">•</span>
-                <span>{ingredient}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-stone-600">Aucun ingrédient renseigné.</p>
-        )}
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-xl font-black text-stone-950">
-          Préparation
-        </h2>
-
-        {recipe.steps.length > 0 ? (
-          <ol className="space-y-2">
-            {recipe.steps.map((step, index) => (
-              <li
-                key={`${step}-${index}`}
-                className="break-inside-avoid rounded-xl border border-stone-200 p-3"
-              >
-                <span className="mr-2 font-black text-orange-700">
-                  {index + 1}.
-                </span>
-
-                <span>{step}</span>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="text-stone-600">Aucune étape renseignée.</p>
-        )}
-      </section>
-    </article>
-  </div>
-)
-}
-
 export default function RecipeDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { isFavorite: isFavoriteCtx, toggleFavorite: toggleFavoriteCtx } =
+    useFavorites()
 
   const recipeId = Number(id)
   const invalidRecipeId = !id || Number.isNaN(recipeId)
   const viewerId = user?.id
+  const isFavorite = !!viewerId && isFavoriteCtx(recipeId)
 
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [authorProfile, setAuthorProfile] = useState<UserProfile | null>(null)
+
+  useDocumentTitle(recipe?.title)
   const [similarRecipes, setSimilarRecipes] = useState<Recipe[]>([])
+  const [allRecipes, setAllRecipes] = useState<Recipe[]>([])
 
   const [loading, setLoading] = useState(!invalidRecipeId)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
   const [isDeleting, setIsDeleting] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteLoading, setFavoriteLoading] = useState(false)
   const [addingIngredientIndex, setAddingIngredientIndex] = useState<
     number | null
@@ -695,24 +140,15 @@ export default function RecipeDetailsPage() {
             })
           : Promise.resolve(null)
 
-        const favoriteStatusPromise = viewerId
-          ? isRecipeFavorite(recipeId).catch((error) => {
-              console.error(error)
-              return false
-            })
-          : Promise.resolve(false)
-
         const recipesPromise = getRecipes().catch((error) => {
           console.error(error)
           return []
         })
 
-        const [loadedAuthorProfile, loadedFavoriteStatus, allRecipes] =
-          await Promise.all([
-            authorProfilePromise,
-            favoriteStatusPromise,
-            recipesPromise,
-          ])
+        const [loadedAuthorProfile, allRecipes] = await Promise.all([
+          authorProfilePromise,
+          recipesPromise,
+        ])
 
         const currentRecipeTags = data.tags.map((tag) => tag.toLowerCase())
 
@@ -751,8 +187,8 @@ export default function RecipeDetailsPage() {
           setRecipe(data)
           setSelectedServings(Math.max(1, data.servings))
           setAuthorProfile(loadedAuthorProfile)
-          setIsFavorite(loadedFavoriteStatus)
           setSimilarRecipes(relatedRecipes)
+          setAllRecipes(allRecipes)
           setCurrentStepIndex(0)
           setGuidedCookingOpen(false)
           setActiveTimerSeconds(null)
@@ -832,8 +268,7 @@ export default function RecipeDetailsPage() {
       setErrorMessage('')
       hideSuccessMessage()
 
-      const newValue = await toggleFavorite(recipe.id)
-      setIsFavorite(newValue)
+      const newValue = await toggleFavoriteCtx(recipe.id)
 
       showSuccessMessage(
         newValue
@@ -1056,9 +491,9 @@ export default function RecipeDetailsPage() {
   if (invalidRecipeId) {
     return (
       <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+        <Alert tone="error" className="mb-6">
           Recette introuvable.
-        </p>
+        </Alert>
 
         <Link
           to="/recipes"
@@ -1071,19 +506,15 @@ export default function RecipeDetailsPage() {
   }
 
   if (loading) {
-    return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="text-stone-600">Chargement de la recette...</p>
-      </section>
-    )
+    return <RecipeDetailSkeleton />
   }
 
   if (!recipe) {
     return (
       <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+        <Alert tone="error" className="mb-6">
           {errorMessage || 'Recette introuvable.'}
-        </p>
+        </Alert>
 
         <Link
           to="/recipes"
@@ -1101,6 +532,11 @@ export default function RecipeDetailsPage() {
   const scaledIngredients = recipe.ingredients.map((ingredient) =>
     scaleIngredientText(ingredient, recipe.servings, selectedServings),
   )
+
+  // Liens créés manuellement dans le formulaire, résolus en recettes.
+  const manualLinkedRecipes = recipe.relatedRecipeIds
+    .map((relatedId) => allRecipes.find((item) => item.id === relatedId))
+    .filter((item): item is Recipe => Boolean(item))
 
   const authorName = authorProfile?.username || 'Utilisateur'
   const authorBio = authorProfile?.bio ?? ''
@@ -1298,20 +734,20 @@ export default function RecipeDetailsPage() {
         </div>
 
         {successMessage && (
-          <div className="fixed bottom-4 left-4 right-4 z-[90] rounded-2xl bg-stone-950 px-5 py-4 text-sm font-bold text-white shadow-xl print:hidden sm:left-auto sm:right-6 sm:max-w-sm">
+          <div className="fixed bottom-24 left-4 right-4 z-[90] rounded-2xl bg-espresso px-5 py-4 text-sm font-bold text-white shadow-lift print:hidden sm:bottom-6 sm:left-auto sm:right-6 sm:max-w-sm">
             ✅ {successMessage}
           </div>
         )}
 
         {errorMessage && (
-          <p className="rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700 print:hidden">
+          <Alert tone="error" className="print:hidden">
             {errorMessage}
-          </p>
+          </Alert>
         )}
 
-        <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+        <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-card ring-1 ring-bark sm:rounded-[2.5rem]">
           <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="min-h-[260px] bg-cream-200 sm:min-h-[340px]">
+            <div className="relative min-h-[260px] bg-cream-200 sm:min-h-[340px]">
               {typeof imageToDisplay === 'string' &&
               imageToDisplay.startsWith('http') ? (
                 <img
@@ -1328,16 +764,16 @@ export default function RecipeDetailsPage() {
 
             <div className="flex flex-col justify-center px-5 py-7 sm:px-6 sm:py-8 lg:px-10">
               <div className="mb-5 flex flex-wrap items-center gap-2 sm:gap-3">
-                <span className="rounded-full bg-orange-100 px-4 py-2 text-xs font-black text-orange-700 sm:text-sm">
+                <span className="rounded-full bg-terracotta-soft px-4 py-2 text-xs font-bold text-terracotta-deep sm:text-sm">
                   {recipe.category}
                 </span>
 
-                <span className="rounded-full bg-white px-4 py-2 text-xs font-bold text-stone-700 shadow-sm ring-1 ring-orange-100 sm:text-sm">
+                <span className="rounded-full bg-card px-4 py-2 text-xs font-bold text-cacao shadow-soft ring-1 ring-bark sm:text-sm">
                   {recipe.difficulty}
                 </span>
               </div>
 
-              <p className="mb-2 text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-terracotta sm:text-sm">
                 Recette maison
               </p>
 
@@ -1563,6 +999,7 @@ export default function RecipeDetailsPage() {
       onChange={(event) =>
         setSelectedPlanningDay(event.target.value as DayKey)
       }
+      aria-label="Jour du planning"
       className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-4 font-bold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
     >
       {DAYS.map((day) => (
@@ -1691,31 +1128,51 @@ export default function RecipeDetailsPage() {
 
             {recipe.ingredients.length > 0 ? (
               <ul className="mt-6 space-y-3">
-                {scaledIngredients.map((ingredient, index) => (
-                  <li
-                    key={`${ingredient}-${index}`}
-                    className="flex items-center gap-3 rounded-[1.4rem] bg-cream-100 px-4 py-3 text-stone-700"
-                  >
-                    <span className="font-black text-orange-600">•</span>
+                {scaledIngredients.map((ingredient, index) => {
+                  const linkedRecipe = findLinkedRecipe(
+                    ingredient,
+                    allRecipes,
+                    recipe.id,
+                  )
 
-                    <span className="min-w-0 flex-1 text-sm font-medium leading-6 sm:text-base">
-                      {ingredient}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleAddIngredientToShoppingList(ingredient, index)
-                      }
-                      disabled={addingIngredientIndex === index}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500 text-lg font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden"
-                      aria-label={`Ajouter ${ingredient} à la liste de courses`}
-                      title="Ajouter à la liste de courses"
+                  return (
+                    <li
+                      key={`${ingredient}-${index}`}
+                      className="rounded-[1.4rem] bg-cream-100 px-4 py-3 text-stone-700"
                     >
-                      {addingIngredientIndex === index ? '…' : '+'}
-                    </button>
-                  </li>
-                ))}
+                      <div className="flex items-center gap-3">
+                        <span className="font-black text-orange-600">•</span>
+
+                        <span className="min-w-0 flex-1 text-sm font-medium leading-6 sm:text-base">
+                          {ingredient}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleAddIngredientToShoppingList(ingredient, index)
+                          }
+                          disabled={addingIngredientIndex === index}
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500 text-lg font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden"
+                          aria-label={`Ajouter ${ingredient} à la liste de courses`}
+                          title="Ajouter à la liste de courses"
+                        >
+                          {addingIngredientIndex === index ? '…' : '+'}
+                        </button>
+                      </div>
+
+                      {linkedRecipe && (
+                        <Link
+                          to={`/recipes/${linkedRecipe.id}`}
+                          className="mt-2 ml-6 inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700 transition hover:bg-orange-200 print:hidden"
+                          title={`Voir la recette « ${linkedRecipe.title} »`}
+                        >
+                          🔗 Voir la recette « {linkedRecipe.title} »
+                        </Link>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             ) : (
               <p className="mt-4 text-stone-500">Aucun ingrédient renseigné.</p>
@@ -1766,6 +1223,28 @@ export default function RecipeDetailsPage() {
         </div>
 
         <RecipeReviews recipeId={recipe.id} />
+
+        {manualLinkedRecipes.length > 0 && (
+          <section className="print:hidden">
+            <div className="mb-6">
+              <p className="font-bold text-orange-600">Recettes liées</p>
+
+              <h2 className="text-2xl font-black text-stone-950 sm:text-3xl">
+                À préparer avec cette recette
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
+                Les recettes-composants reliées à cette fiche.
+              </p>
+            </div>
+
+            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {manualLinkedRecipes.map((linkedRecipe) => (
+                <RecipeCard key={linkedRecipe.id} recipe={linkedRecipe} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {similarRecipes.length > 0 && (
           <section className="print:hidden">

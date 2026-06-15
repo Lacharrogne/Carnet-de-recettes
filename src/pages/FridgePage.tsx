@@ -1,262 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import Alert from '../components/ui/Alert'
+import EmptyState from '../components/ui/EmptyState'
+import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
+import {
+  ANTI_WASTE_INGREDIENTS,
+  analyzeRecipe,
+  getUniqueIngredients,
+  normalizeText,
+  parseFridgeIngredients,
+  recipeUsesIngredient,
+  type FridgeRecipeMatch,
+} from '../lib/fridgeMatching'
 import { getRecipes } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import type { Recipe } from '../types/recipe'
-
-type FridgeRecipeMatch = {
-  recipe: Recipe
-  matchedIngredients: string[]
-  missingIngredients: string[]
-  missingCount: number
-  score: number
-}
-
-const ANTI_WASTE_INGREDIENTS = [
-  'Courgettes',
-  'Tomates',
-  'Œufs',
-  'Crème',
-  'Jambon',
-  'Fromage',
-  'Poulet',
-  'Pommes de terre',
-  'Carottes',
-  'Riz',
-]
-
-const INGREDIENT_SYNONYMS: Record<string, string[]> = {
-  oeuf: ['oeuf', 'oeufs', 'œuf', 'œufs'],
-  pate: [
-    'pate',
-    'pates',
-    'pâtes',
-    'spaghetti',
-    'spaghettis',
-    'tagliatelle',
-    'tagliatelles',
-    'penne',
-    'coquillette',
-    'coquillettes',
-  ],
-  riz: ['riz'],
-  creme: [
-    'creme',
-    'crème',
-    'creme fraiche',
-    'crème fraîche',
-    'creme liquide',
-    'crème liquide',
-    'creme epaisse',
-    'crème épaisse',
-  ],
-  fromage: [
-    'fromage',
-    'fromages',
-    'emmental',
-    'gruyere',
-    'gruyère',
-    'mozzarella',
-    'mozza',
-    'cheddar',
-    'comte',
-    'comté',
-    'parmesan',
-  ],
-  tomate: ['tomate', 'tomates', 'tomate cerise', 'tomates cerises'],
-  oignon: ['oignon', 'oignons'],
-  ail: ['ail', 'gousse ail', "gousse d'ail", 'gousses ail', "gousses d'ail"],
-  pommeDeTerre: [
-    'pomme de terre',
-    'pommes de terre',
-    'patate',
-    'patates',
-  ],
-  poulet: ['poulet', 'blanc de poulet', 'filet de poulet', 'escalope de poulet'],
-  jambon: ['jambon', 'dés de jambon', 'des de jambon', 'tranche de jambon'],
-  viandeHachee: [
-    'viande hachee',
-    'viande hachée',
-    'steak hache',
-    'steak haché',
-    'boeuf hache',
-    'bœuf haché',
-  ],
-  courgette: ['courgette', 'courgettes'],
-  carotte: ['carotte', 'carottes'],
-  chocolat: ['chocolat', 'chocolat noir', 'chocolat au lait'],
-  lait: ['lait'],
-  farine: ['farine'],
-  beurre: ['beurre'],
-  sucre: ['sucre', 'sucre en poudre', 'cassonade'],
-  huile: ['huile', 'huile olive', "huile d'olive", 'huile de tournesol'],
-}
-
-function normalizeText(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/œ/g, 'oe')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[’']/g, ' ')
-    .replace(/[^a-z0-9\s-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-function removeIngredientDetails(value: string) {
-  return normalizeText(value)
-    .replace(/\b\d+([.,]\d+)?\b/g, ' ')
-    .replace(
-      /\b(g|gr|gramme|grammes|kg|kilo|kilos|ml|cl|l|litre|litres|cuillere|cuilleres|cafe|soupe|cas|cac|pincee|pincees|tranche|tranches|boite|boites|sachet|sachets|verre|verres)\b/g,
-      ' ',
-    )
-    .replace(/\b(de|du|des|d|la|le|les|un|une|a|au|aux|et|ou)\b/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-function singularizeText(value: string) {
-  return value
-    .split(' ')
-    .map((word) => {
-      if (word.length > 3 && word.endsWith('s')) {
-        return word.slice(0, -1)
-      }
-
-      return word
-    })
-    .join(' ')
-}
-
-function getIngredientTerms(value: string) {
-  const base = normalizeText(value)
-  const simplified = removeIngredientDetails(value)
-
-  const terms = new Set<string>()
-
-  const rawTerms = [
-    base,
-    simplified,
-    singularizeText(base),
-    singularizeText(simplified),
-  ]
-
-  rawTerms.filter(Boolean).forEach((term) => terms.add(term))
-
-  Object.values(INGREDIENT_SYNONYMS).forEach((synonyms) => {
-    const normalizedSynonyms = synonyms.map((synonym) => normalizeText(synonym))
-
-    const hasSynonym = normalizedSynonyms.some((synonym) => {
-      return Array.from(terms).some((term) => {
-        return (
-          term === synonym ||
-          term.includes(synonym) ||
-          synonym.includes(term)
-        )
-      })
-    })
-
-    if (hasSynonym) {
-      normalizedSynonyms.forEach((synonym) => terms.add(synonym))
-
-      normalizedSynonyms
-        .map((synonym) => singularizeText(synonym))
-        .forEach((synonym) => terms.add(synonym))
-    }
-  })
-
-  return Array.from(terms).filter(Boolean)
-}
-
-function parseFridgeIngredients(value: string) {
-  return Array.from(
-    new Set(
-      value
-        .split(/[\n,;]+/)
-        .map((ingredient) => ingredient.trim())
-        .filter(Boolean),
-    ),
-  )
-}
-
-function getUniqueIngredients(ingredients: string[]) {
-  const uniqueIngredients = new Map<string, string>()
-
-  ingredients.forEach((ingredient) => {
-    const normalizedIngredient = normalizeText(ingredient)
-
-    if (normalizedIngredient) {
-      uniqueIngredients.set(normalizedIngredient, ingredient)
-    }
-  })
-
-  return Array.from(uniqueIngredients.values())
-}
-
-function ingredientMatches(
-  recipeIngredient: string,
-  availableIngredients: string[],
-) {
-  const recipeTerms = getIngredientTerms(recipeIngredient)
-
-  return availableIngredients.some((availableIngredient) => {
-    const availableTerms = getIngredientTerms(availableIngredient)
-
-    return recipeTerms.some((recipeTerm) => {
-      return availableTerms.some((availableTerm) => {
-        if (!recipeTerm || !availableTerm) {
-          return false
-        }
-
-        return (
-          recipeTerm === availableTerm ||
-          recipeTerm.includes(availableTerm) ||
-          availableTerm.includes(recipeTerm)
-        )
-      })
-    })
-  })
-}
-
-function recipeUsesIngredient(recipe: Recipe, ingredient: string) {
-  if (!ingredient.trim()) {
-    return false
-  }
-
-  return recipe.ingredients.some((recipeIngredient) =>
-    ingredientMatches(recipeIngredient, [ingredient]),
-  )
-}
-
-function analyzeRecipe(
-  recipe: Recipe,
-  availableIngredients: string[],
-): FridgeRecipeMatch {
-  const recipeIngredients = recipe.ingredients.filter(Boolean)
-
-  const matchedIngredients = recipeIngredients.filter((ingredient) =>
-    ingredientMatches(ingredient, availableIngredients),
-  )
-
-  const missingIngredients = recipeIngredients.filter(
-    (ingredient) => !ingredientMatches(ingredient, availableIngredients),
-  )
-
-  const score =
-    recipeIngredients.length > 0
-      ? Math.round((matchedIngredients.length / recipeIngredients.length) * 100)
-      : 0
-
-  return {
-    recipe,
-    matchedIngredients,
-    missingIngredients,
-    missingCount: missingIngredients.length,
-    score,
-  }
-}
 
 function FridgeResultCard({
   match,
@@ -272,7 +31,7 @@ function FridgeResultCard({
 
   return (
     <article className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md">
-      <div className="border-b border-orange-100 bg-[#fffaf3] p-5 sm:p-6">
+      <div className="border-b border-orange-100 bg-cream-50 p-5 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-wide text-orange-600">
@@ -355,7 +114,7 @@ function FridgeResultCard({
         className="block p-5 transition hover:bg-orange-50/40 sm:p-6"
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:gap-5">
-          <div className="flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#fff1e6] text-6xl sm:h-24 sm:w-24 sm:text-5xl">
+          <div className="flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-cream-200 text-6xl sm:h-24 sm:w-24 sm:text-5xl">
             {imageToDisplay && imageToDisplay.startsWith('http') ? (
               <img
                 src={imageToDisplay}
@@ -590,10 +349,10 @@ export default function FridgePage() {
 
   return (
     <section className="space-y-8 sm:space-y-12">
-      <div className="overflow-hidden rounded-[2rem] bg-[#fffaf3] shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
         <div className="grid gap-7 px-5 py-7 sm:px-6 sm:py-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-12 lg:py-12">
           <div className="flex flex-col justify-center">
-            <div className="mb-5 flex w-fit items-center gap-3 rounded-full bg-[#f4e8dc] px-4 py-2 text-sm font-bold text-orange-700 sm:mb-6">
+            <div className="mb-5 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700 sm:mb-6">
               <span>🥕</span>
               <span>Mode Frigo</span>
             </div>
@@ -640,7 +399,7 @@ export default function FridgePage() {
                   </p>
                 </div>
 
-                <span className="w-fit rounded-full bg-[#fffaf3] px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-orange-100">
+                <span className="w-fit rounded-full bg-cream-50 px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-orange-100">
                   {fridgeIngredients.length} ingrédient
                   {fridgeIngredients.length > 1 ? 's' : ''}
                 </span>
@@ -653,7 +412,7 @@ export default function FridgePage() {
                   clearMessages()
                 }}
                 placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
-                className="mt-4 min-h-36 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-[#fffaf3] px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 sm:px-5"
+                className="mt-4 min-h-36 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-cream-50 px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 sm:px-5"
               />
 
               <p className="mt-3 text-sm leading-6 text-stone-500">
@@ -736,7 +495,7 @@ export default function FridgePage() {
       </div>
 
       {errorMessage && (
-        <div className="rounded-2xl bg-red-50 px-5 py-4 text-red-700">
+        <Alert tone="error">
           <p className="font-bold">{errorMessage}</p>
 
           {errorMessage.includes('Connecte-toi') && (
@@ -747,11 +506,11 @@ export default function FridgePage() {
               Aller à la connexion
             </Link>
           )}
-        </div>
+        </Alert>
       )}
 
       {successMessage && (
-        <div className="rounded-2xl bg-green-50 px-5 py-4 text-green-700">
+        <Alert tone="success">
           <p className="font-bold">{successMessage}</p>
 
           <Link
@@ -760,37 +519,27 @@ export default function FridgePage() {
           >
             Voir ma liste de courses
           </Link>
-        </div>
+        </Alert>
       )}
 
       {loading ? (
-        <div className="rounded-[2rem] bg-white p-6 text-stone-600 shadow-sm ring-1 ring-orange-100 sm:p-8">
-          Chargement des recettes...
-        </div>
+        <RecipeCardGridSkeleton count={3} />
       ) : effectiveAvailableIngredients.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:p-8">
-          <p className="text-xl font-black text-stone-950">
-            Commence par remplir ton frigo.
-          </p>
-
-          <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
-            Ajoute quelques ingrédients ou choisis un ingrédient anti-gaspi pour
-            découvrir les recettes possibles.
-          </p>
-        </div>
+        <EmptyState
+          tone="sage"
+          emoji="🥕"
+          title="Commence par remplir ton frigo"
+          description="Ajoute quelques ingrédients ci-dessus, ou choisis un ingrédient anti-gaspi, et le carnet te propose aussitôt les recettes possibles."
+        />
       ) : analyzedRecipes.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:p-8">
-          <p className="text-xl font-black text-stone-950">
-            Aucune recette trouvée avec ces ingrédients.
-          </p>
-
-          <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
-            Essaie avec des ingrédients plus simples, comme œufs, pâtes, riz,
-            tomates ou fromage.
-          </p>
-        </div>
+        <EmptyState
+          tone="honey"
+          emoji="🔍"
+          title="Aucune recette avec ces ingrédients"
+          description="Essaie avec des ingrédients plus courants comme œufs, pâtes, riz, tomates ou fromage."
+        />
       ) : (
-        <section className="rounded-[2rem] bg-[#fffaf3]/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-6 md:p-8">
+        <section className="rounded-[2rem] bg-cream-50/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-6 md:p-8">
           <div className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-wide text-orange-600">

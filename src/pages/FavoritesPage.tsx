@@ -1,13 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import RecipeCard from '../components/recipes/RecipeCard'
+import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
+import EmptyState from '../components/ui/EmptyState'
+import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { getFavoriteRecipes } from '../services/favorites'
 import type { Recipe, RecipeCategory } from '../types/recipe'
 
 type SortOption = 'recent' | 'name' | 'time' | 'difficulty'
 
 export default function FavoritesPage() {
+  useDocumentTitle('Mes favoris')
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -133,15 +139,15 @@ export default function FavoritesPage() {
 
   if (loading) {
     return (
-      <section className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-orange-100">
-        <p className="font-medium text-stone-600">Chargement des favoris...</p>
+      <section className="space-y-8">
+        <RecipeCardGridSkeleton count={3} />
       </section>
     )
   }
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-[#fff5ec] p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-orange-100">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-5">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-orange-100">
@@ -171,11 +177,7 @@ export default function FavoritesPage() {
         </div>
       </div>
 
-      {errorMessage && (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700 ring-1 ring-red-100">
-          {errorMessage}
-        </p>
-      )}
+      {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
       <div className="grid gap-5 md:grid-cols-3">
         <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
@@ -249,6 +251,7 @@ export default function FavoritesPage() {
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
+            aria-label="Rechercher dans mes favoris"
             placeholder="Rechercher dans mes favoris..."
             className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           />
@@ -258,6 +261,7 @@ export default function FavoritesPage() {
             onChange={(event) =>
               setSelectedCategory(event.target.value as RecipeCategory | '')
             }
+            aria-label="Filtrer par catégorie"
             className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="">Toutes les catégories</option>
@@ -272,6 +276,7 @@ export default function FavoritesPage() {
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value as SortOption)}
+            aria-label="Trier les favoris"
             className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="recent">Plus récentes</option>
@@ -293,49 +298,24 @@ export default function FavoritesPage() {
       </div>
 
       {recipes.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
-            ❤️
-          </div>
-
-          <p className="mt-5 text-lg font-black text-stone-950">
-            Aucune recette favorite pour le moment
-          </p>
-
-          <p className="mt-2 text-stone-600">
-            Ajoute des recettes en favori avec le bouton cœur pour les retrouver
-            ici facilement.
-          </p>
-
-          <Link
-            to="/recipes"
-            className="mt-6 inline-block rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-          >
-            Explorer les recettes
-          </Link>
-        </div>
+        <EmptyState
+          emoji="❤️"
+          tone="plum"
+          title="Aucune recette favorite pour le moment"
+          description="Ajoute des recettes en favori avec le bouton cœur pour les retrouver ici facilement."
+          action={<Button to="/recipes">Explorer les recettes</Button>}
+        />
       ) : filteredRecipes.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
-            🔎
-          </div>
-
-          <p className="mt-5 text-lg font-black text-stone-950">
-            Aucun favori trouvé
-          </p>
-
-          <p className="mt-2 text-stone-600">
-            Essaie une autre recherche ou une autre catégorie.
-          </p>
-
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="mt-6 rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-          >
-            Voir tous mes favoris
-          </button>
-        </div>
+        <EmptyState
+          emoji="🔎"
+          title="Aucun favori trouvé"
+          description="Essaie une autre recherche ou une autre catégorie."
+          action={
+            <Button type="button" onClick={resetFilters}>
+              Voir tous mes favoris
+            </Button>
+          }
+        />
       ) : (
         <div>
           <div className="mb-6">

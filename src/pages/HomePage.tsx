@@ -1,20 +1,106 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import DashboardHero from '../components/home/DashboardHero'
+import LandingValue from '../components/home/LandingValue'
+import { LOGO_SRC } from '../data/brand'
 import RecipeCard from '../components/recipes/RecipeCard'
+import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import Chip from '../components/ui/Chip'
+import IconTile, { type IconTileTone } from '../components/ui/IconTile'
+import Modal from '../components/ui/Modal'
 import SectionHeader from '../components/ui/SectionHeader'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
+import { useAuth } from '../context/useAuth'
 import { getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
+import { getProfile } from '../services/profiles'
 import { getRecipes } from '../services/recipes'
+import { getRecipeRatings, type RecipeRating } from '../services/reviews'
+import { getShoppingListItems } from '../services/shoppingList'
+import { PLANNER_STORAGE_KEY } from '../lib/weeklyPlanner'
 import type { Recipe } from '../types/recipe'
 
+const WEEK_DAY_KEYS = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+] as const
+
+// Lit le planning local pour proposer le repas du jour sur le dashboard.
+function getTodayPlan(): { mealLabel: string; recipeId: string | null } {
+  const hour = new Date().getHours()
+  const fallbackLabel = hour < 14 ? 'Au déjeuner' : 'Au dîner'
+
+  try {
+    const raw = window.localStorage.getItem(PLANNER_STORAGE_KEY)
+    if (!raw) return { mealLabel: fallbackLabel, recipeId: null }
+
+    const planner = JSON.parse(raw) as Record<
+      string,
+      { lunch?: string; dinner?: string }
+    >
+    const day = planner[WEEK_DAY_KEYS[new Date().getDay()]] ?? {}
+
+    if (hour < 14 && day.lunch) {
+      return { mealLabel: 'Au déjeuner', recipeId: day.lunch }
+    }
+    if (day.dinner) return { mealLabel: 'Au dîner', recipeId: day.dinner }
+    if (day.lunch) return { mealLabel: 'Au déjeuner', recipeId: day.lunch }
+
+    return { mealLabel: fallbackLabel, recipeId: null }
+  } catch {
+    return { mealLabel: fallbackLabel, recipeId: null }
+  }
+}
+
+const QUICK_LINKS: {
+  to: string
+  emoji: string
+  label: string
+  description: string
+  tone: IconTileTone
+}[] = [
+  {
+    to: '/frigo',
+    emoji: '🥕',
+    label: 'Mode frigo',
+    description: 'Cuisiner avec ce que tu as',
+    tone: 'sage',
+  },
+  {
+    to: '/shopping-list',
+    emoji: '🛒',
+    label: 'Liste de courses',
+    description: 'Tes ingrédients à acheter',
+    tone: 'terracotta',
+  },
+  {
+    to: '/planning',
+    emoji: '📅',
+    label: 'Planning',
+    description: 'Les repas de la semaine',
+    tone: 'honey',
+  },
+]
+
 export default function HomePage() {
+  const { user } = useAuth()
+
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+
+  const [ratings, setRatings] = useState<Map<number, RecipeRating>>(new Map())
+
+  const [userName, setUserName] = useState('')
+  const [shoppingCount, setShoppingCount] = useState(0)
+  const todayPlan = getTodayPlan()
 
   const [randomRecipe, setRandomRecipe] = useState<Recipe | null>(null)
   const [randomModalOpen, setRandomModalOpen] = useState(false)
@@ -47,9 +133,64 @@ export default function HomePage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (recipes.length === 0) return
+
+    let ignore = false
+
+    getRecipeRatings(recipes.slice(0, 3).map((recipe) => recipe.id))
+      .then((map) => {
+        if (!ignore) {
+          setRatings(map)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [recipes])
+
+  // Données du dashboard connecté : prénom + nombre d'articles de courses.
+  useEffect(() => {
+    if (!user) return
+
+    let ignore = false
+
+    getProfile(user.id)
+      .then((profile) => {
+        if (ignore) return
+        setUserName(
+          profile?.username || user.email?.split('@')[0] || 'chef',
+        )
+      })
+      .catch((error) => console.error(error))
+
+    getShoppingListItems()
+      .then((items) => {
+        if (!ignore) {
+          setShoppingCount(items.filter((item) => !item.checked).length)
+        }
+      })
+      .catch((error) => console.error(error))
+
+    return () => {
+      ignore = true
+    }
+  }, [user])
+
   const latestRecipes = useMemo(() => {
     return recipes.slice(0, 3)
   }, [recipes])
+
+  const todayRecipe = useMemo(() => {
+    if (!todayPlan.recipeId) return null
+    return (
+      recipes.find((recipe) => String(recipe.id) === todayPlan.recipeId) ?? null
+    )
+  }, [recipes, todayPlan.recipeId])
 
   const categoriesWithCount = useMemo(() => {
     return RECIPE_CATEGORIES.map((category) => {
@@ -87,7 +228,17 @@ export default function HomePage() {
   return (
     <>
       <section className="space-y-8 sm:space-y-10 lg:space-y-14">
-        <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+        {user ? (
+          <DashboardHero
+            userName={userName || 'chef'}
+            todayMealLabel={todayPlan.mealLabel}
+            todayRecipe={todayRecipe}
+            shoppingCount={shoppingCount}
+            onSurprise={launchRandomRecipe}
+            surpriseDisabled={loading || recipes.length === 0 || randomizing}
+          />
+        ) : (
+          <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
           <div className="grid gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
             <div className="flex flex-col justify-center">
               <Chip emoji="🍲" className="mb-5">
@@ -99,47 +250,65 @@ export default function HomePage() {
               </h1>
 
               <p className="mt-5 max-w-2xl text-base leading-7 text-stone-600 sm:mt-6 sm:text-lg sm:leading-8">
-                Un petit carnet chaleureux pour retrouver vos plats préférés,
-                garder les idées de Chloé & Maxime et préparer facilement les
-                prochains repas.
+                Un carnet de cuisine chaleureux pour réunir toutes vos recettes
+                de famille, planifier la semaine et préparer vos courses — sans
+                jamais rechercher où vous aviez noté ce bon petit plat.
               </p>
 
               <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
-                <Button to="/recipes" size="lg" fullWidth className="sm:w-auto">
-                  Voir les recettes
+                <Button to="/auth" size="lg" fullWidth className="sm:w-auto">
+                  Créer mon carnet
                 </Button>
 
                 <Button
-                  to="/add-recipe"
+                  to="/recipes"
                   variant="secondary"
                   size="lg"
                   fullWidth
                   className="sm:w-auto"
                 >
-                  Ajouter une recette
+                  Voir les recettes
                 </Button>
               </div>
+
+              <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-hazel">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-sage-deep">✓</span> Gratuit
+                </span>
+                <span aria-hidden="true" className="text-bark">
+                  ·
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-sage-deep">✓</span> Sans publicité
+                </span>
+                <span aria-hidden="true" className="text-bark">
+                  ·
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-sage-deep">✓</span> Prêt en 30 secondes
+                </span>
+              </p>
             </div>
 
             <div className="relative">
               <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-orange-100/70 blur-2xl" />
               <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-amber-100/80 blur-2xl" />
 
-              <div className="relative rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.25rem] sm:p-6">
+              <div className="relative rounded-[2rem] bg-card p-5 shadow-card ring-1 ring-bark sm:rounded-[2.25rem] sm:p-6">
                 <div className="mb-5 flex items-center gap-4 sm:mb-6 sm:gap-5">
                   <div className="relative h-20 w-20 shrink-0 overflow-visible sm:h-24 sm:w-24">
                     <img
-                      src="/ChatGPT Image 1 mai 2026, 04_35_16.png"
+                      src={LOGO_SRC}
                       alt="Logo Carnet de recettes"
                       className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-md sm:h-32 sm:w-32"
                     />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-xs font-bold uppercase tracking-wide text-orange-600 sm:text-sm">
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-terracotta sm:text-sm">
                       Aujourd’hui
                     </p>
-                    <p className="text-lg font-black text-stone-950 sm:text-xl">
+                    <p className="font-display text-xl font-bold text-espresso sm:text-2xl">
                       On cuisine quoi ?
                     </p>
                   </div>
@@ -172,37 +341,59 @@ export default function HomePage() {
                   </div>
                 </button>
 
-                <div className="mt-5 rounded-[1.5rem] bg-[#f7eee6] p-4 sm:p-5">
-                  <p className="text-sm font-bold text-stone-500">
+                <div className="mt-5 rounded-[1.5rem] bg-linen p-4 sm:p-5">
+                  <p className="text-sm font-bold text-hazel">
                     Dernière recette ajoutée
                   </p>
 
-                  <p className="mt-2 line-clamp-2 text-xl font-black text-stone-950 sm:text-2xl">
+                  <p className="mt-2 line-clamp-2 font-display text-xl font-bold text-espresso sm:text-2xl">
                     {latestRecipes[0]?.title ?? 'Aucune recette pour le moment'}
                   </p>
 
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-stone-600">
+                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-cacao/80">
                     {latestRecipes[0]?.description ??
                       'Ajoute une première recette pour commencer ton carnet.'}
                   </p>
                 </div>
 
-                <div className="mt-5 rounded-[1.5rem] border border-dashed border-orange-200 bg-orange-50/60 p-4 text-sm font-medium leading-6 text-stone-600 sm:mt-6">
+                <div className="mt-5 rounded-[1.5rem] border border-dashed border-honey/50 bg-honey-soft/50 p-4 text-sm font-medium leading-6 text-cacao sm:mt-6">
                   💡 Astuce : ajoute tes recettes du quotidien, tes favoris et
                   les ingrédients à ta liste de courses.
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {errorMessage && (
-          <p className="rounded-2xl bg-red-50 px-4 py-3 text-red-700">
-            {errorMessage}
-          </p>
+          </div>
         )}
 
-        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+        <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+          {QUICK_LINKS.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="group flex items-center gap-3 rounded-card bg-card p-4 shadow-card ring-1 ring-bark transition hover:-translate-y-0.5 hover:shadow-lift"
+            >
+              <IconTile tone={link.tone} size="md">
+                {link.emoji}
+              </IconTile>
+
+              <div className="min-w-0">
+                <p className="font-display font-bold text-espresso">
+                  {link.label}
+                </p>
+                <p className="truncate text-sm text-hazel">{link.description}</p>
+              </div>
+
+              <span className="ml-auto text-hazel transition group-hover:translate-x-0.5 group-hover:text-terracotta">
+                →
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
+
+        <div className="rounded-[2rem] bg-card/95 p-5 shadow-card ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
           <SectionHeader
             className="mb-6 sm:mb-8"
             eyebrow="Nouveautés"
@@ -244,13 +435,17 @@ export default function HomePage() {
           ) : (
             <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {latestRecipes.map((recipe) => (
-                <RecipeCard key={recipe.id} recipe={recipe} />
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  rating={ratings.get(recipe.id)}
+                />
               ))}
             </div>
           )}
         </div>
 
-        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+        <div className="rounded-[2rem] bg-card/95 p-5 shadow-card ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
           <SectionHeader
             className="mb-6 sm:mb-8"
             eyebrow="Explorer"
@@ -346,125 +541,104 @@ export default function HomePage() {
             </div>
           )}
         </div>
+
+        {!user && <LandingValue />}
       </section>
 
-      {randomModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/45 px-4 py-5 backdrop-blur-sm sm:px-5 sm:py-8">
-          <div className="relative max-h-[calc(100dvh-40px)] w-full max-w-lg overflow-y-auto rounded-[2rem] bg-white p-5 shadow-2xl ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-6">
-            <button
-              type="button"
-              onClick={closeRandomModal}
-              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-cream-100 text-xl font-black text-stone-700 transition hover:bg-orange-100 sm:right-5 sm:top-5"
-              aria-label="Fermer"
-            >
-              ×
-            </button>
+      <Modal open={randomModalOpen} onClose={closeRandomModal}>
+        {randomizing ? (
+          <div className="flex min-h-[300px] flex-col items-center justify-center text-center sm:min-h-[340px]">
+            <div className="mb-7 flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-terracotta text-5xl shadow-card sm:mb-8 sm:h-28 sm:w-28 sm:rounded-[2rem] sm:text-6xl">
+              <span className="animate-spin">🎲</span>
+            </div>
 
-            {randomizing ? (
-              <div className="flex min-h-[320px] flex-col items-center justify-center text-center sm:min-h-[360px]">
-                <div className="mb-7 flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-orange-500 text-5xl shadow-lg sm:mb-8 sm:h-28 sm:w-28 sm:rounded-[2rem] sm:text-6xl">
-                  <span className="animate-spin">🎲</span>
-                </div>
+            <p className="text-sm font-bold uppercase tracking-[0.12em] text-terracotta">
+              Le carnet choisit...
+            </p>
 
-                <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-                  Le carnet choisit...
-                </p>
+            <h2 className="mt-3 text-2xl font-bold text-espresso sm:text-3xl">
+              On mélange les idées
+            </h2>
 
-                <h2 className="mt-3 text-2xl font-black text-stone-950 sm:text-3xl">
-                  On mélange les idées
-                </h2>
-
-                <p className="mt-3 max-w-sm text-stone-600">
-                  Une recette arrive dans quelques secondes.
-                </p>
-              </div>
-            ) : randomRecipe ? (
-              <div>
-                <div className="mb-5 flex items-center gap-4 pr-10 sm:pr-12">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#fff1e6] text-4xl">
-                    {randomRecipe.imageUrl ? (
-                      <img
-                        src={randomRecipe.imageUrl}
-                        alt={randomRecipe.title}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      randomRecipe.image || '🍽️'
-                    )}
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
-                      Recette surprise
-                    </p>
-
-                    <h2 className="line-clamp-2 text-xl font-black text-stone-950 sm:text-2xl">
-                      {randomRecipe.title}
-                    </h2>
-                  </div>
-                </div>
-
-                <span className="inline-block rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700">
-                  {randomRecipe.category}
-                </span>
-
-                <p className="mt-5 leading-7 text-stone-600">
-                  {randomRecipe.description ||
-                    'Aucune description pour cette recette.'}
-                </p>
-
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-cream-100 p-4">
-                    <p className="text-sm font-bold text-stone-500">
-                      Temps total
-                    </p>
-                    <p className="mt-1 text-lg font-black text-stone-950 sm:text-xl">
-                      {randomRecipe.prepTime + randomRecipe.cookTime} min
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl bg-cream-100 p-4">
-                    <p className="text-sm font-bold text-stone-500">
-                      Portions
-                    </p>
-                    <p className="mt-1 text-lg font-black text-stone-950 sm:text-xl">
-                      {randomRecipe.servings} pers.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
-                  <Link
-                    to={`/recipes/${randomRecipe.id}`}
-                    onClick={closeRandomModal}
-                    className="rounded-full bg-orange-500 px-6 py-3 text-center font-black text-white shadow-sm transition hover:bg-orange-600"
-                  >
-                    Voir la recette
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={launchRandomRecipe}
-                    className="rounded-full border border-orange-200 bg-white px-6 py-3 font-black text-orange-700 transition hover:bg-orange-50"
-                  >
-                    Relancer 🎲
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="py-10 text-center">
-                <p className="text-lg font-black text-stone-950">
-                  Aucune recette disponible.
-                </p>
-
-                <p className="mt-2 text-stone-600">
-                  Ajoute une recette pour utiliser le bouton magique.
-                </p>
-              </div>
-            )}
+            <p className="mt-3 max-w-sm text-cacao/80">
+              Une recette arrive dans quelques secondes.
+            </p>
           </div>
-        </div>
-      )}
+        ) : randomRecipe ? (
+          <div>
+            <div className="mb-5 flex items-center gap-4">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-cream-200 text-4xl">
+                {randomRecipe.imageUrl ? (
+                  <img
+                    src={randomRecipe.imageUrl}
+                    alt={randomRecipe.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  randomRecipe.image || '🍽️'
+                )}
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-terracotta sm:text-sm">
+                  Recette surprise
+                </p>
+
+                <h2 className="line-clamp-2 text-xl font-bold text-espresso sm:text-2xl">
+                  {randomRecipe.title}
+                </h2>
+              </div>
+            </div>
+
+            <span className="inline-block rounded-full bg-terracotta-soft px-4 py-2 text-sm font-bold text-terracotta-deep">
+              {randomRecipe.category}
+            </span>
+
+            <p className="mt-5 leading-7 text-cacao/80">
+              {randomRecipe.description ||
+                'Aucune description pour cette recette.'}
+            </p>
+
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-linen p-4">
+                <p className="text-sm font-bold text-hazel">Temps total</p>
+                <p className="mt-1 text-lg font-bold text-espresso sm:text-xl">
+                  {randomRecipe.prepTime + randomRecipe.cookTime} min
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-linen p-4">
+                <p className="text-sm font-bold text-hazel">Portions</p>
+                <p className="mt-1 text-lg font-bold text-espresso sm:text-xl">
+                  {randomRecipe.servings} pers.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
+              <Button to={`/recipes/${randomRecipe.id}`}>Voir la recette</Button>
+
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={launchRandomRecipe}
+              >
+                Relancer 🎲
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="py-10 text-center">
+            <p className="text-lg font-bold text-espresso">
+              Aucune recette disponible.
+            </p>
+
+            <p className="mt-2 text-cacao/80">
+              Ajoute une recette pour utiliser le bouton magique.
+            </p>
+          </div>
+        )}
+      </Modal>
     </>
   )
 }

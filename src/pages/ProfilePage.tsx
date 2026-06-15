@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import Alert from '../components/ui/Alert'
 import RecipeBadgesPanel, {
   RecipeBadgePill,
 } from '../components/badges/RecipeBadgesPanel'
+import { ProfileSkeleton } from '../components/ui/Skeleton'
 import { getRecipePublicationBadge } from '../data/recipeBadges'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
@@ -176,11 +178,7 @@ export default function ProfilePage() {
   }
 
   if (loading) {
-    return (
-      <section className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-orange-100">
-        <p className="font-medium text-stone-600">Chargement du profil...</p>
-      </section>
-    )
+    return <ProfileSkeleton />
   }
 
   if (!user) {
@@ -210,7 +208,7 @@ export default function ProfilePage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-[#fff5ec] shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-100 shadow-sm ring-1 ring-orange-100">
         <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <div className="relative">
@@ -286,17 +284,9 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {errorMessage && (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700 ring-1 ring-red-100">
-          {errorMessage}
-        </p>
-      )}
+      {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
-      {successMessage && (
-        <p className="rounded-2xl bg-green-50 px-4 py-3 font-medium text-green-700 ring-1 ring-green-100">
-          {successMessage}
-        </p>
-      )}
+      {successMessage && <Alert tone="success">{successMessage}</Alert>}
 
       {isEditing && (
         <form
@@ -520,7 +510,7 @@ export default function ProfilePage() {
         </div>
 
         {latestRecipes.length === 0 ? (
-          <div className="rounded-[2rem] bg-[#fff5ec] p-6 text-center">
+          <div className="rounded-[2rem] bg-cream-100 p-6 text-center">
             <p className="font-bold text-stone-900">
               Aucune recette créée pour le moment.
             </p>

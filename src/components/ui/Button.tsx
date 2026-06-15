@@ -1,24 +1,30 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
-export type ButtonSize = 'md' | 'lg'
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'soft'
+  | 'ghost'
+  | 'danger'
+export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const BASE_CLASS =
-  'inline-flex items-center justify-center gap-2 rounded-full text-center font-black transition disabled:cursor-not-allowed disabled:opacity-60'
+  'inline-flex items-center justify-center gap-2 rounded-full text-center font-bold transition duration-200 outline-none focus-visible:ring-4 focus-visible:ring-terracotta/25 disabled:cursor-not-allowed disabled:opacity-60'
 
 const VARIANT_CLASS: Record<ButtonVariant, string> = {
   primary:
-    'bg-orange-500 text-white shadow-sm hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md',
+    'bg-terracotta text-white shadow-soft hover:-translate-y-0.5 hover:bg-terracotta-deep hover:shadow-card',
   secondary:
-    'border border-orange-200 bg-white text-orange-700 hover:-translate-y-0.5 hover:bg-orange-50',
-  ghost:
-    'border border-orange-100 bg-white text-stone-700 hover:-translate-y-0.5 hover:bg-orange-50',
+    'bg-card text-cacao ring-1 ring-bark hover:-translate-y-0.5 hover:bg-linen',
+  soft: 'bg-terracotta-soft text-terracotta-deep hover:-translate-y-0.5 hover:bg-[#eecbb4]',
+  ghost: 'text-hazel hover:bg-linen',
   danger:
-    'border border-red-200 bg-red-50 text-red-700 hover:-translate-y-0.5 hover:bg-red-100',
+    'bg-[#f7e3de] text-[#b23b2e] ring-1 ring-[#e9c4bc] hover:-translate-y-0.5 hover:bg-[#f2d4cd]',
 }
 
 const SIZE_CLASS: Record<ButtonSize, string> = {
+  sm: 'px-4 py-2 text-sm',
   md: 'px-6 py-3',
   lg: 'px-7 py-4',
 }

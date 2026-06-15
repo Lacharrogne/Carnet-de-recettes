@@ -16,6 +16,7 @@ type RecipeRow = {
   tags: string[] | null
   ingredients: string[] | null
   steps: string[] | null
+  related_recipe_ids: number[] | null
 }
 
 function mapRecipe(row: RecipeRow): Recipe {
@@ -34,6 +35,7 @@ function mapRecipe(row: RecipeRow): Recipe {
     tags: row.tags ?? [],
     ingredients: row.ingredients ?? [],
     steps: row.steps ?? [],
+    relatedRecipeIds: row.related_recipe_ids ?? [],
   }
 }
 
@@ -125,6 +127,7 @@ export async function createRecipe(recipe: {
   tags: string[]
   ingredients: string[]
   steps: string[]
+  relatedRecipeIds: number[]
 }): Promise<Recipe> {
   const {
     data: { user },
@@ -151,6 +154,7 @@ export async function createRecipe(recipe: {
         tags: recipe.tags,
         ingredients: recipe.ingredients,
         steps: recipe.steps,
+        related_recipe_ids: recipe.relatedRecipeIds,
       },
     ])
     .select()
@@ -176,6 +180,7 @@ export async function updateRecipe(
     tags: string[]
     ingredients: string[]
     steps: string[]
+    relatedRecipeIds: number[]
   }
 ): Promise<Recipe> {
   const { data, error } = await supabase
@@ -193,6 +198,7 @@ export async function updateRecipe(
       tags: recipe.tags,
       ingredients: recipe.ingredients,
       steps: recipe.steps,
+      related_recipe_ids: recipe.relatedRecipeIds,
     })
     .eq('id', id)
     .select()
