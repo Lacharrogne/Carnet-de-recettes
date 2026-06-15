@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
+import EmptyState from '../components/ui/EmptyState'
 import { Skeleton } from '../components/ui/Skeleton'
 import { LOGO_SRC } from '../data/brand'
 import {
@@ -506,25 +508,13 @@ export default function ShoppingListPage() {
             ))}
           </div>
         ) : visibleItems.length === 0 ? (
-          <div className="rounded-[2.5rem] bg-white p-10 text-center shadow-sm ring-1 ring-orange-100">
-            <p className="text-5xl">🧺</p>
-
-            <h2 className="mt-4 text-3xl font-black text-stone-950">
-              Ta liste est vide.
-            </h2>
-
-            <p className="mx-auto mt-3 max-w-xl text-stone-600">
-              Ajoute un ingrédient manuellement, ou ajoute une recette depuis le
-              planning pour générer automatiquement les courses.
-            </p>
-
-            <Link
-              to="/recipes"
-              className="mt-6 inline-flex rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-            >
-              Parcourir les recettes
-            </Link>
-          </div>
+          <EmptyState
+            tone="sage"
+            emoji="🧺"
+            title="Ta liste est vide"
+            description="Ajoute un ingrédient à la main, ou envoie une recette depuis sa fiche ou le planning pour générer automatiquement tes courses."
+            action={<Button to="/recipes">Parcourir les recettes</Button>}
+          />
         ) : (
           <div className="space-y-8">
             <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">

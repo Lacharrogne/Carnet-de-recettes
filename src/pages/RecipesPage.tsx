@@ -6,6 +6,7 @@ import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import Chip from '../components/ui/Chip'
+import EmptyState from '../components/ui/EmptyState'
 import SectionHeader from '../components/ui/SectionHeader'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { getCategoryAmbience, getHomeCardStyle } from '../data/categoryStyles'
@@ -457,25 +458,17 @@ export default function RecipesPage() {
             />
 
             {filteredRecipes.length === 0 ? (
-              <div className="rounded-[1.75rem] bg-white/85 p-6 text-center shadow-sm ring-1 ring-white/70 sm:rounded-[2rem] sm:p-8">
-                <p className="text-lg font-bold text-stone-950">
-                  Aucune recette trouvée
-                </p>
-
-                <p className="mt-2 text-stone-600">
-                  Essaie une autre recherche ou une autre catégorie.
-                </p>
-
-                <Button
-                  type="button"
-                  onClick={resetFilters}
-                  size="lg"
-                  fullWidth
-                  className="mt-6 sm:w-auto"
-                >
-                  Revenir aux catégories
-                </Button>
-              </div>
+              <EmptyState
+                tone="honey"
+                emoji="🔍"
+                title="Aucune recette trouvée"
+                description="Essaie une autre recherche ou une autre catégorie."
+                action={
+                  <Button type="button" onClick={resetFilters} size="lg">
+                    Revenir aux catégories
+                  </Button>
+                }
+              />
             ) : (
               <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredRecipes.map((recipe) => (

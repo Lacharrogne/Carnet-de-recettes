@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
+import EmptyState from '../components/ui/EmptyState'
 import { RowsSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { getProfile, type UserProfile } from '../services/profiles'
@@ -368,17 +369,12 @@ export default function IdeasPage() {
         {loading ? (
           <RowsSkeleton rows={4} />
         ) : ideas.length === 0 ? (
-          <div className="rounded-[2rem] bg-cream-50 p-8 text-center ring-1 ring-orange-100">
-            <p className="text-5xl">💭</p>
-
-            <h3 className="mt-4 text-2xl font-black text-stone-950">
-              Aucune idée pour le moment.
-            </h3>
-
-            <p className="mt-2 text-stone-600">
-              Sois le premier à proposer une amélioration pour le site.
-            </p>
-          </div>
+          <EmptyState
+            tone="honey"
+            emoji="💭"
+            title="Aucune idée pour le moment"
+            description="Sois le premier à proposer une amélioration : une fonctionnalité, une recette à ajouter, une envie…"
+          />
         ) : (
           <div className="grid gap-5 lg:grid-cols-2">
             {ideas.map((idea) => {

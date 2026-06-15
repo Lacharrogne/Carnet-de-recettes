@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
+import EmptyState from '../components/ui/EmptyState'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import {
   ANTI_WASTE_INGREDIENTS,
@@ -524,27 +525,19 @@ export default function FridgePage() {
       {loading ? (
         <RecipeCardGridSkeleton count={3} />
       ) : effectiveAvailableIngredients.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:p-8">
-          <p className="text-xl font-black text-stone-950">
-            Commence par remplir ton frigo.
-          </p>
-
-          <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
-            Ajoute quelques ingrédients ou choisis un ingrédient anti-gaspi pour
-            découvrir les recettes possibles.
-          </p>
-        </div>
+        <EmptyState
+          tone="sage"
+          emoji="🥕"
+          title="Commence par remplir ton frigo"
+          description="Ajoute quelques ingrédients ci-dessus, ou choisis un ingrédient anti-gaspi, et le carnet te propose aussitôt les recettes possibles."
+        />
       ) : analyzedRecipes.length === 0 ? (
-        <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:p-8">
-          <p className="text-xl font-black text-stone-950">
-            Aucune recette trouvée avec ces ingrédients.
-          </p>
-
-          <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
-            Essaie avec des ingrédients plus simples, comme œufs, pâtes, riz,
-            tomates ou fromage.
-          </p>
-        </div>
+        <EmptyState
+          tone="honey"
+          emoji="🔍"
+          title="Aucune recette avec ces ingrédients"
+          description="Essaie avec des ingrédients plus courants comme œufs, pâtes, riz, tomates ou fromage."
+        />
       ) : (
         <section className="rounded-[2rem] bg-cream-50/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-6 md:p-8">
           <div className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-end lg:justify-between">
