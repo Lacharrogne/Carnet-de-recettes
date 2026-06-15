@@ -400,7 +400,10 @@ export default function RecipesPage() {
                 className={`pointer-events-none absolute -bottom-28 -left-24 h-64 w-64 rounded-full blur-3xl sm:h-80 sm:w-80 ${activeCategoryAmbience.glowTwo}`}
               />
 
-              <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.18] sm:opacity-[0.26]">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.18] sm:opacity-[0.26]"
+              >
                 <div className="grid h-full min-h-[460px] grid-cols-4 gap-x-8 gap-y-8 px-4 py-6 sm:min-h-[560px] sm:grid-cols-5 sm:gap-x-10 sm:gap-y-10 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8">
                   {wallpaperEmojis.map((emoji, index) => (
                     <div
