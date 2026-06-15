@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   Sparkles,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import Button from '../ui/Button'
 import IconTile, { type IconTileTone } from '../ui/IconTile'
@@ -188,6 +189,13 @@ export default function LandingValue() {
               Explorer les recettes
             </Button>
           </div>
+
+          <Link
+            to="/pricing"
+            className="mt-6 inline-block text-sm font-bold text-cream-100/80 underline-offset-4 transition hover:text-white hover:underline"
+          >
+            Voir le détail des offres →
+          </Link>
         </div>
       </div>
     </div>

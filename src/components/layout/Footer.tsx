@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Heart, Leaf, ShieldCheck } from 'lucide-react'
 
-import { LOGO_SRC } from '../../data/brand'
+import { APP_NAME, LOGO_SRC } from '../../data/brand'
 
 type FooterLink = { label: string; to: string }
 
@@ -11,6 +11,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Recettes', to: '/recipes' },
       { label: 'Outils', to: '/tools' },
+      { label: 'Tarifs', to: '/pricing' },
       { label: 'Boîte à idées', to: '/ideas' },
       { label: 'Mon frigo', to: '/frigo' },
     ],
@@ -108,7 +109,7 @@ export default function Footer() {
 
       <div className="border-t border-orange-100/70">
         <p className="mx-auto max-w-6xl px-6 py-4 text-sm text-stone-500">
-          © 2026 — Recettes de Chloé &amp; Maxime
+          © 2026 — {APP_NAME}
         </p>
       </div>
     </footer>
