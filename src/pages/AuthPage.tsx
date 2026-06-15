@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Alert from '../components/ui/Alert'
 import { supabase } from '../lib/supabase'
 
 type SupabaseLikeError = {
@@ -261,17 +262,9 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {message && (
-          <p className="rounded-2xl bg-green-50 px-4 py-3 text-sm font-semibold leading-6 text-green-700">
-            {message}
-          </p>
-        )}
+        {message && <Alert tone="success">{message}</Alert>}
 
-        {errorMessage && (
-          <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700">
-            {errorMessage}
-          </p>
-        )}
+        {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
         <button
           type="submit"

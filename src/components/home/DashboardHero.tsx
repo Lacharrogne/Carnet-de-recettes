@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { CalendarDays, Dice5, ShoppingCart, UtensilsCrossed } from 'lucide-react'
+import { Dice5, ShoppingCart, Sparkles, UtensilsCrossed } from 'lucide-react'
 
 import IconTile from '../ui/IconTile'
 import type { Recipe } from '../../types/recipe'
@@ -109,7 +109,7 @@ export default function DashboardHero({
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20">
               <Dice5 className="h-6 w-6" />
             </span>
-            <CalendarDays className="h-5 w-5 text-white/70" />
+            <Sparkles className="h-5 w-5 text-white/70" />
           </div>
 
           <div>

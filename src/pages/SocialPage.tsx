@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import Alert from '../components/ui/Alert'
 import { RowsSkeleton } from '../components/ui/Skeleton'
 import {
   getFollowers,
@@ -163,9 +164,9 @@ export default function SocialPage() {
       </div>
 
       {errorMessage && (
-        <div className="rounded-2xl bg-red-50 px-5 py-4 text-red-700">
+        <Alert tone="error">
           <p className="font-bold">{errorMessage}</p>
-        </div>
+        </Alert>
       )}
 
       <div className="grid gap-5 md:grid-cols-3">

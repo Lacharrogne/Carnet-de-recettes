@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import RecipeForm from '../components/recipes/RecipeForm'
 import type { RecipeFormValues } from '../components/recipes/RecipeForm'
+import Alert from '../components/ui/Alert'
 import {
   deleteRecipeImageByUrl,
   getRecipeById,
@@ -120,9 +121,9 @@ export default function EditRecipePage() {
         </p>
 
         {errorMessage && (
-          <p className="mt-5 rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700 ring-1 ring-red-100">
+          <Alert tone="error" className="mt-5">
             {errorMessage}
-          </p>
+          </Alert>
         )}
 
         <Link

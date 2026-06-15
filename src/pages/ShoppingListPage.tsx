@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
+import Alert from '../components/ui/Alert'
 import { Skeleton } from '../components/ui/Skeleton'
 import { LOGO_SRC } from '../data/brand'
 import {
@@ -490,17 +491,9 @@ export default function ShoppingListPage() {
           </div>
         </div>
 
-        {successMessage && (
-          <p className="rounded-2xl bg-green-50 px-5 py-4 font-bold text-green-700">
-            {successMessage}
-          </p>
-        )}
+        {successMessage && <Alert tone="success">{successMessage}</Alert>}
 
-        {errorMessage && (
-          <p className="rounded-2xl bg-red-50 px-5 py-4 font-bold text-red-700">
-            {errorMessage}
-          </p>
-        )}
+        {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
         {loading ? (
           <div className="space-y-3 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 sm:p-8">

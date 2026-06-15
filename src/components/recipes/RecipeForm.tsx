@@ -14,6 +14,7 @@ import {
   RECIPE_TAG_GROUPS,
 } from '../../data/recipeOptions'
 import type { Difficulty, Recipe, RecipeCategory } from '../../types/recipe'
+import Alert from '../ui/Alert'
 
 export type RecipeFormValues = {
   title: string
@@ -379,11 +380,7 @@ export default function RecipeForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-7">
-      {errorMessage && (
-        <p className="rounded-2xl bg-[#f7e3de] px-4 py-3 text-sm font-medium leading-6 text-[#b23b2e] ring-1 ring-[#e9c4bc] sm:text-base">
-          {errorMessage}
-        </p>
-      )}
+      {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
       <div className="rounded-[1.75rem] bg-honey-soft/60 p-5 ring-1 ring-honey/30 sm:rounded-[2rem] sm:p-6">
         <p className="text-sm font-bold text-terracotta sm:text-base">

@@ -6,6 +6,7 @@ import PlannerPrintView from '../components/planner/PlannerPrintView'
 import PlannerWeekGrid from '../components/planner/PlannerWeekGrid'
 import RecipeMiniCard from '../components/planner/RecipeMiniCard'
 import RecipePickerModal from '../components/planner/RecipePickerModal'
+import Alert from '../components/ui/Alert'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -707,15 +708,15 @@ export default function MealPlannerPage() {
         </div>
 
         {errorMessage && (
-          <div className="rounded-2xl bg-red-50 px-5 py-4 text-red-700">
+          <Alert tone="error">
             <p className="font-bold">{errorMessage}</p>
-          </div>
+          </Alert>
         )}
 
         {successMessage && (
-          <div className="rounded-2xl bg-green-50 px-5 py-4 text-green-700">
+          <Alert tone="success">
             <p className="font-bold">{successMessage}</p>
-          </div>
+          </Alert>
         )}
 
         {uniquePlannedRecipes.length > 0 && (

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 
 import RecipeCard from '../components/recipes/RecipeCard'
+import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import Chip from '../components/ui/Chip'
 import SectionHeader from '../components/ui/SectionHeader'
@@ -294,11 +295,7 @@ export default function RecipesPage() {
         </div>
       </div>
 
-      {errorMessage && (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 text-red-700">
-          {errorMessage}
-        </p>
-      )}
+      {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
       {!hasActiveFilters && (
         <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">

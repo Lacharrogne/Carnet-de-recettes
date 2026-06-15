@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import RecipeCard from '../components/recipes/RecipeCard'
+import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
@@ -176,11 +177,7 @@ export default function FavoritesPage() {
         </div>
       </div>
 
-      {errorMessage && (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700 ring-1 ring-red-100">
-          {errorMessage}
-        </p>
-      )}
+      {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
       <div className="grid gap-5 md:grid-cols-3">
         <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">

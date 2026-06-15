@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import Alert from '../components/ui/Alert'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import {
   ANTI_WASTE_INGREDIENTS,
@@ -493,7 +494,7 @@ export default function FridgePage() {
       </div>
 
       {errorMessage && (
-        <div className="rounded-2xl bg-red-50 px-5 py-4 text-red-700">
+        <Alert tone="error">
           <p className="font-bold">{errorMessage}</p>
 
           {errorMessage.includes('Connecte-toi') && (
@@ -504,11 +505,11 @@ export default function FridgePage() {
               Aller à la connexion
             </Link>
           )}
-        </div>
+        </Alert>
       )}
 
       {successMessage && (
-        <div className="rounded-2xl bg-green-50 px-5 py-4 text-green-700">
+        <Alert tone="success">
           <p className="font-bold">{successMessage}</p>
 
           <Link
@@ -517,7 +518,7 @@ export default function FridgePage() {
           >
             Voir ma liste de courses
           </Link>
-        </div>
+        </Alert>
       )}
 
       {loading ? (

@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import PrintableRecipeSheet from '../components/recipes/PrintableRecipeSheet'
 import RecipeCard from '../components/recipes/RecipeCard'
 import RecipeReviews from '../components/reviews/RecipeReviews'
+import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
@@ -490,9 +491,9 @@ export default function RecipeDetailsPage() {
   if (invalidRecipeId) {
     return (
       <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+        <Alert tone="error" className="mb-6">
           Recette introuvable.
-        </p>
+        </Alert>
 
         <Link
           to="/recipes"
@@ -511,9 +512,9 @@ export default function RecipeDetailsPage() {
   if (!recipe) {
     return (
       <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+        <Alert tone="error" className="mb-6">
           {errorMessage || 'Recette introuvable.'}
-        </p>
+        </Alert>
 
         <Link
           to="/recipes"
@@ -739,9 +740,9 @@ export default function RecipeDetailsPage() {
         )}
 
         {errorMessage && (
-          <p className="rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700 print:hidden">
+          <Alert tone="error" className="print:hidden">
             {errorMessage}
-          </p>
+          </Alert>
         )}
 
         <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-card ring-1 ring-bark sm:rounded-[2.5rem]">

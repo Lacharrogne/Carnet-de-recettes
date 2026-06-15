@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
+import Alert from '../ui/Alert'
 import { RowsSkeleton } from '../ui/Skeleton'
 import { useAuth } from '../../context/useAuth'
 import { getProfile, type UserProfile } from '../../services/profiles'
@@ -459,15 +460,15 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       </div>
 
       {errorMessage && (
-        <p className="mb-5 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700">
+        <Alert tone="error" className="mb-5">
           {errorMessage}
-        </p>
+        </Alert>
       )}
 
       {successMessage && (
-        <p className="mb-5 rounded-2xl bg-green-50 px-4 py-3 text-sm font-semibold leading-6 text-green-700">
+        <Alert tone="success" className="mb-5">
           {successMessage}
-        </p>
+        </Alert>
       )}
 
       {user ? (

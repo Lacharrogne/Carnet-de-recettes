@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import Alert from '../components/ui/Alert'
 import RecipeBadgesPanel, {
   RecipeBadgePill,
 } from '../components/badges/RecipeBadgesPanel'
@@ -283,17 +284,9 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {errorMessage && (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 font-medium text-red-700 ring-1 ring-red-100">
-          {errorMessage}
-        </p>
-      )}
+      {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
-      {successMessage && (
-        <p className="rounded-2xl bg-green-50 px-4 py-3 font-medium text-green-700 ring-1 ring-green-100">
-          {successMessage}
-        </p>
-      )}
+      {successMessage && <Alert tone="success">{successMessage}</Alert>}
 
       {isEditing && (
         <form

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import RecipeCard from '../components/recipes/RecipeCard'
 import FollowButton from '../components/social/FollowButton'
+import Alert from '../components/ui/Alert'
 import { ProfileSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { getProfile, type UserProfile } from '../services/profiles'
@@ -207,9 +208,9 @@ export default function PublicProfilePage() {
   if (!userId) {
     return (
       <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+        <Alert tone="error" className="mb-6">
           Profil introuvable.
-        </p>
+        </Alert>
 
         <Link
           to="/recipes"
@@ -228,9 +229,9 @@ export default function PublicProfilePage() {
   if (errorMessage) {
     return (
       <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
-        <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+        <Alert tone="error" className="mb-6">
           {errorMessage}
-        </p>
+        </Alert>
 
         <Link
           to="/recipes"

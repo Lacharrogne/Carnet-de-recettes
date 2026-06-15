@@ -5,6 +5,7 @@ import DashboardHero from '../components/home/DashboardHero'
 import LandingValue from '../components/home/LandingValue'
 import { LOGO_SRC } from '../data/brand'
 import RecipeCard from '../components/recipes/RecipeCard'
+import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import Chip from '../components/ui/Chip'
 import IconTile, { type IconTileTone } from '../components/ui/IconTile'
@@ -249,26 +250,44 @@ export default function HomePage() {
               </h1>
 
               <p className="mt-5 max-w-2xl text-base leading-7 text-stone-600 sm:mt-6 sm:text-lg sm:leading-8">
-                Un petit carnet chaleureux pour retrouver vos plats préférés,
-                garder les idées de Chloé & Maxime et préparer facilement les
-                prochains repas.
+                Un carnet de cuisine chaleureux pour réunir toutes vos recettes
+                de famille, planifier la semaine et préparer vos courses — sans
+                jamais rechercher où vous aviez noté ce bon petit plat.
               </p>
 
               <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
-                <Button to="/recipes" size="lg" fullWidth className="sm:w-auto">
-                  Voir les recettes
+                <Button to="/auth" size="lg" fullWidth className="sm:w-auto">
+                  Créer mon carnet
                 </Button>
 
                 <Button
-                  to="/add-recipe"
+                  to="/recipes"
                   variant="secondary"
                   size="lg"
                   fullWidth
                   className="sm:w-auto"
                 >
-                  Ajouter une recette
+                  Voir les recettes
                 </Button>
               </div>
+
+              <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-hazel">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-sage-deep">✓</span> Gratuit
+                </span>
+                <span aria-hidden="true" className="text-bark">
+                  ·
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-sage-deep">✓</span> Sans publicité
+                </span>
+                <span aria-hidden="true" className="text-bark">
+                  ·
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-sage-deep">✓</span> Prêt en 30 secondes
+                </span>
+              </p>
             </div>
 
             <div className="relative">
@@ -372,11 +391,7 @@ export default function HomePage() {
           ))}
         </div>
 
-        {errorMessage && (
-          <p className="rounded-2xl bg-[#f7e3de] px-4 py-3 font-medium text-[#b23b2e]">
-            {errorMessage}
-          </p>
-        )}
+        {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
         <div className="rounded-[2rem] bg-card/95 p-5 shadow-card ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
           <SectionHeader

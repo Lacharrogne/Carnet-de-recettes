@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
+import Alert from '../components/ui/Alert'
 import { RowsSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { getProfile, type UserProfile } from '../services/profiles'
@@ -343,17 +344,9 @@ export default function IdeasPage() {
         </div>
       </div>
 
-      {successMessage && (
-        <p className="rounded-2xl bg-green-50 px-5 py-4 font-bold text-green-700">
-          {successMessage}
-        </p>
-      )}
+      {successMessage && <Alert tone="success">{successMessage}</Alert>}
 
-      {errorMessage && (
-        <p className="rounded-2xl bg-red-50 px-5 py-4 font-bold text-red-700">
-          {errorMessage}
-        </p>
-      )}
+      {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
       <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
