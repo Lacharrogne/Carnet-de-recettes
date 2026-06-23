@@ -198,9 +198,6 @@ create policy site_ideas_delete on public.site_ideas
   for delete using (auth.uid() = user_id or public.is_admin());
 
 -- ----------------------------------------------------------------------------
--- ⚠️ À COMPLÉTER : table `avatars` (colonnes non confirmées lors de l'audit).
--- Vérifiez ses colonnes puis appliquez le même schéma (lecture publique si
--- les avatars sont publics, écriture au propriétaire). Idem pour le bucket
--- Storage `recipe-images` : restreindre l'upload/suppression au propriétaire
--- via les Storage Policies.
+-- NOTE : « avatars » n'est PAS une table mais un bucket Storage (tout comme
+-- « recipe-images »). Leur sécurisation est dans 0002_security_storage.sql.
 -- ============================================================================
