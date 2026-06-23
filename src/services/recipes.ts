@@ -183,6 +183,16 @@ export async function updateRecipe(
     relatedRecipeIds: number[]
   }
 ): Promise<Recipe> {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError) throw userError
+  if (!user) throw new Error('Utilisateur non connecté')
+
+  // On restreint la modification à la recette de l'utilisateur (défense en
+  // profondeur, en complément des politiques RLS côté Supabase).
   const { data, error } = await supabase
     .from('recipes')
     .update({
@@ -201,6 +211,7 @@ export async function updateRecipe(
       related_recipe_ids: recipe.relatedRecipeIds,
     })
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single()
 
@@ -210,10 +221,20 @@ export async function updateRecipe(
 }
 
 export async function deleteRecipe(id: number): Promise<void> {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError) throw userError
+  if (!user) throw new Error('Utilisateur non connecté')
+
+  // Suppression limitée à sa propre recette (défense en profondeur + RLS).
   const { error } = await supabase
     .from('recipes')
     .delete()
     .eq('id', id)
+    .eq('user_id', user.id)
 
   if (error) throw error
 }

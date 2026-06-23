@@ -102,7 +102,14 @@ export default function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/shopping-list" element={<ShoppingListPage />} />
           <Route path="/users/:userId" element={<PublicProfilePage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/ideas" element={<IdeasPage />} />
           <Route path="/tools" element={<ToolsPage />} />
           <Route path="/pricing" element={<PricingPage />} />
