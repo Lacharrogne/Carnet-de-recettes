@@ -2,8 +2,13 @@ import { Link } from 'react-router-dom'
 import { Heart, Leaf, ShieldCheck } from 'lucide-react'
 
 import { APP_NAME, LOGO_SRC } from '../../data/brand'
+import { VITRINE_PRICING_URL } from '../../config/site'
 
 type FooterLink = { label: string; to: string }
+
+function isExternalLink(to: string) {
+  return to.startsWith('http')
+}
 
 const FOOTER_SECTIONS: { title: string; links: FooterLink[] }[] = [
   {
@@ -11,7 +16,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Recettes', to: '/recipes' },
       { label: 'Outils', to: '/tools' },
-      { label: 'Tarifs', to: '/pricing' },
+      { label: 'Tarifs', to: VITRINE_PRICING_URL },
       { label: 'Boîte à idées', to: '/ideas' },
       { label: 'Mon frigo', to: '/frigo' },
     ],
@@ -91,16 +96,29 @@ export default function Footer() {
               </p>
 
               <ul className="mt-4 space-y-2.5">
-                {section.links.map((link) => (
-                  <li key={link.to}>
-                    <Link
-                      to={link.to}
-                      className="text-sm font-bold text-stone-600 transition hover:text-orange-600"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+                {section.links.map((link) =>
+                  isExternalLink(link.to) ? (
+                    <li key={link.to}>
+                      <a
+                        href={link.to}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-bold text-stone-600 transition hover:text-orange-600"
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ) : (
+                    <li key={link.to}>
+                      <Link
+                        to={link.to}
+                        className="text-sm font-bold text-stone-600 transition hover:text-orange-600"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ),
+                )}
               </ul>
             </nav>
           ))}

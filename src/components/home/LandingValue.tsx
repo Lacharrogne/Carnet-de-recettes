@@ -7,8 +7,8 @@ import {
   ShoppingCart,
   Sparkles,
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
 
+import { VITRINE_PRICING_URL } from '../../config/site'
 import Button from '../ui/Button'
 import IconTile, { type IconTileTone } from '../ui/IconTile'
 import SectionHeader from '../ui/SectionHeader'
@@ -190,12 +190,14 @@ export default function LandingValue() {
             </Button>
           </div>
 
-          <Link
-            to="/pricing"
+          <a
+            href={VITRINE_PRICING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-6 inline-block text-sm font-bold text-cream-100/80 underline-offset-4 transition hover:text-white hover:underline"
           >
             Voir le détail des offres →
-          </Link>
+          </a>
         </div>
       </div>
     </div>
