@@ -8,7 +8,7 @@
  * 👉 Mettez ici l'adresse réelle de votre vitrine une fois le domaine connu
  *    (ex. https://les-carnets.fr). Par défaut : l'URL Vercel du projet vitrine.
  */
-export const VITRINE_URL = 'https://vitrine-carnet.vercel.app'
+export const VITRINE_URL = 'https://vitrine-carnet-silk.vercel.app'
 
 /** Lien direct vers la section tarifs/offre de la vitrine. */
 export const VITRINE_PRICING_URL = `${VITRINE_URL}/#tarifs`
