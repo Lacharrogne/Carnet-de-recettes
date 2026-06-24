@@ -86,7 +86,7 @@ export default function App() {
 
       <Header />
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto max-w-6xl px-4 pt-8 pb-28 lg:pb-8">
         <Suspense fallback={<PageSkeleton />}>
         <Routes>
           <Route path="/" element={<HomePage />} />

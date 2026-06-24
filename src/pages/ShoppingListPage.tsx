@@ -469,7 +469,7 @@ export default function ShoppingListPage() {
                   setErrorMessage('')
                   setSuccessMessage('')
                 }}
-                placeholder="Exemple : 6 œufs, 500 g pâtes, lait..."
+                aria-label="Ajouter un article à la liste" placeholder="Exemple : 6 œufs, 500 g pâtes, lait..."
                 className="rounded-[1.5rem] border border-orange-100 bg-cream-50 px-5 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
               />
 

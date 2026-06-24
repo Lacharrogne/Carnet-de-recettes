@@ -411,7 +411,7 @@ export default function FridgePage() {
                   setFridgeValue(event.target.value)
                   clearMessages()
                 }}
-                placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
+                aria-label="Ingrédients présents dans votre frigo" placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
                 className="mt-4 min-h-36 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-cream-50 px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 sm:px-5"
               />
 
@@ -457,7 +457,7 @@ export default function FridgePage() {
                   setPriorityIngredient(event.target.value)
                   clearMessages()
                 }}
-                placeholder="Exemple : courgettes"
+                aria-label="Ajouter un ingrédient" placeholder="Exemple : courgettes"
                 className="mt-5 w-full rounded-[1.4rem] border border-green-100 bg-white px-4 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-green-300 focus:ring-4 focus:ring-green-100 sm:px-5"
               />
 

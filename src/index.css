@@ -37,7 +37,9 @@
   /* Bois : texte & structure */
   --color-espresso: #2b1f18;
   --color-cacao: #4a372c;
-  --color-hazel: #8a6f5c;
+  /* Assombri pour passer le contraste WCAG AA sur les fonds crème/lin/sable
+     (était #8a6f5c, ~3.4–4.5:1 → désormais ~4.9–6.6:1). */
+  --color-hazel: #6f5747;
   --color-bark: #e7d7c4;
 
   /* Accents */
