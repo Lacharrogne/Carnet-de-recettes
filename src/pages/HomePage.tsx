@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import DashboardHero from '../components/home/DashboardHero'
 import LandingValue from '../components/home/LandingValue'
+import OnboardingCard from '../components/home/OnboardingCard'
 import { LOGO_SRC } from '../data/brand'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
@@ -16,11 +17,13 @@ import { useAuth } from '../context/useAuth'
 import { getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getProfile } from '../services/profiles'
-import { getRecipes } from '../services/recipes'
+import { getMyRecipes, getRecipes } from '../services/recipes'
 import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import { getShoppingListItems } from '../services/shoppingList'
 import { PLANNER_STORAGE_KEY } from '../lib/weeklyPlanner'
 import type { Recipe } from '../types/recipe'
+
+const ONBOARDING_DISMISS_KEY = 'cdr-onboarding-dismissed'
 
 const WEEK_DAY_KEYS = [
   'sunday',
@@ -105,6 +108,49 @@ export default function HomePage() {
   const [randomRecipe, setRandomRecipe] = useState<Recipe | null>(null)
   const [randomModalOpen, setRandomModalOpen] = useState(false)
   const [randomizing, setRandomizing] = useState(false)
+
+  const [ownRecipeCount, setOwnRecipeCount] = useState<number | null>(null)
+  const [onboardingDismissed, setOnboardingDismissed] = useState(() => {
+    try {
+      return window.localStorage.getItem(ONBOARDING_DISMISS_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    let ignore = false
+
+    getMyRecipes()
+      .then((data) => {
+        if (!ignore) {
+          setOwnRecipeCount(data.length)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+        if (!ignore) {
+          setOwnRecipeCount(null)
+        }
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [user])
+
+  function dismissOnboarding() {
+    setOnboardingDismissed(true)
+    try {
+      window.localStorage.setItem(ONBOARDING_DISMISS_KEY, '1')
+    } catch {
+      // ignore
+    }
+  }
 
   useEffect(() => {
     let ignore = false
@@ -229,14 +275,21 @@ export default function HomePage() {
     <>
       <section className="space-y-8 sm:space-y-10 lg:space-y-14">
         {user ? (
-          <DashboardHero
-            userName={userName || 'chef'}
-            todayMealLabel={todayPlan.mealLabel}
-            todayRecipe={todayRecipe}
-            shoppingCount={shoppingCount}
-            onSurprise={launchRandomRecipe}
-            surpriseDisabled={loading || recipes.length === 0 || randomizing}
-          />
+          ownRecipeCount === 0 && !onboardingDismissed ? (
+            <OnboardingCard
+              userName={userName || 'chef'}
+              onDismiss={dismissOnboarding}
+            />
+          ) : (
+            <DashboardHero
+              userName={userName || 'chef'}
+              todayMealLabel={todayPlan.mealLabel}
+              todayRecipe={todayRecipe}
+              shoppingCount={shoppingCount}
+              onSurprise={launchRandomRecipe}
+              surpriseDisabled={loading || recipes.length === 0 || randomizing}
+            />
+          )
         ) : (
           <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
           <div className="grid gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
