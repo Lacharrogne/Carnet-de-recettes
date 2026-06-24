@@ -15,7 +15,8 @@ type RecipeRow = {
   image_url: string | null
   tags: string[] | null
   ingredients: string[] | null
-  steps: string[] | null
+  // Optionnel : absent des requêtes de liste (chargé seulement au détail).
+  steps?: string[] | null
   related_recipe_ids: number[] | null
 }
 
@@ -39,10 +40,16 @@ function mapRecipe(row: RecipeRow): Recipe {
   }
 }
 
+// Colonnes utiles aux LISTES (catalogue, cartes, frigo, planning…). On exclut
+// volontairement `steps` (champ le plus lourd) : seules les pages de DÉTAIL en
+// ont besoin. mapRecipe() retombe sur [] si la colonne est absente.
+const RECIPE_LIST_COLUMNS =
+  'id,user_id,title,category,difficulty,prep_time,cook_time,servings,description,image,image_url,tags,ingredients,related_recipe_ids,created_at'
+
 export async function getRecipes(): Promise<Recipe[]> {
   const { data, error } = await supabase
     .from('recipes')
-    .select('*')
+    .select(RECIPE_LIST_COLUMNS)
     .order('created_at', { ascending: false })
 
   if (error) throw error
@@ -250,7 +257,7 @@ export async function getMyRecipes(): Promise<Recipe[]> {
 
   const { data, error } = await supabase
     .from('recipes')
-    .select('*')
+    .select(RECIPE_LIST_COLUMNS)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
