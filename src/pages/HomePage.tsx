@@ -70,14 +70,14 @@ const QUICK_LINKS: {
     to: '/frigo',
     emoji: '🥕',
     label: 'Mode frigo',
-    description: 'Cuisiner avec ce que tu as',
+    description: 'Cuisiner avec ce que vous avez',
     tone: 'sage',
   },
   {
     to: '/shopping-list',
     emoji: '🛒',
     label: 'Liste de courses',
-    description: 'Tes ingrédients à acheter',
+    description: 'Vos ingrédients à acheter',
     tone: 'terracotta',
   },
   {
@@ -331,7 +331,7 @@ export default function HomePage() {
                       </p>
 
                       <p className="mt-3 max-w-sm text-sm font-bold leading-6 text-orange-50 sm:mt-4 sm:text-base sm:leading-7">
-                        Clique ici et le carnet choisit une recette au hasard.
+                        Cliquez ici et le carnet choisit une recette au hasard.
                       </p>
                     </div>
 
@@ -352,13 +352,13 @@ export default function HomePage() {
 
                   <p className="mt-3 line-clamp-3 text-sm leading-6 text-cacao/80">
                     {latestRecipes[0]?.description ??
-                      'Ajoute une première recette pour commencer ton carnet.'}
+                      'Ajoutez une première recette pour commencer votre carnet.'}
                   </p>
                 </div>
 
                 <div className="mt-5 rounded-[1.5rem] border border-dashed border-honey/50 bg-honey-soft/50 p-4 text-sm font-medium leading-6 text-cacao sm:mt-6">
-                  💡 Astuce : ajoute tes recettes du quotidien, tes favoris et
-                  les ingrédients à ta liste de courses.
+                  💡 Astuce : ajoutez vos recettes du quotidien, vos favoris et
+                  les ingrédients à votre liste de courses.
                 </div>
               </div>
             </div>
@@ -420,7 +420,7 @@ export default function HomePage() {
               </p>
 
               <p className="mt-2 text-stone-600">
-                Ajoute ta première recette pour la voir apparaître ici.
+                Ajoutez votre première recette pour la voir apparaître ici.
               </p>
 
               <Button
@@ -450,7 +450,7 @@ export default function HomePage() {
             className="mb-6 sm:mb-8"
             eyebrow="Explorer"
             title="Les grandes familles de recettes"
-            subtitle="Parcours le carnet selon tes envies du moment."
+            subtitle="Parcourez le carnet selon vos envies du moment."
             action={
               <Button
                 to="/recipes"
@@ -634,7 +634,7 @@ export default function HomePage() {
             </p>
 
             <p className="mt-2 text-cacao/80">
-              Ajoute une recette pour utiliser le bouton magique.
+              Ajoutez une recette pour utiliser le bouton magique.
             </p>
           </div>
         )}

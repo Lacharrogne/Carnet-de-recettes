@@ -161,8 +161,8 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
     const authorName = isMine
       ? profile?.username
-        ? `${profile.username} · toi`
-        : 'Toi'
+        ? `${profile.username} · vous`
+        : 'Vous'
       : profile?.username || 'Utilisateur'
 
     return {
@@ -226,11 +226,11 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       })
 
       setSuccessMessage(
-        myReview ? 'Ton avis a été modifié.' : 'Ton avis a été ajouté.',
+        myReview ? 'Votre avis a été modifié.' : 'Votre avis a été ajouté.',
       )
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible d’enregistrer ton avis.')
+      setErrorMessage('Impossible d’enregistrer votre avis.')
     } finally {
       setSaving(false)
     }
@@ -258,10 +258,10 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       setMyReview(null)
       setRating(5)
       setComment('')
-      setSuccessMessage('Ton avis a été supprimé.')
+      setSuccessMessage('Votre avis a été supprimé.')
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible de supprimer ton avis.')
+      setErrorMessage('Impossible de supprimer votre avis.')
     } finally {
       setDeleting(false)
     }
@@ -269,7 +269,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
   async function handleToggleLike(review: RecipeReview) {
     if (!userId) {
-      setErrorMessage('Connecte-toi pour aimer un commentaire.')
+      setErrorMessage('Connectez-vous pour aimer un commentaire.')
       setSuccessMessage('')
       return
     }
@@ -328,7 +328,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
     event.preventDefault()
 
     if (!userId) {
-      setErrorMessage('Connecte-toi pour répondre à un commentaire.')
+      setErrorMessage('Connectez-vous pour répondre à un commentaire.')
       setSuccessMessage('')
       return
     }
@@ -379,10 +379,10 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       }))
 
       setReplyingReviewId(null)
-      setSuccessMessage('Ta réponse a été ajoutée.')
+      setSuccessMessage('Votre réponse a été ajoutée.')
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible d’ajouter ta réponse.')
+      setErrorMessage('Impossible d’ajouter votre réponse.')
     } finally {
       setReplySavingReviewId(null)
     }
@@ -416,7 +416,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
         }),
       )
 
-      setSuccessMessage('Ta réponse a été supprimée.')
+      setSuccessMessage('Votre réponse a été supprimée.')
     } catch (error) {
       console.error(error)
       setErrorMessage('Impossible de supprimer cette réponse.')
@@ -481,7 +481,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
           </h3>
 
           <p className="mt-1 text-sm font-medium text-stone-500">
-            Laisse une note et un petit commentaire sur cette recette.
+            Laissez une note et un petit commentaire sur cette recette.
           </p>
 
           <div className="mt-5">
@@ -552,11 +552,11 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       ) : (
         <div className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-orange-100">
           <p className="font-bold text-stone-900">
-            Connecte-toi pour donner ton avis.
+            Connectez-vous pour donner votre avis.
           </p>
 
           <p className="mt-1 text-sm text-stone-600">
-            Tu pourras noter la recette, aimer les commentaires et répondre aux
+            Vous pourrez noter la recette, aimer les commentaires et répondre aux
             autres utilisateurs.
           </p>
 
@@ -576,7 +576,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
           </p>
 
           <p className="mt-2 text-stone-600">
-            Sois le premier à donner ton avis sur cette recette.
+            Soyez le premier à donner votre avis sur cette recette.
           </p>
         </div>
       ) : (
@@ -659,7 +659,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                     onClick={() => {
                       if (!userId) {
                         setErrorMessage(
-                          'Connecte-toi pour répondre à un commentaire.',
+                          'Connectez-vous pour répondre à un commentaire.',
                         )
                         setSuccessMessage('')
                         return
@@ -683,7 +683,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                     className="mt-4 rounded-[1.5rem] bg-white p-4 ring-1 ring-orange-100"
                   >
                     <label className="mb-2 block text-sm font-black text-stone-800">
-                      Ta réponse
+                      Votre réponse
                     </label>
 
                     <textarea
@@ -693,7 +693,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       }
                       rows={3}
                       placeholder={`Répondre à ${authorName.replace(
-                        ' · toi',
+                        ' · vous',
                         '',
                       )}...`}
                       className="w-full rounded-[1.2rem] border border-orange-100 bg-cream-input px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"

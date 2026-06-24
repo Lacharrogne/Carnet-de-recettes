@@ -155,7 +155,7 @@ export default function IdeasPage() {
     const cleanedMessage = message.trim()
 
     if (!cleanedTitle || !cleanedMessage) {
-      setErrorMessage('Ajoute un titre et un message avant de publier.')
+      setErrorMessage('Ajoutez un titre et un message avant de publier.')
       return
     }
 
@@ -184,14 +184,14 @@ export default function IdeasPage() {
       setTitle('')
       setMessage('')
       setCategory('amelioration')
-      setSuccessMessage('Ton idée a bien été publiée.')
+      setSuccessMessage('Votre idée a bien été publiée.')
 
       window.setTimeout(() => {
         setSuccessMessage('')
       }, 3000)
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible de publier ton idée.')
+      setErrorMessage('Impossible de publier votre idée.')
     } finally {
       setSaving(false)
     }
@@ -239,11 +239,11 @@ export default function IdeasPage() {
         <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-start">
           <div>
             <h1 className="text-4xl font-black leading-tight text-stone-950 md:text-6xl">
-              Propose tes idées pour améliorer le site.
+              Proposez vos idées pour améliorer le site.
             </h1>
 
             <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
-              Tu peux laisser une suggestion, signaler un bug ou proposer une
+              Vous pouvez laisser une suggestion, signaler un bug ou proposer une
               nouvelle fonctionnalité pour faire évoluer le carnet de recettes.
             </p>
           </div>
@@ -309,7 +309,7 @@ export default function IdeasPage() {
                       setErrorMessage('')
                     }}
                     rows={5}
-                    placeholder="Explique ton idée en quelques phrases..."
+                    placeholder="Expliquez votre idée en quelques phrases..."
                     className="w-full rounded-[1.4rem] border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold leading-7 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                   />
                 </div>
@@ -325,11 +325,11 @@ export default function IdeasPage() {
             ) : (
               <div className="mt-5 rounded-[1.5rem] bg-cream-50 p-5 ring-1 ring-orange-100">
                 <p className="font-bold text-stone-900">
-                  Connecte-toi pour proposer une idée.
+                  Connectez-vous pour proposer une idée.
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-stone-600">
-                  Les idées sont liées à ton profil pour que les autres
+                  Les idées sont liées à votre profil pour que les autres
                   utilisateurs voient qui les propose.
                 </p>
 
@@ -373,7 +373,7 @@ export default function IdeasPage() {
             tone="honey"
             emoji="💭"
             title="Aucune idée pour le moment"
-            description="Sois le premier à proposer une amélioration : une fonctionnalité, une recette à ajouter, une envie…"
+            description="Soyez le premier à proposer une amélioration : une fonctionnalité, une recette à ajouter, une envie…"
           />
         ) : (
           <div className="grid gap-5 lg:grid-cols-2">
@@ -409,7 +409,7 @@ export default function IdeasPage() {
                       <div className="min-w-0">
                         <p className="truncate font-black text-stone-950">
                           {authorName}
-                          {isMine ? ' · toi' : ''}
+                          {isMine ? ' · vous' : ''}
                         </p>
 
                         <p className="text-sm font-semibold text-stone-500">

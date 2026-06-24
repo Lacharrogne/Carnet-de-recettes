@@ -66,7 +66,7 @@ export async function followUser(targetUserId: string) {
   const currentUserId = await getCurrentUserId()
 
   if (currentUserId === targetUserId) {
-    throw new Error('Tu ne peux pas t’abonner à toi-même.')
+    throw new Error('Vous ne pouvez pas vous abonner à vous-même.')
   }
 
   const { error } = await supabase.from('user_follows').insert({

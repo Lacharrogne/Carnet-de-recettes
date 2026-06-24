@@ -291,7 +291,7 @@ async function handleSearchReviews() {
     return (
       <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
         <p className="text-2xl font-black text-stone-950">
-          Connecte-toi pour accéder à l’administration.
+          Connectez-vous pour accéder à l’administration.
         </p>
 
         <Link
@@ -348,7 +348,7 @@ async function handleSearchReviews() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
-              Ici tu peux surveiller le carnet de recettes et supprimer les
+              Ici vous pouvez surveiller le carnet de recettes et supprimer les
               contenus problématiques.
             </p>
           </div>

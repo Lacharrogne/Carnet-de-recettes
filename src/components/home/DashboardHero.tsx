@@ -42,7 +42,7 @@ export default function DashboardHero({
         </h1>
 
         <p className="mt-1 max-w-2xl text-base leading-7 text-cacao/80 sm:text-lg">
-          Ton carnet est prêt. Une idée, une envie&nbsp;? Tout est là, bien au
+          Votre carnet est prêt. Une idée, une envie&nbsp;? Tout est là, bien au
           chaud.
         </p>
       </div>

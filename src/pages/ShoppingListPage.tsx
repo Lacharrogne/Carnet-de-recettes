@@ -114,7 +114,7 @@ export default function ShoppingListPage() {
     const cleanedText = newItemText.trim()
 
     if (!cleanedText) {
-      setErrorMessage('Écris un ingrédient avant de l’ajouter.')
+      setErrorMessage('Écrivez un ingrédient avant de l’ajouter.')
       return
     }
 
@@ -127,7 +127,7 @@ export default function ShoppingListPage() {
 
       setItems((currentItems) => [createdItem, ...currentItems])
       setNewItemText('')
-      setSuccessMessage('Ingrédient ajouté à ta liste de courses.')
+      setSuccessMessage('Ingrédient ajouté à votre liste de courses.')
     } catch (error) {
       console.error(error)
       setSuccessMessage('')
@@ -301,11 +301,11 @@ export default function ShoppingListPage() {
     return (
       <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
         <p className="text-2xl font-black text-stone-950">
-          Connecte-toi pour voir ta liste de courses.
+          Connectez-vous pour voir votre liste de courses.
         </p>
 
         <p className="mx-auto mt-3 max-w-xl text-stone-600">
-          Ta liste de courses est liée à ton compte pour pouvoir la retrouver
+          Votre liste de courses est liée à votre compte pour pouvoir la retrouver
           plus tard.
         </p>
 
@@ -372,7 +372,7 @@ export default function ShoppingListPage() {
             </div>
 
             <h1 className="text-4xl font-black leading-tight text-stone-950 md:text-6xl">
-              Fais tes courses sans rien oublier.
+              Faites vos courses sans rien oublier.
             </h1>
 
             <p className="mt-5 max-w-xl text-lg leading-8 text-stone-600">
@@ -486,7 +486,7 @@ export default function ShoppingListPage() {
               <p className="font-black">Astuce</p>
 
               <p>
-                Si tu ajoutes plusieurs fois la même recette dans le planning,
+                Si vous ajoutez plusieurs fois la même recette dans le planning,
                 les quantités se regroupent ici automatiquement.
               </p>
             </div>
@@ -511,8 +511,8 @@ export default function ShoppingListPage() {
           <EmptyState
             tone="sage"
             emoji="🧺"
-            title="Ta liste est vide"
-            description="Ajoute un ingrédient à la main, ou envoie une recette depuis sa fiche ou le planning pour générer automatiquement tes courses."
+            title="Votre liste est vide"
+            description="Ajoutez un ingrédient à la main, ou envoyez une recette depuis sa fiche ou le planning pour générer automatiquement vos courses."
             action={<Button to="/recipes">Parcourir les recettes</Button>}
           />
         ) : (
@@ -539,7 +539,7 @@ export default function ShoppingListPage() {
                   <p className="font-black">Tout est coché.</p>
 
                   <p className="mt-1 text-sm">
-                    Tu peux supprimer les ingrédients cochés ou garder
+                    Vous pouvez supprimer les ingrédients cochés ou garder
                     l’historique pour le moment.
                   </p>
                 </div>

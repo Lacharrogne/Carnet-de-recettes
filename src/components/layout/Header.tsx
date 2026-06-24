@@ -25,13 +25,13 @@ const personalLinks = [
   },
   {
     label: 'Mes recettes',
-    description: 'Voir et modifier tes recettes',
+    description: 'Voir et modifier vos recettes',
     to: '/my-recipes',
     emoji: '📖',
   },
   {
     label: 'Favoris',
-    description: 'Retrouver tes recettes préférées',
+    description: 'Retrouver vos recettes préférées',
     to: '/favorites',
     emoji: '❤️',
   },
@@ -40,7 +40,7 @@ const personalLinks = [
 const toolLinks = [
   {
     label: 'Mode frigo',
-    description: 'Trouver une recette avec ce que tu as',
+    description: 'Trouver une recette avec ce que vous avez',
     to: '/frigo',
     emoji: '🥕',
   },
@@ -470,7 +470,7 @@ export default function Header() {
                             </p>
 
                             <p className="text-xs font-semibold text-stone-500">
-                              Quitter ton compte
+                              Quitter votre compte
                             </p>
                           </div>
                         </div>

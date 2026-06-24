@@ -12,7 +12,7 @@ export default function NotFoundPage() {
         <EmptyState
           emoji="🍽️"
           title="Cette page n’existe pas"
-          description="La page que tu cherches est introuvable. Elle a peut-être été déplacée, supprimée, ou l’adresse est incorrecte."
+          description="La page que vous cherchez est introuvable. Elle a peut-être été déplacée, supprimée, ou l’adresse est incorrecte."
           action={
             <div className="flex flex-wrap justify-center gap-3">
               <Button to="/">Retour à l’accueil</Button>

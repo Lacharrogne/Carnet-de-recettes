@@ -66,9 +66,9 @@ export default function Footer() {
           </div>
 
           <p className="mt-5 max-w-sm text-sm leading-6 text-stone-600">
-            Le carnet de famille qui réunit tes recettes, tes courses et tes
+            Le carnet de famille qui réunit vos recettes, vos courses et vos
             idées de repas au même endroit. Simple, chaleureux, toujours prêt
-            quand tu cuisines.
+            quand vous cuisinez.
           </p>
 
           <ul className="mt-6 space-y-2">

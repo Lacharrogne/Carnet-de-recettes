@@ -193,7 +193,7 @@ export default function ProfilePage() {
         </p>
 
         <p className="mt-2 text-stone-600">
-          Connecte-toi pour retrouver ton carnet de recettes.
+          Connectez-vous pour retrouver votre carnet de recettes.
         </p>
 
         <Link
@@ -254,7 +254,7 @@ export default function ProfilePage() {
                 </p>
               ) : (
                 <p className="mt-4 max-w-2xl leading-7 text-stone-500">
-                  Ajoute une petite bio pour personnaliser ton profil.
+                  Ajoutez une petite bio pour personnaliser votre profil.
                 </p>
               )}
             </div>
@@ -301,7 +301,7 @@ export default function ProfilePage() {
             </h2>
 
             <p className="mt-2 text-stone-600">
-              Ajoute un pseudo, une bio et une photo de profil pour rendre ton
+              Ajoutez un pseudo, une bio et une photo de profil pour rendre votre
               espace plus personnel.
             </p>
           </div>
@@ -361,7 +361,7 @@ export default function ProfilePage() {
                   value={bio}
                   onChange={(event) => setBio(event.target.value)}
                   rows={5}
-                  placeholder="Une petite description de ton profil..."
+                  placeholder="Une petite description de votre profil..."
                   className="w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
                 />
               </div>
@@ -458,7 +458,7 @@ export default function ProfilePage() {
           </h2>
 
           <p className="mt-2 text-stone-600">
-            Voir et modifier les recettes que tu as créées.
+            Voir et modifier les recettes que vous avez créées.
           </p>
         </Link>
 
@@ -516,7 +516,7 @@ export default function ProfilePage() {
             </p>
 
             <p className="mt-2 text-stone-600">
-              Ajoute ta première recette pour commencer ton carnet.
+              Ajoutez votre première recette pour commencer votre carnet.
             </p>
 
             <Link
