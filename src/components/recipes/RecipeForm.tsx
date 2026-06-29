@@ -15,6 +15,7 @@ import {
 } from '../../data/recipeOptions'
 import type { Difficulty, Recipe, RecipeCategory } from '../../types/recipe'
 import Alert from '../ui/Alert'
+import { EmojiPicker } from '../ui/EmojiPicker'
 
 export type RecipeFormValues = {
   title: string
@@ -544,11 +545,10 @@ export default function RecipeForm({
           <div>
             <label className={labelClass}>Emoji de secours</label>
 
-            <input
+            <EmojiPicker
               value={image}
-              onChange={(event) => setImage(event.target.value)}
+              onChange={(emoji) => setImage(emoji)}
               placeholder="🍽️"
-              className={inputClass}
             />
 
             <p className="mt-2 text-sm leading-6 text-stone-500">
