@@ -418,21 +418,23 @@ summary:focus-visible {
   }
 }
 
-html,
-body,
-a,
-button,
-select,
-summary,
-[role='button'] {
+/* Curseur « gant de cuisine » : actif uniquement quand l'utilisateur l'a
+   choisi (html[data-cursor='kitchen']). Voir src/lib/cursorPreference.ts. */
+html[data-cursor='kitchen'],
+html[data-cursor='kitchen'] body,
+html[data-cursor='kitchen'] a,
+html[data-cursor='kitchen'] button,
+html[data-cursor='kitchen'] select,
+html[data-cursor='kitchen'] summary,
+html[data-cursor='kitchen'] [role='button'] {
   cursor: url('/cursor-gant-cuisine.cur'), pointer !important;
 }
 
-* {
+html[data-cursor='kitchen'] * {
   cursor: url('/cursor-gant-cuisine.cur'), auto;
 }
 
-input,
-textarea {
+html[data-cursor='kitchen'] input,
+html[data-cursor='kitchen'] textarea {
   cursor: text !important;
 }

@@ -5,6 +5,7 @@ import Alert from '../components/ui/Alert'
 import RecipeBadgesPanel, {
   RecipeBadgePill,
 } from '../components/badges/RecipeBadgesPanel'
+import CursorSelector from '../components/settings/CursorSelector'
 import { ProfileSkeleton } from '../components/ui/Skeleton'
 import { getRecipePublicationBadge } from '../data/recipeBadges'
 import { useAuth } from '../context/useAuth'
@@ -432,6 +433,8 @@ export default function ProfilePage() {
       </div>
 
       <RecipeBadgesPanel recipeCount={myRecipes.length} />
+
+      <CursorSelector />
 
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <Link
