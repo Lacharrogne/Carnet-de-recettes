@@ -102,7 +102,7 @@ export default function AuthPage() {
         const cleanUsername = username.trim()
 
         if (!cleanUsername) {
-          setErrorMessage('Tu dois choisir un pseudo.')
+          setErrorMessage('Vous devez choisir un pseudo.')
           setLoading(false)
           return
         }
@@ -137,7 +137,7 @@ export default function AuthPage() {
         }
 
         setMessage(
-          "Compte créé. Vérifie ta boîte mail avant de te connecter. Le pseudo a bien été enregistré. La photo pourra être ajoutée depuis ton profil après confirmation du compte.",
+          'Compte créé. Vérifiez votre boîte mail avant de vous connecter. Le pseudo a bien été enregistré. La photo pourra être ajoutée depuis votre profil après confirmation du compte.',
         )
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -169,13 +169,13 @@ export default function AuthPage() {
         />
 
         <h2 className="mt-3 font-display text-3xl font-black text-espresso">
-          {mode === 'login' ? 'Bon retour !' : 'Crée ton carnet'}
+          {mode === 'login' ? 'Heureux de vous revoir !' : 'Créez votre carnet'}
         </h2>
 
         <p className="mt-2 leading-7 text-cacao/80">
           {mode === 'login'
-            ? 'Connecte-toi pour retrouver tes recettes, tes courses et ton planning.'
-            : 'Quelques secondes suffisent pour commencer ton carnet de cuisine.'}
+            ? 'Connectez-vous pour retrouver vos recettes, vos courses et votre planning.'
+            : 'Quelques secondes suffisent pour commencer votre carnet de cuisine.'}
         </p>
       </div>
 

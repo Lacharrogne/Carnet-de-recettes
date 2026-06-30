@@ -51,7 +51,7 @@ export default function RecipeBadgesPanel({
           </h2>
 
           <p className="mt-2 max-w-2xl leading-7 text-stone-600">
-            Plus tu publies de recettes, plus tu débloques de badges dans le
+            Plus vous publiez de recettes, plus vous débloquez de badges dans le
             carnet.
           </p>
         </div>
@@ -98,7 +98,7 @@ export default function RecipeBadgesPanel({
               </p>
 
               <h3 className="mt-1 text-2xl font-black text-stone-950">
-                Publie ta première recette
+                Publiez votre première recette
               </h3>
 
               <p className="mt-2 leading-7 text-stone-600">

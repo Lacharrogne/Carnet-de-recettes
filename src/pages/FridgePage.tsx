@@ -63,7 +63,7 @@ function FridgeResultCard({
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
             <p className="text-xs font-black uppercase tracking-wide text-green-700">
-              Tu as déjà
+              Vous avez déjà
             </p>
 
             {match.matchedIngredients.length > 0 ? (
@@ -318,7 +318,7 @@ export default function FridgePage() {
       setSuccessMessage(
         `${createdItems.length} ingrédient${
           createdItems.length > 1 ? 's ont' : ' a'
-        } été ajouté${createdItems.length > 1 ? 's' : ''} à ta liste de courses.`,
+        } été ajouté${createdItems.length > 1 ? 's' : ''} à votre liste de courses.`,
       )
     } catch (error) {
       console.error(error)
@@ -328,14 +328,14 @@ export default function FridgePage() {
         error.message.toLowerCase().includes('utilisateur non connecté')
       ) {
         setErrorMessage(
-          'Connecte-toi pour ajouter les ingrédients à ta liste de courses.',
+          'Connectez-vous pour ajouter les ingrédients à votre liste de courses.',
         )
       } else if (
         error instanceof Error &&
         error.message.toLowerCase().includes('déjà dans la liste')
       ) {
         setErrorMessage(
-          'Ces ingrédients sont déjà dans ta liste de courses pour cette recette.',
+          'Ces ingrédients sont déjà dans votre liste de courses pour cette recette.',
         )
       } else {
         setErrorMessage(
@@ -358,12 +358,12 @@ export default function FridgePage() {
             </div>
 
             <h1 className="max-w-3xl text-3xl font-black leading-tight text-stone-950 sm:text-4xl md:text-6xl">
-              Que peux-tu cuisiner avec ce que tu as déjà ?
+              Que pouvez-vous cuisiner avec ce que vous avez déjà ?
             </h1>
 
             <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600 sm:mt-6 sm:text-lg sm:leading-8">
-              Écris les ingrédients disponibles dans ton frigo, tes placards ou
-              ton congélateur. Le carnet te propose ensuite les recettes les
+              Écrivez les ingrédients disponibles dans votre frigo, vos placards ou
+              votre congélateur. Le carnet vous propose ensuite les recettes les
               plus simples à faire maintenant.
             </p>
 
@@ -391,11 +391,11 @@ export default function FridgePage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
-                    Ton frigo
+                    Votre frigo
                   </p>
 
                   <p className="mt-1 text-sm text-stone-500">
-                    Note ce que tu as déjà chez toi.
+                    Notez ce que vous avez déjà chez vous.
                   </p>
                 </div>
 
@@ -411,12 +411,12 @@ export default function FridgePage() {
                   setFridgeValue(event.target.value)
                   clearMessages()
                 }}
-                placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
+                aria-label="Ingrédients présents dans votre frigo" placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
                 className="mt-4 min-h-36 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-cream-50 px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 sm:px-5"
               />
 
               <p className="mt-3 text-sm leading-6 text-stone-500">
-                Sépare les ingrédients avec une virgule ou écris-les sur
+                Séparez les ingrédients avec une virgule ou écrivez-les sur
                 plusieurs lignes.
               </p>
 
@@ -446,7 +446,7 @@ export default function FridgePage() {
                   <p className="font-black text-green-800">Mode anti-gaspi</p>
 
                   <p className="text-sm leading-6 text-green-700">
-                    Mets en priorité un ingrédient à finir.
+                    Mettez en priorité un ingrédient à finir.
                   </p>
                 </div>
               </div>
@@ -457,7 +457,7 @@ export default function FridgePage() {
                   setPriorityIngredient(event.target.value)
                   clearMessages()
                 }}
-                placeholder="Exemple : courgettes"
+                aria-label="Ajouter un ingrédient" placeholder="Exemple : courgettes"
                 className="mt-5 w-full rounded-[1.4rem] border border-green-100 bg-white px-4 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-green-300 focus:ring-4 focus:ring-green-100 sm:px-5"
               />
 
@@ -498,7 +498,7 @@ export default function FridgePage() {
         <Alert tone="error">
           <p className="font-bold">{errorMessage}</p>
 
-          {errorMessage.includes('Connecte-toi') && (
+          {errorMessage.includes('Connectez-vous') && (
             <Link
               to="/auth"
               className="mt-2 inline-block font-black text-red-800 underline"
@@ -528,15 +528,15 @@ export default function FridgePage() {
         <EmptyState
           tone="sage"
           emoji="🥕"
-          title="Commence par remplir ton frigo"
-          description="Ajoute quelques ingrédients ci-dessus, ou choisis un ingrédient anti-gaspi, et le carnet te propose aussitôt les recettes possibles."
+          title="Commencez par remplir votre frigo"
+          description="Ajoutez quelques ingrédients ci-dessus, ou choisissez un ingrédient anti-gaspi, et le carnet vous propose aussitôt les recettes possibles."
         />
       ) : analyzedRecipes.length === 0 ? (
         <EmptyState
           tone="honey"
           emoji="🔍"
           title="Aucune recette avec ces ingrédients"
-          description="Essaie avec des ingrédients plus courants comme œufs, pâtes, riz, tomates ou fromage."
+          description="Essayez avec des ingrédients plus courants comme œufs, pâtes, riz, tomates ou fromage."
         />
       ) : (
         <section className="rounded-[2rem] bg-cream-50/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-6 md:p-8">
@@ -552,7 +552,7 @@ export default function FridgePage() {
 
               <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base sm:leading-7">
                 Les recettes sont triées automatiquement : d’abord celles qui
-                utilisent ton ingrédient anti-gaspi, puis celles avec le moins
+                utilisent votre ingrédient anti-gaspi, puis celles avec le moins
                 d’ingrédients manquants.
               </p>
             </div>

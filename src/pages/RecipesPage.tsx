@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Search, X } from 'lucide-react'
+import { ChevronDown, Search, X } from 'lucide-react'
 
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
@@ -10,14 +10,21 @@ import EmptyState from '../components/ui/EmptyState'
 import SectionHeader from '../components/ui/SectionHeader'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { getCategoryAmbience, getHomeCardStyle } from '../data/categoryStyles'
-import { RECIPE_CATEGORIES } from '../data/recipeOptions'
+import { RECIPE_CATEGORIES, RECIPE_DIFFICULTIES } from '../data/recipeOptions'
 import { useDebounce } from '../lib/useDebounce'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { getRecipes } from '../services/recipes'
 import { getRecipeRatings, type RecipeRating } from '../services/reviews'
-import type { Recipe } from '../types/recipe'
+import type { Difficulty, Recipe } from '../types/recipe'
 
 type SortOption = 'name' | 'time' | 'difficulty'
+type DifficultyFilter = 'all' | Difficulty
+
+/** Options de temps maximum (préparation + cuisson), en minutes. 0 = illimité. */
+const MAX_TIME_OPTIONS = [15, 30, 45, 60]
+
+/** Nombre de recettes affichées par page (pagination « Voir plus »). */
+const PAGE_SIZE = 12
 
 export default function RecipesPage() {
   useDocumentTitle('Toutes les recettes')
@@ -30,6 +37,10 @@ export default function RecipesPage() {
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 200)
   const [sort, setSort] = useState<SortOption>('name')
+  const [difficulty, setDifficulty] = useState<DifficultyFilter>('all')
+  const [maxTime, setMaxTime] = useState(0)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [showTags, setShowTags] = useState(false)
 
   const categoryParam = searchParams.get('category')
 
@@ -101,12 +112,39 @@ export default function RecipesPage() {
     })
   }, [recipes])
 
+  // Tags réellement présents dans les recettes (pour des filtres pertinents).
+  const availableTags = useMemo(() => {
+    const tagSet = new Set<string>()
+
+    recipes.forEach((recipe) => {
+      recipe.tags.forEach((tag) => tagSet.add(tag))
+    })
+
+    return Array.from(tagSet).sort((a, b) => a.localeCompare(b))
+  }, [recipes])
+
   const filteredRecipes = useMemo(() => {
     let result = [...recipes]
 
     if (selectedCategory) {
       result = result.filter(
         (recipe) => recipe.category === selectedCategory.value,
+      )
+    }
+
+    if (difficulty !== 'all') {
+      result = result.filter((recipe) => recipe.difficulty === difficulty)
+    }
+
+    if (maxTime > 0) {
+      result = result.filter(
+        (recipe) => recipe.prepTime + recipe.cookTime <= maxTime,
+      )
+    }
+
+    if (selectedTags.length > 0) {
+      result = result.filter((recipe) =>
+        selectedTags.every((tag) => recipe.tags.includes(tag)),
       )
     }
 
@@ -167,9 +205,39 @@ export default function RecipesPage() {
     }
 
     return result
-  }, [recipes, debouncedSearch, selectedCategory, sort])
+  }, [
+    recipes,
+    debouncedSearch,
+    selectedCategory,
+    sort,
+    difficulty,
+    maxTime,
+    selectedTags,
+  ])
 
-  const hasActiveFilters = debouncedSearch.trim().length > 0 || selectedCategory !== null
+  const hasActiveFilters =
+    debouncedSearch.trim().length > 0 ||
+    selectedCategory !== null ||
+    difficulty !== 'all' ||
+    maxTime > 0 ||
+    selectedTags.length > 0
+
+  // Pagination : on réinitialise le nombre visible dès qu'un filtre change
+  // (ajustement d'état pendant le rendu, sans effet).
+  const filtersKey = `${debouncedSearch.trim().toLowerCase()}|${
+    selectedCategory?.value ?? ''
+  }|${sort}|${difficulty}|${maxTime}|${[...selectedTags].sort().join(',')}`
+
+  const [paginationKey, setPaginationKey] = useState(filtersKey)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  if (paginationKey !== filtersKey) {
+    setPaginationKey(filtersKey)
+    setVisibleCount(PAGE_SIZE)
+  }
+
+  const visibleRecipes = filteredRecipes.slice(0, visibleCount)
+  const remainingCount = filteredRecipes.length - visibleRecipes.length
 
   const activeCategoryAmbience = selectedCategory
     ? getCategoryAmbience(selectedCategory.label)
@@ -192,7 +260,18 @@ export default function RecipesPage() {
   function resetFilters() {
     setSearch('')
     setSort('name')
+    setDifficulty('all')
+    setMaxTime(0)
+    setSelectedTags([])
     setSearchParams({})
+  }
+
+  function toggleTag(tag: string) {
+    setSelectedTags((current) =>
+      current.includes(tag)
+        ? current.filter((value) => value !== tag)
+        : [...current, tag],
+    )
   }
 
   if (loading) {
@@ -256,7 +335,7 @@ export default function RecipesPage() {
               )}
             </div>
 
-            <div className="mt-4 grid gap-3 md:grid-cols-2 md:gap-4">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
               <select
                 value={selectedCategory?.value ?? ''}
                 onChange={(event) => {
@@ -282,6 +361,40 @@ export default function RecipesPage() {
               </select>
 
               <select
+                value={difficulty}
+                onChange={(event) =>
+                  setDifficulty(event.target.value as DifficultyFilter)
+                }
+                aria-label="Filtrer par difficulté"
+                className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
+              >
+                <option value="all">Toutes difficultés</option>
+
+                {RECIPE_DIFFICULTIES.map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={maxTime}
+                onChange={(event) => setMaxTime(Number(event.target.value))}
+                aria-label="Filtrer par temps maximum"
+                className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
+              >
+                <option value={0}>Tous les temps</option>
+
+                {MAX_TIME_OPTIONS.map((minutes) => (
+                  <option key={minutes} value={minutes}>
+                    {minutes < 60
+                      ? `≤ ${minutes} min`
+                      : `≤ ${minutes / 60} h`}
+                  </option>
+                ))}
+              </select>
+
+              <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortOption)}
                 aria-label="Trier les recettes"
@@ -292,6 +405,56 @@ export default function RecipesPage() {
                 <option value="difficulty">Difficulté</option>
               </select>
             </div>
+
+            {availableTags.length > 0 && (
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowTags((current) => !current)}
+                  aria-expanded={showTags}
+                  className="flex w-full items-center justify-between rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 text-sm font-bold text-stone-600 transition hover:border-orange-300 hover:text-orange-700 sm:px-5"
+                >
+                  <span>
+                    Filtrer par tag
+                    {selectedTags.length > 0 && (
+                      <span className="ml-2 rounded-full bg-orange-500 px-2 py-0.5 text-xs font-bold text-white">
+                        {selectedTags.length}
+                      </span>
+                    )}
+                  </span>
+
+                  <ChevronDown
+                    className={`h-5 w-5 shrink-0 transition ${
+                      showTags ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+
+                {showTags && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {availableTags.map((tag) => {
+                      const active = selectedTags.includes(tag)
+
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleTag(tag)}
+                          aria-pressed={active}
+                          className={`rounded-full border px-3 py-1.5 text-sm font-bold transition ${
+                            active
+                              ? 'border-orange-500 bg-orange-500 text-white shadow-sm'
+                              : 'border-orange-100 bg-cream-input text-stone-600 hover:border-orange-300 hover:text-orange-700'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -465,23 +628,41 @@ export default function RecipesPage() {
                 tone="honey"
                 emoji="🔍"
                 title="Aucune recette trouvée"
-                description="Essaie une autre recherche ou une autre catégorie."
+                description="Essaie d’élargir tes filtres (catégorie, difficulté, temps, tags) ou une autre recherche."
                 action={
                   <Button type="button" onClick={resetFilters} size="lg">
-                    Revenir aux catégories
+                    Réinitialiser les filtres
                   </Button>
                 }
               />
             ) : (
-              <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredRecipes.map((recipe) => (
-                  <RecipeCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    rating={ratings.get(recipe.id)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {visibleRecipes.map((recipe) => (
+                    <RecipeCard
+                      key={recipe.id}
+                      recipe={recipe}
+                      rating={ratings.get(recipe.id)}
+                    />
+                  ))}
+                </div>
+
+                {remainingCount > 0 && (
+                  <div className="mt-8 flex justify-center">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="lg"
+                      onClick={() =>
+                        setVisibleCount((current) => current + PAGE_SIZE)
+                      }
+                    >
+                      Voir plus de recettes ({remainingCount} restante
+                      {remainingCount > 1 ? 's' : ''})
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

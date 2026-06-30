@@ -2,10 +2,27 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 import { LOGO_SRC } from '../../data/brand'
+import { VITRINE_PRICING_URL } from '../../config/site'
 import { useAuth } from '../../context/useAuth'
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
 import { supabase } from '../../lib/supabase'
 import { getProfile, type UserProfile } from '../../services/profiles'
+
+function PlusIcon({ className = 'h-4 w-4' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={3}
+      strokeLinecap="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  )
+}
 
 type DropdownName = 'recipes' | 'tools' | 'profile' | null
 
@@ -24,13 +41,13 @@ const personalLinks = [
   },
   {
     label: 'Mes recettes',
-    description: 'Voir et modifier tes recettes',
+    description: 'Voir et modifier vos recettes',
     to: '/my-recipes',
     emoji: '📖',
   },
   {
     label: 'Favoris',
-    description: 'Retrouver tes recettes préférées',
+    description: 'Retrouver vos recettes préférées',
     to: '/favorites',
     emoji: '❤️',
   },
@@ -39,7 +56,7 @@ const personalLinks = [
 const toolLinks = [
   {
     label: 'Mode frigo',
-    description: 'Trouver une recette avec ce que tu as',
+    description: 'Trouver une recette avec ce que vous avez',
     to: '/frigo',
     emoji: '🥕',
   },
@@ -331,19 +348,15 @@ export default function Header() {
               </div>
             </div>
           </div>
-          <NavLink
-            to="/pricing"
+          <a
+            href={VITRINE_PRICING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={closeDropdowns}
-            className={({ isActive }) =>
-              `rounded-full px-5 py-3 text-sm font-bold transition ${
-                isActive
-                  ? 'bg-honey text-espresso'
-                  : 'text-[#8a5a1e] hover:bg-honey-soft'
-              }`
-            }
+            className="rounded-full px-5 py-3 text-sm font-bold text-[#8a5a1e] transition hover:bg-honey-soft"
           >
             ✨ Premium
-          </NavLink>
+          </a>
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -352,20 +365,15 @@ export default function Header() {
               <Link
                 to="/add-recipe"
                 onClick={closeDropdowns}
-                className={`group flex items-center gap-3 rounded-full px-4 py-2 font-black shadow-sm ring-1 transition ${
+                aria-label="Ajouter une recette"
+                className={`group inline-flex items-center gap-2.5 rounded-full py-2.5 pl-2.5 pr-5 font-black text-white transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 ${
                   isAddRecipeActive
-                    ? 'bg-orange-500 text-white ring-orange-200'
-                    : 'bg-cream-300 text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
+                    ? 'bg-orange-600 shadow-md shadow-orange-600/30 ring-2 ring-orange-300'
+                    : 'bg-gradient-to-r from-orange-500 to-orange-600 shadow-sm shadow-orange-500/20 hover:from-orange-600 hover:to-orange-700 hover:shadow-md hover:shadow-orange-500/30'
                 }`}
               >
-                <span
-                  className={`flex h-11 w-11 items-center justify-center rounded-full text-xl font-black ring-2 ring-white transition group-hover:scale-105 ${
-                    isAddRecipeActive
-                      ? 'bg-white/20 text-white'
-                      : 'bg-orange-500 text-white'
-                  }`}
-                >
-                  +
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 transition duration-200 group-hover:rotate-90">
+                  <PlusIcon />
                 </span>
 
                 <span className="whitespace-nowrap">Ajouter une recette</span>
@@ -473,7 +481,7 @@ export default function Header() {
                             </p>
 
                             <p className="text-xs font-semibold text-stone-500">
-                              Quitter ton compte
+                              Quitter votre compte
                             </p>
                           </div>
                         </div>
@@ -517,26 +525,20 @@ export default function Header() {
               <Link
                 to="/add-recipe"
                 onClick={closeMenu}
-                className={`flex items-center justify-between rounded-2xl px-4 py-4 font-black shadow-sm ring-1 transition ${
+                className={`flex items-center justify-between rounded-2xl px-4 py-4 font-black text-white shadow-sm transition ${
                   isAddRecipeActive
-                    ? 'bg-orange-500 text-white ring-orange-200'
-                    : 'bg-cream-300 text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
+                    ? 'bg-orange-600 ring-2 ring-orange-300'
+                    : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
                 }`}
               >
                 <span className="flex items-center gap-3">
-                  <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-full text-xl ring-2 ring-white ${
-                      isAddRecipeActive
-                        ? 'bg-white/20 text-white'
-                        : 'bg-orange-500 text-white'
-                    }`}
-                  >
-                    +
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                    <PlusIcon className="h-5 w-5" />
                   </span>
                   Ajouter une recette
                 </span>
 
-                <span>→</span>
+                <span aria-hidden="true">→</span>
               </Link>
             )}
 
@@ -619,20 +621,16 @@ export default function Header() {
               </div>
             </details>
 
-            <NavLink
-              to="/pricing"
+            <a
+              href={VITRINE_PRICING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={closeMenu}
-              className={({ isActive }) =>
-                `flex items-center justify-between rounded-2xl px-4 py-4 text-base font-black shadow-soft ring-1 transition ${
-                  isActive
-                    ? 'bg-honey text-espresso ring-honey'
-                    : 'bg-honey-soft text-[#8a5a1e] ring-honey/40 hover:bg-honey/30'
-                }`
-              }
+              className="flex items-center justify-between rounded-2xl bg-honey-soft px-4 py-4 text-base font-black text-[#8a5a1e] shadow-soft ring-1 ring-honey/40 transition hover:bg-honey/30"
             >
               <span>✨ Passer à Premium</span>
               <span>→</span>
-            </NavLink>
+            </a>
 
             {user ? (
               <details className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">

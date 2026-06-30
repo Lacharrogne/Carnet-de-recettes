@@ -306,9 +306,9 @@ export default function RecipeDetailsPage() {
       ])
 
       if (addedItems.length === 0) {
-        showSuccessMessage(`"${ingredient}" est déjà dans ta liste de courses.`)
+        showSuccessMessage(`"${ingredient}" est déjà dans votre liste de courses.`)
       } else {
-        showSuccessMessage(`"${ingredient}" a été ajouté à ta liste de courses.`)
+        showSuccessMessage(`"${ingredient}" a été ajouté à votre liste de courses.`)
       }
     } catch (error) {
       console.error(error)
@@ -339,7 +339,7 @@ export default function RecipeDetailsPage() {
 
     if (currentRecipeId && currentRecipeId !== String(recipe.id)) {
       const confirmReplace = window.confirm(
-        `Il y a déjà une recette prévue pour ${dayLabel.toLowerCase()} ${mealLabel.toLowerCase()}.\n\nVeux-tu vraiment la remplacer par "${recipe.title}" ?`,
+        `Il y a déjà une recette prévue pour ${dayLabel.toLowerCase()} ${mealLabel.toLowerCase()}.\n\nVoulez-vous vraiment la remplacer par "${recipe.title}" ?`,
       )
 
       if (!confirmReplace) {
@@ -889,7 +889,7 @@ export default function RecipeDetailsPage() {
 
                   {isOwner && (
                     <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
-                      Ta recette
+                      Votre recette
                     </span>
                   )}
                 </div>
@@ -975,8 +975,8 @@ export default function RecipeDetailsPage() {
                     </h2>
 
                     <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
-                      Choisis un jour et un repas pour retrouver cette recette
-                      dans ton planning.
+                      Choisissez un jour et un repas pour retrouver cette recette
+                      dans votre planning.
                     </p>
                   </div>
 
@@ -1061,8 +1061,8 @@ export default function RecipeDetailsPage() {
               </h2>
 
               <p className="mt-1 text-sm leading-6 text-stone-500 print:hidden">
-                Clique sur + pour ajouter uniquement les ingrédients souhaités à
-                ta liste de courses.
+                Cliquez sur + pour ajouter uniquement les ingrédients souhaités à
+                votre liste de courses.
               </p>
             </div>
 

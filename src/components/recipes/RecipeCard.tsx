@@ -81,8 +81,8 @@ export default function RecipeCard({
       onFavoriteChange?.()
       showToast({
         message: newValue
-          ? 'Recette ajoutée à tes favoris ❤️'
-          : 'Recette retirée de tes favoris',
+          ? 'Recette ajoutée à vos favoris ❤️'
+          : 'Recette retirée de vos favoris',
         tone: 'success',
       })
     } catch (error) {

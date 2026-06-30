@@ -64,7 +64,7 @@ export default function AddRecipePage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
-              Note les ingrédients, les étapes, le temps de préparation et les
+              Notez les ingrédients, les étapes, le temps de préparation et les
               petites astuces pour retrouver facilement cette recette plus tard.
             </p>
           </div>
@@ -81,7 +81,7 @@ export default function AddRecipePage() {
                 </h2>
 
                 <p className="mt-3 leading-7 text-stone-600">
-                  Ajoute une belle photo, choisis une catégorie et utilise les
+                  Ajoutez une belle photo, choisissez une catégorie et utilisez les
                   tags pour la retrouver rapidement.
                 </p>
               </div>
@@ -90,7 +90,7 @@ export default function AddRecipePage() {
                 <p className="font-bold text-stone-900">Petit conseil</p>
 
                 <p className="mt-1 text-sm leading-6 text-stone-600">
-                  Pour les ingrédients, écris-les un par ligne : quantité +
+                  Pour les ingrédients, écrivez-les un par ligne : quantité +
                   ingrédient, par exemple “200 g de farine”.
                 </p>
               </div>
@@ -108,7 +108,7 @@ export default function AddRecipePage() {
           </h2>
 
           <p className="mt-2 text-stone-600">
-            Remplis le formulaire pour enregistrer une nouvelle recette dans le
+            Remplissez le formulaire pour enregistrer une nouvelle recette dans le
             carnet.
           </p>
         </div>

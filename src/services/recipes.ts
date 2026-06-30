@@ -15,7 +15,8 @@ type RecipeRow = {
   image_url: string | null
   tags: string[] | null
   ingredients: string[] | null
-  steps: string[] | null
+  // Optionnel : absent des requêtes de liste (chargé seulement au détail).
+  steps?: string[] | null
   related_recipe_ids: number[] | null
 }
 
@@ -39,10 +40,16 @@ function mapRecipe(row: RecipeRow): Recipe {
   }
 }
 
+// Colonnes utiles aux LISTES (catalogue, cartes, frigo, planning…). On exclut
+// volontairement `steps` (champ le plus lourd) : seules les pages de DÉTAIL en
+// ont besoin. mapRecipe() retombe sur [] si la colonne est absente.
+const RECIPE_LIST_COLUMNS =
+  'id,user_id,title,category,difficulty,prep_time,cook_time,servings,description,image,image_url,tags,ingredients,related_recipe_ids,created_at'
+
 export async function getRecipes(): Promise<Recipe[]> {
   const { data, error } = await supabase
     .from('recipes')
-    .select('*')
+    .select(RECIPE_LIST_COLUMNS)
     .order('created_at', { ascending: false })
 
   if (error) throw error
@@ -183,6 +190,16 @@ export async function updateRecipe(
     relatedRecipeIds: number[]
   }
 ): Promise<Recipe> {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError) throw userError
+  if (!user) throw new Error('Utilisateur non connecté')
+
+  // On restreint la modification à la recette de l'utilisateur (défense en
+  // profondeur, en complément des politiques RLS côté Supabase).
   const { data, error } = await supabase
     .from('recipes')
     .update({
@@ -201,6 +218,7 @@ export async function updateRecipe(
       related_recipe_ids: recipe.relatedRecipeIds,
     })
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single()
 
@@ -210,10 +228,20 @@ export async function updateRecipe(
 }
 
 export async function deleteRecipe(id: number): Promise<void> {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError) throw userError
+  if (!user) throw new Error('Utilisateur non connecté')
+
+  // Suppression limitée à sa propre recette (défense en profondeur + RLS).
   const { error } = await supabase
     .from('recipes')
     .delete()
     .eq('id', id)
+    .eq('user_id', user.id)
 
   if (error) throw error
 }
@@ -229,7 +257,7 @@ export async function getMyRecipes(): Promise<Recipe[]> {
 
   const { data, error } = await supabase
     .from('recipes')
-    .select('*')
+    .select(RECIPE_LIST_COLUMNS)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 

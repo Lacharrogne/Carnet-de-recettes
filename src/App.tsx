@@ -26,7 +26,6 @@ const SocialPage = lazy(() => import('./pages/SocialPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const IdeasPage = lazy(() => import('./pages/IdeasPage'))
 const ToolsPage = lazy(() => import('./pages/ToolsPage'))
-const PricingPage = lazy(() => import('./pages/PricingPage'))
 
 function getPageBackgroundClass(pathname: string) {
   if (pathname === '/') {
@@ -69,10 +68,6 @@ function getPageBackgroundClass(pathname: string) {
     return 'page-background-auth'
   }
 
-  if (pathname.startsWith('/pricing')) {
-    return 'page-background-profile'
-  }
-
   return 'page-background-default'
 }
 
@@ -91,7 +86,7 @@ export default function App() {
 
       <Header />
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto max-w-6xl px-4 pt-8 pb-28 lg:pb-8">
         <Suspense fallback={<PageSkeleton />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -102,10 +97,16 @@ export default function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/shopping-list" element={<ShoppingListPage />} />
           <Route path="/users/:userId" element={<PublicProfilePage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/ideas" element={<IdeasPage />} />
           <Route path="/tools" element={<ToolsPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
 
           <Route
             path="/profile"

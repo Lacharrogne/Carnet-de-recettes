@@ -60,7 +60,7 @@ export default function RecipePickerModal({
           <input
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Rechercher : pâtes, gâteau, poulet..."
+            aria-label="Rechercher une recette" placeholder="Rechercher : pâtes, gâteau, poulet..."
             autoFocus
             className="w-full rounded-[1.5rem] border border-orange-200 bg-white px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
           />

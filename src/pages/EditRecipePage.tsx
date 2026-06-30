@@ -154,7 +154,7 @@ export default function EditRecipePage() {
           </h1>
 
           <p className="mt-3 max-w-2xl leading-7 text-stone-600">
-            Mets à jour les informations de ta recette, puis enregistre les
+            Mettez à jour les informations de votre recette, puis enregistrez les
             modifications pour les retrouver dans le carnet.
           </p>
         </div>

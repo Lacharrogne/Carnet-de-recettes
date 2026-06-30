@@ -81,7 +81,7 @@ export default function SocialPage() {
         }
 
         if (!data.user) {
-          setErrorMessage('Connecte-toi pour voir tes relations.')
+          setErrorMessage('Connectez-vous pour voir vos relations.')
           return
         }
 
@@ -100,7 +100,7 @@ export default function SocialPage() {
         console.error(error)
 
         if (!ignore) {
-          setErrorMessage('Impossible de charger tes relations.')
+          setErrorMessage('Impossible de charger vos relations.')
         }
       } finally {
         if (!ignore) {
@@ -124,14 +124,14 @@ export default function SocialPage() {
 
   const emptyMessage = useMemo(() => {
     if (activeTab === 'friends') {
-      return 'Tu n’as pas encore d’ami. Une amitié apparaît quand deux utilisateurs se suivent mutuellement.'
+      return 'Vous n’avez pas encore d’ami. Une amitié apparaît quand deux utilisateurs se suivent mutuellement.'
     }
 
     if (activeTab === 'followers') {
-      return 'Personne ne suit encore ton carnet.'
+      return 'Personne ne suit encore votre carnet.'
     }
 
-    return 'Tu ne suis encore aucun carnet.'
+    return 'Vous ne suivez encore aucun carnet.'
   }, [activeTab])
 
   return (
@@ -149,8 +149,8 @@ export default function SocialPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-lg leading-8 text-stone-600">
-              Retrouve tes amis, les personnes qui suivent ton carnet et les
-              carnets que tu suis.
+              Retrouvez vos amis, les personnes qui suivent votre carnet et les
+              carnets que vous suivez.
             </p>
           </div>
 
@@ -200,7 +200,7 @@ export default function SocialPage() {
           <p className="mt-3 text-4xl font-black">{followers.length}</p>
           <p className="mt-1 text-sm font-medium opacity-80">
             personne{followers.length > 1 ? 's' : ''} suit
-            {followers.length > 1 ? 'vent' : ''} ton carnet
+            {followers.length > 1 ? 'vent' : ''} votre carnet
           </p>
         </button>
 
@@ -234,10 +234,10 @@ export default function SocialPage() {
 
           <h2 className="text-3xl font-black text-stone-950">
             {activeTab === 'friends'
-              ? 'Tes amis'
+              ? 'Vos amis'
               : activeTab === 'followers'
-                ? 'Ils suivent ton carnet'
-                : 'Les carnets que tu suis'}
+                ? 'Ils suivent votre carnet'
+                : 'Les carnets que vous suivez'}
           </h2>
         </div>
 

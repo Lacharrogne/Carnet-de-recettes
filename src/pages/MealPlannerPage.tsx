@@ -437,7 +437,7 @@ export default function MealPlannerPage() {
     setSuccessMessage(
       shoppingListUpdated
         ? `"${recipe.title}" a été ajouté au planning. La liste de courses a été mise à jour.`
-        : `"${recipe.title}" a été ajouté au planning. Connecte-toi pour synchroniser la liste de courses.`,
+        : `"${recipe.title}" a été ajouté au planning. Connectez-vous pour synchroniser la liste de courses.`,
     )
 
     window.setTimeout(() => {
@@ -586,7 +586,7 @@ export default function MealPlannerPage() {
               </h1>
 
               <p className="mt-6 max-w-xl text-lg leading-8 text-stone-600">
-                Prévois tes déjeuners, tes dîners et tes petites envies de la
+                Prévoyez vos déjeuners, vos dîners et vos petites envies de la
                 semaine. Le carnet peut aussi alimenter automatiquement ta liste
                 de courses.
               </p>
@@ -690,7 +690,7 @@ export default function MealPlannerPage() {
 
               {!user && (
                 <div className="mt-6 rounded-[1.5rem] bg-white/80 p-4 text-sm font-bold leading-6 text-stone-600 ring-1 ring-orange-100">
-                  💡 Ton planning est enregistré sur cet appareil. Connecte-toi
+                  💡 Votre planning est enregistré sur cet appareil. Connectez-vous
                   pour synchroniser automatiquement la liste de courses.
                 </div>
               )}

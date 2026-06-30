@@ -43,7 +43,7 @@ export default function FavoritesPage() {
       .catch((error) => {
         if (!ignore) {
           console.error(error)
-          setErrorMessage('Impossible de charger tes favoris.')
+          setErrorMessage('Impossible de charger vos favoris.')
         }
       })
       .finally(() => {
@@ -162,8 +162,8 @@ export default function FavoritesPage() {
               </h1>
 
               <p className="mt-3 max-w-2xl leading-7 text-stone-600">
-                Retrouve les recettes que tu as gardées de côté pour les refaire
-                plus tard, les partager ou préparer tes repas.
+                Retrouvez les recettes que vous avez gardées de côté pour les refaire
+                plus tard, les partager ou préparer vos repas.
               </p>
             </div>
           </div>
@@ -242,7 +242,7 @@ export default function FavoritesPage() {
           </h2>
 
           <p className="mt-2 text-stone-600">
-            Cherche une recette par nom, ingrédient, tag ou catégorie.
+            Cherchez une recette par nom, ingrédient, tag ou catégorie.
           </p>
         </div>
 
@@ -302,14 +302,14 @@ export default function FavoritesPage() {
           emoji="❤️"
           tone="plum"
           title="Aucune recette favorite pour le moment"
-          description="Ajoute des recettes en favori avec le bouton cœur pour les retrouver ici facilement."
+          description="Ajoutez des recettes en favori avec le bouton cœur pour les retrouver ici facilement."
           action={<Button to="/recipes">Explorer les recettes</Button>}
         />
       ) : filteredRecipes.length === 0 ? (
         <EmptyState
           emoji="🔎"
           title="Aucun favori trouvé"
-          description="Essaie une autre recherche ou une autre catégorie."
+          description="Essayez une autre recherche ou une autre catégorie."
           action={
             <Button type="button" onClick={resetFilters}>
               Voir tous mes favoris

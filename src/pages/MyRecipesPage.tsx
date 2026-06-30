@@ -36,7 +36,7 @@ export default function MyRecipesPage() {
       .catch((error) => {
         if (!ignore) {
           console.error(error)
-          setErrorMessage('Impossible de charger tes recettes.')
+          setErrorMessage('Impossible de charger vos recettes.')
         }
       })
       .finally(() => {
@@ -155,7 +155,7 @@ export default function MyRecipesPage() {
               </h1>
 
               <p className="mt-3 max-w-2xl leading-7 text-stone-600">
-                Retrouve toutes les recettes que tu as ajoutées dans ton carnet,
+                Retrouvez toutes les recettes que vous avez ajoutées dans votre carnet,
                 pour les modifier, les compléter ou les refaire facilement.
               </p>
             </div>
@@ -235,7 +235,7 @@ export default function MyRecipesPage() {
           </h2>
 
           <p className="mt-2 text-stone-600">
-            Cherche une recette par nom, ingrédient, tag ou catégorie.
+            Cherchez une recette par nom, ingrédient, tag ou catégorie.
           </p>
         </div>
 
@@ -294,7 +294,7 @@ export default function MyRecipesPage() {
         <EmptyState
           emoji="📖"
           title="Aucune recette pour le moment"
-          description="Ajoute ta première recette pour commencer ton carnet."
+          description="Ajoutez votre première recette pour commencer votre carnet."
           action={
             <Button to="/add-recipe">Ajouter ma première recette</Button>
           }
@@ -303,7 +303,7 @@ export default function MyRecipesPage() {
         <EmptyState
           emoji="🔎"
           title="Aucune recette trouvée"
-          description="Essaie une autre recherche ou une autre catégorie."
+          description="Essayez une autre recherche ou une autre catégorie."
           action={
             <Button type="button" onClick={resetFilters}>
               Voir toutes mes recettes

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import DashboardHero from '../components/home/DashboardHero'
 import LandingValue from '../components/home/LandingValue'
+import OnboardingCard from '../components/home/OnboardingCard'
 import { LOGO_SRC } from '../data/brand'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
@@ -16,11 +17,13 @@ import { useAuth } from '../context/useAuth'
 import { getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getProfile } from '../services/profiles'
-import { getRecipes } from '../services/recipes'
+import { getMyRecipes, getRecipes } from '../services/recipes'
 import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import { getShoppingListItems } from '../services/shoppingList'
 import { PLANNER_STORAGE_KEY } from '../lib/weeklyPlanner'
 import type { Recipe } from '../types/recipe'
+
+const ONBOARDING_DISMISS_KEY = 'cdr-onboarding-dismissed'
 
 const WEEK_DAY_KEYS = [
   'sunday',
@@ -70,14 +73,14 @@ const QUICK_LINKS: {
     to: '/frigo',
     emoji: '🥕',
     label: 'Mode frigo',
-    description: 'Cuisiner avec ce que tu as',
+    description: 'Cuisiner avec ce que vous avez',
     tone: 'sage',
   },
   {
     to: '/shopping-list',
     emoji: '🛒',
     label: 'Liste de courses',
-    description: 'Tes ingrédients à acheter',
+    description: 'Vos ingrédients à acheter',
     tone: 'terracotta',
   },
   {
@@ -105,6 +108,49 @@ export default function HomePage() {
   const [randomRecipe, setRandomRecipe] = useState<Recipe | null>(null)
   const [randomModalOpen, setRandomModalOpen] = useState(false)
   const [randomizing, setRandomizing] = useState(false)
+
+  const [ownRecipeCount, setOwnRecipeCount] = useState<number | null>(null)
+  const [onboardingDismissed, setOnboardingDismissed] = useState(() => {
+    try {
+      return window.localStorage.getItem(ONBOARDING_DISMISS_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    let ignore = false
+
+    getMyRecipes()
+      .then((data) => {
+        if (!ignore) {
+          setOwnRecipeCount(data.length)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+        if (!ignore) {
+          setOwnRecipeCount(null)
+        }
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [user])
+
+  function dismissOnboarding() {
+    setOnboardingDismissed(true)
+    try {
+      window.localStorage.setItem(ONBOARDING_DISMISS_KEY, '1')
+    } catch {
+      // ignore
+    }
+  }
 
   useEffect(() => {
     let ignore = false
@@ -229,14 +275,21 @@ export default function HomePage() {
     <>
       <section className="space-y-8 sm:space-y-10 lg:space-y-14">
         {user ? (
-          <DashboardHero
-            userName={userName || 'chef'}
-            todayMealLabel={todayPlan.mealLabel}
-            todayRecipe={todayRecipe}
-            shoppingCount={shoppingCount}
-            onSurprise={launchRandomRecipe}
-            surpriseDisabled={loading || recipes.length === 0 || randomizing}
-          />
+          ownRecipeCount === 0 && !onboardingDismissed ? (
+            <OnboardingCard
+              userName={userName || 'chef'}
+              onDismiss={dismissOnboarding}
+            />
+          ) : (
+            <DashboardHero
+              userName={userName || 'chef'}
+              todayMealLabel={todayPlan.mealLabel}
+              todayRecipe={todayRecipe}
+              shoppingCount={shoppingCount}
+              onSurprise={launchRandomRecipe}
+              surpriseDisabled={loading || recipes.length === 0 || randomizing}
+            />
+          )
         ) : (
           <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
           <div className="grid gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
@@ -331,7 +384,7 @@ export default function HomePage() {
                       </p>
 
                       <p className="mt-3 max-w-sm text-sm font-bold leading-6 text-orange-50 sm:mt-4 sm:text-base sm:leading-7">
-                        Clique ici et le carnet choisit une recette au hasard.
+                        Cliquez ici et le carnet choisit une recette au hasard.
                       </p>
                     </div>
 
@@ -352,13 +405,13 @@ export default function HomePage() {
 
                   <p className="mt-3 line-clamp-3 text-sm leading-6 text-cacao/80">
                     {latestRecipes[0]?.description ??
-                      'Ajoute une première recette pour commencer ton carnet.'}
+                      'Ajoutez une première recette pour commencer votre carnet.'}
                   </p>
                 </div>
 
                 <div className="mt-5 rounded-[1.5rem] border border-dashed border-honey/50 bg-honey-soft/50 p-4 text-sm font-medium leading-6 text-cacao sm:mt-6">
-                  💡 Astuce : ajoute tes recettes du quotidien, tes favoris et
-                  les ingrédients à ta liste de courses.
+                  💡 Astuce : ajoutez vos recettes du quotidien, vos favoris et
+                  les ingrédients à votre liste de courses.
                 </div>
               </div>
             </div>
@@ -420,7 +473,7 @@ export default function HomePage() {
               </p>
 
               <p className="mt-2 text-stone-600">
-                Ajoute ta première recette pour la voir apparaître ici.
+                Ajoutez votre première recette pour la voir apparaître ici.
               </p>
 
               <Button
@@ -450,7 +503,7 @@ export default function HomePage() {
             className="mb-6 sm:mb-8"
             eyebrow="Explorer"
             title="Les grandes familles de recettes"
-            subtitle="Parcours le carnet selon tes envies du moment."
+            subtitle="Parcourez le carnet selon vos envies du moment."
             action={
               <Button
                 to="/recipes"
@@ -634,7 +687,7 @@ export default function HomePage() {
             </p>
 
             <p className="mt-2 text-cacao/80">
-              Ajoute une recette pour utiliser le bouton magique.
+              Ajoutez une recette pour utiliser le bouton magique.
             </p>
           </div>
         )}

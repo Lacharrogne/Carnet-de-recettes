@@ -20,9 +20,9 @@ type ToolCard = {
 const tools: ToolCard[] = [
   {
     label: 'Mode frigo',
-    subtitle: 'Cuisiner avec ce que tu as déjà',
+    subtitle: 'Cuisiner avec ce que vous avez déjà',
     description:
-      'Indique les ingrédients disponibles chez toi et le carnet te propose les recettes les plus adaptées.',
+      'Indiquez les ingrédients disponibles chez vous et le carnet vous propose les recettes les plus adaptées.',
     to: '/frigo',
     emoji: '🥕',
     buttonLabel: 'Ouvrir le mode frigo',
@@ -34,7 +34,7 @@ const tools: ToolCard[] = [
     accentText: 'text-green-700',
     glow: 'bg-green-200/60',
     points: [
-      'Recettes selon ton frigo',
+      'Recettes selon votre frigo',
       'Ingrédients manquants visibles',
       'Priorité anti-gaspillage',
     ],
@@ -64,7 +64,7 @@ const tools: ToolCard[] = [
     label: 'Planning',
     subtitle: 'Organiser les repas de la semaine',
     description:
-      'Prévois les déjeuners et les dîners de la semaine pour mieux anticiper les courses.',
+      'Prévoyez les déjeuners et les dîners de la semaine pour mieux anticiper les courses.',
     to: '/planning',
     emoji: '📅',
     buttonLabel: 'Planifier mes repas',
@@ -85,7 +85,7 @@ const tools: ToolCard[] = [
     label: 'Boîte à idées',
     subtitle: 'Faire évoluer le carnet',
     description:
-      'Propose une amélioration, une nouvelle fonctionnalité ou un retour pour rendre le site encore plus utile.',
+      'Proposez une amélioration, une nouvelle fonctionnalité ou un retour pour rendre le site encore plus utile.',
     to: '/ideas',
     emoji: '💡',
     buttonLabel: 'Donner une idée',
@@ -123,9 +123,9 @@ export default function ToolsPage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
-              Retrouve ici les fonctions pratiques du carnet : trouver une
-              recette avec ce que tu as, préparer tes courses, organiser la
-              semaine et proposer tes idées.
+              Retrouvez ici les fonctions pratiques du carnet : trouver une
+              recette avec ce que vous avez, préparer vos courses, organiser la
+              semaine et proposer vos idées.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -158,7 +158,7 @@ export default function ToolsPage() {
               <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
                 <p className="text-2xl">🥕</p>
                 <p className="mt-2 font-black text-stone-950">
-                  Tu pars de ce que tu as déjà.
+                  Vous partez de ce que vous avez déjà.
                 </p>
               </div>
 
@@ -172,7 +172,7 @@ export default function ToolsPage() {
               <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
                 <p className="text-2xl">📅</p>
                 <p className="mt-2 font-black text-stone-950">
-                  Tu organises tes repas sans prise de tête.
+                  Vous organisez vos repas sans prise de tête.
                 </p>
               </div>
             </div>
