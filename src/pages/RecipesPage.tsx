@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Search, X } from 'lucide-react'
+import { ChevronDown, Search, X } from 'lucide-react'
 
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
@@ -40,6 +40,7 @@ export default function RecipesPage() {
   const [difficulty, setDifficulty] = useState<DifficultyFilter>('all')
   const [maxTime, setMaxTime] = useState(0)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [showTags, setShowTags] = useState(false)
 
   const categoryParam = searchParams.get('category')
 
@@ -334,7 +335,7 @@ export default function RecipesPage() {
               )}
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
               <select
                 value={selectedCategory?.value ?? ''}
                 onChange={(event) => {
@@ -407,31 +408,51 @@ export default function RecipesPage() {
 
             {availableTags.length > 0 && (
               <div className="mt-4">
-                <p className="mb-2 text-sm font-bold text-stone-500">
-                  Filtrer par tag
-                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowTags((current) => !current)}
+                  aria-expanded={showTags}
+                  className="flex w-full items-center justify-between rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 text-sm font-bold text-stone-600 transition hover:border-orange-300 hover:text-orange-700 sm:px-5"
+                >
+                  <span>
+                    Filtrer par tag
+                    {selectedTags.length > 0 && (
+                      <span className="ml-2 rounded-full bg-orange-500 px-2 py-0.5 text-xs font-bold text-white">
+                        {selectedTags.length}
+                      </span>
+                    )}
+                  </span>
 
-                <div className="flex flex-wrap gap-2">
-                  {availableTags.map((tag) => {
-                    const active = selectedTags.includes(tag)
+                  <ChevronDown
+                    className={`h-5 w-5 shrink-0 transition ${
+                      showTags ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
 
-                    return (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => toggleTag(tag)}
-                        aria-pressed={active}
-                        className={`rounded-full border px-3 py-1.5 text-sm font-bold transition ${
-                          active
-                            ? 'border-orange-500 bg-orange-500 text-white shadow-sm'
-                            : 'border-orange-100 bg-cream-input text-stone-600 hover:border-orange-300 hover:text-orange-700'
-                        }`}
-                      >
-                        {tag}
-                      </button>
-                    )
-                  })}
-                </div>
+                {showTags && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {availableTags.map((tag) => {
+                      const active = selectedTags.includes(tag)
+
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleTag(tag)}
+                          aria-pressed={active}
+                          className={`rounded-full border px-3 py-1.5 text-sm font-bold transition ${
+                            active
+                              ? 'border-orange-500 bg-orange-500 text-white shadow-sm'
+                              : 'border-orange-100 bg-cream-input text-stone-600 hover:border-orange-300 hover:text-orange-700'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
