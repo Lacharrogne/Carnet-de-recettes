@@ -14,7 +14,7 @@ export default function CursorSelector() {
   return (
     <section
       aria-labelledby="cursor-selector-title"
-      className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100"
+      className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
     >
       <div className="mb-5">
         <p className="font-bold text-orange-700">Apparence</p>
@@ -49,12 +49,12 @@ export default function CursorSelector() {
               className={`flex items-center gap-4 rounded-[1.5rem] border p-4 text-left transition ${
                 selected
                   ? 'border-orange-300 bg-orange-50 ring-2 ring-orange-200'
-                  : 'border-orange-100 bg-cream-raised hover:border-orange-200 hover:bg-orange-50'
+                  : 'border-orange-100 bg-[#fffaf5] hover:border-orange-200 hover:bg-orange-50'
               }`}
             >
               <span
                 aria-hidden="true"
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-card text-2xl shadow-sm ring-1 ring-orange-100"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm ring-1 ring-orange-100"
               >
                 {option.preview}
               </span>

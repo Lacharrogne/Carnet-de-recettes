@@ -138,14 +138,14 @@ export default function ToolsPage() {
 
               <Link
                 to="/shopping-list"
-                className="rounded-full border border-orange-200 bg-card px-6 py-3 font-black text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
+                className="rounded-full border border-orange-200 bg-white px-6 py-3 font-black text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
               >
                 Voir les courses
               </Link>
             </div>
           </div>
 
-          <div className="rounded-[2rem] bg-card/85 p-5 shadow-sm ring-1 ring-orange-100 backdrop-blur">
+          <div className="rounded-[2rem] bg-white/85 p-5 shadow-sm ring-1 ring-orange-100 backdrop-blur">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Le carnet intelligent
             </p>
@@ -224,7 +224,7 @@ export default function ToolsPage() {
                 {tool.points.map((point) => (
                   <div
                     key={point}
-                    className="flex items-center gap-3 rounded-2xl bg-card/75 px-4 py-3 text-sm font-bold text-stone-700 shadow-sm ring-1 ring-white/80"
+                    className="flex items-center gap-3 rounded-2xl bg-white/75 px-4 py-3 text-sm font-bold text-stone-700 shadow-sm ring-1 ring-white/80"
                   >
                     <span className={tool.accentText}>✓</span>
                     <span>{point}</span>
@@ -238,7 +238,7 @@ export default function ToolsPage() {
                 </span>
 
                 <span
-                  className={`flex h-11 w-11 items-center justify-center rounded-full bg-card text-xl font-black ${tool.accentText} shadow-sm transition group-hover:translate-x-1`}
+                  className={`flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl font-black ${tool.accentText} shadow-sm transition group-hover:translate-x-1`}
                 >
                   →
                 </span>
@@ -248,7 +248,7 @@ export default function ToolsPage() {
         ))}
       </div>
 
-      <div className="rounded-[2.5rem] bg-card p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="rounded-[2.5rem] bg-white p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="font-bold text-orange-600">Par quoi commencer ?</p>

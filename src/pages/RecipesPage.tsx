@@ -222,7 +222,7 @@ export default function RecipesPage() {
             </p>
           </div>
 
-          <div className="rounded-[1.75rem] bg-card p-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
+          <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
             <div className="relative">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
 
@@ -299,7 +299,7 @@ export default function RecipesPage() {
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
       {!hasActiveFilters && (
-        <div className="rounded-[2rem] bg-card/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
           <SectionHeader
             className="mb-6 sm:mb-8"
             eyebrow="Catégories"
@@ -346,7 +346,7 @@ export default function RecipesPage() {
                       {visualStyle.miniIcons.map((icon) => (
                         <span
                           key={icon}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-card/90 text-sm shadow-sm ring-1 ring-black/5 sm:h-9 sm:w-9 sm:text-base"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-sm shadow-sm ring-1 ring-black/5 sm:h-9 sm:w-9 sm:text-base"
                         >
                           {icon}
                         </span>
@@ -387,7 +387,7 @@ export default function RecipesPage() {
           className={`relative overflow-hidden rounded-[2rem] p-5 shadow-sm ring-1 sm:rounded-[2.5rem] sm:p-8 md:p-10 ${
             activeCategoryAmbience
               ? `${activeCategoryAmbience.pageBg} ${activeCategoryAmbience.ring}`
-              : 'bg-card/95 ring-orange-100'
+              : 'bg-white/95 ring-orange-100'
           }`}
         >
           {activeCategoryAmbience && (
@@ -451,8 +451,8 @@ export default function RecipesPage() {
                   onClick={resetFilters}
                   className={`w-full rounded-full border px-6 py-3 font-bold transition sm:w-fit ${
                     activeCategoryAmbience
-                      ? `border-white/70 bg-card/80 ${activeCategoryAmbience.buttonText} ${activeCategoryAmbience.buttonHover}`
-                      : 'border-orange-200 bg-card text-orange-700 hover:bg-orange-50'
+                      ? `border-white/70 bg-white/80 ${activeCategoryAmbience.buttonText} ${activeCategoryAmbience.buttonHover}`
+                      : 'border-orange-200 bg-white text-orange-700 hover:bg-orange-50'
                   }`}
                 >
                   Revenir aux catégories

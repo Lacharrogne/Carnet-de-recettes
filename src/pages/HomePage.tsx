@@ -467,7 +467,7 @@ export default function HomePage() {
           {loading ? (
             <RecipeCardGridSkeleton count={3} />
           ) : latestRecipes.length === 0 ? (
-            <div className="rounded-[1.5rem] bg-card p-6 text-center shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-8">
+            <div className="rounded-[1.5rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-8">
               <p className="text-lg font-bold text-stone-950">
                 Aucune recette pour le moment.
               </p>
@@ -559,7 +559,7 @@ export default function HomePage() {
                         {visualStyle.miniIcons.map((icon) => (
                           <span
                             key={icon}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-card/90 text-sm shadow-sm ring-1 ring-black/5 sm:h-9 sm:w-9 sm:text-base"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-sm shadow-sm ring-1 ring-black/5 sm:h-9 sm:w-9 sm:text-base"
                           >
                             {icon}
                           </span>

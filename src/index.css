@@ -52,20 +52,6 @@
   --color-sage-deep: #5f6b41;
   --color-sage-soft: #e8ebdc;
 
-  /* Tokens issus d'anciennes couleurs en dur (centralisés pour le thème) */
-  --color-cream-raised: #fffaf5;
-  --color-field-ring: #e9c4bc;
-  --color-danger: #b23b2e;
-  --color-danger-soft: #f7e3de;
-  --color-honey-deep: #8a5a1e;
-  --color-terracotta-hover: #eecbb4;
-  --color-berry: #8e5a6b;
-  --color-berry-soft: #f4e2e8;
-  --color-ocean: #3f6f8c;
-  --color-ocean-soft: #e3f0f6;
-  --color-rosefav: #d8617a;
-  --color-rosefav-deep: #c4506a;
-
   /* Polices */
   --font-sans:
     "Mulish", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -130,8 +116,8 @@
 }
 
 :root {
-  color: var(--color-espresso);
-  background-color: var(--color-paper);
+  color: #2b1f18;
+  background-color: #fbf6ee;
   font-family:
     "Mulish",
     "Segoe UI",
@@ -140,118 +126,6 @@
     sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-}
-
-/* ------------------------------------------------------------------- */
-/* Mode sombre — "espresso chaud"                                       */
-/* Redéfinit les mêmes tokens : tout le site bascule via var(--color-*) */
-/* sans toucher aux composants. `white` reste clair (texte/reflets sur  */
-/* accent) ; les fonds blancs ont été convertis en `card`.              */
-/* ------------------------------------------------------------------- */
-:root[data-theme='dark'] {
-  /* Surfaces : papier & bois sombres */
-  --color-paper: #15100b;
-  --color-card: #211911;
-  --color-linen: #2b2017;
-  --color-sand: #38291c;
-  --color-cream-raised: #2a1f15;
-
-  /* Bois : texte & structure (clairs sur fond sombre) */
-  --color-espresso: #f6eee2;
-  --color-cacao: #e9ddcd;
-  --color-hazel: #b6a08b;
-  --color-bark: #3a2c1f;
-
-  /* Accents — terracotta vivante, tons doux assombris */
-  --color-terracotta: #d67d4f;
-  --color-terracotta-deep: #e29c74;
-  --color-terracotta-soft: #3e2719;
-  --color-terracotta-hover: #4a2f1f;
-  --color-honey: #e0a55c;
-  --color-honey-soft: #392b15;
-  --color-honey-deep: #e2b066;
-  --color-sage: #9bab6e;
-  --color-sage-deep: #b6c590;
-  --color-sage-soft: #2a3320;
-
-  /* Slate (neutre chaud) — rampe inversée : bas = surface, haut = texte */
-  --color-slate-50: #211911;
-  --color-slate-100: #2a2016;
-  --color-slate-200: #3a2c1f;
-  --color-slate-300: #574436;
-  --color-slate-400: #93806c;
-  --color-slate-500: #b3a08a;
-  --color-slate-600: #c9b8a3;
-  --color-slate-700: #dccdba;
-  --color-slate-800: #ece1d2;
-  --color-slate-900: #f5ece0;
-  --color-slate-950: #fbf5ec;
-
-  /* Crème : surfaces claires -> surfaces sombres */
-  --color-cream-50: #211911;
-  --color-cream-100: #1b140d;
-  --color-cream-200: #241a12;
-  --color-cream-300: #2f2317;
-  --color-cream-input: #2a1f15;
-
-  /* Stone (neutre) — rampe inversée */
-  --color-stone-50: #211911;
-  --color-stone-100: #2a2016;
-  --color-stone-200: #3a2c1f;
-  --color-stone-300: #51402f;
-  --color-stone-400: #8a7560;
-  --color-stone-500: #a89484;
-  --color-stone-600: #c3b29d;
-  --color-stone-700: #d8c8b4;
-  --color-stone-800: #e9dece;
-  --color-stone-900: #f3ece1;
-  --color-stone-950: #faf6ee;
-
-  /* Orange (accent terracotta) : tons clairs assombris, fills vifs,
-     hauts éclaircis pour servir de texte accent lisible sur sombre */
-  --color-orange-50: #2c1c11;
-  --color-orange-100: #3a2516;
-  --color-orange-200: #4f311e;
-  --color-orange-300: #6f4329;
-  --color-orange-400: #9c5733;
-  --color-orange-500: #c2683d;
-  --color-orange-600: #d0744a;
-  --color-orange-700: #dd9061;
-  --color-orange-800: #e8aa82;
-  --color-orange-900: #f0c2a0;
-  --color-orange-950: #f8ddca;
-
-  /* Vert (touche logo) */
-  --color-green-50: #1b2415;
-  --color-green-100: #23301b;
-  --color-green-200: #344828;
-  --color-green-300: #4c6b39;
-  --color-green-400: #689b4d;
-  --color-green-500: #7fae5f;
-  --color-green-600: #95bd79;
-  --color-green-700: #aece93;
-  --color-green-800: #c4dcaf;
-  --color-green-900: #d8ecc9;
-
-  /* Tokens d'accent ex-couleurs en dur */
-  --color-field-ring: #5a3a2a;
-  --color-danger: #e8786a;
-  --color-danger-soft: #3a201b;
-  --color-berry: #d59ab0;
-  --color-berry-soft: #382430;
-  --color-ocean: #88b8d4;
-  --color-ocean-soft: #1e2d37;
-  --color-rosefav: #e0788e;
-  --color-rosefav-deep: #d8617a;
-
-  /* Ombres plus profondes sur fond sombre */
-  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.35),
-    0 14px 30px -14px rgba(0, 0, 0, 0.55);
-  --shadow-lift: 0 6px 12px rgba(0, 0, 0, 0.45),
-    0 24px 48px -18px rgba(0, 0, 0, 0.6);
-
-  color-scheme: dark;
 }
 
 /* Titres en serif éditoriale "carnet premium" */
@@ -280,7 +154,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: var(--color-paper);
+  background: #fbf6ee;
 }
 
 * {

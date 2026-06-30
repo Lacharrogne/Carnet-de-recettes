@@ -19,7 +19,7 @@ export default function RecipeMiniCard({
   const isImageUrl = typeof image === 'string' && image.startsWith('http')
 
   return (
-    <div className="group/card flex items-center gap-4 rounded-[1.6rem] bg-card p-4 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-0.5 hover:shadow-md">
+    <div className="group/card flex items-center gap-4 rounded-[1.6rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-0.5 hover:shadow-md">
       <Link
         to={`/recipes/${recipe.id}`}
         className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.25rem] bg-cream-200 text-3xl"

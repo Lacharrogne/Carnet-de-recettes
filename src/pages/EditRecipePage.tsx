@@ -97,7 +97,7 @@ export default function EditRecipePage() {
 
   if (loading) {
     return (
-      <section className="rounded-[2rem] bg-card p-8 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-orange-100">
         <p className="font-medium text-stone-600">
           Chargement de la recette...
         </p>
@@ -107,7 +107,7 @@ export default function EditRecipePage() {
 
   if (!recipe) {
     return (
-      <section className="rounded-[2rem] bg-card p-8 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
           🍽️
         </div>
@@ -160,7 +160,7 @@ export default function EditRecipePage() {
         </div>
       </div>
 
-      <div className="rounded-[2rem] bg-card p-5 shadow-sm ring-1 ring-orange-100 md:p-8">
+      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-8">
         <RecipeForm
           initialValues={recipe}
           availableRecipes={availableRecipes}

@@ -39,7 +39,7 @@ const DEFAULT_HOME_CARD_STYLE: HomeCardStyle = {
 
 const HOME_CARD_STYLES: Record<string, HomeCardStyle> = {
   'Apéritifs & entrées': {
-    cardBg: 'bg-gradient-to-br from-cream-raised to-[#fffefb]',
+    cardBg: 'bg-gradient-to-br from-[#fffaf5] to-[#fffefb]',
     border: 'border-[#f1dcc8]',
     iconBg: 'bg-[#fff1e6]',
     badgeBg: 'bg-[#f8e7d8]',
@@ -175,7 +175,7 @@ const DEFAULT_RECIPE_CARD_STYLE: RecipeCardStyle = {
   cardBg: 'bg-[#fffaf3]',
   imageBg: 'bg-[#fff1e6]',
   ring: 'ring-orange-100',
-  badgeBg: 'bg-card/95',
+  badgeBg: 'bg-white/95',
   badgeText: 'text-orange-700',
   accentText: 'text-orange-700',
   arrowBg:
@@ -242,7 +242,7 @@ const RECIPE_CARD_STYLES: Record<string, RecipeCardStyle> = {
     imageBg: 'bg-[#e8f5ff]',
     ring: 'ring-[#cde8f8]',
     badgeBg: 'bg-[#e8f5ff]/95',
-    badgeText: 'text-ocean',
+    badgeText: 'text-[#3f6f8c]',
     accentText: 'text-[#3f8cbb]',
     arrowBg:
       'bg-[#d9efff] text-[#3f8cbb] group-hover:bg-[#4b9ac9] group-hover:text-white',
@@ -284,7 +284,7 @@ export type CategoryAmbience = {
 }
 
 const DEFAULT_CATEGORY_AMBIENCE: CategoryAmbience = {
-  pageBg: 'bg-card/95',
+  pageBg: 'bg-white/95',
   ring: 'ring-orange-100',
   accentText: 'text-orange-600',
   buttonText: 'text-orange-700',

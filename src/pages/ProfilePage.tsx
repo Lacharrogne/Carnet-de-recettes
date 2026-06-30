@@ -184,7 +184,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <section className="rounded-[2rem] bg-card p-8 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
           👤
         </div>
@@ -227,7 +227,7 @@ export default function ProfilePage() {
 
               <div
                 title={profileBadgeName}
-                className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-card text-xl shadow-sm ring-1 ring-orange-100"
+                className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-sm ring-1 ring-orange-100"
               >
                 {profileBadgeEmoji}
               </div>
@@ -277,7 +277,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-2xl border border-orange-200 bg-card px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+              className="rounded-2xl border border-orange-200 bg-white px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
             >
               Déconnexion
             </button>
@@ -292,7 +292,7 @@ export default function ProfilePage() {
       {isEditing && (
         <form
           onSubmit={handleSaveProfile}
-          className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
         >
           <div className="mb-6">
             <p className="font-bold text-orange-700">Profil public</p>
@@ -331,7 +331,7 @@ export default function ProfilePage() {
                 onChange={(event) =>
                   setAvatarFile(event.target.files?.[0] ?? null)
                 }
-                className="mt-5 w-full rounded-2xl border border-orange-100 bg-cream-raised px-4 py-3 text-sm outline-none transition focus:border-orange-500"
+                className="mt-5 w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 text-sm outline-none transition focus:border-orange-500"
               />
 
               <p className="mt-2 text-sm text-stone-500">
@@ -349,7 +349,7 @@ export default function ProfilePage() {
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
                   placeholder="Exemple : Chloé, Maxime, Studio C&M..."
-                  className="w-full rounded-2xl border border-orange-100 bg-cream-raised px-4 py-3 outline-none transition focus:border-orange-500"
+                  className="w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
                 />
               </div>
 
@@ -363,7 +363,7 @@ export default function ProfilePage() {
                   onChange={(event) => setBio(event.target.value)}
                   rows={5}
                   placeholder="Une petite description de votre profil..."
-                  className="w-full rounded-2xl border border-orange-100 bg-cream-raised px-4 py-3 outline-none transition focus:border-orange-500"
+                  className="w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
                 />
               </div>
             </div>
@@ -382,7 +382,7 @@ export default function ProfilePage() {
               type="button"
               onClick={cancelEdit}
               disabled={saving}
-              className="rounded-2xl border border-orange-100 bg-card px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl border border-orange-100 bg-white px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Annuler
             </button>
@@ -391,7 +391,7 @@ export default function ProfilePage() {
       )}
 
       <div className="grid gap-5 md:grid-cols-3">
-        <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             📖
           </div>
@@ -405,7 +405,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             ♥
           </div>
@@ -417,7 +417,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             🏷️
           </div>
@@ -452,7 +452,7 @@ export default function ProfilePage() {
 
         <Link
           to="/my-recipes"
-          className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-cream-raised hover:shadow-md"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
         >
           <p className="text-3xl">📖</p>
 
@@ -467,7 +467,7 @@ export default function ProfilePage() {
 
         <Link
           to="/favorites"
-          className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-cream-raised hover:shadow-md"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
         >
           <p className="text-3xl">♥</p>
 
@@ -480,7 +480,7 @@ export default function ProfilePage() {
 
         <Link
           to="/shopping-list"
-          className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-cream-raised hover:shadow-md"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
         >
           <p className="text-3xl">🛒</p>
 
@@ -494,7 +494,7 @@ export default function ProfilePage() {
         </Link>
       </div>
 
-      <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
+      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="font-bold text-orange-700">Activité récente</p>
@@ -535,7 +535,7 @@ export default function ProfilePage() {
               <Link
                 key={recipe.id}
                 to={`/recipes/${recipe.id}`}
-                className="overflow-hidden rounded-[2rem] bg-cream-raised transition hover:-translate-y-1 hover:shadow-md"
+                className="overflow-hidden rounded-[2rem] bg-[#fffaf5] transition hover:-translate-y-1 hover:shadow-md"
               >
                 <div className="flex h-36 items-center justify-center bg-orange-50">
                   {recipe.imageUrl ? (

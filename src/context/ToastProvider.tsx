@@ -18,7 +18,7 @@ const TONE_STYLE: Record<
     icon: <CheckCircle2 className="h-5 w-5 shrink-0" />,
   },
   error: {
-    wrapper: 'bg-danger text-white',
+    wrapper: 'bg-[#b23b2e] text-white',
     icon: <TriangleAlert className="h-5 w-5 shrink-0" />,
   },
   info: {

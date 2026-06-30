@@ -215,7 +215,7 @@ export default function AuthPage() {
                   )}
                 </div>
 
-                <label className="cursor-pointer rounded-full border border-orange-200 bg-card px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50">
+                <label className="cursor-pointer rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50">
                   Choisir une photo
                   <input
                     type="file"

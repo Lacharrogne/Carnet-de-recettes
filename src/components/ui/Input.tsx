@@ -32,7 +32,7 @@ export default function Input({
       <input
         id={inputId}
         className={`${FIELD_CLASS} ${
-          error ? 'ring-2 ring-field-ring' : ''
+          error ? 'ring-2 ring-[#e9c4bc]' : ''
         } ${className}`}
         {...rest}
       />

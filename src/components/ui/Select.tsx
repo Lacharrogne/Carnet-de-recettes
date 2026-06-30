@@ -35,7 +35,7 @@ export default function Select({
         <select
           id={selectId}
           className={`${FIELD_CLASS} cursor-pointer appearance-none pr-10 ${
-            error ? 'ring-2 ring-field-ring' : ''
+            error ? 'ring-2 ring-[#e9c4bc]' : ''
           } ${className}`}
           {...rest}
         >

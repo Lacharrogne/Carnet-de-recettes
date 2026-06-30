@@ -299,7 +299,7 @@ export default function ShoppingListPage() {
 
   if (!user) {
     return (
-      <section className="rounded-[2rem] bg-card px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
         <p className="text-2xl font-black text-stone-950">
           Connectez-vous pour voir votre liste de courses.
         </p>
@@ -382,7 +382,7 @@ export default function ShoppingListPage() {
             </p>
 
             <div className="mt-8 grid grid-cols-3 gap-3">
-              <div className="rounded-[1.5rem] bg-card p-4 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
                 <p className="text-3xl font-black text-orange-600">
                   {activeLines.length}
                 </p>
@@ -390,7 +390,7 @@ export default function ShoppingListPage() {
                 <p className="mt-1 text-sm font-bold text-stone-700">lignes</p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-card p-4 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
                 <p className="text-3xl font-black text-green-700">
                   {checkedLines.length}
                 </p>
@@ -400,7 +400,7 @@ export default function ShoppingListPage() {
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-card p-4 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
                 <p className="text-3xl font-black text-stone-900">
                   {activeCategoryCount}
                 </p>
@@ -422,7 +422,7 @@ export default function ShoppingListPage() {
               <button
                 type="button"
                 onClick={() => setShowCheckedItems((current) => !current)}
-                className="rounded-full border border-orange-200 bg-card px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+                className="rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
               >
                 {showCheckedItems ? 'Masquer les cochés' : 'Afficher les cochés'}
               </button>
@@ -431,7 +431,7 @@ export default function ShoppingListPage() {
                 type="button"
                 onClick={handleDeleteCheckedItems}
                 disabled={checkedItems.length === 0 || bulkActionLoading}
-                className="rounded-full border border-orange-100 bg-card px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-full border border-orange-100 bg-white px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Supprimer les cochés
               </button>
@@ -440,14 +440,14 @@ export default function ShoppingListPage() {
                 type="button"
                 onClick={handleDeleteAllItems}
                 disabled={visibleItems.length === 0 || bulkActionLoading}
-                className="rounded-full border border-red-100 bg-card px-6 py-3 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-full border border-red-100 bg-white px-6 py-3 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Vider la liste
               </button>
             </div>
           </div>
 
-          <div className="rounded-[2.5rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Ajouter rapidement
             </p>
@@ -498,7 +498,7 @@ export default function ShoppingListPage() {
         {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
         {loading ? (
-          <div className="space-y-3 rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100 sm:p-8">
+          <div className="space-y-3 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 sm:p-8">
             {Array.from({ length: 5 }, (_, index) => (
               <div key={index} className="flex items-center gap-3">
                 <Skeleton className="h-6 w-6 rounded-md" />
@@ -517,7 +517,7 @@ export default function ShoppingListPage() {
           />
         ) : (
           <div className="space-y-8">
-            <section className="rounded-[2.5rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
+            <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
               <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -563,7 +563,7 @@ export default function ShoppingListPage() {
                           type="button"
                           onClick={() => handleToggleSection(section, true)}
                           disabled={bulkActionLoading}
-                          className="rounded-full bg-card px-4 py-2 text-sm font-black text-green-700 shadow-sm ring-1 ring-green-100 transition hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-full bg-white px-4 py-2 text-sm font-black text-green-700 shadow-sm ring-1 ring-green-100 transition hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Cocher le rayon
                         </button>
@@ -573,7 +573,7 @@ export default function ShoppingListPage() {
                         {section.lines.map((line) => (
                           <div
                             key={line.key}
-                            className="flex items-center gap-3 rounded-[1.25rem] bg-card px-4 py-3 shadow-sm ring-1 ring-orange-50"
+                            className="flex items-center gap-3 rounded-[1.25rem] bg-white px-4 py-3 shadow-sm ring-1 ring-orange-50"
                           >
                             <button
                               type="button"
@@ -616,7 +616,7 @@ export default function ShoppingListPage() {
             </section>
 
             {showCheckedItems && checkedSections.length > 0 && (
-              <section className="rounded-[2.5rem] bg-card p-6 shadow-sm ring-1 ring-green-100">
+              <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-green-100">
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-black uppercase tracking-wide text-green-700">
@@ -653,7 +653,7 @@ export default function ShoppingListPage() {
                           type="button"
                           onClick={() => handleToggleSection(section, false)}
                           disabled={bulkActionLoading}
-                          className="rounded-full bg-card px-4 py-2 text-sm font-black text-orange-700 shadow-sm transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Remettre le rayon
                         </button>
@@ -663,7 +663,7 @@ export default function ShoppingListPage() {
                         {section.lines.map((line) => (
                           <div
                             key={line.key}
-                            className="flex items-center gap-3 rounded-[1.25rem] bg-card px-4 py-3 text-sm shadow-sm"
+                            className="flex items-center gap-3 rounded-[1.25rem] bg-white px-4 py-3 text-sm shadow-sm"
                           >
                             <button
                               type="button"

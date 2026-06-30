@@ -69,7 +69,7 @@ export default function AddRecipePage() {
             </p>
           </div>
 
-          <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
             <div className="flex h-full flex-col justify-between gap-6">
               <div>
                 <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-terracotta-soft text-4xl">
@@ -99,7 +99,7 @@ export default function AddRecipePage() {
         </div>
       </div>
 
-      <div className="rounded-[2.5rem] bg-card p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+      <div className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
         <div className="mb-8 border-b border-orange-100 pb-6">
           <p className="font-bold text-orange-600">Formulaire</p>
 

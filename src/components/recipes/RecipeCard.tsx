@@ -103,8 +103,8 @@ export default function RecipeCard({
         disabled={loadingFavorite}
         className={`absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full text-xl shadow-soft backdrop-blur transition sm:right-4 sm:top-4 ${
           displayedFavorite
-            ? 'bg-rosefav text-white hover:bg-rosefav-deep'
-            : 'bg-card/90 text-hazel hover:bg-card hover:text-rosefav'
+            ? 'bg-[#d8617a] text-white hover:bg-[#c4506a]'
+            : 'bg-card/90 text-hazel hover:bg-card hover:text-[#d8617a]'
         } disabled:cursor-not-allowed disabled:opacity-60`}
         aria-label={
           displayedFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'

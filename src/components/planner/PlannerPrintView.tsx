@@ -214,7 +214,7 @@ export default function PlannerPrintView({
                     <h2 className="text-xl font-black">{day.label}</h2>
                   </div>
 
-                  <p className="rounded-full border border-orange-100 bg-card px-3 py-1 text-xs font-black">
+                  <p className="rounded-full border border-orange-100 bg-white px-3 py-1 text-xs font-black">
                     {dayMealsCount}/2
                   </p>
                 </div>

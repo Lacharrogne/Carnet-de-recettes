@@ -161,7 +161,7 @@ export default function LandingValue() {
         <div className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-honey/20 blur-3xl" />
 
         <div className="relative">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-white">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-cream-100">
             <Sparkles className="h-4 w-4" />
             Gratuit · sans engagement
           </span>
@@ -170,7 +170,7 @@ export default function LandingValue() {
             Commencez votre carnet de cuisine aujourd’hui
           </h2>
 
-          <p className="mx-auto mt-4 max-w-xl leading-7 text-white/85">
+          <p className="mx-auto mt-4 max-w-xl leading-7 text-cream-100/85">
             Rejoignez le carnet et gardez enfin toutes vos recettes, vos courses et
             vos idées de repas réunies au même endroit.
           </p>
@@ -184,7 +184,7 @@ export default function LandingValue() {
               to="/recipes"
               variant="ghost"
               size="lg"
-              className="w-full text-white hover:bg-white/10 sm:w-auto"
+              className="w-full text-cream-100 hover:bg-white/10 sm:w-auto"
             >
               Explorer les recettes
             </Button>
@@ -194,7 +194,7 @@ export default function LandingValue() {
             href={VITRINE_PRICING_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-block text-sm font-bold text-white/80 underline-offset-4 transition hover:text-white hover:underline"
+            className="mt-6 inline-block text-sm font-bold text-cream-100/80 underline-offset-4 transition hover:text-white hover:underline"
           >
             Voir le détail des offres →
           </a>

@@ -50,7 +50,7 @@ export default function RecipePickerModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-orange-200 bg-card px-5 py-3 font-black text-orange-700 transition hover:bg-orange-50"
+            className="rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-orange-700 transition hover:bg-orange-50"
           >
             Fermer
           </button>
@@ -62,13 +62,13 @@ export default function RecipePickerModal({
             onChange={(event) => onSearchChange(event.target.value)}
             aria-label="Rechercher une recette" placeholder="Rechercher : pâtes, gâteau, poulet..."
             autoFocus
-            className="w-full rounded-[1.5rem] border border-orange-200 bg-card px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+            className="w-full rounded-[1.5rem] border border-orange-200 bg-white px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
           />
 
           <select
             value={selectedCategory}
             onChange={(event) => onCategoryChange(event.target.value)}
-            className="w-full rounded-[1.5rem] border border-orange-200 bg-card px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+            className="w-full rounded-[1.5rem] border border-orange-200 bg-white px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
           >
             <option value={allCategoriesValue}>Toutes les catégories</option>
 
@@ -87,7 +87,7 @@ export default function RecipePickerModal({
             className={`rounded-full px-4 py-2 text-sm font-black transition ${
               selectedCategory === allCategoriesValue
                 ? 'bg-orange-500 text-white'
-                : 'bg-card text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
+                : 'bg-white text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
             }`}
           >
             Toutes
@@ -101,7 +101,7 @@ export default function RecipePickerModal({
               className={`rounded-full px-4 py-2 text-sm font-black transition ${
                 selectedCategory === category.value
                   ? 'bg-orange-500 text-white'
-                  : 'bg-card text-stone-700 ring-1 ring-orange-100 hover:bg-orange-50 hover:text-orange-700'
+                  : 'bg-white text-stone-700 ring-1 ring-orange-100 hover:bg-orange-50 hover:text-orange-700'
               }`}
             >
               {category.emoji} {category.label}
@@ -111,7 +111,7 @@ export default function RecipePickerModal({
 
         <div className="mt-6 min-h-0 flex-1 overflow-y-auto pr-2">
           {filteredRecipes.length === 0 ? (
-            <div className="rounded-[1.5rem] bg-card p-6 text-center text-stone-500 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-6 text-center text-stone-500 shadow-sm ring-1 ring-orange-100">
               Aucune recette trouvée.
             </div>
           ) : (
@@ -128,7 +128,7 @@ export default function RecipePickerModal({
                     type="button"
                     onClick={() => onChooseRecipe(recipe)}
                     disabled={isSyncing}
-                    className="group flex w-full items-center gap-4 rounded-[1.5rem] bg-card p-4 text-left shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-0.5 hover:bg-orange-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                    className="group flex w-full items-center gap-4 rounded-[1.5rem] bg-white p-4 text-left shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-0.5 hover:bg-orange-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-cream-200 text-3xl">
                       {isImageUrl ? (
@@ -156,11 +156,11 @@ export default function RecipePickerModal({
                           {recipe.category}
                         </span>
 
-                        <span className="rounded-full bg-card px-3 py-1 text-xs font-bold text-stone-600 ring-1 ring-orange-100">
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-stone-600 ring-1 ring-orange-100">
                           {recipe.prepTime + recipe.cookTime} min
                         </span>
 
-                        <span className="rounded-full bg-card px-3 py-1 text-xs font-bold text-stone-600 ring-1 ring-orange-100">
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-stone-600 ring-1 ring-orange-100">
                           {recipe.servings} pers.
                         </span>
                       </div>

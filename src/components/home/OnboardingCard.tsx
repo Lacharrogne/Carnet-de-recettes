@@ -38,7 +38,7 @@ export default function OnboardingCard({
   onDismiss: () => void
 }) {
   return (
-    <section className="relative overflow-hidden rounded-[2rem] bg-espresso px-6 py-8 text-white shadow-lift sm:rounded-[2.5rem] sm:px-10 sm:py-10">
+    <section className="relative overflow-hidden rounded-[2rem] bg-espresso px-6 py-8 text-cream-100 shadow-lift sm:rounded-[2.5rem] sm:px-10 sm:py-10">
       <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-terracotta/30 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-honey/20 blur-3xl" />
 
@@ -46,7 +46,7 @@ export default function OnboardingCard({
         type="button"
         onClick={onDismiss}
         aria-label="Masquer le guide de démarrage"
-        className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white/80 transition hover:bg-white/20 hover:text-white"
+        className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-cream-100/80 transition hover:bg-white/20 hover:text-white"
       >
         <X className="h-4 w-4" />
       </button>
@@ -61,7 +61,7 @@ export default function OnboardingCard({
           Bienvenue {userName} ! Créons votre première recette.
         </h2>
 
-        <p className="mt-3 max-w-2xl leading-7 text-white/85">
+        <p className="mt-3 max-w-2xl leading-7 text-cream-100/85">
           Votre carnet est prêt. Ajoutez un premier plat de la maison — avec ses
           ingrédients et ses étapes — et tout le reste (courses, planning,
           favoris) se mettra en place autour.
@@ -92,7 +92,7 @@ export default function OnboardingCard({
                 </span>
 
                 <p className="font-bold text-white">{item.title}</p>
-                <p className="text-sm leading-5 text-white/75">
+                <p className="text-sm leading-5 text-cream-100/75">
                   {item.description}
                 </p>
               </Link>

@@ -289,7 +289,7 @@ async function handleSearchReviews() {
 
   if (!user) {
     return (
-      <section className="rounded-[2rem] bg-card px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
         <p className="text-2xl font-black text-stone-950">
           Connectez-vous pour accéder à l’administration.
         </p>
@@ -306,7 +306,7 @@ async function handleSearchReviews() {
 
   if (checkingAdmin) {
     return (
-      <section className="rounded-[2rem] bg-card px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
         <p className="font-bold text-stone-600">
           Vérification des droits administrateur...
         </p>
@@ -316,7 +316,7 @@ async function handleSearchReviews() {
 
   if (!isAdmin) {
     return (
-      <section className="rounded-[2rem] bg-card px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
         <p className="text-3xl font-black text-stone-950">Accès refusé</p>
 
         <p className="mx-auto mt-3 max-w-xl text-stone-600">
@@ -355,7 +355,7 @@ async function handleSearchReviews() {
 
           <Link
             to="/"
-            className="rounded-full border border-orange-200 bg-card px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+            className="rounded-full border border-orange-200 bg-white px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
           >
             Retour au site
           </Link>
@@ -363,21 +363,21 @@ async function handleSearchReviews() {
 
         {stats && (
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[1.5rem] bg-card p-5 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
               <p className="text-4xl font-black text-orange-600">
                 {stats.profilesCount}
               </p>
               <p className="mt-1 font-bold text-stone-700">profils</p>
             </div>
 
-            <div className="rounded-[1.5rem] bg-card p-5 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
               <p className="text-4xl font-black text-orange-600">
                 {stats.recipesCount}
               </p>
               <p className="mt-1 font-bold text-stone-700">recettes</p>
             </div>
 
-            <div className="rounded-[1.5rem] bg-card p-5 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
               <p className="text-4xl font-black text-orange-600">
                 {stats.reviewsCount}
               </p>
@@ -404,7 +404,7 @@ async function handleSearchReviews() {
           {Array.from({ length: 3 }, (_, index) => (
             <div
               key={index}
-              className="space-y-4 rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100"
+              className="space-y-4 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
             >
               <Skeleton className="h-4 w-28" />
               <Skeleton className="h-9 w-20" />
@@ -415,7 +415,7 @@ async function handleSearchReviews() {
         </div>
       ) : (
         <div className="grid gap-8 xl:grid-cols-3">
-          <section className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
+          <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Utilisateurs
             </p>
@@ -484,7 +484,7 @@ async function handleSearchReviews() {
                       type="button"
                       onClick={() => handleDeleteProfile(profile)}
                       disabled={actionLoading}
-                      className="mt-4 w-full rounded-full border border-red-100 bg-card px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="mt-4 w-full rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Supprimer le profil
                     </button>
@@ -494,7 +494,7 @@ async function handleSearchReviews() {
             </div>
           </section>
 
-          <section className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
+          <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Recettes
             </p>
@@ -548,7 +548,7 @@ async function handleSearchReviews() {
                     <div className="mt-4 flex gap-2">
                       <Link
                         to={`/recipes/${recipe.id}`}
-                        className="flex-1 rounded-full border border-orange-200 bg-card px-4 py-2 text-center text-sm font-black text-orange-700 transition hover:bg-orange-50"
+                        className="flex-1 rounded-full border border-orange-200 bg-white px-4 py-2 text-center text-sm font-black text-orange-700 transition hover:bg-orange-50"
                       >
                         Voir
                       </Link>
@@ -557,7 +557,7 @@ async function handleSearchReviews() {
                         type="button"
                         onClick={() => handleDeleteRecipe(recipe)}
                         disabled={actionLoading}
-                        className="flex-1 rounded-full border border-red-100 bg-card px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex-1 rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Supprimer
                       </button>
@@ -568,7 +568,7 @@ async function handleSearchReviews() {
             </div>
           </section>
 
-          <section className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
+          <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Commentaires
             </p>
@@ -624,7 +624,7 @@ async function handleSearchReviews() {
                     <div className="mt-4 flex gap-2">
                       <Link
                         to={`/recipes/${review.recipeId}`}
-                        className="flex-1 rounded-full border border-orange-200 bg-card px-4 py-2 text-center text-sm font-black text-orange-700 transition hover:bg-orange-50"
+                        className="flex-1 rounded-full border border-orange-200 bg-white px-4 py-2 text-center text-sm font-black text-orange-700 transition hover:bg-orange-50"
                       >
                         Voir
                       </Link>
@@ -633,7 +633,7 @@ async function handleSearchReviews() {
                         type="button"
                         onClick={() => handleDeleteReview(review)}
                         disabled={actionLoading}
-                        className="flex-1 rounded-full border border-red-100 bg-card px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex-1 rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Supprimer
                       </button>

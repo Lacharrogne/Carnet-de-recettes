@@ -32,7 +32,7 @@ export default function PlannerWeekGrid({
         {Array.from({ length: 4 }, (_, index) => (
           <div
             key={index}
-            className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100"
+            className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
           >
             <Skeleton className="h-5 w-32" />
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -55,7 +55,7 @@ export default function PlannerWeekGrid({
         return (
           <section
             key={day.key}
-            className="rounded-[2.5rem] bg-card shadow-sm ring-1 ring-orange-100"
+            className="rounded-[2.5rem] bg-white shadow-sm ring-1 ring-orange-100"
           >
             <div className="grid gap-6 p-6 xl:grid-cols-[260px_minmax(0,1fr)_minmax(0,1fr)]">
               <div className="relative overflow-hidden rounded-[1.8rem] bg-cream-50 p-6 ring-1 ring-orange-100">
@@ -72,7 +72,7 @@ export default function PlannerWeekGrid({
                     {day.label}
                   </h2>
 
-                  <p className="mt-6 inline-flex rounded-full bg-card px-5 py-3 font-black text-stone-700 shadow-sm ring-1 ring-orange-100">
+                  <p className="mt-6 inline-flex rounded-full bg-white px-5 py-3 font-black text-stone-700 shadow-sm ring-1 ring-orange-100">
                     {dayMealsCount}/2 repas
                   </p>
                 </div>
@@ -101,7 +101,7 @@ export default function PlannerWeekGrid({
                       </div>
 
                       {recipe && (
-                        <span className="rounded-full bg-card px-3 py-1 text-xs font-black text-orange-700 ring-1 ring-orange-100">
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-orange-700 ring-1 ring-orange-100">
                           Prévu
                         </span>
                       )}
@@ -124,7 +124,7 @@ export default function PlannerWeekGrid({
                             <button
                               type="button"
                               onClick={() => onRemoveMain(day.key, meal.key)}
-                              className="rounded-full border border-red-100 bg-card px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                              className="rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
                             >
                               Retirer
                             </button>
@@ -135,7 +135,7 @@ export default function PlannerWeekGrid({
                       <button
                         type="button"
                         onClick={() => onPickMain(day.key, meal.key)}
-                        className="flex min-h-40 w-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-orange-200 bg-card/70 px-5 py-6 text-center transition hover:-translate-y-0.5 hover:bg-orange-50 hover:shadow-sm"
+                        className="flex min-h-40 w-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-orange-200 bg-white/70 px-5 py-6 text-center transition hover:-translate-y-0.5 hover:bg-orange-50 hover:shadow-sm"
                       >
                         <span className="text-lg font-black text-stone-500">
                           Aucun repas prévu.
