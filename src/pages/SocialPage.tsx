@@ -25,7 +25,7 @@ function ProfileCard({ profile }: { profile: SocialProfile }) {
   return (
     <Link
       to={`/users/${profile.user_id}`}
-      className="group rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md"
+      className="group rounded-[2rem] bg-card p-5 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md"
     >
       <div className="flex items-center gap-4">
         <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-xl font-black text-white shadow-sm">
@@ -156,7 +156,7 @@ export default function SocialPage() {
 
           <Link
             to="/profile"
-            className="w-fit rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+            className="w-fit rounded-full border border-orange-200 bg-card px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
           >
             Retour au profil
           </Link>
@@ -176,7 +176,7 @@ export default function SocialPage() {
           className={`rounded-[2rem] p-6 text-left shadow-sm ring-1 transition ${
             activeTab === 'friends'
               ? 'bg-orange-500 text-white ring-orange-500'
-              : 'bg-white text-stone-950 ring-orange-100 hover:bg-orange-50'
+              : 'bg-card text-stone-950 ring-orange-100 hover:bg-orange-50'
           }`}
         >
           <p className="text-sm font-bold opacity-80">Amis</p>
@@ -193,7 +193,7 @@ export default function SocialPage() {
           className={`rounded-[2rem] p-6 text-left shadow-sm ring-1 transition ${
             activeTab === 'followers'
               ? 'bg-orange-500 text-white ring-orange-500'
-              : 'bg-white text-stone-950 ring-orange-100 hover:bg-orange-50'
+              : 'bg-card text-stone-950 ring-orange-100 hover:bg-orange-50'
           }`}
         >
           <p className="text-sm font-bold opacity-80">Abonnés</p>
@@ -210,7 +210,7 @@ export default function SocialPage() {
           className={`rounded-[2rem] p-6 text-left shadow-sm ring-1 transition ${
             activeTab === 'following'
               ? 'bg-orange-500 text-white ring-orange-500'
-              : 'bg-white text-stone-950 ring-orange-100 hover:bg-orange-50'
+              : 'bg-card text-stone-950 ring-orange-100 hover:bg-orange-50'
           }`}
         >
           <p className="text-sm font-bold opacity-80">Abonnements</p>
@@ -222,7 +222,7 @@ export default function SocialPage() {
         </button>
       </div>
 
-      <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="rounded-[2.5rem] bg-card/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
         <div className="mb-8">
           <p className="font-bold text-orange-600">
             {activeTab === 'friends'
@@ -244,7 +244,7 @@ export default function SocialPage() {
         {loading ? (
           <RowsSkeleton rows={4} />
         ) : displayedProfiles.length === 0 ? (
-          <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2rem] bg-card p-8 text-center shadow-sm ring-1 ring-orange-100">
             <p className="text-lg font-black text-stone-950">
               Rien à afficher pour le moment.
             </p>

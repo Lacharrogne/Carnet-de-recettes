@@ -30,7 +30,7 @@ function FridgeResultCard({
   const imageToDisplay = match.recipe.imageUrl || match.recipe.image
 
   return (
-    <article className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md">
+    <article className="overflow-hidden rounded-[2rem] bg-card shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md">
       <div className="border-b border-orange-100 bg-cream-50 p-5 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -379,7 +379,7 @@ export default function FridgePage() {
               <button
                 type="button"
                 onClick={clearFridge}
-                className="rounded-full border border-orange-200 bg-white px-6 py-3.5 font-bold text-orange-700 transition hover:bg-orange-50"
+                className="rounded-full border border-orange-200 bg-card px-6 py-3.5 font-bold text-orange-700 transition hover:bg-orange-50"
               >
                 Vider mon frigo
               </button>
@@ -387,7 +387,7 @@ export default function FridgePage() {
           </div>
 
           <div className="space-y-5">
-            <div className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
+            <div className="rounded-[1.75rem] bg-card p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
@@ -438,7 +438,7 @@ export default function FridgePage() {
 
             <div className="rounded-[1.75rem] bg-green-50 p-5 shadow-sm ring-1 ring-green-100 sm:rounded-[2rem] sm:p-6">
               <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-xl shadow-sm">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-card text-xl shadow-sm">
                   ♻️
                 </span>
 
@@ -458,7 +458,7 @@ export default function FridgePage() {
                   clearMessages()
                 }}
                 aria-label="Ajouter un ingrédient" placeholder="Exemple : courgettes"
-                className="mt-5 w-full rounded-[1.4rem] border border-green-100 bg-white px-4 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-green-300 focus:ring-4 focus:ring-green-100 sm:px-5"
+                className="mt-5 w-full rounded-[1.4rem] border border-green-100 bg-card px-4 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-green-300 focus:ring-4 focus:ring-green-100 sm:px-5"
               />
 
               <div className="mt-4 flex flex-wrap gap-2">
@@ -470,7 +470,7 @@ export default function FridgePage() {
                       setPriorityIngredient(ingredient)
                       clearMessages()
                     }}
-                    className="rounded-full bg-white px-4 py-2 text-sm font-bold text-green-800 shadow-sm ring-1 ring-green-100 transition hover:bg-green-100"
+                    className="rounded-full bg-card px-4 py-2 text-sm font-bold text-green-800 shadow-sm ring-1 ring-green-100 transition hover:bg-green-100"
                   >
                     {ingredient}
                   </button>
@@ -558,12 +558,12 @@ export default function FridgePage() {
             </div>
 
             <div className="flex flex-wrap gap-2 sm:gap-3">
-              <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm ring-1 ring-orange-100">
+              <span className="rounded-full bg-card px-4 py-2 text-sm font-black text-orange-700 shadow-sm ring-1 ring-orange-100">
                 {analyzedRecipes.length} recette
                 {analyzedRecipes.length > 1 ? 's' : ''}
               </span>
 
-              <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-green-800 shadow-sm ring-1 ring-green-100">
+              <span className="rounded-full bg-card px-4 py-2 text-sm font-black text-green-800 shadow-sm ring-1 ring-green-100">
                 meilleur score : {bestScore} %
               </span>
 

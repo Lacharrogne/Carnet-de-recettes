@@ -24,17 +24,17 @@ const TONE_CONFIG: Record<AlertTone, AlertConfig> = {
   },
   error: {
     icon: XCircle,
-    className: 'bg-[#f7e3de] text-[#b23b2e] ring-[#e9c4bc]',
-    iconClassName: 'text-[#b23b2e]',
+    className: 'bg-danger-soft text-danger ring-field-ring',
+    iconClassName: 'text-danger',
   },
   info: {
     icon: Info,
-    className: 'bg-honey-soft text-[#8a5a1e] ring-honey/30',
-    iconClassName: 'text-[#8a5a1e]',
+    className: 'bg-honey-soft text-honey-deep ring-honey/30',
+    iconClassName: 'text-honey-deep',
   },
   warning: {
     icon: AlertTriangle,
-    className: 'bg-honey-soft text-[#8a5a1e] ring-honey/40',
+    className: 'bg-honey-soft text-honey-deep ring-honey/40',
     iconClassName: 'text-honey',
   },
 }

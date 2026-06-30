@@ -52,7 +52,7 @@ const sectionClass =
   'rounded-[1.75rem] bg-card p-5 shadow-card ring-1 ring-bark sm:rounded-[2rem] md:p-6'
 
 const smallButtonClass =
-  'inline-flex items-center justify-center rounded-full bg-terracotta-soft px-4 py-2 text-sm font-bold text-terracotta-deep transition hover:bg-[#eecbb4]'
+  'inline-flex items-center justify-center rounded-full bg-terracotta-soft px-4 py-2 text-sm font-bold text-terracotta-deep transition hover:bg-terracotta-hover'
 
 export default function RecipeForm({
   initialValues,
@@ -695,7 +695,7 @@ export default function RecipeForm({
                 type="button"
                 onClick={() => removeIngredient(index)}
                 disabled={ingredients.length === 1}
-                className="w-full rounded-2xl border border-[#e9c4bc] bg-card px-4 py-3 font-bold text-hazel transition hover:bg-[#f7e3de] hover:text-[#b23b2e] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+                className="w-full rounded-2xl border border-field-ring bg-card px-4 py-3 font-bold text-hazel transition hover:bg-danger-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
               >
                 Supprimer
               </button>
@@ -754,7 +754,7 @@ export default function RecipeForm({
                 type="button"
                 onClick={() => removeStep(index)}
                 disabled={steps.length === 1}
-                className="h-fit w-full rounded-2xl border border-[#e9c4bc] bg-card px-4 py-3 font-bold text-hazel transition hover:bg-[#f7e3de] hover:text-[#b23b2e] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+                className="h-fit w-full rounded-2xl border border-field-ring bg-card px-4 py-3 font-bold text-hazel transition hover:bg-danger-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
               >
                 Supprimer
               </button>
@@ -798,7 +798,7 @@ export default function RecipeForm({
                     type="button"
                     onClick={() => removeRelatedRecipe(recipe.id)}
                     aria-label={`Retirer le lien vers ${recipe.title}`}
-                    className="flex h-5 w-5 items-center justify-center rounded-full bg-card/70 text-xs font-black text-hazel transition hover:bg-card hover:text-[#b23b2e]"
+                    className="flex h-5 w-5 items-center justify-center rounded-full bg-card/70 text-xs font-black text-hazel transition hover:bg-card hover:text-danger"
                   >
                     ×
                   </button>

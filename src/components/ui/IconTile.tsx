@@ -8,7 +8,7 @@ const TONE_CLASS: Record<IconTileTone, string> = {
   honey: 'bg-honey-soft',
   sage: 'bg-sage-soft',
   linen: 'bg-linen',
-  plum: 'bg-[#f4e2e8]',
+  plum: 'bg-berry-soft',
 }
 
 const SIZE_CLASS: Record<IconTileSize, string> = {

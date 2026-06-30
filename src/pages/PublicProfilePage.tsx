@@ -207,7 +207,7 @@ export default function PublicProfilePage() {
 
   if (!userId) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-card px-6 py-10 shadow-sm ring-1 ring-orange-100">
         <Alert tone="error" className="mb-6">
           Profil introuvable.
         </Alert>
@@ -228,7 +228,7 @@ export default function PublicProfilePage() {
 
   if (errorMessage) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-card px-6 py-10 shadow-sm ring-1 ring-orange-100">
         <Alert tone="error" className="mb-6">
           {errorMessage}
         </Alert>
@@ -255,7 +255,7 @@ export default function PublicProfilePage() {
       <div>
         <Link
           to="/recipes"
-          className="inline-flex items-center rounded-full bg-white px-5 py-3 font-bold text-orange-700 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50"
+          className="inline-flex items-center rounded-full bg-card px-5 py-3 font-bold text-orange-700 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50"
         >
           ← Retour aux recettes
         </Link>
@@ -263,7 +263,7 @@ export default function PublicProfilePage() {
 
       <article className="overflow-hidden rounded-[2.5rem] bg-cream-50 shadow-sm ring-1 ring-orange-100">
         <div className="grid gap-8 px-6 py-8 lg:grid-cols-[0.75fr_1.25fr] lg:px-10 lg:py-10">
-          <div className="flex flex-col items-center justify-center rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+          <div className="flex flex-col items-center justify-center rounded-[2rem] bg-card p-8 text-center shadow-sm ring-1 ring-orange-100">
             <div className="relative">
               <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-5xl font-black text-white ring-4 ring-white">
                 {displayedAvatarUrl ? (
@@ -277,7 +277,7 @@ export default function PublicProfilePage() {
                 )}
               </div>
 
-              <div className="absolute -bottom-3 -right-3 flex h-14 w-14 items-center justify-center rounded-full bg-white text-3xl shadow-sm ring-1 ring-orange-100">
+              <div className="absolute -bottom-3 -right-3 flex h-14 w-14 items-center justify-center rounded-full bg-card text-3xl shadow-sm ring-1 ring-orange-100">
                 {currentBadge?.emoji ?? '🔒'}
               </div>
             </div>
@@ -351,7 +351,7 @@ export default function PublicProfilePage() {
 
           <div className="flex flex-col justify-center">
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
                 <p className="text-sm font-bold text-stone-500">
                   Recettes publiées
                 </p>
@@ -365,7 +365,7 @@ export default function PublicProfilePage() {
                 </p>
               </div>
 
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
                 <p className="text-sm font-bold text-stone-500">
                   Catégories utilisées
                 </p>
@@ -379,7 +379,7 @@ export default function PublicProfilePage() {
                 </p>
               </div>
 
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
                 <p className="text-sm font-bold text-stone-500">Amis</p>
 
                 <p className="mt-3 text-4xl font-black text-stone-950">
@@ -394,7 +394,7 @@ export default function PublicProfilePage() {
             </div>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
                 <p className="text-sm font-bold text-stone-500">Abonnés</p>
 
                 <p className="mt-3 text-4xl font-black text-orange-700">
@@ -409,7 +409,7 @@ export default function PublicProfilePage() {
                 </p>
               </div>
 
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
                 <p className="text-sm font-bold text-stone-500">
                   Abonnements
                 </p>
@@ -425,7 +425,7 @@ export default function PublicProfilePage() {
               </div>
             </div>
 
-            <div className="mt-5 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+            <div className="mt-5 rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
               <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
                 <div>
                   <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -487,7 +487,7 @@ export default function PublicProfilePage() {
         </div>
       </article>
 
-      <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2.5rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
         <div className="mb-6">
           <p className="font-bold text-orange-600">Badges</p>
 
@@ -533,7 +533,7 @@ export default function PublicProfilePage() {
               className="rounded-[2rem] bg-stone-50 p-5 opacity-70 ring-1 ring-stone-200"
             >
               <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-3xl ring-1 ring-stone-200">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-card text-3xl ring-1 ring-stone-200">
                   🔒
                 </div>
 
@@ -569,7 +569,7 @@ export default function PublicProfilePage() {
         </div>
 
         {recipes.length === 0 ? (
-          <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2rem] bg-card p-8 text-center shadow-sm ring-1 ring-orange-100">
             <p className="text-lg font-bold text-stone-950">
               Aucune recette pour le moment.
             </p>

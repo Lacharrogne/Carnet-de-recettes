@@ -248,7 +248,7 @@ export default function IdeasPage() {
             </p>
           </div>
 
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Participer
             </p>
@@ -349,7 +349,7 @@ export default function IdeasPage() {
 
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
-      <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+      <section className="rounded-[2.5rem] bg-card p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -425,7 +425,7 @@ export default function IdeasPage() {
                     </span>
                   </div>
 
-                  <div className="mb-3 flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-black text-orange-700 ring-1 ring-orange-100">
+                  <div className="mb-3 flex w-fit items-center gap-2 rounded-full bg-card px-3 py-1 text-sm font-black text-orange-700 ring-1 ring-orange-100">
                     <span>{categoryInfo.emoji}</span>
                     <span>{categoryInfo.label}</span>
                   </div>
@@ -443,7 +443,7 @@ export default function IdeasPage() {
                       type="button"
                       onClick={() => handleDeleteIdea(idea)}
                       disabled={deletingIdeaId === idea.id}
-                      className="mt-5 rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="mt-5 rounded-full border border-red-100 bg-card px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {deletingIdeaId === idea.id
                         ? 'Suppression...'

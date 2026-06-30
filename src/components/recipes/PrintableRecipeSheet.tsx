@@ -21,7 +21,7 @@ export default function PrintableRecipeSheet({
     typeof imageToDisplay === 'string' && imageToDisplay.startsWith('http')
 
   return (
-    <div className="hidden print:block print:bg-white print:p-0 print:text-black">
+    <div className="hidden print:block print:bg-card print:p-0 print:text-black">
       <article className="mx-auto max-w-[760px] text-[10.5pt] leading-relaxed">
         <header className="mb-5 border-b border-stone-200 pb-4">
           <div className="mb-5 flex items-center justify-between gap-4">

@@ -11,10 +11,10 @@ export type BadgeTone =
 const TONE_CLASS: Record<BadgeTone, string> = {
   neutral: 'bg-linen text-cacao',
   terracotta: 'bg-terracotta-soft text-terracotta-deep',
-  honey: 'bg-honey-soft text-[#8a5a1e]',
+  honey: 'bg-honey-soft text-honey-deep',
   sage: 'bg-sage-soft text-sage-deep',
-  plum: 'bg-[#f4e2e8] text-[#8e5a6b]',
-  frost: 'bg-[#e3f0f6] text-[#3f6f8c]',
+  plum: 'bg-berry-soft text-berry',
+  frost: 'bg-ocean-soft text-ocean',
 }
 
 type BadgeProps = {

@@ -36,7 +36,7 @@ export default function FieldShell({
       {children}
 
       {error ? (
-        <p className="mt-1.5 text-sm font-semibold text-[#b23b2e]">{error}</p>
+        <p className="mt-1.5 text-sm font-semibold text-danger">{error}</p>
       ) : hint ? (
         <p className="mt-1.5 text-sm text-hazel">{hint}</p>
       ) : null}

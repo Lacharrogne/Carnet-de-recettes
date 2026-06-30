@@ -17,10 +17,10 @@ const VARIANT_CLASS: Record<ButtonVariant, string> = {
     'bg-terracotta text-white shadow-soft hover:-translate-y-0.5 hover:bg-terracotta-deep hover:shadow-card',
   secondary:
     'bg-card text-cacao ring-1 ring-bark hover:-translate-y-0.5 hover:bg-linen',
-  soft: 'bg-terracotta-soft text-terracotta-deep hover:-translate-y-0.5 hover:bg-[#eecbb4]',
+  soft: 'bg-terracotta-soft text-terracotta-deep hover:-translate-y-0.5 hover:bg-terracotta-hover',
   ghost: 'text-hazel hover:bg-linen',
   danger:
-    'bg-[#f7e3de] text-[#b23b2e] ring-1 ring-[#e9c4bc] hover:-translate-y-0.5 hover:bg-[#f2d4cd]',
+    'bg-danger-soft text-danger ring-1 ring-field-ring hover:-translate-y-0.5 hover:bg-[#f2d4cd]',
 }
 
 const SIZE_CLASS: Record<ButtonSize, string> = {

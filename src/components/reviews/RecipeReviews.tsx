@@ -430,7 +430,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
   }
 
   return (
-    <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-7">
+    <section className="rounded-[2rem] bg-card p-5 shadow-sm ring-1 ring-orange-100 md:p-7">
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="font-bold text-orange-600">Avis de la famille</p>
@@ -498,7 +498,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                   className={`rounded-2xl px-4 py-3 text-xl font-black shadow-sm transition ${
                     value <= rating
                       ? 'bg-orange-500 text-white hover:bg-orange-600'
-                      : 'bg-white text-stone-300 ring-1 ring-orange-100 hover:bg-orange-50 hover:text-orange-400'
+                      : 'bg-card text-stone-300 ring-1 ring-orange-100 hover:bg-orange-50 hover:text-orange-400'
                   }`}
                   aria-label={`Mettre ${value} étoile${
                     value > 1 ? 's' : ''
@@ -520,7 +520,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
               onChange={(event) => setComment(event.target.value)}
               rows={4}
               placeholder="Exemple : recette facile, très bonne, parfaite pour le soir..."
-              className="w-full rounded-[1.4rem] border border-orange-100 bg-white px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 md:text-[15px]"
+              className="w-full rounded-[1.4rem] border border-orange-100 bg-card px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 md:text-[15px]"
             />
           </div>
 
@@ -542,7 +542,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                 type="button"
                 onClick={handleDeleteReview}
                 disabled={deleting}
-                className="rounded-full border border-red-200 bg-white px-6 py-3 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-full border border-red-200 bg-card px-6 py-3 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {deleting ? 'Suppression...' : 'Supprimer mon avis'}
               </button>
@@ -647,7 +647,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                     className={`rounded-full px-4 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-60 ${
                       review.likedByMe
                         ? 'bg-orange-500 text-white hover:bg-orange-600'
-                        : 'bg-white text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
+                        : 'bg-card text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
                     }`}
                   >
                     {review.likedByMe ? '♥ Aimé' : '♡ J’aime'}
@@ -670,7 +670,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       )
                       clearMessages()
                     }}
-                    className="rounded-full bg-white px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 transition hover:bg-orange-50 hover:text-orange-700"
+                    className="rounded-full bg-card px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 transition hover:bg-orange-50 hover:text-orange-700"
                   >
                     Répondre
                     {replyCount > 0 ? ` · ${replyCount}` : ''}
@@ -680,7 +680,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                 {replyingReviewId === review.id && (
                   <form
                     onSubmit={(event) => handleReplySubmit(event, review.id)}
-                    className="mt-4 rounded-[1.5rem] bg-white p-4 ring-1 ring-orange-100"
+                    className="mt-4 rounded-[1.5rem] bg-card p-4 ring-1 ring-orange-100"
                   >
                     <label className="mb-2 block text-sm font-black text-stone-800">
                       Votre réponse
@@ -713,7 +713,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       <button
                         type="button"
                         onClick={() => setReplyingReviewId(null)}
-                        className="rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-black text-orange-700 transition hover:bg-orange-50"
+                        className="rounded-full border border-orange-200 bg-card px-5 py-3 text-sm font-black text-orange-700 transition hover:bg-orange-50"
                       >
                         Annuler
                       </button>
@@ -735,7 +735,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       return (
                         <div
                           key={reply.id}
-                          className="rounded-[1.5rem] bg-white p-4 ring-1 ring-orange-100"
+                          className="rounded-[1.5rem] bg-card p-4 ring-1 ring-orange-100"
                         >
                           <div className="mb-3 flex items-center gap-3">
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">

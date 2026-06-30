@@ -490,7 +490,7 @@ export default function RecipeDetailsPage() {
 
   if (invalidRecipeId) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-card px-6 py-10 shadow-sm ring-1 ring-orange-100">
         <Alert tone="error" className="mb-6">
           Recette introuvable.
         </Alert>
@@ -511,7 +511,7 @@ export default function RecipeDetailsPage() {
 
   if (!recipe) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-card px-6 py-10 shadow-sm ring-1 ring-orange-100">
         <Alert tone="error" className="mb-6">
           {errorMessage || 'Recette introuvable.'}
         </Alert>
@@ -577,13 +577,13 @@ export default function RecipeDetailsPage() {
               <button
                 type="button"
                 onClick={closeGuidedCooking}
-                className="w-full rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-orange-700 shadow-sm transition hover:bg-orange-50 sm:w-auto"
+                className="w-full rounded-full border border-orange-200 bg-card px-5 py-3 font-black text-orange-700 shadow-sm transition hover:bg-orange-50 sm:w-auto"
               >
                 Quitter
               </button>
             </div>
 
-            <div className="mb-5 rounded-full bg-white p-2 shadow-sm ring-1 ring-orange-100 sm:mb-8">
+            <div className="mb-5 rounded-full bg-card p-2 shadow-sm ring-1 ring-orange-100 sm:mb-8">
               <div
                 className="h-3 rounded-full bg-orange-500 transition-all sm:h-4"
                 style={{ width: `${guidedProgress}%` }}
@@ -591,7 +591,7 @@ export default function RecipeDetailsPage() {
             </div>
 
             <div className="grid flex-1 gap-5 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
-              <aside className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
+              <aside className="rounded-[1.75rem] bg-card p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
                 <p className="font-black text-orange-600">Ingrédients</p>
 
                 <p className="mt-1 text-sm font-semibold text-stone-500">
@@ -611,7 +611,7 @@ export default function RecipeDetailsPage() {
                 </ul>
               </aside>
 
-              <main className="flex flex-col justify-between rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:p-8 md:rounded-[2.5rem] md:p-10">
+              <main className="flex flex-col justify-between rounded-[2rem] bg-card p-5 shadow-sm ring-1 ring-orange-100 sm:p-8 md:rounded-[2.5rem] md:p-10">
                 <div>
                   <div className="mb-5 flex flex-wrap items-center justify-between gap-3 sm:mb-6">
                     <span className="rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700 sm:px-5">
@@ -668,7 +668,7 @@ export default function RecipeDetailsPage() {
                         <button
                           type="button"
                           onClick={toggleTimer}
-                          className="rounded-full bg-white px-5 py-3 font-black text-stone-950 transition hover:bg-orange-50"
+                          className="rounded-full bg-card px-5 py-3 font-black text-stone-950 transition hover:bg-orange-50"
                         >
                           {timerRunning
                             ? 'Pause'
@@ -694,7 +694,7 @@ export default function RecipeDetailsPage() {
                     type="button"
                     onClick={goToPreviousStep}
                     disabled={currentStepIndex === 0}
-                    className="rounded-full border border-orange-200 bg-white px-6 py-4 font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-full border border-orange-200 bg-card px-6 py-4 font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     ← Précédent
                   </button>
@@ -727,7 +727,7 @@ export default function RecipeDetailsPage() {
         <div className="print:hidden">
           <Link
             to="/recipes"
-            className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 font-bold text-orange-700 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-full bg-card px-5 py-3 font-bold text-orange-700 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 sm:w-auto"
           >
             ← Retour aux recettes
           </Link>
@@ -788,7 +788,7 @@ export default function RecipeDetailsPage() {
               {recipe.userId && (
                 <Link
                   to={`/users/${recipe.userId}`}
-                  className="mt-6 block rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 print:hidden sm:mt-7 sm:rounded-[2rem] sm:p-5"
+                  className="mt-6 block rounded-[1.75rem] bg-card p-4 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 print:hidden sm:mt-7 sm:rounded-[2rem] sm:p-5"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-xl font-black text-white ring-2 ring-white sm:h-16 sm:w-16 sm:text-2xl">
@@ -827,7 +827,7 @@ export default function RecipeDetailsPage() {
               )}
 
               <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4 lg:grid-cols-4">
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-card px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Préparation
                   </p>
@@ -837,7 +837,7 @@ export default function RecipeDetailsPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-card px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Cuisson
                   </p>
@@ -847,7 +847,7 @@ export default function RecipeDetailsPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-card px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Total
                   </p>
@@ -857,7 +857,7 @@ export default function RecipeDetailsPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-card px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Portions
                   </p>
@@ -881,7 +881,7 @@ export default function RecipeDetailsPage() {
                 </div>
               )}
 
-              <div className="mt-7 rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-5">
+              <div className="mt-7 rounded-[1.75rem] bg-card p-4 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
                     Actions rapides
@@ -963,7 +963,7 @@ export default function RecipeDetailsPage() {
                 </div>
               </div>
 
-              <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
+              <div className="mt-7 rounded-[1.75rem] bg-card p-5 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
@@ -1052,7 +1052,7 @@ export default function RecipeDetailsPage() {
         </article>
 
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
-          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:p-6">
+          <section className="rounded-[2rem] bg-card p-5 shadow-sm ring-1 ring-orange-100 sm:p-6">
             <div>
               <p className="font-bold text-orange-600">À préparer</p>
 
@@ -1082,12 +1082,12 @@ export default function RecipeDetailsPage() {
                   type="button"
                   onClick={decreaseServings}
                   disabled={selectedServings <= 1}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-orange-200 bg-white text-xl font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-orange-200 bg-card text-xl font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   −
                 </button>
 
-                <div className="flex-1 rounded-full bg-white px-5 py-3 text-center font-black text-stone-950 shadow-sm ring-1 ring-orange-100 sm:flex-none sm:px-6">
+                <div className="flex-1 rounded-full bg-card px-5 py-3 text-center font-black text-stone-950 shadow-sm ring-1 ring-orange-100 sm:flex-none sm:px-6">
                   {selectedServings} personne{selectedServings > 1 ? 's' : ''}
                 </div>
 
@@ -1102,7 +1102,7 @@ export default function RecipeDetailsPage() {
                 <button
                   type="button"
                   onClick={resetServings}
-                  className="w-full rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
+                  className="w-full rounded-full border border-orange-200 bg-card px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
                 >
                   Revenir à {recipe.servings} pers.
                 </button>
@@ -1117,7 +1117,7 @@ export default function RecipeDetailsPage() {
                     className={`rounded-full px-3 py-2 text-sm font-black transition sm:px-4 ${
                       selectedServings === servingValue
                         ? 'bg-orange-500 text-white'
-                        : 'bg-white text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
+                        : 'bg-card text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
                     }`}
                   >
                     {servingValue}
@@ -1179,7 +1179,7 @@ export default function RecipeDetailsPage() {
             )}
           </section>
 
-          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:p-6">
+          <section className="rounded-[2rem] bg-card p-5 shadow-sm ring-1 ring-orange-100 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-bold text-orange-600">En cuisine</p>

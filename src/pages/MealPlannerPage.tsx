@@ -591,7 +591,7 @@ export default function MealPlannerPage() {
                 de courses.
               </p>
 
-              <div className="mt-8 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+              <div className="mt-8 rounded-[2rem] bg-card p-5 shadow-sm ring-1 ring-orange-100">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -617,7 +617,7 @@ export default function MealPlannerPage() {
               </div>
 
               <div className="mt-6 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-card p-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-3xl font-black text-orange-600">
                     {plannedMealsCount}
                   </p>
@@ -626,7 +626,7 @@ export default function MealPlannerPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-card p-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-3xl font-black text-green-800">
                     {plannedDaysCount}
                   </p>
@@ -635,7 +635,7 @@ export default function MealPlannerPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-card p-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-3xl font-black text-stone-950">
                     {estimatedIngredientsCount}
                   </p>
@@ -644,7 +644,7 @@ export default function MealPlannerPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-card p-4 shadow-sm ring-1 ring-orange-100">
                   <p className="text-3xl font-black text-stone-950">
                     {estimatedCookingTime}
                   </p>
@@ -664,7 +664,7 @@ export default function MealPlannerPage() {
 
                 <Link
                   to="/recipes"
-                  className="rounded-full border border-orange-200 bg-white px-6 py-4 text-center font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50"
+                  className="rounded-full border border-orange-200 bg-card px-6 py-4 text-center font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50"
                 >
                   Parcourir les catégories
                 </Link>
@@ -673,7 +673,7 @@ export default function MealPlannerPage() {
                   type="button"
                   onClick={handlePrintPlanning}
                   disabled={plannedRecipeIds.length === 0}
-                  className="rounded-full border border-orange-200 bg-white px-6 py-4 font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full border border-orange-200 bg-card px-6 py-4 font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Imprimer le planning
                 </button>
@@ -682,14 +682,14 @@ export default function MealPlannerPage() {
                   type="button"
                   onClick={handleClearPlanning}
                   disabled={plannedRecipeIds.length === 0}
-                  className="rounded-full border border-red-100 bg-white px-6 py-4 font-black text-red-600 transition hover:-translate-y-0.5 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full border border-red-100 bg-card px-6 py-4 font-black text-red-600 transition hover:-translate-y-0.5 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Vider le planning
                 </button>
               </div>
 
               {!user && (
-                <div className="mt-6 rounded-[1.5rem] bg-white/80 p-4 text-sm font-bold leading-6 text-stone-600 ring-1 ring-orange-100">
+                <div className="mt-6 rounded-[1.5rem] bg-card/80 p-4 text-sm font-bold leading-6 text-stone-600 ring-1 ring-orange-100">
                   💡 Votre planning est enregistré sur cet appareil. Connectez-vous
                   pour synchroniser automatiquement la liste de courses.
                 </div>
@@ -720,7 +720,7 @@ export default function MealPlannerPage() {
         )}
 
         {uniquePlannedRecipes.length > 0 && (
-          <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+          <section className="rounded-[2.5rem] bg-card p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="font-bold text-orange-600">Récapitulatif</p>

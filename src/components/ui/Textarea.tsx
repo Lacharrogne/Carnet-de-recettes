@@ -32,7 +32,7 @@ export default function Textarea({
       <textarea
         id={textareaId}
         className={`${FIELD_CLASS} resize-y leading-7 ${
-          error ? 'ring-2 ring-[#e9c4bc]' : ''
+          error ? 'ring-2 ring-field-ring' : ''
         } ${className}`}
         {...rest}
       />

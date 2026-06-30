@@ -150,7 +150,7 @@ export default function FavoritesPage() {
       <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-orange-100">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-5">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-orange-100">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-card text-3xl shadow-sm ring-1 ring-orange-100">
               ♥
             </div>
 
@@ -180,7 +180,7 @@ export default function FavoritesPage() {
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
       <div className="grid gap-5 md:grid-cols-3">
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             ❤️
           </div>
@@ -197,7 +197,7 @@ export default function FavoritesPage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             🔎
           </div>
@@ -214,7 +214,7 @@ export default function FavoritesPage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             🧺
           </div>
@@ -233,7 +233,7 @@ export default function FavoritesPage() {
         </div>
       </div>
 
-      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+      <div className="rounded-[2rem] bg-card p-6 shadow-sm ring-1 ring-orange-100">
         <div className="mb-5">
           <p className="font-bold text-orange-700">Recherche</p>
 
@@ -253,7 +253,7 @@ export default function FavoritesPage() {
             onChange={(event) => setSearch(event.target.value)}
             aria-label="Rechercher dans mes favoris"
             placeholder="Rechercher dans mes favoris..."
-            className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
+            className="rounded-2xl border border-orange-100 bg-cream-raised px-4 py-3 outline-none transition focus:border-orange-500"
           />
 
           <select
@@ -262,7 +262,7 @@ export default function FavoritesPage() {
               setSelectedCategory(event.target.value as RecipeCategory | '')
             }
             aria-label="Filtrer par catégorie"
-            className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
+            className="rounded-2xl border border-orange-100 bg-cream-raised px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="">Toutes les catégories</option>
 
@@ -277,7 +277,7 @@ export default function FavoritesPage() {
             value={sort}
             onChange={(event) => setSort(event.target.value as SortOption)}
             aria-label="Trier les favoris"
-            className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
+            className="rounded-2xl border border-orange-100 bg-cream-raised px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="recent">Plus récentes</option>
             <option value="name">Trier par nom</option>
@@ -290,7 +290,7 @@ export default function FavoritesPage() {
           <button
             type="button"
             onClick={resetFilters}
-            className="mt-4 rounded-2xl border border-orange-200 bg-white px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+            className="mt-4 rounded-2xl border border-orange-200 bg-card px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
           >
             Réinitialiser les filtres
           </button>

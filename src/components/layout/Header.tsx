@@ -7,6 +7,7 @@ import { useAuth } from '../../context/useAuth'
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
 import { supabase } from '../../lib/supabase'
 import { getProfile, type UserProfile } from '../../services/profiles'
+import ThemeToggle from '../ui/ThemeToggle'
 
 function PlusIcon({ className = 'h-4 w-4' }: { className?: string }) {
   return (
@@ -220,7 +221,7 @@ export default function Header() {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-2 rounded-full bg-white/70 px-2 py-2 shadow-sm ring-1 ring-orange-100 lg:flex">
+        <nav className="hidden items-center gap-2 rounded-full bg-card/70 px-2 py-2 shadow-sm ring-1 ring-orange-100 lg:flex">
           <NavLink to="/" onClick={closeDropdowns} className={navLinkClass}>
             Accueil
           </NavLink>
@@ -244,7 +245,7 @@ export default function Header() {
                 'w-[520px]',
               )}
             >
-              <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-card p-4 shadow-xl ring-1 ring-orange-100">
                 <div className="mb-3 flex items-center justify-between gap-4 px-2">
                   <div>
                     <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -308,7 +309,7 @@ export default function Header() {
                 'w-[430px]',
               )}
             >
-              <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-card p-4 shadow-xl ring-1 ring-orange-100">
                 <div className="mb-3 px-2">
                   <p className="text-sm font-black uppercase tracking-wide text-orange-600">
                     Outils du carnet
@@ -353,13 +354,15 @@ export default function Header() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={closeDropdowns}
-            className="rounded-full px-5 py-3 text-sm font-bold text-[#8a5a1e] transition hover:bg-honey-soft"
+            className="rounded-full px-5 py-3 text-sm font-bold text-honey-deep transition hover:bg-honey-soft"
           >
             ✨ Premium
           </a>
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <ThemeToggle />
+
           {user ? (
             <>
               <Link
@@ -412,7 +415,7 @@ export default function Header() {
                     'right-0',
                   )}
                 >
-                  <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100">
+                  <div className="rounded-[2rem] bg-card p-4 shadow-xl ring-1 ring-orange-100">
                     <div className="mb-3 rounded-[1.5rem] bg-cream-50 p-3 ring-1 ring-orange-100">
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-lg font-black text-white ring-2 ring-white">
@@ -468,7 +471,7 @@ export default function Header() {
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="mt-2 rounded-2xl border border-orange-200 bg-white p-2.5 text-left transition hover:bg-orange-50"
+                        className="mt-2 rounded-2xl border border-orange-200 bg-card p-2.5 text-left transition hover:bg-orange-50"
                       >
                         <div className="flex items-center gap-3">
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-xl">
@@ -498,15 +501,19 @@ export default function Header() {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setMenuOpen((current) => !current)}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-orange-100 bg-white text-2xl font-black text-stone-900 shadow-sm transition hover:bg-orange-50 lg:hidden"
-          aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? '✕' : '☰'}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <ThemeToggle className="h-12 w-12 rounded-2xl" />
+
+          <button
+            type="button"
+            onClick={() => setMenuOpen((current) => !current)}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-orange-100 bg-card text-2xl font-black text-stone-900 shadow-sm transition hover:bg-orange-50"
+            aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? '✕' : '☰'}
+          </button>
+        </div>
       </div>
 
       {menuOpen && (
@@ -544,7 +551,7 @@ export default function Header() {
 
             <details
               open={isRecipesActive}
-              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden"
+              className="rounded-[1.5rem] bg-card p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden"
             >
               <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
                 <span>📖 Recettes</span>
@@ -578,7 +585,7 @@ export default function Header() {
 
             <details
               open={isToolsActive}
-              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden"
+              className="rounded-[1.5rem] bg-card p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden"
             >
               <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
                 <span>🧰 Outils</span>
@@ -626,14 +633,14 @@ export default function Header() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={closeMenu}
-              className="flex items-center justify-between rounded-2xl bg-honey-soft px-4 py-4 text-base font-black text-[#8a5a1e] shadow-soft ring-1 ring-honey/40 transition hover:bg-honey/30"
+              className="flex items-center justify-between rounded-2xl bg-honey-soft px-4 py-4 text-base font-black text-honey-deep shadow-soft ring-1 ring-honey/40 transition hover:bg-honey/30"
             >
               <span>✨ Passer à Premium</span>
               <span>→</span>
             </a>
 
             {user ? (
-              <details className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">
+              <details className="rounded-[1.5rem] bg-card p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">
                 <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
                   <span className="flex min-w-0 items-center gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
