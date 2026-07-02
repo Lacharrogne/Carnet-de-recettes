@@ -22,6 +22,27 @@ function parseFraction(value: string) {
   return topValue / bottomValue
 }
 
+/** Valeur numérique des fractions unicode courantes (« ½ », « ¾ », « ⅓ »...). */
+const UNICODE_FRACTIONS: Record<string, number> = {
+  '½': 1 / 2,
+  '⅓': 1 / 3,
+  '⅔': 2 / 3,
+  '¼': 1 / 4,
+  '¾': 3 / 4,
+  '⅕': 1 / 5,
+  '⅖': 2 / 5,
+  '⅗': 3 / 5,
+  '⅘': 4 / 5,
+  '⅙': 1 / 6,
+  '⅚': 5 / 6,
+  '⅛': 1 / 8,
+  '⅜': 3 / 8,
+  '⅝': 5 / 8,
+  '⅞': 7 / 8,
+}
+
+const UNICODE_FRACTION_CLASS = Object.keys(UNICODE_FRACTIONS).join('')
+
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
@@ -166,6 +187,16 @@ function adjustIngredientAgreement(quantity: number, ingredientRest: string) {
   return ingredientRest
 }
 
+/** Assemble le résultat : quantité recalculée + reste accordé (pluriel). */
+function buildScaledResult(scaledQuantity: number, restOfIngredient: string) {
+  const adjustedRest = adjustIngredientAgreement(
+    scaledQuantity,
+    restOfIngredient,
+  )
+
+  return `${formatScaledQuantity(scaledQuantity)}${adjustedRest}`
+}
+
 export function scaleIngredientText(
   ingredient: string,
   originalServings: number,
@@ -178,6 +209,35 @@ export function scaleIngredientText(
   const multiplier = selectedServings / originalServings
   const trimmedIngredient = ingredient.trim()
 
+  // Fourchette de quantités (« 2 à 3 », « 2-3 ») : on recalcule les deux bornes
+  // en conservant le séparateur d'origine.
+  const rangeMatch = trimmedIngredient.match(
+    /^(\d+(?:[.,]\d+)?)(\s*(?:-|–|—|à|to)\s*)(\d+(?:[.,]\d+)?)(.*)$/iu,
+  )
+
+  if (rangeMatch) {
+    const low = Number(rangeMatch[1].replace(',', '.')) * multiplier
+    const high = Number(rangeMatch[3].replace(',', '.')) * multiplier
+    const restOfIngredient = rangeMatch[4] ?? ''
+    const adjustedRest = adjustIngredientAgreement(high, restOfIngredient)
+
+    return `${formatScaledQuantity(low)}${rangeMatch[2]}${formatScaledQuantity(
+      high,
+    )}${adjustedRest}`
+  }
+
+  // Fraction unicode, éventuellement précédée d'un entier (« ½ », « 1 ½ »).
+  const unicodeMatch = trimmedIngredient.match(
+    new RegExp(`^(\\d+\\s*)?([${UNICODE_FRACTION_CLASS}])(.*)$`, 'u'),
+  )
+
+  if (unicodeMatch) {
+    const wholePart = unicodeMatch[1] ? Number(unicodeMatch[1].trim()) : 0
+    const quantity = wholePart + (UNICODE_FRACTIONS[unicodeMatch[2]] ?? 0)
+
+    return buildScaledResult(quantity * multiplier, unicodeMatch[3] ?? '')
+  }
+
   const fractionMatch = trimmedIngredient.match(/^(\d+)\/(\d+)(.*)$/)
 
   if (fractionMatch) {
@@ -187,14 +247,7 @@ export function scaleIngredientText(
       return ingredient
     }
 
-    const scaledQuantity = quantity * multiplier
-    const restOfIngredient = fractionMatch[3] ?? ''
-    const adjustedRest = adjustIngredientAgreement(
-      scaledQuantity,
-      restOfIngredient,
-    )
-
-    return `${formatScaledQuantity(scaledQuantity)}${adjustedRest}`
+    return buildScaledResult(quantity * multiplier, fractionMatch[3] ?? '')
   }
 
   const decimalMatch = trimmedIngredient.match(/^(\d+(?:[.,]\d+)?)(.*)$/)
@@ -209,12 +262,5 @@ export function scaleIngredientText(
     return ingredient
   }
 
-  const scaledQuantity = quantity * multiplier
-  const restOfIngredient = decimalMatch[2] ?? ''
-  const adjustedRest = adjustIngredientAgreement(
-    scaledQuantity,
-    restOfIngredient,
-  )
-
-  return `${formatScaledQuantity(scaledQuantity)}${adjustedRest}`
+  return buildScaledResult(quantity * multiplier, decimalMatch[2] ?? '')
 }
