@@ -378,6 +378,11 @@ textarea {
 
 /* Impression propre */
 @media print {
+  /* Marges de page cohérentes pour la fiche imprimable. */
+  @page {
+    margin: 14mm;
+  }
+
   body,
   .page-background-home,
   .page-background-fridge,
@@ -391,6 +396,13 @@ textarea {
   .page-background-auth,
   .page-background-default {
     background: white !important;
+  }
+
+  /* Conserve les couleurs/fonds (chips, puces) à l'impression : sans ça, la
+     plupart des imprimantes suppriment les aplats colorés de la fiche. */
+  body * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 /* Focus clavier visible et cohérent partout (a11y).

@@ -87,6 +87,14 @@ export default function PrintableRecipeSheet({
                   {recipe.description}
                 </p>
               )}
+
+              {recipe.tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[9.5pt] font-bold text-stone-500">
+                  {recipe.tags.map((tag) => (
+                    <span key={tag}>#{tag}</span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -162,6 +170,10 @@ export default function PrintableRecipeSheet({
             <p className="text-stone-600">Aucune étape renseignée.</p>
           )}
         </section>
+
+        <footer className="mt-6 border-t border-stone-200 pt-3 text-center text-[9pt] text-stone-400">
+          Carnet de recettes — cuisine maison & petits plats
+        </footer>
       </article>
     </div>
   )
