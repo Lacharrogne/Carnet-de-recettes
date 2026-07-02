@@ -10,6 +10,7 @@ import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { useFavorites } from '../context/useFavorites'
 import { scaleIngredientText } from '../lib/ingredientScaling'
+import { useWakeLock } from '../lib/useWakeLock'
 import { findLinkedRecipe } from '../lib/recipeLinks'
 import {
   formatTimerTime,
@@ -70,6 +71,9 @@ export default function RecipeDetailsPage() {
 
   const [guidedCookingOpen, setGuidedCookingOpen] = useState(false)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
+
+  // Maintient l'écran allumé pendant la cuisine guidée.
+  const screenKeptAwake = useWakeLock(guidedCookingOpen)
 
   const [activeTimerSeconds, setActiveTimerSeconds] = useState<number | null>(
     null,
@@ -618,9 +622,20 @@ export default function RecipeDetailsPage() {
                       Étape {currentStepIndex + 1} sur {recipe.steps.length}
                     </span>
 
-                    <span className="rounded-full bg-cream-50 px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 sm:px-5">
-                      {guidedProgress} %
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {screenKeptAwake && (
+                        <span
+                          title="L’écran reste allumé pendant la cuisine"
+                          className="rounded-full bg-green-50 px-4 py-2 text-sm font-black text-green-700 ring-1 ring-green-100 sm:px-5"
+                        >
+                          🔆 Écran allumé
+                        </span>
+                      )}
+
+                      <span className="rounded-full bg-cream-50 px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 sm:px-5">
+                        {guidedProgress} %
+                      </span>
+                    </div>
                   </div>
 
                   <p className="text-2xl font-black leading-relaxed text-stone-950 sm:text-3xl md:text-5xl md:leading-relaxed">
