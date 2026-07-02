@@ -761,23 +761,24 @@ export default function RecipeDetailsPage() {
         )}
 
         <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-card ring-1 ring-bark sm:rounded-[2.5rem]">
-          <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="relative min-h-[260px] bg-cream-200 sm:min-h-[340px]">
+          <div>
+            <div className="relative w-full bg-cream-200">
               {typeof imageToDisplay === 'string' &&
               imageToDisplay.startsWith('http') ? (
                 <img
                   src={imageToDisplay}
                   alt={recipe.title}
-                  className="h-full max-h-[360px] min-h-[260px] w-full object-cover sm:max-h-[560px] sm:min-h-[340px] lg:max-h-none lg:h-full"
+                  className="h-72 w-full object-cover sm:h-96 lg:h-[30rem]"
                 />
               ) : (
-                <div className="flex min-h-[260px] items-center justify-center text-7xl sm:min-h-[340px] sm:text-8xl lg:h-full">
+                <div className="flex h-72 items-center justify-center text-7xl sm:h-96 sm:text-8xl lg:h-[30rem]">
                   {recipe.image || '🍽️'}
                 </div>
               )}
             </div>
 
-            <div className="flex flex-col justify-center px-5 py-7 sm:px-6 sm:py-8 lg:px-10">
+            <div className="grid gap-8 px-5 py-7 sm:px-6 sm:py-8 lg:grid-cols-[1.4fr_1fr] lg:items-start lg:gap-12 lg:px-10 lg:py-10">
+              <div className="min-w-0">
               <div className="mb-5 flex flex-wrap items-center gap-2 sm:gap-3">
                 <span className="rounded-full bg-terracotta-soft px-4 py-2 text-xs font-bold text-terracotta-deep sm:text-sm">
                   {recipe.category}
@@ -895,8 +896,10 @@ export default function RecipeDetailsPage() {
                   ))}
                 </div>
               )}
+              </div>
 
-              <div className="mt-7 rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-5">
+              <div>
+              <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 print:hidden sm:rounded-[2rem] sm:p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
                     Actions rapides
@@ -1063,6 +1066,7 @@ export default function RecipeDetailsPage() {
 </div>
               </div>
             </div>
+          </div>
           </div>
         </article>
 
