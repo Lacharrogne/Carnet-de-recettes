@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 import { LOGO_SRC } from '../../data/brand'
-import { VITRINE_PRICING_URL } from '../../config/site'
 import { useAuth } from '../../context/useAuth'
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
 import { supabase } from '../../lib/supabase'
@@ -348,15 +347,6 @@ export default function Header() {
               </div>
             </div>
           </div>
-          <a
-            href={VITRINE_PRICING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={closeDropdowns}
-            className="rounded-full px-5 py-3 text-sm font-bold text-[#8a5a1e] transition hover:bg-honey-soft"
-          >
-            ✨ Premium
-          </a>
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -620,17 +610,6 @@ export default function Header() {
                 ))}
               </div>
             </details>
-
-            <a
-              href={VITRINE_PRICING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={closeMenu}
-              className="flex items-center justify-between rounded-2xl bg-honey-soft px-4 py-4 text-base font-black text-[#8a5a1e] shadow-soft ring-1 ring-honey/40 transition hover:bg-honey/30"
-            >
-              <span>✨ Passer à Premium</span>
-              <span>→</span>
-            </a>
 
             {user ? (
               <details className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">
