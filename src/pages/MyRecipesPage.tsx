@@ -12,6 +12,9 @@ import type { Recipe, RecipeCategory } from '../types/recipe'
 
 type SortOption = 'recent' | 'name' | 'time' | 'difficulty'
 
+/** Nombre de recettes affichées par page (pagination « Voir plus »). */
+const PAGE_SIZE = 12
+
 export default function MyRecipesPage() {
   useDocumentTitle('Mes recettes')
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -123,6 +126,20 @@ export default function MyRecipesPage() {
   }, [recipes])
 
   const hasActiveFilters = search.trim().length > 0 || selectedCategory !== ''
+
+  // Pagination : on réinitialise le nombre visible dès qu'un filtre change
+  // (ajustement d'état pendant le rendu, sans effet).
+  const filtersKey = `${search.trim().toLowerCase()}|${selectedCategory}|${sort}`
+  const [paginationKey, setPaginationKey] = useState(filtersKey)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  if (paginationKey !== filtersKey) {
+    setPaginationKey(filtersKey)
+    setVisibleCount(PAGE_SIZE)
+  }
+
+  const visibleRecipes = filteredRecipes.slice(0, visibleCount)
+  const remainingCount = filteredRecipes.length - visibleRecipes.length
 
   function resetFilters() {
     setSearch('')
@@ -327,10 +344,24 @@ export default function MyRecipesPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredRecipes.map((recipe) => (
+            {visibleRecipes.map((recipe) => (
               <RecipeCard key={recipe.id} recipe={recipe} />
             ))}
           </div>
+
+          {remainingCount > 0 && (
+            <div className="mt-8 flex justify-center">
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
+              >
+                Voir plus de recettes ({remainingCount} restante
+                {remainingCount > 1 ? 's' : ''})
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </section>
