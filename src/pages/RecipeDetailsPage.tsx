@@ -768,10 +768,10 @@ export default function RecipeDetailsPage() {
                 <img
                   src={imageToDisplay}
                   alt={recipe.title}
-                  className="h-full max-h-[360px] min-h-[260px] w-full object-cover sm:max-h-[560px] sm:min-h-[340px] lg:h-full"
+                  className="h-full max-h-[360px] min-h-[260px] w-full object-cover sm:max-h-[560px] sm:min-h-[340px] lg:max-h-none lg:h-full"
                 />
               ) : (
-                <div className="flex min-h-[260px] items-center justify-center text-7xl sm:min-h-[340px] sm:text-8xl">
+                <div className="flex min-h-[260px] items-center justify-center text-7xl sm:min-h-[340px] sm:text-8xl lg:h-full">
                   {recipe.image || '🍽️'}
                 </div>
               )}
