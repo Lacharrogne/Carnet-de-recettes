@@ -16,6 +16,7 @@ import {
 import type { Difficulty, Recipe, RecipeCategory } from '../../types/recipe'
 import Alert from '../ui/Alert'
 import { EmojiPicker } from '../ui/EmojiPicker'
+import ImageCropper from './ImageCropper'
 
 export type RecipeFormValues = {
   title: string
@@ -114,6 +115,7 @@ export default function RecipeForm({
   const [relatedSearch, setRelatedSearch] = useState('')
 
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
 
   const previewUrl = useMemo(() => {
     if (!imageFile) return null
@@ -562,11 +564,21 @@ export default function RecipeForm({
             <input
               type="file"
               accept="image/*"
-              onChange={(event) =>
-                setImageFile(event.target.files ? event.target.files[0] : null)
-              }
+              onChange={(event) => {
+                const selected = event.target.files?.[0] ?? null
+                if (selected) {
+                  setPendingFile(selected)
+                }
+                // Réinitialise pour permettre de re-choisir le même fichier.
+                event.target.value = ''
+              }}
               className={`${inputClass} file:mr-4 file:rounded-full file:border-0 file:bg-orange-100 file:px-4 file:py-2 file:text-sm file:font-bold file:text-orange-700`}
             />
+
+            <p className="mt-2 text-sm leading-6 text-stone-500">
+              Vous pourrez recadrer et redimensionner la photo avant
+              l’enregistrement.
+            </p>
 
             {initialValues?.imageUrl && !previewUrl && (
               <p className="mt-2 text-sm leading-6 text-stone-500">
@@ -577,13 +589,36 @@ export default function RecipeForm({
         </div>
 
         {previewUrl && (
-          <img
-            src={previewUrl}
-            alt="Aperçu de la recette"
-            className="mt-5 h-44 w-full rounded-[1.5rem] object-cover ring-1 ring-bark sm:h-56"
-          />
+          <div className="mt-5">
+            <img
+              src={previewUrl}
+              alt="Aperçu de la recette"
+              className="h-44 w-full rounded-[1.5rem] object-cover ring-1 ring-bark sm:h-56"
+            />
+
+            {imageFile && (
+              <button
+                type="button"
+                onClick={() => setPendingFile(imageFile)}
+                className={`${smallButtonClass} mt-3`}
+              >
+                Recadrer la photo
+              </button>
+            )}
+          </div>
         )}
       </div>
+
+      {pendingFile && (
+        <ImageCropper
+          file={pendingFile}
+          onCancel={() => setPendingFile(null)}
+          onConfirm={(croppedFile) => {
+            setImageFile(croppedFile)
+            setPendingFile(null)
+          }}
+        />
+      )}
 
       <div className={sectionClass}>
         <div className="mb-5 sm:mb-6">
