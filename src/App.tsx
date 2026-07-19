@@ -26,6 +26,7 @@ const SocialPage = lazy(() => import('./pages/SocialPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const IdeasPage = lazy(() => import('./pages/IdeasPage'))
 const ToolsPage = lazy(() => import('./pages/ToolsPage'))
+const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'))
 
 function getPageBackgroundClass(pathname: string) {
   if (pathname === '/') {
@@ -107,6 +108,7 @@ export default function App() {
           />
           <Route path="/ideas" element={<IdeasPage />} />
           <Route path="/tools" element={<ToolsPage />} />
+          <Route path="/premium" element={<SubscriptionPage />} />
 
           <Route
             path="/profile"
