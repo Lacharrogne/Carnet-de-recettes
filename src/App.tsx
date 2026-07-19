@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 
 import Header from './components/layout/Header'
+import TrialBanner from './components/layout/TrialBanner'
 import Footer from './components/layout/Footer'
 import BottomNav from './components/layout/BottomNav'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -86,6 +87,8 @@ export default function App() {
       <ScrollToTop />
 
       <Header />
+
+      <TrialBanner />
 
       <main className="mx-auto max-w-6xl px-4 pt-8 pb-28 lg:pb-8">
         <Suspense fallback={<PageSkeleton />}>

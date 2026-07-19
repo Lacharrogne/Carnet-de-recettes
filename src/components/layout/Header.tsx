@@ -50,6 +50,12 @@ const personalLinks = [
     to: '/favorites',
     emoji: '❤️',
   },
+  {
+    label: 'Abonnement',
+    description: 'Votre offre premium et votre essai',
+    to: '/premium',
+    emoji: '💎',
+  },
 ]
 
 const toolLinks = [
