@@ -1,25 +1,10 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
-import { Skeleton } from '../components/ui/Skeleton'
+import ResourceManager from '../components/admin/ResourceManager'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
-import {
-  deleteAdminProfile,
-  deleteAdminRecipe,
-  deleteAdminReview,
-  getAdminStats,
-  getRecentAdminProfiles,
-  getRecentAdminRecipes,
-  getRecentAdminReviews,
-  searchAdminProfiles,
-  searchAdminRecipes,
-  searchAdminReviews,
-  type AdminProfilePreview,
-  type AdminRecipePreview,
-  type AdminReviewPreview,
-  type AdminStats,
-} from '../services/admin'
+import { getAdminStats, type AdminStats } from '../services/admin'
 
 type CompAccess = {
   user_id: string
@@ -44,23 +29,9 @@ export default function AdminPage() {
   const [checkingAdmin, setCheckingAdmin] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
 
-  const [loadingData, setLoadingData] = useState(true)
   const [stats, setStats] = useState<AdminStats | null>(null)
-  const [profiles, setProfiles] = useState<AdminProfilePreview[]>([])
-  const [recipes, setRecipes] = useState<AdminRecipePreview[]>([])
-  const [reviews, setReviews] = useState<AdminReviewPreview[]>([])
-
-  const [actionLoading, setActionLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
-
-  const [profileSearch, setProfileSearch] = useState('')
-const [recipeSearch, setRecipeSearch] = useState('')
-const [reviewSearch, setReviewSearch] = useState('')
-
-const [profileSearchLoading, setProfileSearchLoading] = useState(false)
-const [recipeSearchLoading, setRecipeSearchLoading] = useState(false)
-const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
 
   const [compEmail, setCompEmail] = useState('')
   const [compList, setCompList] = useState<CompAccess[]>([])
@@ -75,7 +46,6 @@ const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
           setCheckingAdmin(false)
           setIsAdmin(false)
         }
-
         return
       }
 
@@ -93,7 +63,6 @@ const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
         }
       } catch (error) {
         console.error(error)
-
         if (!ignore) {
           setIsAdmin(false)
           setErrorMessage('Impossible de vérifier les droits administrateur.')
@@ -112,81 +81,6 @@ const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
     }
   }, [user])
 
-  async function loadAdminData() {
-    const [loadedStats, loadedProfiles, loadedRecipes, loadedReviews] =
-      await Promise.all([
-        getAdminStats(),
-        getRecentAdminProfiles(),
-        getRecentAdminRecipes(),
-        getRecentAdminReviews(),
-      ])
-
-    setStats(loadedStats)
-    setProfiles(loadedProfiles)
-    setRecipes(loadedRecipes)
-    setReviews(loadedReviews)
-  }
-
-  useEffect(() => {
-    let ignore = false
-
-    async function fetchAdminData() {
-      if (!isAdmin) {
-        return
-      }
-
-      try {
-        setLoadingData(true)
-
-        const [loadedStats, loadedProfiles, loadedRecipes, loadedReviews] =
-          await Promise.all([
-            getAdminStats(),
-            getRecentAdminProfiles(),
-            getRecentAdminRecipes(),
-            getRecentAdminReviews(),
-          ])
-
-        if (!ignore) {
-          setStats(loadedStats)
-          setProfiles(loadedProfiles)
-          setRecipes(loadedRecipes)
-          setReviews(loadedReviews)
-          setErrorMessage('')
-        }
-      } catch (error) {
-        console.error(error)
-
-        if (!ignore) {
-          setErrorMessage('Impossible de charger les données administrateur.')
-        }
-      } finally {
-        if (!ignore) {
-          setLoadingData(false)
-        }
-      }
-    }
-
-    void fetchAdminData()
-
-    return () => {
-      ignore = true
-    }
-  }, [isAdmin])
-
-  async function refreshAfterAction(message: string) {
-    try {
-      await loadAdminData()
-      setSuccessMessage(message)
-
-      window.setTimeout(() => {
-        setSuccessMessage('')
-      }, 3000)
-    } catch (error) {
-      console.error(error)
-      setErrorMessage('Impossible de recharger les données administrateur.')
-    }
-  }
-
   const refreshCompList = useCallback(async () => {
     const { data, error } = await supabase.rpc('list_comp_access')
 
@@ -203,11 +97,18 @@ const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
       return
     }
 
-    async function loadComp() {
+    async function loadAdmin() {
+      try {
+        const loadedStats = await getAdminStats()
+        setStats(loadedStats)
+      } catch (error) {
+        console.error(error)
+      }
+
       await refreshCompList()
     }
 
-    void loadComp()
+    void loadAdmin()
   }, [isAdmin, refreshCompList])
 
   async function handleGrantComp(event: FormEvent) {
@@ -231,9 +132,7 @@ const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
       await refreshCompList()
       setSuccessMessage(`Accès offert à ${email}.`)
 
-      window.setTimeout(() => {
-        setSuccessMessage('')
-      }, 3000)
+      window.setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
       console.error(error)
       setErrorMessage(
@@ -249,11 +148,9 @@ const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
   async function handleRevokeComp(access: CompAccess) {
     const label = access.email ?? access.username ?? 'ce compte'
 
-    const confirmRevoke = window.confirm(
-      `Retirer l'accès offert à ${label} ?`,
-    )
-
-    if (!confirmRevoke) return
+    if (!window.confirm(`Retirer l'accès offert à ${label} ?`)) {
+      return
+    }
 
     if (!access.email) {
       setErrorMessage('Email manquant pour ce compte, retrait impossible.')
@@ -274,125 +171,12 @@ const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
       await refreshCompList()
       setSuccessMessage(`Accès retiré à ${label}.`)
 
-      window.setTimeout(() => {
-        setSuccessMessage('')
-      }, 3000)
+      window.setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
       console.error(error)
       setErrorMessage("Impossible de retirer l'accès.")
     } finally {
       setCompBusy(false)
-    }
-  }
-
-  async function handleSearchProfiles() {
-  try {
-    setProfileSearchLoading(true)
-    setErrorMessage('')
-
-    const results = await searchAdminProfiles(profileSearch)
-    setProfiles(results)
-  } catch (error) {
-    console.error(error)
-    setErrorMessage('Impossible de rechercher les profils.')
-  } finally {
-    setProfileSearchLoading(false)
-  }
-}
-
-async function handleSearchRecipes() {
-  try {
-    setRecipeSearchLoading(true)
-    setErrorMessage('')
-
-    const results = await searchAdminRecipes(recipeSearch)
-    setRecipes(results)
-  } catch (error) {
-    console.error(error)
-    setErrorMessage('Impossible de rechercher les recettes.')
-  } finally {
-    setRecipeSearchLoading(false)
-  }
-}
-
-async function handleSearchReviews() {
-  try {
-    setReviewSearchLoading(true)
-    setErrorMessage('')
-
-    const results = await searchAdminReviews(reviewSearch)
-    setReviews(results)
-  } catch (error) {
-    console.error(error)
-    setErrorMessage('Impossible de rechercher les commentaires.')
-  } finally {
-    setReviewSearchLoading(false)
-  }
-}
-
-  async function handleDeleteReview(review: AdminReviewPreview) {
-    const confirmDelete = window.confirm(
-      `Supprimer ce commentaire ?\n\n"${review.comment}"`,
-    )
-
-    if (!confirmDelete) return
-
-    try {
-      setActionLoading(true)
-      setErrorMessage('')
-      setSuccessMessage('')
-
-      await deleteAdminReview(review.id)
-      await refreshAfterAction('Commentaire supprimé.')
-    } catch (error) {
-      console.error(error)
-      setErrorMessage('Impossible de supprimer ce commentaire.')
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
-  async function handleDeleteRecipe(recipe: AdminRecipePreview) {
-    const confirmDelete = window.confirm(
-      `Supprimer la recette "${recipe.title}" ?\n\nCette action supprimera aussi les éléments liés à cette recette.`,
-    )
-
-    if (!confirmDelete) return
-
-    try {
-      setActionLoading(true)
-      setErrorMessage('')
-      setSuccessMessage('')
-
-      await deleteAdminRecipe(recipe.id)
-      await refreshAfterAction('Recette supprimée.')
-    } catch (error) {
-      console.error(error)
-      setErrorMessage('Impossible de supprimer cette recette.')
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
-  async function handleDeleteProfile(profile: AdminProfilePreview) {
-    const confirmDelete = window.confirm(
-      `Supprimer le profil "${profile.username}" ?\n\nAttention : cela supprime le profil et ses données liées, mais pas encore le compte Auth Supabase.`,
-    )
-
-    if (!confirmDelete) return
-
-    try {
-      setActionLoading(true)
-      setErrorMessage('')
-      setSuccessMessage('')
-
-      await deleteAdminProfile(profile.userId)
-      await refreshAfterAction('Profil supprimé.')
-    } catch (error) {
-      console.error(error)
-      setErrorMessage('Impossible de supprimer ce profil.')
-    } finally {
-      setActionLoading(false)
     }
   }
 
@@ -457,8 +241,8 @@ async function handleSearchReviews() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
-              Ici vous pouvez surveiller le carnet de recettes et supprimer les
-              contenus problématiques.
+              Vous pouvez tout consulter, modifier et supprimer dans le carnet
+              de recettes.
             </p>
           </div>
 
@@ -579,252 +363,7 @@ async function handleSearchReviews() {
         </div>
       </section>
 
-      {loadingData ? (
-        <div className="grid gap-8 xl:grid-cols-3">
-          {Array.from({ length: 3 }, (_, index) => (
-            <div
-              key={index}
-              className="space-y-4 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
-            >
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-9 w-20" />
-              <Skeleton className="h-3 w-full" />
-              <Skeleton className="h-3 w-2/3" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid gap-8 xl:grid-cols-3">
-          <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-            <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-              Utilisateurs
-            </p>
-
-            <h2 className="mt-2 text-2xl font-black text-stone-950">
-              Profils récents
-            </h2>
-
-            <form
-  onSubmit={(event) => {
-    event.preventDefault()
-    void handleSearchProfiles()
-  }}
-  className="mt-5 flex gap-2"
->
-  <input
-    value={profileSearch}
-    onChange={(event) => setProfileSearch(event.target.value)}
-    aria-label="Rechercher un profil" placeholder="Rechercher un profil..."
-    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
-  />
-
-  <button
-    type="submit"
-    disabled={profileSearchLoading}
-    className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    {profileSearchLoading ? '...' : 'OK'}
-  </button>
-</form>
-
-            <div className="mt-6 space-y-3">
-              {profiles.length === 0 ? (
-                <p className="text-stone-500">Aucun profil trouvé.</p>
-              ) : (
-                profiles.map((profile) => (
-                  <div
-                    key={profile.userId}
-                    className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 font-black text-white">
-                        {profile.avatarUrl ? (
-                          <img
-                            src={profile.avatarUrl}
-                            alt={profile.username}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          profile.username.charAt(0).toUpperCase()
-                        )}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-black text-stone-950">
-                          {profile.username}
-                        </p>
-
-                        <p className="text-xs font-semibold text-stone-500">
-                          {formatDate(profile.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteProfile(profile)}
-                      disabled={actionLoading}
-                      className="mt-4 w-full rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      Supprimer le profil
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-
-          <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-            <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-              Recettes
-            </p>
-
-            <h2 className="mt-2 text-2xl font-black text-stone-950">
-              Recettes récentes
-            </h2>
-
-            <form
-  onSubmit={(event) => {
-    event.preventDefault()
-    void handleSearchRecipes()
-  }}
-  className="mt-5 flex gap-2"
->
-  <input
-    value={recipeSearch}
-    onChange={(event) => setRecipeSearch(event.target.value)}
-    aria-label="Rechercher une recette" placeholder="Rechercher une recette..."
-    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
-  />
-
-  <button
-    type="submit"
-    disabled={recipeSearchLoading}
-    className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    {recipeSearchLoading ? '...' : 'OK'}
-  </button>
-</form>
-
-            <div className="mt-6 space-y-3">
-              {recipes.length === 0 ? (
-                <p className="text-stone-500">Aucune recette trouvée.</p>
-              ) : (
-                recipes.map((recipe) => (
-                  <div
-                    key={recipe.id}
-                    className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100"
-                  >
-                    <p className="font-black text-stone-950">{recipe.title}</p>
-
-                    <p className="mt-1 text-sm font-semibold text-orange-700">
-                      {recipe.category}
-                    </p>
-
-                    <p className="mt-1 text-xs font-semibold text-stone-500">
-                      {formatDate(recipe.createdAt)}
-                    </p>
-
-                    <div className="mt-4 flex gap-2">
-                      <Link
-                        to={`/recipes/${recipe.id}`}
-                        className="flex-1 rounded-full border border-orange-200 bg-white px-4 py-2 text-center text-sm font-black text-orange-700 transition hover:bg-orange-50"
-                      >
-                        Voir
-                      </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteRecipe(recipe)}
-                        disabled={actionLoading}
-                        className="flex-1 rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-
-          <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-            <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-              Commentaires
-            </p>
-
-            <h2 className="mt-2 text-2xl font-black text-stone-950">
-              Avis récents
-            </h2>
-
-            <form
-  onSubmit={(event) => {
-    event.preventDefault()
-    void handleSearchReviews()
-  }}
-  className="mt-5 flex gap-2"
->
-  <input
-    value={reviewSearch}
-    onChange={(event) => setReviewSearch(event.target.value)}
-    aria-label="Rechercher un commentaire" placeholder="Rechercher un commentaire..."
-    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
-  />
-
-  <button
-    type="submit"
-    disabled={reviewSearchLoading}
-    className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    {reviewSearchLoading ? '...' : 'OK'}
-  </button>
-</form>
-
-            <div className="mt-6 space-y-3">
-              {reviews.length === 0 ? (
-                <p className="text-stone-500">Aucun commentaire trouvé.</p>
-              ) : (
-                reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100"
-                  >
-                    <p className="font-black text-orange-600">
-                      Note : {review.rating}/5
-                    </p>
-
-                    <p className="mt-2 text-sm leading-6 text-stone-700">
-                      {review.comment || 'Aucun commentaire écrit.'}
-                    </p>
-
-                    <p className="mt-2 text-xs font-semibold text-stone-500">
-                      Recette #{review.recipeId} — {formatDate(review.createdAt)}
-                    </p>
-
-                    <div className="mt-4 flex gap-2">
-                      <Link
-                        to={`/recipes/${review.recipeId}`}
-                        className="flex-1 rounded-full border border-orange-200 bg-white px-4 py-2 text-center text-sm font-black text-orange-700 transition hover:bg-orange-50"
-                      >
-                        Voir
-                      </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteReview(review)}
-                        disabled={actionLoading}
-                        className="flex-1 rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-        </div>
-      )}
+      <ResourceManager />
     </section>
   )
 }
