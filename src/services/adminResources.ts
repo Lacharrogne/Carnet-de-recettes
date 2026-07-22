@@ -46,6 +46,8 @@ export type AdminResource = {
   fields: AdminField[]
   /** Suppression des lignes liées avant celle-ci (intégrité référentielle). */
   cascade?: (row: AdminRow) => Promise<void>
+  /** Autorise la suppression complète du compte (auth) via `admin_delete_user`. */
+  authDelete?: boolean
 }
 
 const DIFFICULTIES = ['Facile', 'Moyen', 'Difficile']
@@ -128,6 +130,7 @@ export const ADMIN_RESOURCES: AdminResource[] = [
       { name: 'created_at', label: 'Créé le', type: 'readonly' },
     ],
     cascade: (row) => cascadeProfile(String(row.user_id)),
+    authDelete: true,
   },
   {
     key: 'recipes',
@@ -393,6 +396,15 @@ export async function updateResourceRow(
       .match(pkFilter(resource, row))
     if (error) throw error
   }
+}
+
+/** Supprime intégralement un compte, y compris son authentification. */
+export async function deleteAuthUser(userId: string): Promise<void> {
+  const { error } = await supabase.rpc('admin_delete_user', {
+    target_user_id: userId,
+  })
+
+  if (error) throw error
 }
 
 export async function deleteResourceRow(

@@ -8,6 +8,7 @@ import {
 
 import {
   ADMIN_RESOURCES,
+  deleteAuthUser,
   deleteResourceRow,
   listResource,
   updateResourceRow,
@@ -139,6 +140,35 @@ export default function ResourceManager() {
         deleteError instanceof Error && deleteError.message
           ? deleteError.message
           : 'Suppression impossible.',
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleDeleteAuth(row: AdminRow) {
+    const label = String(row.username ?? row.user_id)
+
+    if (
+      !window.confirm(
+        `SUPPRIMER LE COMPTE de « ${label} » ?\n\nCela efface son contenu ET son compte de connexion (auth). Action irréversible.`,
+      )
+    ) {
+      return
+    }
+
+    try {
+      setBusy(true)
+      setError('')
+      await deleteAuthUser(String(row.user_id))
+      flash('Compte supprimé.')
+      await refresh()
+    } catch (deleteError) {
+      console.error(deleteError)
+      setError(
+        deleteError instanceof Error && deleteError.message
+          ? deleteError.message
+          : 'Suppression du compte impossible.',
       )
     } finally {
       setBusy(false)
@@ -280,6 +310,18 @@ export default function ResourceManager() {
                       >
                         Suppr.
                       </button>
+
+                      {resource.authDelete && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAuth(row)}
+                          disabled={busy}
+                          title="Supprimer aussi le compte de connexion (auth)"
+                          className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-black text-white transition hover:bg-red-700 disabled:opacity-50"
+                        >
+                          Compte
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
