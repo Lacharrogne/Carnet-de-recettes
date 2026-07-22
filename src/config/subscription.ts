@@ -21,6 +21,13 @@ export const ENFORCE_TRIAL = false
 export const CONTACT_EMAIL = 'maxi.charr@gmail.com'
 
 /**
+ * Hub d'abonnement de la suite « Les Carnets ». L'abonnement (souscription
+ * ET gestion/résiliation) est centralisé sur la vitrine ; le carnet y
+ * redirige. Le SSO fait que l'utilisateur y arrive déjà connecté.
+ */
+export const SUBSCRIPTION_HUB_URL = 'https://lescarnets.app/#tarifs'
+
+/**
  * Liens de paiement Lemon Squeezy (checkout hébergé), via les variables
  * d'environnement Vite. Laisser vide tant que le produit n'existe pas : la
  * page d'abonnement affiche alors « bientôt ».

@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 import { LOGO_SRC } from '../../data/brand'
 import { useAuth } from '../../context/useAuth'
-import { useEntitlement } from '../../lib/useEntitlement'
+import { SUBSCRIPTION_HUB_URL } from '../../config/subscription'
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
 import { supabase } from '../../lib/supabase'
 import { getProfile, type UserProfile } from '../../services/profiles'
@@ -50,12 +50,6 @@ const personalLinks = [
     description: 'Retrouver vos recettes préférées',
     to: '/favorites',
     emoji: '❤️',
-  },
-  {
-    label: 'Abonnement',
-    description: 'Votre offre premium et votre essai',
-    to: '/premium',
-    emoji: '💎',
   },
 ]
 
@@ -124,12 +118,6 @@ export default function Header() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
-  const { isPremium, subscription } = useEntitlement()
-
-  const manageSubscriptionUrl =
-    isPremium && subscription?.customerPortalUrl
-      ? subscription.customerPortalUrl
-      : null
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<DropdownName>(null)
@@ -468,31 +456,27 @@ export default function Header() {
                         </Link>
                       ))}
 
-                      {manageSubscriptionUrl && (
-                        <a
-                          href={manageSubscriptionUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={closeDropdowns}
-                          className="group/item rounded-2xl p-2.5 transition hover:bg-orange-50"
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-xl transition group-hover/item:scale-105">
-                              💳
-                            </span>
+                      <a
+                        href={SUBSCRIPTION_HUB_URL}
+                        onClick={closeDropdowns}
+                        className="group/item rounded-2xl p-2.5 transition hover:bg-orange-50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-xl transition group-hover/item:scale-105">
+                            💎
+                          </span>
 
-                            <div className="min-w-0">
-                              <p className="truncate font-black text-stone-950">
-                                Gérer mon abonnement
-                              </p>
+                          <div className="min-w-0">
+                            <p className="truncate font-black text-stone-950">
+                              Abonnement
+                            </p>
 
-                              <p className="truncate text-xs font-semibold text-stone-500">
-                                Résilier ou changer de carte
-                              </p>
-                            </div>
+                            <p className="truncate text-xs font-semibold text-stone-500">
+                              S'abonner ou gérer sur Les Carnets
+                            </p>
                           </div>
-                        </a>
-                      )}
+                        </div>
+                      </a>
 
                       <button
                         type="button"
@@ -698,31 +682,25 @@ export default function Header() {
                     </Link>
                   ))}
 
-                  {manageSubscriptionUrl && (
-                    <a
-                      href={manageSubscriptionUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={closeMenu}
-                      className="rounded-2xl bg-cream-50 px-4 py-3.5 transition hover:bg-orange-50"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-xl">
-                          💳
-                        </span>
+                  <a
+                    href={SUBSCRIPTION_HUB_URL}
+                    onClick={closeMenu}
+                    className="rounded-2xl bg-cream-50 px-4 py-3.5 transition hover:bg-orange-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-xl">
+                        💎
+                      </span>
 
-                        <div className="min-w-0">
-                          <p className="font-black text-stone-900">
-                            Gérer mon abonnement
-                          </p>
+                      <div className="min-w-0">
+                        <p className="font-black text-stone-900">Abonnement</p>
 
-                          <p className="truncate text-sm font-semibold text-stone-500">
-                            Résilier ou changer de carte
-                          </p>
-                        </div>
+                        <p className="truncate text-sm font-semibold text-stone-500">
+                          S'abonner ou gérer sur Les Carnets
+                        </p>
                       </div>
-                    </a>
-                  )}
+                    </div>
+                  </a>
 
                   <button
                     type="button"

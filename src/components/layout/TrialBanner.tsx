@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 
 import { useAuth } from '../../context/useAuth'
 import { useEntitlement } from '../../lib/useEntitlement'
+import { SUBSCRIPTION_HUB_URL } from '../../config/subscription'
 
 const DISMISS_KEY = 'recettes-trial-banner-dismissed'
 
@@ -74,12 +74,12 @@ export default function TrialBanner() {
             : `Essai gratuit — il vous reste ${daysLeft} jour${daysLeft > 1 ? 's' : ''}.`}
         </p>
 
-        <Link
-          to="/premium"
+        <a
+          href={SUBSCRIPTION_HUB_URL}
           className="shrink-0 rounded-full bg-terracotta px-4 py-1.5 font-bold text-white shadow-soft transition hover:bg-terracotta-deep"
         >
           {isExpired ? "S'abonner" : "Voir l'offre"}
-        </Link>
+        </a>
 
         <button
           type="button"
