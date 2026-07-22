@@ -43,12 +43,13 @@ export default function SubscriptionPage() {
         </p>
 
         <h1 className="mt-2 font-display text-3xl font-black text-espresso sm:text-4xl">
-          Le Carnet de recettes, sans limite
+          Un abonnement, tous les carnets
         </h1>
 
         <p className="mx-auto mt-3 max-w-xl text-base leading-7 text-hazel">
-          Toutes les fonctionnalités, un essai gratuit de 14 jours, puis un
-          abonnement simple pour continuer. Résiliable à tout moment.
+          Un seul abonnement « Les Carnets » débloque toutes les fonctionnalités
+          de vos carnets (recettes, budget, sport…). Essai gratuit de 14 jours,
+          puis simple à résilier à tout moment.
         </p>
       </div>
 

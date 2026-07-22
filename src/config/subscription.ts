@@ -31,8 +31,9 @@ export const CONTACT_EMAIL = 'maxi.charr@gmail.com'
 export const LEMONSQUEEZY = {
   monthlyUrl: (import.meta.env.VITE_LS_MONTHLY_URL as string | undefined) ?? '',
   yearlyUrl: (import.meta.env.VITE_LS_YEARLY_URL as string | undefined) ?? '',
-  monthlyPrice: '3,99 €',
-  yearlyPrice: '39,99 €',
+  // Offre unique « Les Carnets » : un seul abonnement débloque tous les carnets.
+  monthlyPrice: '5,99 €',
+  yearlyPrice: '59,99 €',
 }
 
 /** Le paiement est-il configuré (au moins un lien de checkout présent) ? */
