@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useState,
   type FormEvent,
 } from 'react'
@@ -37,7 +36,6 @@ function formatValue(field: AdminField | undefined, value: unknown): string {
   return text.length > 48 ? `${text.slice(0, 48)}…` : text
 }
 
-/** Valeur initiale d'un champ dans le formulaire (chaîne ou booléen). */
 function toFormValue(field: AdminField, value: unknown): string | boolean {
   if (field.type === 'boolean') return Boolean(value)
   if (value === null || value === undefined) return ''
@@ -57,6 +55,46 @@ function buildForm(resource: AdminResource, row: AdminRow): FormState {
 
 export default function ResourceManager() {
   const [activeKey, setActiveKey] = useState(ADMIN_RESOURCES[0].key)
+
+  const resource =
+    ADMIN_RESOURCES.find((item) => item.key === activeKey) ?? ADMIN_RESOURCES[0]
+
+  return (
+    <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+      <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+        Base de données
+      </p>
+
+      <h2 className="mt-2 text-2xl font-black text-stone-950">
+        Tout voir, modifier, supprimer
+      </h2>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        {ADMIN_RESOURCES.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            onClick={() => setActiveKey(item.key)}
+            className={`rounded-full px-4 py-2 text-sm font-black transition ${
+              item.key === activeKey
+                ? 'bg-orange-500 text-white shadow-sm'
+                : 'bg-cream-100 text-stone-700 hover:bg-orange-50'
+            }`}
+          >
+            <span className="mr-1.5">{item.emoji}</span>
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {/* La `key` force un remontage complet à chaque changement d'onglet :
+          aucun état (lignes, page, recherche) ne peut fuiter d'une table à l'autre. */}
+      <ResourceTable key={resource.key} resource={resource} />
+    </section>
+  )
+}
+
+function ResourceTable({ resource }: { resource: AdminResource }) {
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
@@ -69,11 +107,6 @@ export default function ResourceManager() {
 
   const [editing, setEditing] = useState<AdminRow | null>(null)
   const [busy, setBusy] = useState(false)
-
-  const resource = useMemo(
-    () => ADMIN_RESOURCES.find((item) => item.key === activeKey) ?? ADMIN_RESOURCES[0],
-    [activeKey],
-  )
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -101,14 +134,6 @@ export default function ResourceManager() {
 
     void run()
   }, [refresh])
-
-  function selectResource(key: string) {
-    setActiveKey(key)
-    setSearchInput('')
-    setSearch('')
-    setPage(0)
-    setEditing(null)
-  }
 
   function flash(message: string) {
     setSuccess(message)
@@ -175,38 +200,11 @@ export default function ResourceManager() {
     }
   }
 
+  const searchable = resource.searchColumns.length > 0 || Boolean(resource.numericSearch)
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE))
 
   return (
-    <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-      <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-        Base de données
-      </p>
-
-      <h2 className="mt-2 text-2xl font-black text-stone-950">
-        Tout voir, modifier, supprimer
-      </h2>
-
-      {/* Onglets des tables */}
-      <div className="mt-5 flex flex-wrap gap-2">
-        {ADMIN_RESOURCES.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => selectResource(item.key)}
-            className={`rounded-full px-4 py-2 text-sm font-black transition ${
-              item.key === activeKey
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-cream-100 text-stone-700 hover:bg-orange-50'
-            }`}
-          >
-            <span className="mr-1.5">{item.emoji}</span>
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Recherche */}
+    <>
       <form
         onSubmit={(event) => {
           event.preventDefault()
@@ -220,17 +218,15 @@ export default function ResourceManager() {
           onChange={(event) => setSearchInput(event.target.value)}
           aria-label="Rechercher dans cette table"
           placeholder={
-            resource.searchColumns.length > 0 || resource.numericSearch
-              ? 'Rechercher…'
-              : 'Recherche indisponible pour cette table'
+            searchable ? 'Rechercher…' : 'Recherche indisponible pour cette table'
           }
-          disabled={resource.searchColumns.length === 0 && !resource.numericSearch}
+          disabled={!searchable}
           className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 disabled:opacity-50"
         />
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !searchable}
           className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? '...' : 'OK'}
@@ -249,7 +245,6 @@ export default function ResourceManager() {
         </p>
       )}
 
-      {/* Tableau */}
       <div className="mt-5 overflow-x-auto">
         <table className="w-full min-w-[640px] border-collapse text-left text-sm">
           <thead>
@@ -264,7 +259,16 @@ export default function ResourceManager() {
           </thead>
 
           <tbody>
-            {rows.length === 0 && !loading ? (
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={resource.listColumns.length + 1}
+                  className="px-3 py-8 text-center text-stone-500"
+                >
+                  Chargement…
+                </td>
+              </tr>
+            ) : rows.length === 0 ? (
               <tr>
                 <td
                   colSpan={resource.listColumns.length + 1}
@@ -276,11 +280,13 @@ export default function ResourceManager() {
             ) : (
               rows.map((row, index) => (
                 <tr
-                  key={resource.pk.map((key) => String(row[key])).join('-') || index}
+                  key={index}
                   className="border-b border-orange-50 hover:bg-cream-50"
                 >
                   {resource.listColumns.map((column) => {
-                    const field = resource.fields.find((item) => item.name === column)
+                    const field = resource.fields.find(
+                      (item) => item.name === column,
+                    )
                     return (
                       <td
                         key={column}
@@ -331,7 +337,6 @@ export default function ResourceManager() {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="mt-4 flex items-center justify-between gap-3 text-sm font-bold text-stone-600">
         <span>
           {count} ligne{count > 1 ? 's' : ''} · page {page + 1} / {totalPages}
@@ -371,7 +376,7 @@ export default function ResourceManager() {
           onError={(message) => setError(message)}
         />
       )}
-    </section>
+    </>
   )
 }
 
@@ -417,10 +422,10 @@ function RowEditor({
           patch[field.name] = Boolean(raw)
         } else if (field.type === 'number') {
           const text = String(raw).trim()
-          patch[field.name] = text === '' ? null : Number(text)
           if (text !== '' && Number.isNaN(Number(text))) {
             throw new Error(`Nombre invalide pour « ${field.label} ».`)
           }
+          patch[field.name] = text === '' ? null : Number(text)
         } else if (field.type === 'json') {
           const text = String(raw).trim()
           patch[field.name] = text === '' ? null : JSON.parse(text)
