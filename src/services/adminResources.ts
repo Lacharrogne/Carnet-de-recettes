@@ -339,6 +339,56 @@ export type ListResult = {
   count: number
 }
 
+/** Résout des identifiants utilisateurs en pseudos (pour l'affichage). */
+export async function fetchUserLabels(
+  ids: string[],
+): Promise<Record<string, string>> {
+  const unique = Array.from(new Set(ids.filter(Boolean)))
+  if (unique.length === 0) return {}
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('user_id, username')
+    .in('user_id', unique)
+
+  if (error) {
+    console.error(error)
+    return {}
+  }
+
+  const map: Record<string, string> = {}
+  for (const row of data ?? []) {
+    const typed = row as { user_id: string; username: string | null }
+    map[typed.user_id] = typed.username || '(sans pseudo)'
+  }
+  return map
+}
+
+/** Résout des identifiants recettes en titres (pour l'affichage). */
+export async function fetchRecipeLabels(
+  ids: number[],
+): Promise<Record<number, string>> {
+  const unique = Array.from(new Set(ids.filter((id) => Number.isFinite(id))))
+  if (unique.length === 0) return {}
+
+  const { data, error } = await supabase
+    .from('recipes')
+    .select('id, title')
+    .in('id', unique)
+
+  if (error) {
+    console.error(error)
+    return {}
+  }
+
+  const map: Record<number, string> = {}
+  for (const row of data ?? []) {
+    const typed = row as { id: number; title: string }
+    map[typed.id] = typed.title
+  }
+  return map
+}
+
 export async function listResource(
   resource: AdminResource,
   { search, page, pageSize }: { search: string; page: number; pageSize: number },

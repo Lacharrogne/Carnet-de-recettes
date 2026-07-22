@@ -9,6 +9,8 @@ import {
   ADMIN_RESOURCES,
   deleteAuthUser,
   deleteResourceRow,
+  fetchRecipeLabels,
+  fetchUserLabels,
   listResource,
   updateResourceRow,
   type AdminField,
@@ -17,6 +19,11 @@ import {
 } from '../../services/adminResources'
 
 const PAGE_SIZE = 20
+
+/** Colonnes qui référencent un utilisateur (résolues en pseudo). */
+const USER_REF_COLUMNS = new Set(['user_id', 'follower_id', 'following_id'])
+/** Colonnes qui référencent une recette (résolues en titre). */
+const RECIPE_REF_COLUMNS = new Set(['recipe_id'])
 
 function formatValue(field: AdminField | undefined, value: unknown): string {
   if (value === null || value === undefined) return '—'
@@ -105,6 +112,9 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  const [userLabels, setUserLabels] = useState<Record<string, string>>({})
+  const [recipeLabels, setRecipeLabels] = useState<Record<number, string>>({})
+
   const [editing, setEditing] = useState<AdminRow | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -119,6 +129,28 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
       setRows(result.rows)
       setCount(result.count)
       setError('')
+
+      // Résout les identifiants affichés en pseudos / titres.
+      const userIds: string[] = []
+      const recipeIds: number[] = []
+      for (const row of result.rows) {
+        for (const column of resource.listColumns) {
+          const value = row[column]
+          if (USER_REF_COLUMNS.has(column) && typeof value === 'string') {
+            userIds.push(value)
+          }
+          if (RECIPE_REF_COLUMNS.has(column) && value != null) {
+            recipeIds.push(Number(value))
+          }
+        }
+      }
+
+      const [users, recipes] = await Promise.all([
+        fetchUserLabels(userIds),
+        fetchRecipeLabels(recipeIds),
+      ])
+      setUserLabels(users)
+      setRecipeLabels(recipes)
     } catch (loadError) {
       console.error(loadError)
       setError('Impossible de charger cette table.')
@@ -198,6 +230,34 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
     } finally {
       setBusy(false)
     }
+  }
+
+  function renderCell(column: string, value: unknown) {
+    if (
+      USER_REF_COLUMNS.has(column) &&
+      typeof value === 'string' &&
+      userLabels[value]
+    ) {
+      return (
+        <span title={value} className="text-orange-800">
+          {userLabels[value]}
+        </span>
+      )
+    }
+
+    if (RECIPE_REF_COLUMNS.has(column) && value != null) {
+      const title = recipeLabels[Number(value)]
+      if (title) {
+        return (
+          <span title={String(value)} className="text-orange-800">
+            {title}
+          </span>
+        )
+      }
+    }
+
+    const field = resource.fields.find((item) => item.name === column)
+    return formatValue(field, value)
   }
 
   const searchable = resource.searchColumns.length > 0 || Boolean(resource.numericSearch)
@@ -283,19 +343,14 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
                   key={index}
                   className="border-b border-orange-50 hover:bg-cream-50"
                 >
-                  {resource.listColumns.map((column) => {
-                    const field = resource.fields.find(
-                      (item) => item.name === column,
-                    )
-                    return (
-                      <td
-                        key={column}
-                        className="px-3 py-2 font-semibold text-stone-800"
-                      >
-                        {formatValue(field, row[column])}
-                      </td>
-                    )
-                  })}
+                  {resource.listColumns.map((column) => (
+                    <td
+                      key={column}
+                      className="px-3 py-2 font-semibold text-stone-800"
+                    >
+                      {renderCell(column, row[column])}
+                    </td>
+                  ))}
 
                   <td className="px-3 py-2">
                     <div className="flex justify-end gap-2">
@@ -367,6 +422,8 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
         <RowEditor
           resource={resource}
           row={editing}
+          userLabels={userLabels}
+          recipeLabels={recipeLabels}
           onClose={() => setEditing(null)}
           onSaved={async () => {
             setEditing(null)
@@ -383,16 +440,41 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
 function RowEditor({
   resource,
   row,
+  userLabels,
+  recipeLabels,
   onClose,
   onSaved,
   onError,
 }: {
   resource: AdminResource
   row: AdminRow
+  userLabels: Record<string, string>
+  recipeLabels: Record<number, string>
   onClose: () => void
   onSaved: () => Promise<void>
   onError: (message: string) => void
 }) {
+  function readonlyDisplay(field: AdminField): string {
+    const value = row[field.name]
+
+    if (
+      USER_REF_COLUMNS.has(field.name) &&
+      typeof value === 'string' &&
+      userLabels[value]
+    ) {
+      return `${userLabels[value]} · ${value}`
+    }
+
+    if (RECIPE_REF_COLUMNS.has(field.name) && value != null) {
+      const title = recipeLabels[Number(value)]
+      if (title) {
+        return `${title} · ${String(value)}`
+      }
+    }
+
+    return formatValue(field, value)
+  }
+
   const [form, setForm] = useState<FormState>(() => buildForm(resource, row))
   const [saving, setSaving] = useState(false)
 
@@ -485,7 +567,7 @@ function RowEditor({
 
               {field.type === 'readonly' ? (
                 <p className="break-all rounded-2xl bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-500 ring-1 ring-orange-50">
-                  {formatValue(field, row[field.name])}
+                  {readonlyDisplay(field)}
                 </p>
               ) : field.type === 'boolean' ? (
                 <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-stone-700">
