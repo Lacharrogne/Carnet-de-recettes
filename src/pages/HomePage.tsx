@@ -12,6 +12,7 @@ import Chip from '../components/ui/Chip'
 import IconTile, { type IconTileTone } from '../components/ui/IconTile'
 import Modal from '../components/ui/Modal'
 import SectionHeader from '../components/ui/SectionHeader'
+import CategoryBadge from '../components/recipes/CategoryBadge'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { getHomeCardStyle } from '../data/categoryStyles'
@@ -541,11 +542,13 @@ export default function HomePage() {
 
                     <div className="relative z-10">
                       <div className="mb-5 flex items-start justify-between gap-3 sm:mb-6 sm:gap-4">
-                        <div
-                          className={`flex h-16 w-16 items-center justify-center rounded-[1.35rem] ${visualStyle.iconBg} text-3xl shadow-sm transition group-hover:scale-105 sm:h-20 sm:w-20 sm:rounded-[1.6rem] sm:text-4xl`}
-                        >
-                          {category.emoji}
-                        </div>
+                        <CategoryBadge
+                          image={category.image}
+                          emoji={category.emoji}
+                          label={category.label}
+                          className="h-20 w-20 transition group-hover:scale-105 sm:h-24 sm:w-24"
+                          emojiClassName={`flex items-center justify-center rounded-[1.35rem] ${visualStyle.iconBg} text-3xl shadow-sm sm:rounded-[1.6rem] sm:text-4xl`}
+                        />
 
                         <span
                           className={`shrink-0 rounded-full ${visualStyle.badgeBg} px-3 py-2 text-xs font-bold ${visualStyle.badgeText} sm:px-4 sm:text-sm`}
