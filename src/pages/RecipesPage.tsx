@@ -491,21 +491,21 @@ export default function RecipesPage() {
                   />
 
                   <div className="relative z-10">
-                    <div className="mb-5 flex items-start justify-between gap-3 sm:mb-6 sm:gap-4">
+                    <span
+                      className={`absolute right-0 top-0 shrink-0 rounded-full ${visualStyle.badgeBg} px-3 py-2 text-xs font-bold ${visualStyle.badgeText} sm:px-4 sm:text-sm`}
+                    >
+                      {category.count} recette
+                      {category.count > 1 ? 's' : ''}
+                    </span>
+
+                    <div className="mb-4 flex justify-center pt-1 sm:mb-5">
                       <CategoryBadge
                         image={category.image}
                         emoji={category.emoji}
                         label={category.label}
-                        className="h-20 w-20 transition group-hover:scale-105 sm:h-24 sm:w-24"
-                        emojiClassName={`flex items-center justify-center rounded-[1.35rem] ${visualStyle.iconBg} text-3xl shadow-sm sm:rounded-[1.6rem] sm:text-4xl`}
+                        className="h-40 w-40 drop-shadow-sm transition duration-300 group-hover:scale-105 sm:h-48 sm:w-48"
+                        emojiClassName="flex items-center justify-center text-7xl"
                       />
-
-                      <span
-                        className={`shrink-0 rounded-full ${visualStyle.badgeBg} px-3 py-2 text-xs font-bold ${visualStyle.badgeText} sm:px-4 sm:text-sm`}
-                      >
-                        {category.count} recette
-                        {category.count > 1 ? 's' : ''}
-                      </span>
                     </div>
 
                     <div className="mb-4 flex gap-2">
