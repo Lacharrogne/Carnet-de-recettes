@@ -49,12 +49,12 @@ export const RECIPE_CATEGORIES: {
       'Des boissons fraîches, chaudes ou originales à préparer à la maison.',
   },
   {
-    label: 'Healthy',
-    value: 'Healthy',
-    emoji: '🥦',
-    image: '/categories/healthy.png',
+    label: 'Vegan & Végétarien',
+    value: 'Végétarien',
+    emoji: '🌱',
+    image: '/categories/vegan-vegetarien.png',
     description:
-      'Des recettes plus équilibrées, légères ou riches en bons ingrédients.',
+      'Des recettes gourmandes sans viande — vegan ou végétariennes, pour se régaler autrement.',
   },
 ]
 

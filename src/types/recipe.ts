@@ -4,7 +4,7 @@ export type RecipeCategory =
   | 'Boisson'
   | 'Sucré'
   | 'Petit-déjeuner'
-  | 'Healthy'
+  | 'Végétarien'
 
 export type Difficulty = 'Facile' | 'Moyen' | 'Difficile'
 

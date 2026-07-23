@@ -10,7 +10,7 @@ avec EXACTEMENT ces noms de fichier :
 | Desserts & goûters       | `desserts-gouters.png`          |
 | Petit-déjeuner & brunch  | `petit-dejeuner-brunch.png`     |
 | Boissons                 | `boissons.png`                  |
-| Healthy                  | `healthy.png`                   |
+| Vegan & Végétarien       | `vegan-vegetarien.png`          |
 
 Ces images sont affichées sur la page d'accueil et la page des recettes
 (cartes « grandes familles »). Si un fichier est absent, l'application retombe
