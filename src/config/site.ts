@@ -5,10 +5,9 @@
  * VITRINE, pas dans l'application. Les boutons « Premium / Tarifs » de l'app
  * renvoient donc vers cette vitrine.
  *
- * 👉 Mettez ici l'adresse réelle de votre vitrine une fois le domaine connu
- *    (ex. https://les-carnets.fr). Par défaut : l'URL Vercel du projet vitrine.
+ * Domaine réel de la vitrine « Les Carnets ».
  */
-export const VITRINE_URL = 'https://vitrine-carnet-silk.vercel.app'
+export const VITRINE_URL = 'https://lescarnets.app'
 
 /** Lien direct vers la section tarifs/offre de la vitrine. */
 export const VITRINE_PRICING_URL = `${VITRINE_URL}/#tarifs`
