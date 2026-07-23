@@ -530,7 +530,7 @@ export default function HomePage() {
                     to={`/recipes?category=${encodeURIComponent(
                       category.value,
                     )}`}
-                    className={`group relative overflow-hidden rounded-[1.75rem] border ${visualStyle.border} ${visualStyle.cardBg} p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)] sm:rounded-[2rem] sm:p-6`}
+                    className={`group relative flex flex-col overflow-hidden rounded-[1.75rem] border ${visualStyle.border} ${visualStyle.cardBg} p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)] sm:rounded-[2rem] sm:p-6`}
                   >
                     <div
                       className={`pointer-events-none absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full blur-3xl sm:h-28 sm:w-28 ${visualStyle.topGlow}`}
@@ -540,7 +540,7 @@ export default function HomePage() {
                       className={`pointer-events-none absolute bottom-0 left-0 h-20 w-20 -translate-x-6 translate-y-6 rounded-full blur-3xl sm:h-24 sm:w-24 ${visualStyle.bottomGlow}`}
                     />
 
-                    <div className="relative z-10">
+                    <div className="relative z-10 flex flex-1 flex-col">
                       <span
                         className={`absolute right-0 top-0 shrink-0 rounded-full ${visualStyle.badgeBg} px-3 py-2 text-xs font-bold ${visualStyle.badgeText} sm:px-4 sm:text-sm`}
                       >
@@ -569,17 +569,15 @@ export default function HomePage() {
                         ))}
                       </div>
 
-                      <h3 className="mb-3 text-xl font-black leading-tight text-stone-950 sm:text-2xl">
+                      <h3 className="mb-3 flex min-h-[3.5rem] items-start text-xl font-black leading-tight text-stone-950 sm:min-h-[4rem] sm:text-2xl">
                         {category.label}
                       </h3>
 
-                      <p
-                        className={`leading-7 ${visualStyle.subtleText} sm:min-h-[84px]`}
-                      >
+                      <p className={`leading-7 ${visualStyle.subtleText}`}>
                         {category.description}
                       </p>
 
-                      <div className="mt-6 flex items-center justify-between border-t border-black/5 pt-4">
+                      <div className="mt-auto flex items-center justify-between border-t border-black/5 pt-4">
                         <span className={`font-bold ${visualStyle.accentText}`}>
                           Voir les recettes
                         </span>
