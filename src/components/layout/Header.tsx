@@ -202,11 +202,11 @@ export default function Header() {
           onClick={closeMenu}
           className="group flex min-w-0 items-center gap-3 sm:gap-5"
         >
-          <div className="relative h-11 w-14 shrink-0 overflow-visible sm:h-12 sm:w-20 lg:w-24">
+          <div className="relative h-12 w-12 shrink-0 overflow-visible sm:h-14 sm:w-14">
             <img
               src={LOGO_SRC}
               alt="Logo Carnet de recettes"
-              className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-lg transition group-hover:-rotate-2 group-hover:scale-105 sm:h-28 sm:w-28 lg:h-32 lg:w-32"
+              className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-lg transition group-hover:-rotate-2 group-hover:scale-105 sm:h-[4.5rem] sm:w-[4.5rem]"
             />
           </div>
 
