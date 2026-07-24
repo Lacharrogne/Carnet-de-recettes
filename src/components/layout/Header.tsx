@@ -4,6 +4,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { LOGO_SRC } from '../../data/brand'
 import { useAuth } from '../../context/useAuth'
 import { SUBSCRIPTION_HUB_URL } from '../../config/subscription'
+import { VITRINE_URL } from '../../config/site'
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
 import { supabase } from '../../lib/supabase'
 import { getProfile, type UserProfile } from '../../services/profiles'
@@ -351,6 +352,27 @@ export default function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <a
+            href={VITRINE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Découvrir toute la suite Les Carnets"
+            className="inline-flex items-center gap-2 rounded-full bg-cream-300 px-4 py-2.5 text-sm font-bold text-stone-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-50 hover:text-orange-600"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              className="h-4 w-4"
+            >
+              <rect x="3" y="3" width="7.5" height="7.5" rx="1.6" />
+              <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6" />
+              <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6" />
+              <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6" />
+            </svg>
+            Les Carnets
+          </a>
+
           {user ? (
             <>
               <Link
