@@ -553,7 +553,7 @@ export default function HomePage() {
                           image={category.image}
                           emoji={category.emoji}
                           label={category.label}
-                          className="h-52 w-52 drop-shadow-sm transition duration-300 group-hover:scale-105 sm:h-64 sm:w-64"
+                          className="h-52 w-52 drop-shadow-sm transition duration-300 group-hover:-rotate-2 group-hover:scale-105 sm:h-64 sm:w-64"
                           emojiClassName="flex items-center justify-center text-7xl"
                         />
                       </div>
