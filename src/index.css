@@ -142,6 +142,9 @@ h4 {
 
 html {
   scroll-behavior: smooth;
+  /* Garde-fou mobile : aucun contenu ne peut déborder horizontalement.
+     Sur <html> uniquement (sticky-safe, contrairement à body/#root). */
+  overflow-x: hidden;
 }
 
 html,
