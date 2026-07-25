@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { CARNET } from '../config/subscription'
 
 /** Statuts renvoyés par Lemon Squeezy (via la table `subscriptions`). */
 export type SubscriptionStatus =
@@ -13,14 +14,26 @@ export type SubscriptionStatus =
 
 export type SubscriptionRow = {
   status: SubscriptionStatus
+  /** Carnet(s) débloqué(s) : 'recettes' | 'budget' | 'sport' | 'all' | null. */
+  plan: string | null
   endsAt: string | null
   renewsAt: string | null
   customerPortalUrl: string | null
 }
 
-/** L'abonnement donne-t-il accès premium à l'instant présent ? */
+/** Un plan donne-t-il accès à ce carnet ? (null et 'all' = accès total.) */
+export function planGrantsCarnet(plan: string | null): boolean {
+  return plan === null || plan === 'all' || plan === CARNET
+}
+
+/** L'abonnement donne-t-il accès premium À CE CARNET à l'instant présent ? */
 export function isSubscriptionActive(row: SubscriptionRow | null): boolean {
   if (!row) {
+    return false
+  }
+
+  // Un abonnement à un autre carnet ne débloque pas celui-ci.
+  if (!planGrantsCarnet(row.plan)) {
     return false
   }
 
@@ -42,7 +55,7 @@ export async function getSubscription(
 ): Promise<SubscriptionRow | null> {
   const { data, error } = await supabase
     .from('subscriptions')
-    .select('status, ends_at, renews_at, customer_portal_url')
+    .select('status, plan, ends_at, renews_at, customer_portal_url')
     .eq('user_id', userId)
     .maybeSingle()
 
@@ -57,6 +70,7 @@ export async function getSubscription(
 
   return {
     status: (data.status as SubscriptionStatus) ?? 'none',
+    plan: (data.plan as string | null) ?? null,
     endsAt: data.ends_at ?? null,
     renewsAt: data.renews_at ?? null,
     customerPortalUrl: data.customer_portal_url ?? null,

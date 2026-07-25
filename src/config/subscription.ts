@@ -7,6 +7,12 @@
  * à `true` le jour venu.
  */
 
+/**
+ * Identifiant de ce carnet dans le modèle d'abonnement par carnet.
+ * Un abonnement débloque ce carnet si son `plan` vaut ce carnet ou `all`.
+ */
+export const CARNET = 'recettes'
+
 /** Durée de l'essai gratuit, en jours (aligné sur la vitrine). */
 export const TRIAL_DURATION_DAYS = 14
 
