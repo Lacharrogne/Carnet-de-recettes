@@ -21,7 +21,7 @@ export const TRIAL_DURATION_DAYS = 14
  * `true` une fois le paiement en place pour verrouiller l'app à la fin de
  * l'essai (sauf abonnés).
  */
-export const ENFORCE_TRIAL = true
+export const ENFORCE_TRIAL = false
 
 /** Contact utilisé en repli tant qu'il n'y a pas de paiement configuré. */
 export const CONTACT_EMAIL = 'maxi.charr@gmail.com'
