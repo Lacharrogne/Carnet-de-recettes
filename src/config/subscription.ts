@@ -31,7 +31,7 @@ export const CONTACT_EMAIL = 'maxi.charr@gmail.com'
  * ET gestion/résiliation) est centralisé sur la vitrine ; le carnet y
  * redirige. Le SSO fait que l'utilisateur y arrive déjà connecté.
  */
-export const SUBSCRIPTION_HUB_URL = 'https://lescarnets.app/#tarifs'
+export const SUBSCRIPTION_HUB_URL = 'https://lescarnets.app/#hub'
 
 /**
  * Liens de paiement Lemon Squeezy (checkout hébergé), via les variables
