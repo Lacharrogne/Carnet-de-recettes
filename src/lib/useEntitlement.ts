@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { useAuth } from '../context/useAuth'
-import {
-  ENFORCE_TRIAL,
-  IS_BILLING_CONFIGURED,
-  TRIAL_DURATION_DAYS,
-} from '../config/subscription'
+import { ENFORCE_TRIAL, TRIAL_DURATION_DAYS } from '../config/subscription'
 import {
   getSubscription,
   isSubscriptionActive,
@@ -46,9 +42,7 @@ export function useEntitlement(): Entitlement {
 
   const [now, setNow] = useState(() => Date.now())
   const [subscription, setSubscription] = useState<SubscriptionRow | null>(null)
-  const [loading, setLoading] = useState(
-    () => IS_BILLING_CONFIGURED && Boolean(userId),
-  )
+  const [loading, setLoading] = useState(() => Boolean(userId))
 
   useEffect(() => {
     const intervalId = setInterval(() => setNow(Date.now()), 60 * 1000)
@@ -59,7 +53,7 @@ export function useEntitlement(): Entitlement {
     let ignore = false
 
     const load = async () => {
-      if (!userId || !IS_BILLING_CONFIGURED) {
+      if (!userId) {
         if (!ignore) {
           setSubscription(null)
           setLoading(false)
@@ -93,8 +87,9 @@ export function useEntitlement(): Entitlement {
     ? trialEndsAt.getTime() - now
     : TRIAL_DURATION_DAYS * DAY_MS
 
-  const isTrialing = msLeft > 0
-  const daysLeft = Math.max(0, Math.ceil(msLeft / DAY_MS))
+  // Dès qu'on est abonné, l'essai est considéré terminé (il ne « reste » plus).
+  const isTrialing = !isPremium && msLeft > 0
+  const daysLeft = isPremium ? 0 : Math.max(0, Math.ceil(msLeft / DAY_MS))
 
   const status: EntitlementStatus = isPremium
     ? 'premium'
