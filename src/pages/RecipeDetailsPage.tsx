@@ -39,6 +39,7 @@ import {
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import { getRecipeNote, saveRecipeNote } from '../services/recipeNotes'
 import AddToCollectionMenu from '../components/recipes/AddToCollectionMenu'
+import RecipeNutritionCard from '../components/recipes/RecipeNutritionCard'
 import type { Recipe } from '../types/recipe'
 
 export default function RecipeDetailsPage() {
@@ -1104,6 +1105,8 @@ export default function RecipeDetailsPage() {
                   )}
                 </div>
               </div>
+
+              <RecipeNutritionCard recipe={recipe} />
 
               {user && (
                 <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/useAuth'
 import { useEntitlement } from '../../lib/useEntitlement'
+import { getRecipeNutrition } from '../../lib/recipeNutrition'
 import { useFavorites } from '../../context/useFavorites'
 import { useToast } from '../../context/useToast'
 import { getRecipeCardStyle } from '../../data/categoryStyles'
@@ -44,6 +45,8 @@ export default function RecipeCard({
 
   const displayedFavorite = user ? isFavorite(recipe.id) : false
   const visualStyle = getRecipeCardStyle(recipe.category)
+
+  const nutrition = useMemo(() => getRecipeNutrition(recipe), [recipe])
 
   const effectiveRating = rating ?? fetchedRating
   const averageRating = effectiveRating?.average ?? 0
@@ -179,6 +182,12 @@ export default function RecipeCard({
             {reviewsCount > 0 && (
               <span className="rounded-full bg-card/95 px-3 py-1 text-xs font-bold text-honey shadow-soft">
                 ★ {averageRating}/5
+              </span>
+            )}
+
+            {nutrition.recognized > 0 && (
+              <span className="rounded-full bg-card/95 px-3 py-1 text-xs font-bold text-orange-700 shadow-soft">
+                ≈{nutrition.perServing.kcal} kcal
               </span>
             )}
           </div>
