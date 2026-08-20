@@ -412,7 +412,7 @@ export default function FridgePage() {
                   clearMessages()
                 }}
                 aria-label="Ingrédients présents dans votre frigo" placeholder="Exemple : œufs, pâtes, crème, jambon, fromage..."
-                className="mt-4 min-h-36 w-full resize-none rounded-[1.5rem] border border-orange-100 bg-cream-50 px-4 py-4 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 sm:px-5"
+                className="mt-4 min-h-36 w-full resize-none rounded-2xl bg-linen px-4 py-4 text-base text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40 sm:px-5"
               />
 
               <p className="mt-3 text-sm leading-6 text-stone-500">

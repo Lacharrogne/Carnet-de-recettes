@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
 import EmptyState from '../components/ui/EmptyState'
+import Select from '../components/ui/Select'
 import { RowsSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { getProfile, type UserProfile } from '../services/profiles'
@@ -260,15 +261,11 @@ export default function IdeasPage() {
             {user ? (
               <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
                 <div>
-                  <label className="mb-2 block text-sm font-black text-stone-800">
-                    Type d’idée
-                  </label>
-
-                  <select
+                  <Select
+                    label="Type d’idée"
                     value={category}
                     onChange={(event) => setCategory(event.target.value)}
                     aria-label="Type d’idée"
-                    className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                   >
                     {IDEA_CATEGORIES.map((currentCategory) => (
                       <option
@@ -278,7 +275,7 @@ export default function IdeasPage() {
                         {currentCategory.emoji} {currentCategory.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
@@ -293,7 +290,7 @@ export default function IdeasPage() {
                       setErrorMessage('')
                     }}
                     placeholder="Exemple : Ajouter un mode anti-gaspillage"
-                    className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                    className="w-full rounded-2xl bg-linen px-4 py-3 font-semibold text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                   />
                 </div>
 
@@ -310,7 +307,7 @@ export default function IdeasPage() {
                     }}
                     rows={5}
                     placeholder="Expliquez votre idée en quelques phrases..."
-                    className="w-full rounded-[1.4rem] border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold leading-7 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                    className="w-full rounded-2xl bg-linen px-4 py-3 text-sm font-semibold leading-7 text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                   />
                 </div>
 

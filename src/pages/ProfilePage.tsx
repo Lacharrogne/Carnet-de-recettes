@@ -332,7 +332,7 @@ export default function ProfilePage() {
                 onChange={(event) =>
                   setAvatarFile(event.target.files?.[0] ?? null)
                 }
-                className="mt-5 w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 text-sm outline-none transition focus:border-orange-500"
+                className="mt-5 w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 text-cacao text-sm outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
               />
 
               <p className="mt-2 text-sm text-stone-500">
@@ -350,7 +350,7 @@ export default function ProfilePage() {
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
                   placeholder="Exemple : Chloé, Maxime, Studio C&M..."
-                  className="w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
+                  className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 text-cacao outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                 />
               </div>
 
@@ -364,7 +364,7 @@ export default function ProfilePage() {
                   onChange={(event) => setBio(event.target.value)}
                   rows={5}
                   placeholder="Une petite description de votre profil..."
-                  className="w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
+                  className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 text-cacao outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                 />
               </div>
             </div>
