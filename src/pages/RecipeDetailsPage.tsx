@@ -722,7 +722,7 @@ export default function RecipeDetailsPage() {
               <button
                 type="button"
                 onClick={closeGuidedCooking}
-                className="w-full rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-orange-700 shadow-sm transition hover:bg-orange-50 sm:w-auto"
+                className="w-full rounded-full bg-card ring-1 ring-bark px-5 py-3 font-black text-orange-700 shadow-sm transition hover:bg-orange-50 sm:w-auto"
               >
                 Quitter
               </button>
@@ -850,7 +850,7 @@ export default function RecipeDetailsPage() {
                     type="button"
                     onClick={goToPreviousStep}
                     disabled={currentStepIndex === 0}
-                    className="rounded-full border border-orange-200 bg-white px-6 py-4 font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-full bg-card ring-1 ring-bark px-6 py-4 font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     ← Précédent
                   </button>
@@ -1310,7 +1310,7 @@ export default function RecipeDetailsPage() {
                   type="button"
                   onClick={decreaseServings}
                   disabled={selectedServings <= 1}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-orange-200 bg-white text-xl font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-card ring-1 ring-bark text-xl font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   −
                 </button>
@@ -1330,7 +1330,7 @@ export default function RecipeDetailsPage() {
                 <button
                   type="button"
                   onClick={resetServings}
-                  className="w-full rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
+                  className="w-full rounded-full bg-card ring-1 ring-bark px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
                 >
                   Revenir à {recipe.servings} pers.
                 </button>

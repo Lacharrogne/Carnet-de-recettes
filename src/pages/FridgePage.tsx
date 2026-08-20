@@ -379,7 +379,7 @@ export default function FridgePage() {
               <button
                 type="button"
                 onClick={clearFridge}
-                className="rounded-full border border-orange-200 bg-white px-6 py-3.5 font-bold text-orange-700 transition hover:bg-orange-50"
+                className="rounded-full bg-card ring-1 ring-bark px-6 py-3.5 font-bold text-orange-700 transition hover:bg-orange-50"
               >
                 Vider mon frigo
               </button>

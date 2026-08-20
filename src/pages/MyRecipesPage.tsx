@@ -354,7 +354,7 @@ export default function MyRecipesPage() {
           <button
             type="button"
             onClick={resetFilters}
-            className="mt-4 rounded-2xl border border-orange-200 bg-white px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+            className="mt-4 rounded-2xl bg-card ring-1 ring-bark px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
           >
             Réinitialiser les filtres
           </button>

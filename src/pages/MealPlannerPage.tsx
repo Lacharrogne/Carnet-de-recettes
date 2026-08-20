@@ -794,7 +794,7 @@ export default function MealPlannerPage() {
 
                 <Link
                   to="/recipes"
-                  className="rounded-full border border-orange-200 bg-white px-6 py-4 text-center font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50"
+                  className="rounded-full bg-card ring-1 ring-bark px-6 py-4 text-center font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50"
                 >
                   Parcourir les catégories
                 </Link>
@@ -803,7 +803,7 @@ export default function MealPlannerPage() {
                   type="button"
                   onClick={handlePrintPlanning}
                   disabled={plannedRecipeIds.length === 0}
-                  className="rounded-full border border-orange-200 bg-white px-6 py-4 font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full bg-card ring-1 ring-bark px-6 py-4 font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Imprimer le planning
                 </button>

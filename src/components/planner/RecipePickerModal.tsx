@@ -50,7 +50,7 @@ export default function RecipePickerModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-orange-700 transition hover:bg-orange-50"
+            className="rounded-full bg-card ring-1 ring-bark px-5 py-3 font-black text-orange-700 transition hover:bg-orange-50"
           >
             Fermer
           </button>
@@ -62,13 +62,13 @@ export default function RecipePickerModal({
             onChange={(event) => onSearchChange(event.target.value)}
             aria-label="Rechercher une recette" placeholder="Rechercher : pâtes, gâteau, poulet..."
             autoFocus
-            className="w-full rounded-[1.5rem] border border-orange-200 bg-white px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+            className="w-full rounded-[1.5rem] bg-card ring-1 ring-bark px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
           />
 
           <select
             value={selectedCategory}
             onChange={(event) => onCategoryChange(event.target.value)}
-            className="w-full rounded-[1.5rem] border border-orange-200 bg-white px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+            className="w-full rounded-[1.5rem] bg-card ring-1 ring-bark px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
           >
             <option value={allCategoriesValue}>Toutes les catégories</option>
 

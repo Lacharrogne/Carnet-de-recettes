@@ -780,7 +780,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       <button
                         type="button"
                         onClick={() => setReplyingReviewId(null)}
-                        className="rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-black text-orange-700 transition hover:bg-orange-50"
+                        className="rounded-full bg-card ring-1 ring-bark px-5 py-3 text-sm font-black text-orange-700 transition hover:bg-orange-50"
                       >
                         Annuler
                       </button>

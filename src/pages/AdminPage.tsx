@@ -248,7 +248,7 @@ export default function AdminPage() {
 
           <Link
             to="/"
-            className="rounded-full border border-orange-200 bg-white px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+            className="rounded-full bg-card ring-1 ring-bark px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
           >
             Retour au site
           </Link>

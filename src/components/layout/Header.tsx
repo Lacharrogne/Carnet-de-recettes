@@ -537,7 +537,7 @@ export default function Header() {
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="mt-2 rounded-2xl border border-orange-200 bg-white p-2.5 text-left transition hover:bg-orange-50"
+                        className="mt-2 rounded-2xl bg-card ring-1 ring-bark p-2.5 text-left transition hover:bg-orange-50"
                       >
                         <div className="flex items-center gap-3">
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-xl">

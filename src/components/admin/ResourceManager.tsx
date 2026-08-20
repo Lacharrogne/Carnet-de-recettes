@@ -358,7 +358,7 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
                         type="button"
                         onClick={() => setEditing(row)}
                         disabled={busy}
-                        className="rounded-full border border-orange-200 bg-white px-3 py-1.5 text-xs font-black text-orange-700 transition hover:bg-orange-50 disabled:opacity-50"
+                        className="rounded-full bg-card ring-1 ring-bark px-3 py-1.5 text-xs font-black text-orange-700 transition hover:bg-orange-50 disabled:opacity-50"
                       >
                         Éditer
                       </button>
@@ -402,7 +402,7 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
             type="button"
             onClick={() => setPage((current) => Math.max(0, current - 1))}
             disabled={page === 0 || loading}
-            className="rounded-full border border-orange-200 bg-white px-4 py-2 text-orange-700 transition hover:bg-orange-50 disabled:opacity-40"
+            className="rounded-full bg-card ring-1 ring-bark px-4 py-2 text-orange-700 transition hover:bg-orange-50 disabled:opacity-40"
           >
             ← Précédent
           </button>
@@ -411,7 +411,7 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
             type="button"
             onClick={() => setPage((current) => current + 1)}
             disabled={page + 1 >= totalPages || loading}
-            className="rounded-full border border-orange-200 bg-white px-4 py-2 text-orange-700 transition hover:bg-orange-50 disabled:opacity-40"
+            className="rounded-full bg-card ring-1 ring-bark px-4 py-2 text-orange-700 transition hover:bg-orange-50 disabled:opacity-40"
           >
             Suivant →
           </button>
@@ -613,7 +613,7 @@ function RowEditor({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-stone-700 transition hover:bg-orange-50"
+              className="rounded-full bg-card ring-1 ring-bark px-5 py-3 font-black text-stone-700 transition hover:bg-orange-50"
             >
               Annuler
             </button>

@@ -422,7 +422,7 @@ export default function ShoppingListPage() {
               <button
                 type="button"
                 onClick={() => setShowCheckedItems((current) => !current)}
-                className="rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+                className="rounded-full bg-card ring-1 ring-bark px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
               >
                 {showCheckedItems ? 'Masquer les cochés' : 'Afficher les cochés'}
               </button>

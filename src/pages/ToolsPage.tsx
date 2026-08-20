@@ -138,7 +138,7 @@ export default function ToolsPage() {
 
               <Link
                 to="/shopping-list"
-                className="rounded-full border border-orange-200 bg-white px-6 py-3 font-black text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
+                className="rounded-full bg-card ring-1 ring-bark px-6 py-3 font-black text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
               >
                 Voir les courses
               </Link>
