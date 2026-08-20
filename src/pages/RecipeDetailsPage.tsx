@@ -601,6 +601,34 @@ export default function RecipeDetailsPage() {
     }
   }
 
+  async function handleShare() {
+    if (!recipe) return
+
+    const url = window.location.href
+    const shareData: ShareData = {
+      title: recipe.title,
+      text: recipe.description
+        ? `${recipe.title} — ${recipe.description}`
+        : `${recipe.title} — une recette à découvrir sur Carnet de recettes`,
+      url,
+    }
+
+    // Partage natif (feuille de partage du système) si dispo, sinon on copie.
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share(shareData)
+      } catch (error) {
+        // L'utilisateur a annulé la feuille de partage : on ignore.
+        if ((error as Error)?.name !== 'AbortError') {
+          console.error(error)
+        }
+      }
+      return
+    }
+
+    await handleCopyLink()
+  }
+
   function handlePrint() {
     window.print()
   }
@@ -1050,6 +1078,15 @@ export default function RecipeDetailsPage() {
                         ? 'Retirer des favoris'
                         : 'Ajouter aux favoris'}
                     </span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={handleShare}
+                    variant="secondary"
+                    fullWidth
+                  >
+                    📤 Partager
                   </Button>
 
                   <Button
