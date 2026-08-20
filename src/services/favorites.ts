@@ -18,6 +18,7 @@ type FavoriteRecipeRow = {
     ingredients: string[] | null
     steps: string[] | null
     related_recipe_ids: number[] | null
+    status?: string | null
   } | null
 }
 
@@ -40,6 +41,8 @@ function mapFavoriteRecipe(row: FavoriteRecipeRow): Recipe | null {
     ingredients: row.recipes.ingredients ?? [],
     steps: row.recipes.steps ?? [],
     relatedRecipeIds: row.recipes.related_recipe_ids ?? [],
+    status:
+      (row.recipes.status as Recipe['status']) ?? 'published',
   }
 }
 

@@ -21,6 +21,9 @@ export default function EditRecipePage() {
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
+
+  const isDraft = recipe?.status === 'draft'
 
   useEffect(() => {
     async function loadRecipe() {
@@ -77,6 +80,8 @@ export default function EditRecipePage() {
       const updatedRecipe = await updateRecipe(Number(id), {
         ...recipeValues,
         imageUrl,
+        // Le bouton principal d'un brouillon le publie.
+        ...(isDraft ? { status: 'published' as const } : {}),
       })
 
       if (imageFile && oldImageUrl) {
@@ -92,6 +97,47 @@ export default function EditRecipePage() {
       console.error(error)
       setErrorMessage('Impossible de modifier la recette.')
       setIsSubmitting(false)
+    }
+  }
+
+  // Enregistre les modifications sans publier (le brouillon reste privé).
+  async function handleSaveDraft(values: RecipeFormValues) {
+    setErrorMessage('')
+    setIsSavingDraft(true)
+
+    try {
+      if (!id || !recipe) {
+        throw new Error('Recette introuvable')
+      }
+
+      const { imageFile, ...recipeValues } = values
+
+      const oldImageUrl = recipe.imageUrl
+      let imageUrl = oldImageUrl
+
+      if (imageFile) {
+        imageUrl = await uploadRecipeImage(imageFile)
+      }
+
+      await updateRecipe(Number(id), {
+        ...recipeValues,
+        imageUrl,
+        status: 'draft',
+      })
+
+      if (imageFile && oldImageUrl) {
+        try {
+          await deleteRecipeImageByUrl(oldImageUrl)
+        } catch (error) {
+          console.warn("L'ancienne image n'a pas pu être supprimée.", error)
+        }
+      }
+
+      navigate('/my-recipes')
+    } catch (error) {
+      console.error(error)
+      setErrorMessage("Impossible d'enregistrer le brouillon.")
+      setIsSavingDraft(false)
     }
   }
 
@@ -150,12 +196,13 @@ export default function EditRecipePage() {
           <p className="font-bold text-orange-600">Carnet familial</p>
 
           <h1 className="mt-2 text-4xl font-black leading-tight text-stone-950">
-            Modifier la recette
+            {isDraft ? 'Terminer le brouillon' : 'Modifier la recette'}
           </h1>
 
           <p className="mt-3 max-w-2xl leading-7 text-stone-600">
-            Mettez à jour les informations de votre recette, puis enregistrez les
-            modifications pour les retrouver dans le carnet.
+            {isDraft
+              ? 'Complétez votre brouillon, puis publiez-le pour le partager — ou gardez-le en brouillon pour plus tard.'
+              : 'Mettez à jour les informations de votre recette, puis enregistrez les modifications pour les retrouver dans le carnet.'}
           </p>
         </div>
       </div>
@@ -164,10 +211,15 @@ export default function EditRecipePage() {
         <RecipeForm
           initialValues={recipe}
           availableRecipes={availableRecipes}
-          submitLabel="Enregistrer les modifications"
+          submitLabel={
+            isDraft ? 'Publier la recette' : 'Enregistrer les modifications'
+          }
           isSubmitting={isSubmitting}
           errorMessage={errorMessage}
           onSubmit={handleSubmit}
+          onSaveDraft={isDraft ? handleSaveDraft : undefined}
+          isSavingDraft={isSavingDraft}
+          draftLabel="Garder en brouillon"
         />
       </div>
     </section>

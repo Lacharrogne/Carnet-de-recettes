@@ -11,6 +11,7 @@ export default function AddRecipePage() {
   const [availableRecipes, setAvailableRecipes] = useState<Recipe[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
 
   useEffect(() => {
     let ignore = false
@@ -49,6 +50,34 @@ export default function AddRecipePage() {
       console.error(error)
       setErrorMessage("Impossible d'ajouter la recette.")
       setIsSubmitting(false)
+    }
+  }
+
+  async function handleSaveDraft(values: RecipeFormValues) {
+    setErrorMessage('')
+    setIsSavingDraft(true)
+
+    try {
+      const { imageFile, ...recipeValues } = values
+
+      let imageUrl: string | null = null
+
+      if (imageFile) {
+        imageUrl = await uploadRecipeImage(imageFile)
+      }
+
+      await createRecipe({
+        ...recipeValues,
+        imageUrl,
+        status: 'draft',
+      })
+
+      // On retrouve le brouillon dans « Mes recettes ».
+      navigate('/my-recipes')
+    } catch (error) {
+      console.error(error)
+      setErrorMessage("Impossible d'enregistrer le brouillon.")
+      setIsSavingDraft(false)
     }
   }
 
@@ -119,6 +148,9 @@ export default function AddRecipePage() {
           isSubmitting={isSubmitting}
           errorMessage={errorMessage}
           onSubmit={handleSubmit}
+          onSaveDraft={handleSaveDraft}
+          isSavingDraft={isSavingDraft}
+          draftLabel="Enregistrer comme brouillon"
         />
       </div>
     </section>

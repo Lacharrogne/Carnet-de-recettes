@@ -53,8 +53,19 @@ export default function MyRecipesPage() {
     }
   }, [])
 
+  // Brouillons (visibles de l'auteur seul) séparés des recettes publiées.
+  const drafts = useMemo(
+    () => recipes.filter((recipe) => recipe.status === 'draft'),
+    [recipes],
+  )
+
+  const publishedRecipes = useMemo(
+    () => recipes.filter((recipe) => recipe.status !== 'draft'),
+    [recipes],
+  )
+
   const filteredRecipes = useMemo(() => {
-    let result = [...recipes]
+    let result = [...publishedRecipes]
 
     if (selectedCategory) {
       result = result.filter((recipe) => recipe.category === selectedCategory)
@@ -119,7 +130,7 @@ export default function MyRecipesPage() {
     }
 
     return result
-  }, [recipes, search, selectedCategory, sort])
+  }, [publishedRecipes, search, selectedCategory, sort])
 
   const usedCategoriesCount = useMemo(() => {
     return new Set(recipes.map((recipe) => recipe.category)).size
@@ -188,6 +199,50 @@ export default function MyRecipesPage() {
       </div>
 
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
+
+      {drafts.length > 0 && (
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-honey/40">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-honey-soft text-2xl">
+              📝
+            </span>
+
+            <div>
+              <h2 className="text-2xl font-black text-stone-950">Brouillons</h2>
+              <p className="text-sm text-stone-600">
+                {drafts.length} recette{drafts.length > 1 ? 's' : ''} à terminer
+                — visible{drafts.length > 1 ? 's' : ''} de vous seul.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {drafts.map((draft) => (
+              <Link
+                key={draft.id}
+                to={`/recipes/${draft.id}/edit`}
+                className="group flex items-center gap-3 rounded-2xl bg-honey-soft/40 p-4 ring-1 ring-honey/40 transition hover:bg-honey-soft"
+              >
+                <span className="text-2xl">{draft.image || '🍽️'}</span>
+
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-black text-stone-950">
+                    {draft.title || 'Sans titre'}
+                  </p>
+
+                  <span className="mt-0.5 inline-block rounded-full bg-honey/20 px-2 py-0.5 text-[0.65rem] font-black uppercase tracking-wide text-stone-700">
+                    Brouillon
+                  </span>
+                </div>
+
+                <span className="shrink-0 font-bold text-orange-700 transition group-hover:translate-x-0.5">
+                  Continuer →
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-5 md:grid-cols-3">
         <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
@@ -307,15 +362,17 @@ export default function MyRecipesPage() {
         )}
       </div>
 
-      {recipes.length === 0 ? (
-        <EmptyState
-          emoji="📖"
-          title="Aucune recette pour le moment"
-          description="Ajoutez votre première recette pour commencer votre carnet."
-          action={
-            <Button to="/add-recipe">Ajouter ma première recette</Button>
-          }
-        />
+      {publishedRecipes.length === 0 ? (
+        drafts.length === 0 ? (
+          <EmptyState
+            emoji="📖"
+            title="Aucune recette pour le moment"
+            description="Ajoutez votre première recette pour commencer votre carnet."
+            action={
+              <Button to="/add-recipe">Ajouter ma première recette</Button>
+            }
+          />
+        ) : null
       ) : filteredRecipes.length === 0 ? (
         <EmptyState
           emoji="🔎"

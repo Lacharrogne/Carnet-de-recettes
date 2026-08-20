@@ -42,6 +42,10 @@ type RecipeFormProps = {
   // Autres recettes proposées pour créer des liens manuels.
   availableRecipes?: Recipe[]
   onSubmit: (values: RecipeFormValues) => Promise<void>
+  // Enregistrement en brouillon (facultatif) : n'exige qu'un titre.
+  onSaveDraft?: (values: RecipeFormValues) => Promise<void>
+  isSavingDraft?: boolean
+  draftLabel?: string
 }
 
 const inputClass =
@@ -62,6 +66,9 @@ export default function RecipeForm({
   errorMessage,
   availableRecipes = [],
   onSubmit,
+  onSaveDraft,
+  isSavingDraft = false,
+  draftLabel = 'Enregistrer le brouillon',
 }: RecipeFormProps) {
   const ingredientInputRefs = useRef<Array<HTMLInputElement | null>>([])
   const stepTextareaRefs = useRef<Array<HTMLTextAreaElement | null>>([])
@@ -69,6 +76,7 @@ export default function RecipeForm({
   const stepFocusIndexRef = useRef<number | null>(null)
 
   const [title, setTitle] = useState(initialValues?.title ?? '')
+  const [draftError, setDraftError] = useState('')
 
   const [category, setCategory] = useState<RecipeCategory>(
     initialValues?.category ?? DEFAULT_RECIPE_CATEGORY,
@@ -361,10 +369,8 @@ export default function RecipeForm({
       .filter((value) => value.length > 0)
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    await onSubmit({
+  function collectValues(): RecipeFormValues {
+    return {
       title: title.trim(),
       category,
       difficulty,
@@ -378,7 +384,25 @@ export default function RecipeForm({
       steps: cleanList(steps),
       relatedRecipeIds,
       imageFile,
-    })
+    }
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    await onSubmit(collectValues())
+  }
+
+  async function handleSaveDraft() {
+    if (!onSaveDraft) return
+
+    // Un brouillon n'exige qu'un titre (le reste est facultatif).
+    if (!title.trim()) {
+      setDraftError('Donne au moins un titre à ton brouillon pour l’enregistrer.')
+      return
+    }
+
+    setDraftError('')
+    await onSaveDraft(collectValues())
   }
 
   return (
@@ -877,14 +901,27 @@ export default function RecipeForm({
         </div>
       )}
 
-      <div className="z-20 rounded-[1.75rem] bg-cream-50/90 p-2 shadow-lift ring-1 ring-bark backdrop-blur print:static">
+      <div className="z-20 space-y-2 rounded-[1.75rem] bg-cream-50/90 p-2 shadow-lift ring-1 ring-bark backdrop-blur print:static">
+        {draftError && <Alert tone="error">{draftError}</Alert>}
+
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isSavingDraft}
           className="w-full rounded-[1.5rem] bg-terracotta px-6 py-4 text-lg font-bold text-white shadow-soft transition hover:bg-terracotta-deep disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? 'Enregistrement...' : submitLabel}
         </button>
+
+        {onSaveDraft && (
+          <button
+            type="button"
+            onClick={handleSaveDraft}
+            disabled={isSubmitting || isSavingDraft}
+            className="w-full rounded-[1.5rem] bg-card px-6 py-3.5 text-base font-bold text-cacao ring-1 ring-bark transition hover:bg-linen disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSavingDraft ? 'Enregistrement...' : draftLabel}
+          </button>
+        )}
       </div>
     </form>
   )

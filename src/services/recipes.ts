@@ -1,5 +1,10 @@
 import { supabase } from '../lib/supabase'
-import type { RecipeCategory, Difficulty, Recipe } from '../types/recipe'
+import type {
+  RecipeCategory,
+  Difficulty,
+  Recipe,
+  RecipeStatus,
+} from '../types/recipe'
 
 type RecipeRow = {
   id: number
@@ -18,6 +23,8 @@ type RecipeRow = {
   // Optionnel : absent des requêtes de liste (chargé seulement au détail).
   steps?: string[] | null
   related_recipe_ids: number[] | null
+  // Optionnel : absent tant que la migration `status` n'est pas lancée.
+  status?: string | null
 }
 
 function mapRecipe(row: RecipeRow): Recipe {
@@ -37,6 +44,7 @@ function mapRecipe(row: RecipeRow): Recipe {
     ingredients: row.ingredients ?? [],
     steps: row.steps ?? [],
     relatedRecipeIds: row.related_recipe_ids ?? [],
+    status: (row.status as RecipeStatus) ?? 'published',
   }
 }
 
@@ -46,13 +54,28 @@ function mapRecipe(row: RecipeRow): Recipe {
 const RECIPE_LIST_COLUMNS =
   'id,user_id,title,category,difficulty,prep_time,cook_time,servings,description,image,image_url,tags,ingredients,related_recipe_ids,created_at'
 
+const RECIPE_LIST_COLUMNS_WITH_STATUS = `${RECIPE_LIST_COLUMNS},status`
+
 export async function getRecipes(): Promise<Recipe[]> {
+  // Catalogue communautaire : on n'affiche que les recettes publiées.
   const { data, error } = await supabase
     .from('recipes')
-    .select(RECIPE_LIST_COLUMNS)
+    .select(RECIPE_LIST_COLUMNS_WITH_STATUS)
+    .eq('status', 'published')
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  if (error) {
+    // Repli si la colonne `status` n'existe pas encore (migration non lancée) :
+    // on renvoie toutes les recettes plutôt que de casser le catalogue.
+    const fallback = await supabase
+      .from('recipes')
+      .select(RECIPE_LIST_COLUMNS)
+      .order('created_at', { ascending: false })
+
+    if (fallback.error) throw fallback.error
+
+    return (fallback.data ?? []).map((row) => mapRecipe(row as RecipeRow))
+  }
 
   return (data ?? []).map((row) => mapRecipe(row as RecipeRow))
 }
@@ -135,6 +158,7 @@ export async function createRecipe(recipe: {
   ingredients: string[]
   steps: string[]
   relatedRecipeIds: number[]
+  status?: RecipeStatus
 }): Promise<Recipe> {
   const {
     data: { user },
@@ -162,6 +186,9 @@ export async function createRecipe(recipe: {
         ingredients: recipe.ingredients,
         steps: recipe.steps,
         related_recipe_ids: recipe.relatedRecipeIds,
+        // On n'écrit `status` que pour un brouillon : une publication normale
+        // s'appuie sur la valeur par défaut (reste tolérant sans la migration).
+        ...(recipe.status === 'draft' ? { status: 'draft' } : {}),
       },
     ])
     .select()
@@ -188,6 +215,7 @@ export async function updateRecipe(
     ingredients: string[]
     steps: string[]
     relatedRecipeIds: number[]
+    status?: RecipeStatus
   }
 ): Promise<Recipe> {
   const {
@@ -216,6 +244,9 @@ export async function updateRecipe(
       ingredients: recipe.ingredients,
       steps: recipe.steps,
       related_recipe_ids: recipe.relatedRecipeIds,
+      // Écrit seulement lors d'un changement d'état (publier / repasser en
+      // brouillon) — une simple modification n'y touche pas.
+      ...(recipe.status ? { status: recipe.status } : {}),
     })
     .eq('id', id)
     .eq('user_id', user.id)
@@ -255,13 +286,25 @@ export async function getMyRecipes(): Promise<Recipe[]> {
   if (userError) throw userError
   if (!user) throw new Error('Utilisateur non connecté')
 
+  // On récupère aussi les brouillons de l'auteur (colonne `status`), avec repli
+  // si la migration n'est pas encore lancée.
   const { data, error } = await supabase
     .from('recipes')
-    .select(RECIPE_LIST_COLUMNS)
+    .select(RECIPE_LIST_COLUMNS_WITH_STATUS)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  if (error) {
+    const fallback = await supabase
+      .from('recipes')
+      .select(RECIPE_LIST_COLUMNS)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (fallback.error) throw fallback.error
+
+    return (fallback.data ?? []).map((row) => mapRecipe(row as RecipeRow))
+  }
 
   return (data ?? []).map((row) => mapRecipe(row as RecipeRow))
 }
