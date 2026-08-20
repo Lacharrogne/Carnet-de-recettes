@@ -901,7 +901,9 @@ export default function RecipeDetailsPage() {
           </Alert>
         )}
 
-        <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-card ring-1 ring-bark sm:rounded-[2.5rem]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_minmax(300px,360px)] lg:items-start lg:gap-8">
+          <div className="min-w-0 space-y-8">
+          <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-card ring-1 ring-bark sm:rounded-[2.5rem]">
           <div>
             <div className="relative w-full bg-cream-200">
               {typeof imageToDisplay === 'string' &&
@@ -918,7 +920,7 @@ export default function RecipeDetailsPage() {
               )}
             </div>
 
-            <div className="grid gap-8 px-5 py-7 sm:px-6 sm:py-8 lg:px-10 lg:py-10 xl:grid-cols-[1.55fr_minmax(320px,1fr)] xl:items-start xl:gap-12">
+            <div className="px-5 py-7 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
               <div className="min-w-0">
               <div className="mb-5 flex flex-wrap items-center gap-2 sm:gap-3">
                 <span className="rounded-full bg-terracotta-soft px-4 py-2 text-xs font-bold text-terracotta-deep sm:text-sm">
@@ -1039,7 +1041,183 @@ export default function RecipeDetailsPage() {
               )}
               </div>
 
-              <div className="xl:sticky xl:top-6 xl:self-start">
+                        </div>
+          </div>
+        </article>
+
+        <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
+          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-6">
+            <div>
+              <p className="font-bold text-orange-600">À préparer</p>
+
+              <h2 className="text-2xl font-black text-stone-950">
+                Ingrédients
+              </h2>
+
+              <p className="mt-1 text-sm leading-6 text-stone-500 print:hidden">
+                Cliquez sur + pour ajouter uniquement les ingrédients souhaités à
+                votre liste de courses.
+              </p>
+            </div>
+
+            <div className="mt-6 rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark print:hidden sm:p-5">
+              <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+                Adapter les portions
+              </p>
+
+              <p className="mt-2 text-sm font-semibold leading-6 text-stone-500">
+                Recette prévue pour {recipe.servings} personne
+                {recipe.servings > 1 ? 's' : ''}. Les quantités sont
+                recalculées automatiquement.
+              </p>
+
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={decreaseServings}
+                  disabled={selectedServings <= 1}
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-card ring-1 ring-bark text-xl font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  −
+                </button>
+
+                <div className="flex-1 rounded-full bg-white px-5 py-3 text-center font-black text-stone-950 shadow-sm ring-1 ring-bark sm:flex-none sm:px-6">
+                  {selectedServings} personne{selectedServings > 1 ? 's' : ''}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={increaseServings}
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-xl font-black text-white transition hover:bg-orange-600"
+                >
+                  +
+                </button>
+
+                <button
+                  type="button"
+                  onClick={resetServings}
+                  className="w-full rounded-full bg-card ring-1 ring-bark px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
+                >
+                  Revenir à {recipe.servings} pers.
+                </button>
+              </div>
+
+              <div className="mt-4 grid grid-cols-4 gap-2 sm:flex sm:flex-wrap">
+                {[2, 4, 6, 8].map((servingValue) => (
+                  <button
+                    key={servingValue}
+                    type="button"
+                    onClick={() => setSelectedServings(servingValue)}
+                    className={`rounded-full px-3 py-2 text-sm font-black transition sm:px-4 ${
+                      selectedServings === servingValue
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-white text-orange-700 ring-1 ring-bark hover:bg-orange-50'
+                    }`}
+                  >
+                    {servingValue}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {recipe.ingredients.length > 0 ? (
+              <ul className="mt-6 space-y-3">
+                {scaledIngredients.map((ingredient, index) => {
+                  const linkedRecipe = findLinkedRecipe(
+                    ingredient,
+                    allRecipes,
+                    recipe.id,
+                  )
+
+                  return (
+                    <li
+                      key={`${ingredient}-${index}`}
+                      className="rounded-[1.4rem] bg-cream-100 px-4 py-3 text-stone-700"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="font-black text-orange-600">•</span>
+
+                        <span className="min-w-0 flex-1 text-sm font-medium leading-6 sm:text-base">
+                          {ingredient}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleAddIngredientToShoppingList(ingredient, index)
+                          }
+                          disabled={addingIngredientIndex === index}
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500 text-lg font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden"
+                          aria-label={`Ajouter ${ingredient} à la liste de courses`}
+                          title="Ajouter à la liste de courses"
+                        >
+                          {addingIngredientIndex === index ? '…' : '+'}
+                        </button>
+                      </div>
+
+                      {linkedRecipe && (
+                        <Link
+                          to={`/recipes/${linkedRecipe.id}`}
+                          className="mt-2 ml-6 inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700 transition hover:bg-orange-200 print:hidden"
+                          title={`Voir la recette « ${linkedRecipe.title} »`}
+                        >
+                          🔗 Voir la recette « {linkedRecipe.title} »
+                        </Link>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+            ) : (
+              <p className="mt-4 text-stone-500">Aucun ingrédient renseigné.</p>
+            )}
+          </section>
+
+          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-bold text-orange-600">En cuisine</p>
+
+                <h2 className="text-2xl font-black text-stone-950">
+                  Préparation
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={openGuidedCooking}
+                disabled={recipe.steps.length === 0}
+                className="w-full rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden sm:w-auto"
+              >
+                ▶ Lancer
+              </button>
+            </div>
+
+            {recipe.steps.length > 0 ? (
+              <ol className="mt-6 space-y-4">
+                {recipe.steps.map((step, index) => (
+                  <li
+                    key={`${step}-${index}`}
+                    className="flex gap-3 rounded-[1.4rem] bg-cream-50 px-4 py-4 text-stone-700 ring-1 ring-bark/60 sm:gap-4"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white">
+                      {index + 1}
+                    </span>
+
+                    <span className="text-sm leading-7 sm:text-base">
+                      {step}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="mt-4 text-stone-500">Aucune étape renseignée.</p>
+            )}
+          </section>
+        </div>
+
+        </div>
+          <aside className="lg:sticky lg:top-6 lg:self-start">
               <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-bark print:hidden sm:rounded-[2rem] sm:p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
@@ -1275,180 +1453,8 @@ export default function RecipeDetailsPage() {
   </button>
 </div>
               </div>
-            </div>
-          </div>
-          </div>
-        </article>
 
-        <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
-          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-6">
-            <div>
-              <p className="font-bold text-orange-600">À préparer</p>
-
-              <h2 className="text-2xl font-black text-stone-950">
-                Ingrédients
-              </h2>
-
-              <p className="mt-1 text-sm leading-6 text-stone-500 print:hidden">
-                Cliquez sur + pour ajouter uniquement les ingrédients souhaités à
-                votre liste de courses.
-              </p>
-            </div>
-
-            <div className="mt-6 rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark print:hidden sm:p-5">
-              <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-                Adapter les portions
-              </p>
-
-              <p className="mt-2 text-sm font-semibold leading-6 text-stone-500">
-                Recette prévue pour {recipe.servings} personne
-                {recipe.servings > 1 ? 's' : ''}. Les quantités sont
-                recalculées automatiquement.
-              </p>
-
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={decreaseServings}
-                  disabled={selectedServings <= 1}
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-card ring-1 ring-bark text-xl font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  −
-                </button>
-
-                <div className="flex-1 rounded-full bg-white px-5 py-3 text-center font-black text-stone-950 shadow-sm ring-1 ring-bark sm:flex-none sm:px-6">
-                  {selectedServings} personne{selectedServings > 1 ? 's' : ''}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={increaseServings}
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-xl font-black text-white transition hover:bg-orange-600"
-                >
-                  +
-                </button>
-
-                <button
-                  type="button"
-                  onClick={resetServings}
-                  className="w-full rounded-full bg-card ring-1 ring-bark px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
-                >
-                  Revenir à {recipe.servings} pers.
-                </button>
-              </div>
-
-              <div className="mt-4 grid grid-cols-4 gap-2 sm:flex sm:flex-wrap">
-                {[2, 4, 6, 8].map((servingValue) => (
-                  <button
-                    key={servingValue}
-                    type="button"
-                    onClick={() => setSelectedServings(servingValue)}
-                    className={`rounded-full px-3 py-2 text-sm font-black transition sm:px-4 ${
-                      selectedServings === servingValue
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-white text-orange-700 ring-1 ring-bark hover:bg-orange-50'
-                    }`}
-                  >
-                    {servingValue}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {recipe.ingredients.length > 0 ? (
-              <ul className="mt-6 space-y-3">
-                {scaledIngredients.map((ingredient, index) => {
-                  const linkedRecipe = findLinkedRecipe(
-                    ingredient,
-                    allRecipes,
-                    recipe.id,
-                  )
-
-                  return (
-                    <li
-                      key={`${ingredient}-${index}`}
-                      className="rounded-[1.4rem] bg-cream-100 px-4 py-3 text-stone-700"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="font-black text-orange-600">•</span>
-
-                        <span className="min-w-0 flex-1 text-sm font-medium leading-6 sm:text-base">
-                          {ingredient}
-                        </span>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleAddIngredientToShoppingList(ingredient, index)
-                          }
-                          disabled={addingIngredientIndex === index}
-                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500 text-lg font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden"
-                          aria-label={`Ajouter ${ingredient} à la liste de courses`}
-                          title="Ajouter à la liste de courses"
-                        >
-                          {addingIngredientIndex === index ? '…' : '+'}
-                        </button>
-                      </div>
-
-                      {linkedRecipe && (
-                        <Link
-                          to={`/recipes/${linkedRecipe.id}`}
-                          className="mt-2 ml-6 inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700 transition hover:bg-orange-200 print:hidden"
-                          title={`Voir la recette « ${linkedRecipe.title} »`}
-                        >
-                          🔗 Voir la recette « {linkedRecipe.title} »
-                        </Link>
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
-            ) : (
-              <p className="mt-4 text-stone-500">Aucun ingrédient renseigné.</p>
-            )}
-          </section>
-
-          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="font-bold text-orange-600">En cuisine</p>
-
-                <h2 className="text-2xl font-black text-stone-950">
-                  Préparation
-                </h2>
-              </div>
-
-              <button
-                type="button"
-                onClick={openGuidedCooking}
-                disabled={recipe.steps.length === 0}
-                className="w-full rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden sm:w-auto"
-              >
-                ▶ Lancer
-              </button>
-            </div>
-
-            {recipe.steps.length > 0 ? (
-              <ol className="mt-6 space-y-4">
-                {recipe.steps.map((step, index) => (
-                  <li
-                    key={`${step}-${index}`}
-                    className="flex gap-3 rounded-[1.4rem] bg-cream-50 px-4 py-4 text-stone-700 ring-1 ring-bark/60 sm:gap-4"
-                  >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white">
-                      {index + 1}
-                    </span>
-
-                    <span className="text-sm leading-7 sm:text-base">
-                      {step}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="mt-4 text-stone-500">Aucune étape renseignée.</p>
-            )}
-          </section>
+          </aside>
         </div>
 
         <RecipeReviews recipeId={recipe.id} />
