@@ -1170,7 +1170,7 @@ export default function RecipeDetailsPage() {
                     }}
                     rows={4}
                     placeholder="Vos ajustements : « la prochaine fois, moins de sucre »…"
-                    className="mt-4 w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 text-cacao outline-none transition focus:border-orange-500"
+                    className="mt-4 w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 text-cacao outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                   />
 
                   {noteSaved && (
@@ -1227,7 +1227,7 @@ export default function RecipeDetailsPage() {
         setSelectedPlanningDay(event.target.value as DayKey)
       }
       aria-label="Jour du planning"
-      className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-4 font-bold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+      className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-4 font-bold text-stone-800 outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
     >
       {DAYS.map((day) => (
         <option key={day.key} value={day.key}>

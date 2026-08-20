@@ -95,7 +95,7 @@ export default function RecipeVisibilitySelector({
       <select
         value={visibility.mode === 'friend' ? (visibility.friendId ?? '') : ''}
         onChange={(event) => handleFriendChange(event.target.value)}
-        className="w-full rounded-2xl border border-orange-100 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-100 sm:max-w-xs"
+        className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-2.5 text-sm font-semibold text-stone-800 outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40 sm:max-w-xs"
       >
         <option value="">Tous mes amis</option>
         {friends.map((friend) => (
