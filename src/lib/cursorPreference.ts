@@ -1,5 +1,8 @@
 import { useCallback, useState } from 'react'
 
+import { useAuth } from '../context/useAuth'
+import { saveAccountPreference } from '../services/preferences'
+
 /**
  * Préférence de curseur du Carnet de recettes.
  *
@@ -59,6 +62,18 @@ export function applyCursor(id: CursorId): void {
   }
 }
 
+/** Enregistre le curseur en local (sans l'appliquer). */
+export function storeCursor(id: CursorId): void {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(STORAGE_KEY, id)
+  }
+}
+
+/** Valide une valeur brute comme identifiant de curseur. */
+export function toCursorId(value: string | null | undefined): CursorId | null {
+  return isCursorId(value ?? null) ? (value as CursorId) : null
+}
+
 /** Applique la préférence enregistrée — à appeler au démarrage de l'app. */
 export function initCursor(): void {
   applyCursor(getStoredCursor())
@@ -69,16 +84,23 @@ export function initCursor(): void {
  * persiste et applique immédiatement le choix.
  */
 export function useCursorPreference() {
+  const { user } = useAuth()
   const [cursor, setCursorState] = useState<CursorId>(getStoredCursor)
 
-  const setCursor = useCallback((id: CursorId) => {
-    setCursorState(id)
-    applyCursor(id)
+  const setCursor = useCallback(
+    (id: CursorId) => {
+      setCursorState(id)
+      applyCursor(id)
+      storeCursor(id)
 
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEY, id)
-    }
-  }, [])
+      // Synchronise le choix sur le compte (suit l'utilisateur d'un appareil à
+      // l'autre). Tolérant : ignoré si le compte n'est pas dispo.
+      if (user) {
+        void saveAccountPreference(user.id, { cursor: id })
+      }
+    },
+    [user],
+  )
 
   return { cursor, setCursor }
 }

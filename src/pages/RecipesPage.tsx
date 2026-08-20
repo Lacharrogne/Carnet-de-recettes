@@ -19,7 +19,11 @@ import { recipeMatchesVisibility } from '../lib/recipeVisibility'
 import { useDebounce } from '../lib/useDebounce'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { getRecipes } from '../services/recipes'
-import { getFriends, type SocialProfile } from '../services/social'
+import {
+  getFriends,
+  getProfilesByUserIds,
+  type SocialProfile,
+} from '../services/social'
 import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import type { Difficulty, Recipe } from '../types/recipe'
 
@@ -38,6 +42,7 @@ export default function RecipesPage() {
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [ratings, setRatings] = useState<Map<number, RecipeRating>>(new Map())
+  const [authors, setAuthors] = useState<Map<string, SocialProfile>>(new Map())
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [search, setSearch] = useState('')
@@ -132,6 +137,40 @@ export default function RecipesPage() {
       .then((map) => {
         if (!ignore) {
           setRatings(map)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [recipes])
+
+  // Charge les profils auteurs des recettes affichées (une seule requête).
+  useEffect(() => {
+    const authorIds = Array.from(
+      new Set(
+        recipes
+          .map((recipe) => recipe.userId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    )
+
+    if (authorIds.length === 0) {
+      setAuthors(new Map())
+      return
+    }
+
+    let ignore = false
+
+    getProfilesByUserIds(authorIds)
+      .then((profiles) => {
+        if (!ignore) {
+          setAuthors(
+            new Map(profiles.map((profile) => [profile.user_id, profile])),
+          )
         }
       })
       .catch((error) => {
@@ -712,6 +751,11 @@ export default function RecipesPage() {
                       key={recipe.id}
                       recipe={recipe}
                       rating={ratings.get(recipe.id)}
+                      author={
+                        recipe.userId
+                          ? authors.get(recipe.userId)
+                          : undefined
+                      }
                     />
                   ))}
                 </div>

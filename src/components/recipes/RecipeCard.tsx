@@ -11,18 +11,22 @@ import {
   getRecipeReviews,
   type RecipeRating,
 } from '../../services/reviews'
+import type { SocialProfile } from '../../services/social'
 import type { Recipe } from '../../types/recipe'
 
 type RecipeCardProps = {
   recipe: Recipe
   // Note agrégée fournie par la page (évite une requête par carte).
   rating?: RecipeRating
+  // Profil de l'auteur (fourni par la page ; évite une requête par carte).
+  author?: SocialProfile
   onFavoriteChange?: () => void
 }
 
 export default function RecipeCard({
   recipe,
   rating,
+  author,
   onFavoriteChange,
 }: RecipeCardProps) {
   const navigate = useNavigate()
@@ -181,11 +185,35 @@ export default function RecipeCard({
         </div>
 
         <div className="flex flex-1 flex-col p-4 sm:p-5">
-          <p
-            className={`mb-1 text-[0.7rem] font-bold uppercase tracking-[0.12em] sm:text-xs ${visualStyle.accentText}`}
-          >
-            Recette maison
-          </p>
+          {author ? (
+            <div className="mb-1 flex items-center gap-2">
+              {author.avatar_url ? (
+                <img
+                  src={author.avatar_url}
+                  alt=""
+                  className="h-5 w-5 shrink-0 rounded-full object-cover ring-1 ring-bark/60"
+                />
+              ) : (
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-terracotta/15 text-[0.6rem] font-black text-terracotta">
+                  {(author.full_name || author.username || '?')
+                    .charAt(0)
+                    .toUpperCase()}
+                </span>
+              )}
+
+              <span
+                className={`truncate text-[0.7rem] font-bold uppercase tracking-[0.12em] sm:text-xs ${visualStyle.accentText}`}
+              >
+                {author.full_name || author.username || 'Cuisinier·ère'}
+              </span>
+            </div>
+          ) : (
+            <p
+              className={`mb-1 text-[0.7rem] font-bold uppercase tracking-[0.12em] sm:text-xs ${visualStyle.accentText}`}
+            >
+              Recette maison
+            </p>
+          )}
 
           <h3 className="line-clamp-2 font-display text-lg font-bold leading-snug text-espresso transition group-hover:text-terracotta sm:text-xl">
             {recipe.title}

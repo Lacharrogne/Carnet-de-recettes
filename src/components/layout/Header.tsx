@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 import { LOGO_SRC } from '../../data/brand'
 import { useAuth } from '../../context/useAuth'
+import { useEntitlement } from '../../lib/useEntitlement'
 import { SUBSCRIPTION_HUB_URL } from '../../config/subscription'
 import { VITRINE_URL } from '../../config/site'
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
@@ -27,7 +28,16 @@ function PlusIcon({ className = 'h-4 w-4' }: { className?: string }) {
 
 type DropdownName = 'recipes' | 'tools' | 'profile' | null
 
-const personalLinks = [
+type NavLinkItem = {
+  label: string
+  description: string
+  to: string
+  emoji: string
+  /** Réservé à l'abonnement (affiche un cadenas une fois l'essai terminé). */
+  premium?: boolean
+}
+
+const personalLinks: NavLinkItem[] = [
   {
     label: 'Mon profil',
     description: 'Avatar, pseudo et présentation',
@@ -45,33 +55,38 @@ const personalLinks = [
     description: 'Voir et modifier vos recettes',
     to: '/my-recipes',
     emoji: '📖',
+    premium: true,
   },
   {
     label: 'Favoris',
     description: 'Retrouver vos recettes préférées',
     to: '/favorites',
     emoji: '❤️',
+    premium: true,
   },
 ]
 
-const toolLinks = [
+const toolLinks: NavLinkItem[] = [
   {
     label: 'Mode frigo',
     description: 'Trouver une recette avec ce que vous avez',
     to: '/frigo',
     emoji: '🥕',
+    premium: true,
   },
   {
     label: 'Liste de courses',
     description: 'Regrouper les ingrédients à acheter',
     to: '/shopping-list',
     emoji: '🛒',
+    premium: true,
   },
   {
     label: 'Planning',
     description: 'Organiser les repas de la semaine',
     to: '/planning',
     emoji: '📅',
+    premium: true,
   },
   {
     label: 'Boîte à idées',
@@ -119,6 +134,8 @@ export default function Header() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
+  const { hasAccess } = useEntitlement()
+  const locked = !hasAccess
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<DropdownName>(null)
@@ -334,8 +351,13 @@ export default function Header() {
                         </span>
 
                         <div className="min-w-0">
-                          <p className="truncate font-black text-stone-950">
+                          <p className="flex items-center gap-1.5 truncate font-black text-stone-950">
                             {link.label}
+                            {locked && link.premium && (
+                              <span aria-hidden="true" className="text-xs">
+                                🔒
+                              </span>
+                            )}
                           </p>
 
                           <p className="truncate text-xs font-semibold text-stone-500">
@@ -466,8 +488,13 @@ export default function Header() {
                             </span>
 
                             <div className="min-w-0">
-                              <p className="truncate font-black text-stone-950">
+                              <p className="flex items-center gap-1.5 truncate font-black text-stone-950">
                                 {link.label}
+                                {locked && link.premium && (
+                                  <span aria-hidden="true" className="text-xs">
+                                    🔒
+                                  </span>
+                                )}
                               </p>
 
                               <p className="truncate text-xs font-semibold text-stone-500">
@@ -642,8 +669,13 @@ export default function Header() {
                       </span>
 
                       <div className="min-w-0">
-                        <p className="font-black text-stone-900">
+                        <p className="flex items-center gap-1.5 font-black text-stone-900">
                           {link.label}
+                          {locked && link.premium && (
+                            <span aria-hidden="true" className="text-xs">
+                              🔒
+                            </span>
+                          )}
                         </p>
 
                         <p className="truncate text-sm font-semibold text-stone-500">
@@ -692,8 +724,13 @@ export default function Header() {
                         </span>
 
                         <div className="min-w-0">
-                          <p className="font-black text-stone-900">
+                          <p className="flex items-center gap-1.5 font-black text-stone-900">
                             {link.label}
+                            {locked && link.premium && (
+                              <span aria-hidden="true" className="text-xs">
+                                🔒
+                              </span>
+                            )}
                           </p>
 
                           <p className="truncate text-sm font-semibold text-stone-500">

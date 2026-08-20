@@ -39,7 +39,7 @@ function uniqueValues(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)))
 }
 
-async function getProfilesByUserIds(userIds: string[]) {
+export async function getProfilesByUserIds(userIds: string[]) {
   const uniqueUserIds = uniqueValues(userIds)
 
   if (uniqueUserIds.length === 0) {
