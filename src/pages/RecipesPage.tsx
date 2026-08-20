@@ -16,6 +16,7 @@ import RecipeVisibilitySelector from '../components/recipes/RecipeVisibilitySele
 import { useAuth } from '../context/useAuth'
 import { useRecipeVisibility } from '../context/useRecipeVisibility'
 import { recipeMatchesVisibility } from '../lib/recipeVisibility'
+import { getRecipeDiets, DIET_OPTIONS, type DietKey } from '../lib/dietFilters'
 import { useDebounce } from '../lib/useDebounce'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { getRecipes } from '../services/recipes'
@@ -52,6 +53,7 @@ export default function RecipesPage() {
   const [maxTime, setMaxTime] = useState(0)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [showTags, setShowTags] = useState(false)
+  const [selectedDiets, setSelectedDiets] = useState<DietKey[]>([])
 
   const { user } = useAuth()
   const { visibility } = useRecipeVisibility()
@@ -206,8 +208,22 @@ export default function RecipesPage() {
     return Array.from(tagSet).sort((a, b) => a.localeCompare(b))
   }, [recipes])
 
+  // Régimes déduits une fois par recette (heuristique sur les ingrédients).
+  const recipeDiets = useMemo(() => {
+    const map = new Map<number, ReturnType<typeof getRecipeDiets>>()
+    recipes.forEach((recipe) => map.set(recipe.id, getRecipeDiets(recipe)))
+    return map
+  }, [recipes])
+
   const filteredRecipes = useMemo(() => {
     let result = [...recipes]
+
+    if (selectedDiets.length > 0) {
+      result = result.filter((recipe) => {
+        const diets = recipeDiets.get(recipe.id)
+        return diets ? selectedDiets.every((diet) => diets[diet]) : false
+      })
+    }
 
     if (effectiveVisibility.mode !== 'community') {
       result = result.filter((recipe) =>
@@ -307,6 +323,8 @@ export default function RecipesPage() {
     difficulty,
     maxTime,
     selectedTags,
+    selectedDiets,
+    recipeDiets,
     effectiveVisibility,
     friendIds,
     user,
@@ -317,15 +335,28 @@ export default function RecipesPage() {
     selectedCategory !== null ||
     difficulty !== 'all' ||
     maxTime > 0 ||
-    selectedTags.length > 0
+    selectedTags.length > 0 ||
+    selectedDiets.length > 0
+
+  function toggleDiet(diet: DietKey) {
+    setSelectedDiets((current) =>
+      current.includes(diet)
+        ? current.filter((value) => value !== diet)
+        : [...current, diet],
+    )
+  }
 
   // Pagination : on réinitialise le nombre visible dès qu'un filtre change
   // (ajustement d'état pendant le rendu, sans effet).
   const filtersKey = `${debouncedSearch.trim().toLowerCase()}|${
     selectedCategory?.value ?? ''
-  }|${sort}|${difficulty}|${maxTime}|${[...selectedTags].sort().join(',')}|${
-    effectiveVisibility.mode
-  }:${effectiveVisibility.friendId ?? ''}`
+  }|${sort}|${difficulty}|${maxTime}|${[...selectedTags].sort().join(',')}|${[
+    ...selectedDiets,
+  ]
+    .sort()
+    .join(',')}|${effectiveVisibility.mode}:${
+    effectiveVisibility.friendId ?? ''
+  }`
 
   const [paginationKey, setPaginationKey] = useState(filtersKey)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -362,6 +393,7 @@ export default function RecipesPage() {
     setDifficulty('all')
     setMaxTime(0)
     setSelectedTags([])
+    setSelectedDiets([])
     setSearchParams({})
   }
 
@@ -442,6 +474,35 @@ export default function RecipesPage() {
                 />
               </div>
             )}
+
+            <div className="mt-4 rounded-[1.5rem] border border-orange-100 bg-[#fffaf5]/70 p-4">
+              <p className="mb-2 text-xs font-black uppercase tracking-wide text-orange-700">
+                Régime <span className="font-semibold normal-case">(estimé)</span>
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                {DIET_OPTIONS.map((option) => {
+                  const active = selectedDiets.includes(option.key)
+
+                  return (
+                    <button
+                      key={option.key}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => toggleDiet(option.key)}
+                      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition ${
+                        active
+                          ? 'border-green-300 bg-green-50 text-green-800 ring-2 ring-green-200'
+                          : 'border-orange-100 bg-white text-stone-700 hover:border-orange-200 hover:bg-orange-50'
+                      }`}
+                    >
+                      <span aria-hidden="true">{option.emoji}</span>
+                      {option.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
               <select
