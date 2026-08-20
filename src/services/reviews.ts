@@ -15,6 +15,7 @@ export type RecipeReview = {
   userId: string
   rating: number
   comment: string
+  imageUrl: string | null
   createdAt: string
   updatedAt: string
   likesCount: number
@@ -28,6 +29,7 @@ type RecipeReviewRow = {
   user_id: string
   rating: number
   comment: string | null
+  image_url?: string | null
   created_at: string
   updated_at: string
 }
@@ -75,6 +77,7 @@ function mapRecipeReview(
     userId: row.user_id,
     rating: row.rating,
     comment: row.comment ?? '',
+    imageUrl: row.image_url ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     likesCount,
@@ -212,29 +215,36 @@ export async function saveRecipeReview({
   recipeId,
   rating,
   comment,
+  imageUrl,
 }: {
   recipeId: number
   rating: number
   comment: string
+  imageUrl?: string | null
 }) {
   const userId = await getCurrentUserId()
 
   const cleanedComment = comment.trim()
 
+  const row: Record<string, unknown> = {
+    recipe_id: recipeId,
+    user_id: userId,
+    rating,
+    comment: cleanedComment,
+    updated_at: new Date().toISOString(),
+  }
+
+  // On n'écrit `image_url` que si une photo est fournie : les avis sans photo
+  // restent compatibles même si la migration n'est pas encore lancée.
+  if (imageUrl) {
+    row.image_url = imageUrl
+  }
+
   const { data, error } = await supabase
     .from('recipe_reviews')
-    .upsert(
-      {
-        recipe_id: recipeId,
-        user_id: userId,
-        rating,
-        comment: cleanedComment,
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: 'recipe_id,user_id',
-      },
-    )
+    .upsert(row, {
+      onConflict: 'recipe_id,user_id',
+    })
     .select()
     .single()
 

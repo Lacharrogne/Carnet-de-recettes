@@ -5,6 +5,7 @@ import Alert from '../ui/Alert'
 import { RowsSkeleton } from '../ui/Skeleton'
 import { useAuth } from '../../context/useAuth'
 import { getProfile, type UserProfile } from '../../services/profiles'
+import { uploadRecipeImage } from '../../services/recipes'
 import {
   addReviewReply,
   deleteRecipeReview,
@@ -75,6 +76,8 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
   const [replyingReviewId, setReplyingReviewId] = useState<number | null>(null)
   const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({})
@@ -119,6 +122,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
           if (loadedMyReview) {
             setRating(loadedMyReview.rating)
             setComment(loadedMyReview.comment)
+            setPhotoPreview(loadedMyReview.imageUrl)
           } else {
             setRating(5)
             setComment('')
@@ -183,11 +187,21 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
       const cleanComment = comment.trim()
 
+      // Nouvelle photo → upload ; sinon on garde celle déjà présente.
+      let imageUrl = myReview?.imageUrl ?? undefined
+      if (photoFile) {
+        imageUrl = await uploadRecipeImage(photoFile)
+      }
+
       const savedReview = await saveRecipeReview({
         recipeId,
         rating,
         comment: cleanComment,
+        imageUrl,
       })
+
+      setPhotoFile(null)
+      setPhotoPreview(imageUrl ?? null)
 
       const existingReview = reviews.find((review) => review.id === savedReview.id)
 
@@ -524,6 +538,43 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
             />
           </div>
 
+          <div className="mt-5">
+            <label className="mb-2 block text-sm font-black text-stone-800">
+              Photo du plat <span className="font-medium text-stone-400">(facultatif)</span>
+            </label>
+
+            {photoPreview && (
+              <div className="mb-3 flex items-center gap-3">
+                <img
+                  src={photoPreview}
+                  alt="Aperçu du plat"
+                  className="h-20 w-20 rounded-2xl object-cover ring-1 ring-orange-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPhotoFile(null)
+                    setPhotoPreview(null)
+                  }}
+                  className="rounded-full border border-orange-100 bg-white px-4 py-2 text-sm font-bold text-stone-600 transition hover:bg-orange-50"
+                >
+                  Retirer la photo
+                </button>
+              </div>
+            )}
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null
+                setPhotoFile(file)
+                setPhotoPreview(file ? URL.createObjectURL(file) : null)
+              }}
+              className="block w-full text-sm text-stone-600 file:mr-3 file:rounded-full file:border-0 file:bg-orange-100 file:px-4 file:py-2 file:font-bold file:text-orange-700 hover:file:bg-orange-200"
+            />
+          </div>
+
           <div className="mt-5 flex flex-wrap gap-3">
             <button
               type="submit"
@@ -637,6 +688,22 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                   <p className="text-sm italic text-stone-400 md:text-[15px]">
                     Aucun commentaire écrit.
                   </p>
+                )}
+
+                {review.imageUrl && (
+                  <a
+                    href={review.imageUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 block w-fit"
+                  >
+                    <img
+                      src={review.imageUrl}
+                      alt="Plat réalisé"
+                      loading="lazy"
+                      className="max-h-64 rounded-2xl object-cover ring-1 ring-orange-100 transition hover:opacity-95"
+                    />
+                  </a>
                 )}
 
                 <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-orange-100 pt-4">
