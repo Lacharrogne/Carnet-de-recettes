@@ -918,7 +918,7 @@ export default function RecipeDetailsPage() {
               )}
             </div>
 
-            <div className="grid gap-8 px-5 py-7 sm:px-6 sm:py-8 lg:grid-cols-[1.4fr_1fr] lg:items-start lg:gap-12 lg:px-10 lg:py-10">
+            <div className="grid gap-8 px-5 py-7 sm:px-6 sm:py-8 lg:px-10 lg:py-10 xl:grid-cols-[1.55fr_minmax(320px,1fr)] xl:items-start xl:gap-12">
               <div className="min-w-0">
               <div className="mb-5 flex flex-wrap items-center gap-2 sm:gap-3">
                 <span className="rounded-full bg-terracotta-soft px-4 py-2 text-xs font-bold text-terracotta-deep sm:text-sm">
@@ -983,7 +983,7 @@ export default function RecipeDetailsPage() {
                 </Link>
               )}
 
-              <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4 lg:grid-cols-4">
+              <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
                 <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-bark sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Préparation
@@ -1039,7 +1039,7 @@ export default function RecipeDetailsPage() {
               )}
               </div>
 
-              <div>
+              <div className="xl:sticky xl:top-6 xl:self-start">
               <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-bark print:hidden sm:rounded-[2rem] sm:p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
@@ -1059,6 +1059,7 @@ export default function RecipeDetailsPage() {
                     onClick={openGuidedCooking}
                     disabled={recipe.steps.length === 0}
                     fullWidth
+                    className="sm:col-span-2"
                   >
                     <span>▶</span>
                     <span>Lancer la recette</span>
