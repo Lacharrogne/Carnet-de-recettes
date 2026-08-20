@@ -575,9 +575,32 @@ export default function MealPlannerPage() {
       const nextPlanner = generateWeeklyPlan(pool)
       setPlanner(nextPlanner)
       savePlanner(nextPlanner)
-      setSuccessMessage(
-        'Nouvelle semaine générée ! Ajustez chaque repas à votre goût.',
-      )
+
+      // On remplit la liste de courses depuis la semaine générée (si connecté).
+      if (user) {
+        const plannedRecipes = Array.from(
+          new Set(getAllPlannedRecipeIds(nextPlanner)),
+        )
+          .map((id) => recipes.find((recipe) => String(recipe.id) === id))
+          .filter((recipe): recipe is Recipe => Boolean(recipe))
+
+        await Promise.all(
+          plannedRecipes.map((recipe) =>
+            addRecipeIngredientsToShoppingList(
+              recipe.id,
+              recipe.ingredients,
+            ).catch((error) => console.error(error)),
+          ),
+        )
+
+        setSuccessMessage(
+          'Nouvelle semaine générée et liste de courses mise à jour ! Ajustez ce que vous voulez.',
+        )
+      } else {
+        setSuccessMessage(
+          'Nouvelle semaine générée ! Connectez-vous pour remplir automatiquement la liste de courses.',
+        )
+      }
     } catch (error) {
       console.error(error)
       setErrorMessage('Impossible de générer le planning.')
@@ -730,8 +753,8 @@ export default function MealPlannerPage() {
               <div className="mt-8 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
                 <p className="font-black text-stone-950">✨ Surprends-moi</p>
                 <p className="mt-1 text-sm leading-6 text-stone-600">
-                  Génère une semaine équilibrée automatiquement, puis ajuste ce
-                  que tu veux.
+                  Génère une semaine équilibrée automatiquement et remplit ta
+                  liste de courses. Tu ajustes ensuite ce que tu veux.
                 </p>
 
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
