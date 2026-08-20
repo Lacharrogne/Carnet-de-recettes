@@ -666,7 +666,7 @@ export default function MealPlannerPage() {
       />
 
       <section className="space-y-10">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-cream-50 shadow-sm ring-1 ring-orange-100">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-cream-50 shadow-sm ring-1 ring-bark">
           <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-orange-100/80 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-amber-100/80 blur-3xl" />
 
@@ -687,7 +687,7 @@ export default function MealPlannerPage() {
                 de courses.
               </p>
 
-              <div className="mt-8 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+              <div className="mt-8 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -713,7 +713,7 @@ export default function MealPlannerPage() {
               </div>
 
               <div className="mt-6 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                   <p className="text-3xl font-black text-orange-600">
                     {plannedMealsCount}
                   </p>
@@ -722,7 +722,7 @@ export default function MealPlannerPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                   <p className="text-3xl font-black text-green-800">
                     {plannedDaysCount}
                   </p>
@@ -731,7 +731,7 @@ export default function MealPlannerPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                   <p className="text-3xl font-black text-stone-950">
                     {estimatedIngredientsCount}
                   </p>
@@ -740,7 +740,7 @@ export default function MealPlannerPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                   <p className="text-3xl font-black text-stone-950">
                     {estimatedCookingTime}
                   </p>
@@ -750,7 +750,7 @@ export default function MealPlannerPage() {
                 </div>
               </div>
 
-              <div className="mt-8 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+              <div className="mt-8 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
                 <p className="font-black text-stone-950">✨ Surprends-moi</p>
                 <p className="mt-1 text-sm leading-6 text-stone-600">
                   Génère une semaine équilibrée automatiquement et remplit ta
@@ -762,7 +762,7 @@ export default function MealPlannerPage() {
                     value={planSource}
                     onChange={(event) => setPlanSource(event.target.value)}
                     aria-label="Source des recettes"
-                    className="min-w-0 flex-1 rounded-full border border-orange-100 bg-[#fffaf5] px-4 py-3 font-bold text-stone-700 outline-none transition focus:border-orange-500"
+                    className="min-w-0 flex-1 rounded-full ring-1 ring-bark bg-[#fffaf5] px-4 py-3 font-bold text-stone-700 outline-none transition focus:border-orange-500"
                   >
                     <option value="all">Toutes les recettes</option>
                     {user && <option value="mine">Mes recettes</option>}
@@ -819,7 +819,7 @@ export default function MealPlannerPage() {
               </div>
 
               {!user && (
-                <div className="mt-6 rounded-[1.5rem] bg-white/80 p-4 text-sm font-bold leading-6 text-stone-600 ring-1 ring-orange-100">
+                <div className="mt-6 rounded-[1.5rem] bg-white/80 p-4 text-sm font-bold leading-6 text-stone-600 ring-1 ring-bark">
                   💡 Votre planning est enregistré sur cet appareil. Connectez-vous
                   pour synchroniser automatiquement la liste de courses.
                 </div>
@@ -850,7 +850,7 @@ export default function MealPlannerPage() {
         )}
 
         {uniquePlannedRecipes.length > 0 && (
-          <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+          <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark md:p-8">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="font-bold text-orange-600">Récapitulatif</p>

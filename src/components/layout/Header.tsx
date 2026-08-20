@@ -219,7 +219,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-orange-100/80 bg-cream-50/95 backdrop-blur-xl print:hidden">
+    <header className="sticky top-0 z-50 border-b border-bark/80 bg-cream-50/95 backdrop-blur-xl print:hidden">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-5">
         <Link
           to="/"
@@ -245,7 +245,7 @@ export default function Header() {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-2 rounded-full bg-white/70 px-2 py-2 shadow-sm ring-1 ring-orange-100 lg:flex">
+        <nav className="hidden items-center gap-2 rounded-full bg-white/70 px-2 py-2 shadow-sm ring-1 ring-bark lg:flex">
           <NavLink to="/" onClick={closeDropdowns} className={navLinkClass}>
             Accueil
           </NavLink>
@@ -269,7 +269,7 @@ export default function Header() {
                 'w-[520px]',
               )}
             >
-              <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-bark">
                 <div className="mb-3 flex items-center justify-between gap-4 px-2">
                   <div>
                     <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -333,7 +333,7 @@ export default function Header() {
                 'w-[430px]',
               )}
             >
-              <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-bark">
                 <div className="mb-3 px-2">
                   <p className="text-sm font-black uppercase tracking-wide text-orange-600">
                     Outils du carnet
@@ -454,8 +454,8 @@ export default function Header() {
                     'right-0',
                   )}
                 >
-                  <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100">
-                    <div className="mb-3 rounded-[1.5rem] bg-cream-50 p-3 ring-1 ring-orange-100">
+                  <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-bark">
+                    <div className="mb-3 rounded-[1.5rem] bg-cream-50 p-3 ring-1 ring-bark">
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-lg font-black text-white ring-2 ring-white">
                           {displayedAvatarUrl ? (
@@ -570,7 +570,7 @@ export default function Header() {
         <button
           type="button"
           onClick={() => setMenuOpen((current) => !current)}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-orange-100 bg-white text-2xl font-black text-stone-900 shadow-sm transition hover:bg-orange-50 lg:hidden"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ring-1 ring-bark bg-white text-2xl font-black text-stone-900 shadow-sm transition hover:bg-orange-50 lg:hidden"
           aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
           aria-expanded={menuOpen}
         >
@@ -579,7 +579,7 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <div className="max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-orange-100 bg-cream-50 px-4 py-5 shadow-xl lg:hidden">
+        <div className="max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-bark bg-cream-50 px-4 py-5 shadow-xl lg:hidden">
           <nav className="mx-auto grid max-w-7xl gap-3 pb-4">
             <NavLink
               to="/"
@@ -613,7 +613,7 @@ export default function Header() {
 
             <details
               open={isRecipesActive}
-              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden"
+              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-bark [&>summary::-webkit-details-marker]:hidden"
             >
               <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
                 <span>📖 Recettes</span>
@@ -647,7 +647,7 @@ export default function Header() {
 
             <details
               open={isToolsActive}
-              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden"
+              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-bark [&>summary::-webkit-details-marker]:hidden"
             >
               <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
                 <span>🧰 Outils</span>
@@ -696,7 +696,7 @@ export default function Header() {
             </details>
 
             {user ? (
-              <details className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">
+              <details className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-bark [&>summary::-webkit-details-marker]:hidden">
                 <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
                   <span className="flex min-w-0 items-center gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">

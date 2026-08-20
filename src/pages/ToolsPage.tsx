@@ -107,7 +107,7 @@ const tools: ToolCard[] = [
 export default function ToolsPage() {
   return (
     <section className="space-y-10">
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-bark md:p-10">
         <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-orange-100/80 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-amber-100/80 blur-3xl" />
 
@@ -145,7 +145,7 @@ export default function ToolsPage() {
             </div>
           </div>
 
-          <div className="rounded-[2rem] bg-white/85 p-5 shadow-sm ring-1 ring-orange-100 backdrop-blur">
+          <div className="rounded-[2rem] bg-white/85 p-5 shadow-sm ring-1 ring-bark backdrop-blur">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Le carnet intelligent
             </p>
@@ -155,21 +155,21 @@ export default function ToolsPage() {
             </h2>
 
             <div className="mt-5 grid gap-3">
-              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark">
                 <p className="text-2xl">🥕</p>
                 <p className="mt-2 font-black text-stone-950">
                   Vous partez de ce que vous avez déjà.
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark">
                 <p className="text-2xl">🛒</p>
                 <p className="mt-2 font-black text-stone-950">
                   Les courses se préparent toutes seules.
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark">
                 <p className="text-2xl">📅</p>
                 <p className="mt-2 font-black text-stone-950">
                   Vous organisez vos repas sans prise de tête.
@@ -185,7 +185,7 @@ export default function ToolsPage() {
           <Link
             key={tool.to}
             to={tool.to}
-            className={`group relative overflow-hidden rounded-[2.5rem] ${tool.cardBg} p-6 shadow-sm ring-1 ring-orange-100 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(28,25,23,0.1)]`}
+            className={`group relative overflow-hidden rounded-[2.5rem] ${tool.cardBg} p-6 shadow-sm ring-1 ring-bark transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(28,25,23,0.1)]`}
           >
             <div
               className={`pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full ${tool.glow} blur-3xl`}
@@ -248,7 +248,7 @@ export default function ToolsPage() {
         ))}
       </div>
 
-      <div className="rounded-[2.5rem] bg-white p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="rounded-[2.5rem] bg-white p-8 shadow-sm ring-1 ring-bark md:p-10">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="font-bold text-orange-600">Par quoi commencer ?</p>
@@ -274,7 +274,7 @@ export default function ToolsPage() {
 
             <Link
               to="/recipes"
-              className="rounded-full border border-orange-200 bg-cream-50 px-6 py-3 text-center font-black text-orange-700 transition hover:bg-orange-50"
+              className="rounded-full ring-1 ring-bark bg-cream-50 px-6 py-3 text-center font-black text-orange-700 transition hover:bg-orange-50"
             >
               Parcourir les catégories
             </Link>

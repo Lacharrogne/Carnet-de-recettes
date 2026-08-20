@@ -657,7 +657,7 @@ export default function RecipeForm({
           </div>
         </div>
 
-        <div className="mt-5 rounded-[1.5rem] bg-linen px-5 py-4 ring-1 ring-orange-100">
+        <div className="mt-5 rounded-[1.5rem] bg-linen px-5 py-4 ring-1 ring-bark">
           <p className="text-sm font-bold text-stone-600">Temps total</p>
 
           <p className="mt-1 text-3xl font-black text-stone-950">

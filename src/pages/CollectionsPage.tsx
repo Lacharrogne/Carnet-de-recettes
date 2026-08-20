@@ -78,9 +78,9 @@ export default function CollectionsPage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-bark">
         <div className="flex items-start gap-5">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-orange-100">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-bark">
             🗂️
           </div>
 
@@ -104,7 +104,7 @@ export default function CollectionsPage() {
 
       <form
         onSubmit={handleCreate}
-        className="flex flex-col gap-3 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 sm:flex-row sm:items-end"
+        className="flex flex-col gap-3 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark sm:flex-row sm:items-end"
       >
         <div className="flex-1">
           <label className="mb-2 block text-sm font-semibold text-stone-600">
@@ -137,7 +137,7 @@ export default function CollectionsPage() {
           {collections.map((collection) => (
             <div
               key={collection.id}
-              className="group relative flex flex-col rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md"
+              className="group relative flex flex-col rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark transition hover:-translate-y-1 hover:shadow-md"
             >
               <button
                 type="button"

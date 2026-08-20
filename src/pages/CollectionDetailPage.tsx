@@ -102,7 +102,7 @@ export default function CollectionDetailPage() {
 
   if (!collection) {
     return (
-      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-bark">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
           🗂️
         </div>
@@ -123,7 +123,7 @@ export default function CollectionDetailPage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-bark">
         <Link
           to="/collections"
           className="font-bold text-orange-700 transition hover:text-orange-800"
@@ -133,7 +133,7 @@ export default function CollectionDetailPage() {
 
         <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-5">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-orange-100">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-bark">
               {collection.emoji}
             </div>
 
@@ -185,7 +185,7 @@ export default function CollectionDetailPage() {
               <button
                 type="button"
                 onClick={() => handleRemove(recipe.id)}
-                className="rounded-2xl border border-orange-100 bg-white px-4 py-2.5 text-sm font-bold text-stone-600 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-700"
+                className="rounded-2xl ring-1 ring-bark bg-white px-4 py-2.5 text-sm font-bold text-stone-600 transition hover:border-bark hover:bg-orange-50 hover:text-orange-700"
               >
                 Retirer de la collection
               </button>

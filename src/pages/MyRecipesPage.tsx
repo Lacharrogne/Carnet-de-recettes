@@ -169,10 +169,10 @@ export default function MyRecipesPage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-bark">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-5">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-orange-100">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-bark">
               📖
             </div>
 
@@ -246,7 +246,7 @@ export default function MyRecipesPage() {
       )}
 
       <div className="grid gap-5 md:grid-cols-3">
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             🍲
           </div>
@@ -263,7 +263,7 @@ export default function MyRecipesPage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             🔎
           </div>
@@ -280,7 +280,7 @@ export default function MyRecipesPage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             🧺
           </div>
@@ -299,7 +299,7 @@ export default function MyRecipesPage() {
         </div>
       </div>
 
-      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
         <div className="mb-5">
           <p className="font-bold text-orange-700">Recherche</p>
 

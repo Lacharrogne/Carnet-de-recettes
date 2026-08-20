@@ -299,7 +299,7 @@ export default function ShoppingListPage() {
 
   if (!user) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-bark">
         <p className="text-2xl font-black text-stone-950">
           Connectez-vous pour voir votre liste de courses.
         </p>
@@ -365,7 +365,7 @@ export default function ShoppingListPage() {
 
       <section className="screen-shopping-list space-y-8">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-bark">
             <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
               <span>🛒</span>
               <span>Liste de courses</span>
@@ -382,7 +382,7 @@ export default function ShoppingListPage() {
             </p>
 
             <div className="mt-8 grid grid-cols-3 gap-3">
-              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                 <p className="text-3xl font-black text-orange-600">
                   {activeLines.length}
                 </p>
@@ -390,7 +390,7 @@ export default function ShoppingListPage() {
                 <p className="mt-1 text-sm font-bold text-stone-700">lignes</p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                 <p className="text-3xl font-black text-green-700">
                   {checkedLines.length}
                 </p>
@@ -400,7 +400,7 @@ export default function ShoppingListPage() {
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                 <p className="text-3xl font-black text-stone-900">
                   {activeCategoryCount}
                 </p>
@@ -431,7 +431,7 @@ export default function ShoppingListPage() {
                 type="button"
                 onClick={handleDeleteCheckedItems}
                 disabled={checkedItems.length === 0 || bulkActionLoading}
-                className="rounded-full border border-orange-100 bg-white px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-full ring-1 ring-bark bg-white px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Supprimer les cochés
               </button>
@@ -447,7 +447,7 @@ export default function ShoppingListPage() {
             </div>
           </div>
 
-          <div className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Ajouter rapidement
             </p>
@@ -498,7 +498,7 @@ export default function ShoppingListPage() {
         {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
         {loading ? (
-          <div className="space-y-3 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 sm:p-8">
+          <div className="space-y-3 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark sm:p-8">
             {Array.from({ length: 5 }, (_, index) => (
               <div key={index} className="flex items-center gap-3">
                 <Skeleton className="h-6 w-6 rounded-md" />
@@ -517,7 +517,7 @@ export default function ShoppingListPage() {
           />
         ) : (
           <div className="space-y-8">
-            <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+            <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark">
               <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -548,7 +548,7 @@ export default function ShoppingListPage() {
                   {activeSections.map((section) => (
                     <article
                       key={section.category}
-                      className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-orange-100"
+                      className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-bark"
                     >
                       <div className="mb-4 flex items-center justify-between gap-4">
                         <div>
@@ -573,13 +573,13 @@ export default function ShoppingListPage() {
                         {section.lines.map((line) => (
                           <div
                             key={line.key}
-                            className="flex items-center gap-3 rounded-[1.25rem] bg-white px-4 py-3 shadow-sm ring-1 ring-orange-50"
+                            className="flex items-center gap-3 rounded-[1.25rem] bg-white px-4 py-3 shadow-sm ring-1 ring-bark/60"
                           >
                             <button
                               type="button"
                               onClick={() => handleToggleLine(line)}
                               disabled={bulkActionLoading}
-                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-orange-200 text-sm font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-1 ring-bark text-sm font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
                               aria-label={`Cocher ${line.displayText}`}
                             >
                               ✓

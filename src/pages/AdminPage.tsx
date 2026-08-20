@@ -182,7 +182,7 @@ export default function AdminPage() {
 
   if (!user) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-bark">
         <p className="text-2xl font-black text-stone-950">
           Connectez-vous pour accéder à l’administration.
         </p>
@@ -199,7 +199,7 @@ export default function AdminPage() {
 
   if (checkingAdmin) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-bark">
         <p className="font-bold text-stone-600">
           Vérification des droits administrateur...
         </p>
@@ -209,7 +209,7 @@ export default function AdminPage() {
 
   if (!isAdmin) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-bark">
         <p className="text-3xl font-black text-stone-950">Accès refusé</p>
 
         <p className="mx-auto mt-3 max-w-xl text-stone-600">
@@ -228,7 +228,7 @@ export default function AdminPage() {
 
   return (
     <section className="space-y-8">
-      <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-bark">
         <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
           <span>🛡️</span>
           <span>Mode administrateur</span>
@@ -256,21 +256,21 @@ export default function AdminPage() {
 
         {stats && (
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
               <p className="text-4xl font-black text-orange-600">
                 {stats.profilesCount}
               </p>
               <p className="mt-1 font-bold text-stone-700">profils</p>
             </div>
 
-            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
               <p className="text-4xl font-black text-orange-600">
                 {stats.recipesCount}
               </p>
               <p className="mt-1 font-bold text-stone-700">recettes</p>
             </div>
 
-            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
               <p className="text-4xl font-black text-orange-600">
                 {stats.reviewsCount}
               </p>
@@ -292,7 +292,7 @@ export default function AdminPage() {
         </p>
       )}
 
-      <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
         <p className="text-sm font-black uppercase tracking-wide text-orange-600">
           Accès offerts
         </p>
@@ -317,7 +317,7 @@ export default function AdminPage() {
             onChange={(event) => setCompEmail(event.target.value)}
             aria-label="Email du compte"
             placeholder="email@exemple.com"
-            className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+            className="min-w-0 flex-1 rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-bark"
           />
 
           <button
@@ -336,7 +336,7 @@ export default function AdminPage() {
             compList.map((access) => (
               <div
                 key={access.user_id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark"
               >
                 <div className="min-w-0">
                   <p className="truncate font-black text-stone-950">

@@ -416,7 +416,7 @@ export default function RecipesPage() {
 
   return (
     <section className="space-y-8 sm:space-y-10">
-      <div className="overflow-hidden rounded-[2rem] bg-cream-50/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-50/95 p-5 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
         <div className="grid gap-7 lg:grid-cols-[0.9fr_1fr] lg:items-center">
           <div>
             <Chip emoji="📖" className="mb-4">
@@ -476,7 +476,7 @@ export default function RecipesPage() {
               </div>
             )}
 
-            <div className="mt-4 rounded-[1.5rem] border border-orange-100 bg-[#fffaf5]/70 p-4">
+            <div className="mt-4 rounded-[1.5rem] ring-1 ring-bark bg-[#fffaf5]/70 p-4">
               <p className="mb-2 text-xs font-black uppercase tracking-wide text-orange-700">
                 Régime <span className="font-semibold normal-case">(estimé)</span>
               </p>
@@ -494,7 +494,7 @@ export default function RecipesPage() {
                       className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition ${
                         active
                           ? 'border-green-300 bg-green-50 text-green-800 ring-2 ring-green-200'
-                          : 'border-orange-100 bg-white text-stone-700 hover:border-orange-200 hover:bg-orange-50'
+                          : 'border-bark bg-white text-stone-700 hover:border-bark hover:bg-orange-50'
                       }`}
                     >
                       <span aria-hidden="true">{option.emoji}</span>
@@ -578,7 +578,7 @@ export default function RecipesPage() {
                   type="button"
                   onClick={() => setShowTags((current) => !current)}
                   aria-expanded={showTags}
-                  className="flex w-full items-center justify-between rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 text-sm font-bold text-stone-600 transition hover:border-orange-300 hover:text-orange-700 sm:px-5"
+                  className="flex w-full items-center justify-between rounded-2xl ring-1 ring-bark bg-cream-input px-4 py-3 text-sm font-bold text-stone-600 transition hover:border-orange-300 hover:text-orange-700 sm:px-5"
                 >
                   <span>
                     Filtrer par tag
@@ -610,7 +610,7 @@ export default function RecipesPage() {
                           className={`rounded-full border px-3 py-1.5 text-sm font-bold transition ${
                             active
                               ? 'border-orange-500 bg-orange-500 text-white shadow-sm'
-                              : 'border-orange-100 bg-cream-input text-stone-600 hover:border-orange-300 hover:text-orange-700'
+                              : 'border-bark bg-cream-input text-stone-600 hover:border-orange-300 hover:text-orange-700'
                           }`}
                         >
                           {tag}
@@ -628,7 +628,7 @@ export default function RecipesPage() {
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
       {!hasActiveFilters && (
-        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
           <SectionHeader
             className="mb-6 sm:mb-8"
             eyebrow="Catégories"
@@ -716,7 +716,7 @@ export default function RecipesPage() {
           className={`relative overflow-hidden rounded-[2rem] p-5 shadow-sm ring-1 sm:rounded-[2.5rem] sm:p-8 md:p-10 ${
             activeCategoryAmbience
               ? `${activeCategoryAmbience.pageBg} ${activeCategoryAmbience.ring}`
-              : 'bg-white/95 ring-orange-100'
+              : 'bg-white/95 ring-bark'
           }`}
         >
           {activeCategoryAmbience && (
@@ -781,7 +781,7 @@ export default function RecipesPage() {
                   className={`w-full rounded-full border px-6 py-3 font-bold transition sm:w-fit ${
                     activeCategoryAmbience
                       ? `border-white/70 bg-white/80 ${activeCategoryAmbience.buttonText} ${activeCategoryAmbience.buttonHover}`
-                      : 'border-orange-200 bg-white text-orange-700 hover:bg-orange-50'
+                      : 'border-bark bg-white text-orange-700 hover:bg-orange-50'
                   }`}
                 >
                   Revenir aux catégories

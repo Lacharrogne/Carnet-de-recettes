@@ -635,7 +635,7 @@ export default function RecipeDetailsPage() {
 
   if (invalidRecipeId) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-bark">
         <Alert tone="error" className="mb-6">
           Recette introuvable.
         </Alert>
@@ -656,7 +656,7 @@ export default function RecipeDetailsPage() {
 
   if (!recipe) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-bark">
         <Alert tone="error" className="mb-6">
           {errorMessage || 'Recette introuvable.'}
         </Alert>
@@ -728,7 +728,7 @@ export default function RecipeDetailsPage() {
               </button>
             </div>
 
-            <div className="mb-5 rounded-full bg-white p-2 shadow-sm ring-1 ring-orange-100 sm:mb-8">
+            <div className="mb-5 rounded-full bg-white p-2 shadow-sm ring-1 ring-bark sm:mb-8">
               <div
                 className="h-3 rounded-full bg-orange-500 transition-all sm:h-4"
                 style={{ width: `${guidedProgress}%` }}
@@ -736,7 +736,7 @@ export default function RecipeDetailsPage() {
             </div>
 
             <div className="grid flex-1 gap-5 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
-              <aside className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
+              <aside className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:rounded-[2rem] sm:p-6">
                 <p className="font-black text-orange-600">Ingrédients</p>
 
                 <p className="mt-1 text-sm font-semibold text-stone-500">
@@ -756,7 +756,7 @@ export default function RecipeDetailsPage() {
                 </ul>
               </aside>
 
-              <main className="flex flex-col justify-between rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:p-8 md:rounded-[2.5rem] md:p-10">
+              <main className="flex flex-col justify-between rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-8 md:rounded-[2.5rem] md:p-10">
                 <div>
                   <div className="mb-5 flex flex-wrap items-center justify-between gap-3 sm:mb-6">
                     <span className="rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700 sm:px-5">
@@ -773,7 +773,7 @@ export default function RecipeDetailsPage() {
                         </span>
                       )}
 
-                      <span className="rounded-full bg-cream-50 px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 sm:px-5">
+                      <span className="rounded-full bg-cream-50 px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-bark sm:px-5">
                         {guidedProgress} %
                       </span>
                     </div>
@@ -784,7 +784,7 @@ export default function RecipeDetailsPage() {
                   </p>
 
                   {currentStepTimers.length > 0 && (
-                    <div className="mt-6 rounded-[1.75rem] bg-cream-50 p-5 ring-1 ring-orange-100 sm:mt-8 sm:rounded-[2rem]">
+                    <div className="mt-6 rounded-[1.75rem] bg-cream-50 p-5 ring-1 ring-bark sm:mt-8 sm:rounded-[2rem]">
                       <p className="font-black text-orange-600">
                         Minuteur détecté
                       </p>
@@ -883,7 +883,7 @@ export default function RecipeDetailsPage() {
         <div className="print:hidden">
           <Link
             to="/recipes"
-            className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 font-bold text-orange-700 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 font-bold text-orange-700 shadow-sm ring-1 ring-bark transition hover:bg-orange-50 sm:w-auto"
           >
             ← Retour aux recettes
           </Link>
@@ -945,7 +945,7 @@ export default function RecipeDetailsPage() {
               {recipe.userId && (
                 <Link
                   to={`/users/${recipe.userId}`}
-                  className="mt-6 block rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 print:hidden sm:mt-7 sm:rounded-[2rem] sm:p-5"
+                  className="mt-6 block rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-bark transition hover:bg-orange-50 print:hidden sm:mt-7 sm:rounded-[2rem] sm:p-5"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-xl font-black text-white ring-2 ring-white sm:h-16 sm:w-16 sm:text-2xl">
@@ -984,7 +984,7 @@ export default function RecipeDetailsPage() {
               )}
 
               <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4 lg:grid-cols-4">
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-bark sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Préparation
                   </p>
@@ -994,7 +994,7 @@ export default function RecipeDetailsPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-bark sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Cuisson
                   </p>
@@ -1004,7 +1004,7 @@ export default function RecipeDetailsPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-bark sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Total
                   </p>
@@ -1014,7 +1014,7 @@ export default function RecipeDetailsPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-bark sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Portions
                   </p>
@@ -1040,7 +1040,7 @@ export default function RecipeDetailsPage() {
               </div>
 
               <div>
-              <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 print:hidden sm:rounded-[2rem] sm:p-5">
+              <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-bark print:hidden sm:rounded-[2rem] sm:p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
                     Actions rapides
@@ -1146,7 +1146,7 @@ export default function RecipeDetailsPage() {
               <RecipeNutritionCard recipe={recipe} />
 
               {user && (
-                <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
+                <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-bark print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
                   <div className="flex items-center gap-3">
                     <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-honey-soft text-2xl">
                       📝
@@ -1190,7 +1190,7 @@ export default function RecipeDetailsPage() {
                 </div>
               )}
 
-              <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
+              <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-bark print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
@@ -1209,7 +1209,7 @@ export default function RecipeDetailsPage() {
 
                   <Link
                     to="/planning"
-                    className="w-full rounded-full border border-orange-200 bg-cream-50 px-5 py-3 text-center text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
+                    className="w-full rounded-full ring-1 ring-bark bg-cream-50 px-5 py-3 text-center text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
                   >
                     Voir le planning
                   </Link>
@@ -1254,7 +1254,7 @@ export default function RecipeDetailsPage() {
             className={`rounded-2xl px-4 py-4 text-left font-black transition ${
               isSelected
                 ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-cream-50 text-stone-800 ring-1 ring-orange-100 hover:bg-orange-50'
+                : 'bg-cream-50 text-stone-800 ring-1 ring-bark hover:bg-orange-50'
             }`}
           >
             <span className="block text-2xl">{meal.emoji}</span>
@@ -1280,7 +1280,7 @@ export default function RecipeDetailsPage() {
         </article>
 
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
-          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:p-6">
+          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-6">
             <div>
               <p className="font-bold text-orange-600">À préparer</p>
 
@@ -1294,7 +1294,7 @@ export default function RecipeDetailsPage() {
               </p>
             </div>
 
-            <div className="mt-6 rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100 print:hidden sm:p-5">
+            <div className="mt-6 rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark print:hidden sm:p-5">
               <p className="text-sm font-black uppercase tracking-wide text-orange-600">
                 Adapter les portions
               </p>
@@ -1315,7 +1315,7 @@ export default function RecipeDetailsPage() {
                   −
                 </button>
 
-                <div className="flex-1 rounded-full bg-white px-5 py-3 text-center font-black text-stone-950 shadow-sm ring-1 ring-orange-100 sm:flex-none sm:px-6">
+                <div className="flex-1 rounded-full bg-white px-5 py-3 text-center font-black text-stone-950 shadow-sm ring-1 ring-bark sm:flex-none sm:px-6">
                   {selectedServings} personne{selectedServings > 1 ? 's' : ''}
                 </div>
 
@@ -1345,7 +1345,7 @@ export default function RecipeDetailsPage() {
                     className={`rounded-full px-3 py-2 text-sm font-black transition sm:px-4 ${
                       selectedServings === servingValue
                         ? 'bg-orange-500 text-white'
-                        : 'bg-white text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
+                        : 'bg-white text-orange-700 ring-1 ring-bark hover:bg-orange-50'
                     }`}
                   >
                     {servingValue}
@@ -1407,7 +1407,7 @@ export default function RecipeDetailsPage() {
             )}
           </section>
 
-          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:p-6">
+          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-bold text-orange-600">En cuisine</p>
@@ -1432,7 +1432,7 @@ export default function RecipeDetailsPage() {
                 {recipe.steps.map((step, index) => (
                   <li
                     key={`${step}-${index}`}
-                    className="flex gap-3 rounded-[1.4rem] bg-cream-50 px-4 py-4 text-stone-700 ring-1 ring-orange-50 sm:gap-4"
+                    className="flex gap-3 rounded-[1.4rem] bg-cream-50 px-4 py-4 text-stone-700 ring-1 ring-bark/60 sm:gap-4"
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white">
                       {index + 1}

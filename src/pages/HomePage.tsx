@@ -292,7 +292,7 @@ export default function HomePage() {
             />
           )
         ) : (
-          <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+          <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem]">
           <div className="grid gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
             <div className="flex flex-col justify-center">
               <Chip emoji="🍲" className="mb-5">
@@ -468,7 +468,7 @@ export default function HomePage() {
           {loading ? (
             <RecipeCardGridSkeleton count={3} />
           ) : latestRecipes.length === 0 ? (
-            <div className="rounded-[1.5rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-8">
+            <div className="rounded-[1.5rem] bg-white p-6 text-center shadow-sm ring-1 ring-bark sm:rounded-[2rem] sm:p-8">
               <p className="text-lg font-bold text-stone-950">
                 Aucune recette pour le moment.
               </p>

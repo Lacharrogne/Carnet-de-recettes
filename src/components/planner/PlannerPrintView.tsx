@@ -122,7 +122,7 @@ export default function PlannerPrintView({
             </p>
           </div>
 
-          <div className="flex items-center gap-3 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3">
+          <div className="flex items-center gap-3 rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3">
             <img
               src={LOGO_SRC}
               alt="Carnet de recettes"
@@ -214,7 +214,7 @@ export default function PlannerPrintView({
                     <h2 className="text-xl font-black">{day.label}</h2>
                   </div>
 
-                  <p className="rounded-full border border-orange-100 bg-white px-3 py-1 text-xs font-black">
+                  <p className="rounded-full ring-1 ring-bark bg-white px-3 py-1 text-xs font-black">
                     {dayMealsCount}/2
                   </p>
                 </div>

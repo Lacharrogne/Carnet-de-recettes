@@ -76,7 +76,7 @@ export default function RecipeVisibilitySelector({
             className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition ${
               active
                 ? 'border-orange-300 bg-orange-50 text-orange-800 ring-2 ring-orange-200'
-                : 'border-orange-100 bg-[#fffaf5] text-stone-700 hover:border-orange-200 hover:bg-orange-50'
+                : 'border-bark bg-[#fffaf5] text-stone-700 hover:border-bark hover:bg-orange-50'
             }`}
           >
             <span aria-hidden="true">{option.emoji}</span>
@@ -118,7 +118,7 @@ export default function RecipeVisibilitySelector({
     return (
       <section
         aria-labelledby="recipe-visibility-title"
-        className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
+        className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark"
       >
         <div className="mb-5">
           <p className="font-bold text-orange-700">Recettes</p>
@@ -141,7 +141,7 @@ export default function RecipeVisibilitySelector({
   }
 
   return (
-    <div className="rounded-[1.5rem] border border-orange-100 bg-[#fffaf5]/70 p-4">
+    <div className="rounded-[1.5rem] ring-1 ring-bark bg-[#fffaf5]/70 p-4">
       <p className="mb-2 text-xs font-black uppercase tracking-wide text-orange-700">
         Recettes affichées
       </p>

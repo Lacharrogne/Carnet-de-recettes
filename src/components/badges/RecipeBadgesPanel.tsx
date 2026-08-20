@@ -39,7 +39,7 @@ export default function RecipeBadgesPanel({
   const nextBadge = progress.nextBadge
 
   return (
-    <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+    <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark md:p-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -56,7 +56,7 @@ export default function RecipeBadgesPanel({
           </p>
         </div>
 
-        <div className="rounded-[1.5rem] bg-cream-50 px-5 py-4 text-center shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[1.5rem] bg-cream-50 px-5 py-4 text-center shadow-sm ring-1 ring-bark">
           <p className="text-3xl font-black text-orange-600">{recipeCount}</p>
           <p className="text-sm font-bold text-stone-600">
             recette{recipeCount > 1 ? 's' : ''} publiée
@@ -65,7 +65,7 @@ export default function RecipeBadgesPanel({
         </div>
       </div>
 
-      <div className="rounded-[2rem] bg-cream-50 p-5 ring-1 ring-orange-100">
+      <div className="rounded-[2rem] bg-cream-50 p-5 ring-1 ring-bark">
         {currentBadge ? (
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[1.7rem] bg-orange-500 text-5xl shadow-sm">
@@ -122,7 +122,7 @@ export default function RecipeBadgesPanel({
                 </p>
               </div>
 
-              <div className="h-4 overflow-hidden rounded-full bg-white shadow-inner ring-1 ring-orange-100">
+              <div className="h-4 overflow-hidden rounded-full bg-white shadow-inner ring-1 ring-bark">
                 <div
                   className="h-full rounded-full bg-orange-500 transition-all"
                   style={{ width: `${progress.percent}%` }}
@@ -152,7 +152,7 @@ export default function RecipeBadgesPanel({
               key={badge.id}
               className={`rounded-[1.7rem] p-5 shadow-sm ring-1 transition ${
                 unlocked
-                  ? 'bg-white ring-orange-100'
+                  ? 'bg-white ring-bark'
                   : 'bg-stone-50 opacity-70 ring-stone-100'
               }`}
             >
@@ -184,7 +184,7 @@ export default function RecipeBadgesPanel({
                 {badge.description}
               </p>
 
-              <p className="mt-4 rounded-full bg-cream-50 px-4 py-2 text-sm font-black text-orange-700 ring-1 ring-orange-100">
+              <p className="mt-4 rounded-full bg-cream-50 px-4 py-2 text-sm font-black text-orange-700 ring-1 ring-bark">
                 {badge.minRecipes} recette{badge.minRecipes > 1 ? 's' : ''}
               </p>
             </article>

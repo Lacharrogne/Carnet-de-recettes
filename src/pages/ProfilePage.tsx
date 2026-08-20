@@ -185,7 +185,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-bark">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
           👤
         </div>
@@ -210,7 +210,7 @@ export default function ProfilePage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-cream-100 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-100 shadow-sm ring-1 ring-bark">
         <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <div className="relative">
@@ -228,7 +228,7 @@ export default function ProfilePage() {
 
               <div
                 title={profileBadgeName}
-                className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-sm ring-1 ring-orange-100"
+                className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-sm ring-1 ring-bark"
               >
                 {profileBadgeEmoji}
               </div>
@@ -293,7 +293,7 @@ export default function ProfilePage() {
       {isEditing && (
         <form
           onSubmit={handleSaveProfile}
-          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark"
         >
           <div className="mb-6">
             <p className="font-bold text-orange-700">Profil public</p>
@@ -314,7 +314,7 @@ export default function ProfilePage() {
                 Photo de profil
               </label>
 
-              <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-full bg-orange-600 text-5xl font-black text-white ring-4 ring-orange-50">
+              <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-full bg-orange-600 text-5xl font-black text-white ring-4 ring-bark/60">
                 {displayedAvatarUrl ? (
                   <img
                     src={displayedAvatarUrl}
@@ -383,7 +383,7 @@ export default function ProfilePage() {
               type="button"
               onClick={cancelEdit}
               disabled={saving}
-              className="rounded-2xl border border-orange-100 bg-white px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl ring-1 ring-bark bg-white px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Annuler
             </button>
@@ -392,7 +392,7 @@ export default function ProfilePage() {
       )}
 
       <div className="grid gap-5 md:grid-cols-3">
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             📖
           </div>
@@ -406,7 +406,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             ♥
           </div>
@@ -418,7 +418,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             🏷️
           </div>
@@ -455,7 +455,7 @@ export default function ProfilePage() {
 
         <Link
           to="/my-recipes"
-          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
         >
           <p className="text-3xl">📖</p>
 
@@ -470,7 +470,7 @@ export default function ProfilePage() {
 
         <Link
           to="/favorites"
-          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
         >
           <p className="text-3xl">♥</p>
 
@@ -483,7 +483,7 @@ export default function ProfilePage() {
 
         <Link
           to="/shopping-list"
-          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
         >
           <p className="text-3xl">🛒</p>
 
@@ -497,7 +497,7 @@ export default function ProfilePage() {
         </Link>
       </div>
 
-      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="font-bold text-orange-700">Activité récente</p>

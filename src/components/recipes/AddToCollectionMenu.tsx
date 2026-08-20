@@ -132,7 +132,7 @@ export default function AddToCollectionMenu({ recipeId }: { recipeId: number }) 
       </Button>
 
       {open && (
-        <div className="mt-3 rounded-[1.5rem] border border-orange-100 bg-[#fffaf5] p-4">
+        <div className="mt-3 rounded-[1.5rem] ring-1 ring-bark bg-[#fffaf5] p-4">
           {error && (
             <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-bold text-red-700">
               {error}
@@ -156,7 +156,7 @@ export default function AddToCollectionMenu({ recipeId }: { recipeId: number }) 
                           className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition ${
                             isMember
                               ? 'bg-orange-100 text-orange-800'
-                              : 'bg-white text-stone-700 ring-1 ring-orange-100 hover:bg-orange-50'
+                              : 'bg-white text-stone-700 ring-1 ring-bark hover:bg-orange-50'
                           }`}
                         >
                           <span className="text-lg">{collection.emoji}</span>

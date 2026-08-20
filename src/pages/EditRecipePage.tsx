@@ -143,7 +143,7 @@ export default function EditRecipePage() {
 
   if (loading) {
     return (
-      <section className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-bark">
         <p className="font-medium text-stone-600">
           Chargement de la recette...
         </p>
@@ -153,7 +153,7 @@ export default function EditRecipePage() {
 
   if (!recipe) {
     return (
-      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-bark">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
           🍽️
         </div>
@@ -184,7 +184,7 @@ export default function EditRecipePage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-linen p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-linen p-8 shadow-sm ring-1 ring-bark">
         <Link
           to={`/recipes/${recipe.id}`}
           className="font-bold text-orange-700 transition hover:text-orange-800"
@@ -207,7 +207,7 @@ export default function EditRecipePage() {
         </div>
       </div>
 
-      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-8">
+      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark md:p-8">
         <RecipeForm
           initialValues={recipe}
           availableRecipes={availableRecipes}

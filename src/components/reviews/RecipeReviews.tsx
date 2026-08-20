@@ -444,7 +444,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
   }
 
   return (
-    <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-7">
+    <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark md:p-7">
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="font-bold text-orange-600">Avis de la famille</p>
@@ -488,7 +488,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       {user ? (
         <form
           onSubmit={handleSubmit}
-          className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-orange-100"
+          className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-bark"
         >
           <h3 className="text-xl font-black text-stone-950">
             {myReview ? 'Modifier mon avis' : 'Donner mon avis'}
@@ -512,7 +512,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                   className={`rounded-2xl px-4 py-3 text-xl font-black shadow-sm transition ${
                     value <= rating
                       ? 'bg-orange-500 text-white hover:bg-orange-600'
-                      : 'bg-white text-stone-300 ring-1 ring-orange-100 hover:bg-orange-50 hover:text-orange-400'
+                      : 'bg-white text-stone-300 ring-1 ring-bark hover:bg-orange-50 hover:text-orange-400'
                   }`}
                   aria-label={`Mettre ${value} étoile${
                     value > 1 ? 's' : ''
@@ -534,7 +534,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
               onChange={(event) => setComment(event.target.value)}
               rows={4}
               placeholder="Exemple : recette facile, très bonne, parfaite pour le soir..."
-              className="w-full rounded-[1.4rem] border border-orange-100 bg-white px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 md:text-[15px]"
+              className="w-full rounded-[1.4rem] ring-1 ring-bark bg-white px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-bark md:text-[15px]"
             />
           </div>
 
@@ -548,7 +548,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                 <img
                   src={photoPreview}
                   alt="Aperçu du plat"
-                  className="h-20 w-20 rounded-2xl object-cover ring-1 ring-orange-100"
+                  className="h-20 w-20 rounded-2xl object-cover ring-1 ring-bark"
                 />
                 <button
                   type="button"
@@ -556,7 +556,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                     setPhotoFile(null)
                     setPhotoPreview(null)
                   }}
-                  className="rounded-full border border-orange-100 bg-white px-4 py-2 text-sm font-bold text-stone-600 transition hover:bg-orange-50"
+                  className="rounded-full ring-1 ring-bark bg-white px-4 py-2 text-sm font-bold text-stone-600 transition hover:bg-orange-50"
                 >
                   Retirer la photo
                 </button>
@@ -601,7 +601,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
           </div>
         </form>
       ) : (
-        <div className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-orange-100">
+        <div className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-bark">
           <p className="font-bold text-stone-900">
             Connectez-vous pour donner votre avis.
           </p>
@@ -621,7 +621,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       )}
 
       {reviews.length === 0 ? (
-        <div className="rounded-[2rem] bg-cream-50 p-6 text-center ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-cream-50 p-6 text-center ring-1 ring-bark">
           <p className="font-bold text-stone-900">
             Aucun commentaire pour le moment.
           </p>
@@ -646,7 +646,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
             return (
               <article
                 key={review.id}
-                className="rounded-[2rem] bg-cream-50 p-4 ring-1 ring-orange-100 md:p-5"
+                className="rounded-[2rem] bg-cream-50 p-4 ring-1 ring-bark md:p-5"
               >
                 <div className="mb-4 flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-base font-black text-white ring-2 ring-white md:h-12 md:w-12">
@@ -701,12 +701,12 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       src={review.imageUrl}
                       alt="Plat réalisé"
                       loading="lazy"
-                      className="max-h-64 rounded-2xl object-cover ring-1 ring-orange-100 transition hover:opacity-95"
+                      className="max-h-64 rounded-2xl object-cover ring-1 ring-bark transition hover:opacity-95"
                     />
                   </a>
                 )}
 
-                <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-orange-100 pt-4">
+                <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-bark pt-4">
                   <button
                     type="button"
                     onClick={() => void handleToggleLike(review)}
@@ -714,7 +714,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                     className={`rounded-full px-4 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-60 ${
                       review.likedByMe
                         ? 'bg-orange-500 text-white hover:bg-orange-600'
-                        : 'bg-white text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
+                        : 'bg-white text-orange-700 ring-1 ring-bark hover:bg-orange-50'
                     }`}
                   >
                     {review.likedByMe ? '♥ Aimé' : '♡ J’aime'}
@@ -737,7 +737,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       )
                       clearMessages()
                     }}
-                    className="rounded-full bg-white px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 transition hover:bg-orange-50 hover:text-orange-700"
+                    className="rounded-full bg-white px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-bark transition hover:bg-orange-50 hover:text-orange-700"
                   >
                     Répondre
                     {replyCount > 0 ? ` · ${replyCount}` : ''}
@@ -747,7 +747,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                 {replyingReviewId === review.id && (
                   <form
                     onSubmit={(event) => handleReplySubmit(event, review.id)}
-                    className="mt-4 rounded-[1.5rem] bg-white p-4 ring-1 ring-orange-100"
+                    className="mt-4 rounded-[1.5rem] bg-white p-4 ring-1 ring-bark"
                   >
                     <label className="mb-2 block text-sm font-black text-stone-800">
                       Votre réponse
@@ -763,7 +763,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                         ' · vous',
                         '',
                       )}...`}
-                      className="w-full rounded-[1.2rem] border border-orange-100 bg-cream-input px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                      className="w-full rounded-[1.2rem] ring-1 ring-bark bg-cream-input px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-bark"
                     />
 
                     <div className="mt-3 flex flex-wrap gap-3">
@@ -789,7 +789,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                 )}
 
                 {review.replies.length > 0 && (
-                  <div className="mt-5 space-y-3 border-l-2 border-orange-200 pl-4">
+                  <div className="mt-5 space-y-3 border-l-2 border-bark pl-4">
                     {review.replies.map((reply) => {
                       const replyIsMine = userId === reply.userId
                       const replyAuthor = getAuthorInfo(
@@ -802,7 +802,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       return (
                         <div
                           key={reply.id}
-                          className="rounded-[1.5rem] bg-white p-4 ring-1 ring-orange-100"
+                          className="rounded-[1.5rem] bg-white p-4 ring-1 ring-bark"
                         >
                           <div className="mb-3 flex items-center gap-3">
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">

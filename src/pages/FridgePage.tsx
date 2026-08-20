@@ -30,8 +30,8 @@ function FridgeResultCard({
   const imageToDisplay = match.recipe.imageUrl || match.recipe.image
 
   return (
-    <article className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md">
-      <div className="border-b border-orange-100 bg-cream-50 p-5 sm:p-6">
+    <article className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-bark transition hover:-translate-y-1 hover:shadow-md">
+      <div className="border-b border-bark bg-cream-50 p-5 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-wide text-orange-600">
@@ -155,7 +155,7 @@ function FridgeResultCard({
       </Link>
 
       {match.missingIngredients.length > 0 && (
-        <div className="border-t border-orange-100 p-5 sm:p-6">
+        <div className="border-t border-bark p-5 sm:p-6">
           <button
             type="button"
             onClick={() => onAddMissingIngredients(match)}
@@ -349,7 +349,7 @@ export default function FridgePage() {
 
   return (
     <section className="space-y-8 sm:space-y-12">
-      <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem]">
         <div className="grid gap-7 px-5 py-7 sm:px-6 sm:py-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-12 lg:py-12">
           <div className="flex flex-col justify-center">
             <div className="mb-5 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700 sm:mb-6">
@@ -387,7 +387,7 @@ export default function FridgePage() {
           </div>
 
           <div className="space-y-5">
-            <div className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
+            <div className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:rounded-[2rem] sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
@@ -399,7 +399,7 @@ export default function FridgePage() {
                   </p>
                 </div>
 
-                <span className="w-fit rounded-full bg-cream-50 px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-orange-100">
+                <span className="w-fit rounded-full bg-cream-50 px-3 py-1 text-xs font-black text-stone-600 ring-1 ring-bark">
                   {fridgeIngredients.length} ingrédient
                   {fridgeIngredients.length > 1 ? 's' : ''}
                 </span>
@@ -539,7 +539,7 @@ export default function FridgePage() {
           description="Essayez avec des ingrédients plus courants comme œufs, pâtes, riz, tomates ou fromage."
         />
       ) : (
-        <section className="rounded-[2rem] bg-cream-50/95 p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem] sm:p-6 md:p-8">
+        <section className="rounded-[2rem] bg-cream-50/95 p-5 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem] sm:p-6 md:p-8">
           <div className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -558,7 +558,7 @@ export default function FridgePage() {
             </div>
 
             <div className="flex flex-wrap gap-2 sm:gap-3">
-              <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm ring-1 ring-orange-100">
+              <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm ring-1 ring-bark">
                 {analyzedRecipes.length} recette
                 {analyzedRecipes.length > 1 ? 's' : ''}
               </span>

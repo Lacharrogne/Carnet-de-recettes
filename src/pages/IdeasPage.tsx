@@ -231,7 +231,7 @@ export default function IdeasPage() {
 
   return (
     <section className="space-y-8">
-      <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-bark">
         <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
           <span>💡</span>
           <span>Boîte à idées</span>
@@ -249,7 +249,7 @@ export default function IdeasPage() {
             </p>
           </div>
 
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Participer
             </p>
@@ -320,7 +320,7 @@ export default function IdeasPage() {
                 </button>
               </form>
             ) : (
-              <div className="mt-5 rounded-[1.5rem] bg-cream-50 p-5 ring-1 ring-orange-100">
+              <div className="mt-5 rounded-[1.5rem] bg-cream-50 p-5 ring-1 ring-bark">
                 <p className="font-bold text-stone-900">
                   Connectez-vous pour proposer une idée.
                 </p>
@@ -346,7 +346,7 @@ export default function IdeasPage() {
 
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
-      <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+      <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark md:p-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -387,7 +387,7 @@ export default function IdeasPage() {
               return (
                 <article
                   key={idea.id}
-                  className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-orange-100"
+                  className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-bark"
                 >
                   <div className="mb-4 flex items-start justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-3">
@@ -422,7 +422,7 @@ export default function IdeasPage() {
                     </span>
                   </div>
 
-                  <div className="mb-3 flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-black text-orange-700 ring-1 ring-orange-100">
+                  <div className="mb-3 flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-black text-orange-700 ring-1 ring-bark">
                     <span>{categoryInfo.emoji}</span>
                     <span>{categoryInfo.label}</span>
                   </div>

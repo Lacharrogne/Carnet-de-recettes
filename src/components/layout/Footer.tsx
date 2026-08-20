@@ -47,7 +47,7 @@ const TRUST_SIGNALS: { icon: typeof Heart; label: string }[] = [
 
 export default function Footer() {
   return (
-    <footer className="mt-16 border-t border-orange-100 bg-cream-50 print:hidden">
+    <footer className="mt-16 border-t border-bark bg-cream-50 print:hidden">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 md:grid-cols-[1.2fr_2fr]">
         <div>
           <div className="flex items-center gap-3">
@@ -125,7 +125,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-orange-100/70">
+      <div className="border-t border-bark/70">
         <p className="mx-auto max-w-6xl px-6 py-4 text-sm text-stone-500">
           © 2026 — {APP_NAME}
         </p>

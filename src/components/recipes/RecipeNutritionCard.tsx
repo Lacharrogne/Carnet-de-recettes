@@ -26,7 +26,7 @@ export default function RecipeNutritionCard({ recipe }: { recipe: Recipe }) {
   ]
 
   return (
-    <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
+    <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-bark print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
@@ -47,14 +47,14 @@ export default function RecipeNutritionCard({ recipe }: { recipe: Recipe }) {
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-orange-100">
+        <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
           <p className="text-3xl font-black text-orange-600">
             {perServing.kcal}
           </p>
           <p className="mt-1 text-sm font-bold text-stone-600">kcal / pers.</p>
         </div>
 
-        <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-orange-100">
+        <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
           <p className="text-3xl font-black text-green-700">
             {formatEuro(costPerServing)}
           </p>
@@ -66,7 +66,7 @@ export default function RecipeNutritionCard({ recipe }: { recipe: Recipe }) {
         {macros.map((macro) => (
           <div
             key={macro.label}
-            className="rounded-[1rem] bg-cream-50 px-3 py-2.5 text-center ring-1 ring-orange-50"
+            className="rounded-[1rem] bg-cream-50 px-3 py-2.5 text-center ring-1 ring-bark/60"
           >
             <p className="text-base font-black text-stone-900">{macro.value}</p>
             <p className="mt-0.5 text-xs font-semibold text-stone-500">

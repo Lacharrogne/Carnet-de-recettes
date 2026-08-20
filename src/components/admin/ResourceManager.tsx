@@ -67,7 +67,7 @@ export default function ResourceManager() {
     ADMIN_RESOURCES.find((item) => item.key === activeKey) ?? ADMIN_RESOURCES[0]
 
   return (
-    <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+    <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
       <p className="text-sm font-black uppercase tracking-wide text-orange-600">
         Base de données
       </p>
@@ -281,7 +281,7 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
             searchable ? 'Rechercher…' : 'Recherche indisponible pour cette table'
           }
           disabled={!searchable}
-          className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 disabled:opacity-50"
+          className="min-w-0 flex-1 rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-bark disabled:opacity-50"
         />
 
         <button
@@ -308,7 +308,7 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
       <div className="mt-5 overflow-x-auto">
         <table className="w-full min-w-[640px] border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b border-orange-100 text-xs font-black uppercase tracking-wide text-stone-500">
+            <tr className="border-b border-bark text-xs font-black uppercase tracking-wide text-stone-500">
               {resource.listColumns.map((column) => (
                 <th key={column} className="px-3 py-2">
                   {column}
@@ -542,7 +542,7 @@ function RowEditor({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-stone-900/50 p-4 backdrop-blur-sm">
-      <div className="my-8 w-full max-w-2xl rounded-[2rem] bg-white p-6 shadow-xl ring-1 ring-orange-100">
+      <div className="my-8 w-full max-w-2xl rounded-[2rem] bg-white p-6 shadow-xl ring-1 ring-bark">
         <div className="flex items-start justify-between gap-4">
           <h3 className="text-xl font-black text-stone-950">
             Éditer — {resource.label}
@@ -566,7 +566,7 @@ function RowEditor({
               </label>
 
               {field.type === 'readonly' ? (
-                <p className="break-all rounded-2xl bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-500 ring-1 ring-orange-50">
+                <p className="break-all rounded-2xl bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-500 ring-1 ring-bark/60">
                   {readonlyDisplay(field)}
                 </p>
               ) : field.type === 'boolean' ? (
@@ -583,7 +583,7 @@ function RowEditor({
                 <select
                   value={String(form[field.name])}
                   onChange={(event) => setField(field.name, event.target.value)}
-                  className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                  className="w-full rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none focus:border-orange-300 focus:ring-4 focus:ring-bark"
                 >
                   {(field.options ?? []).map((option) => (
                     <option key={option} value={option}>
@@ -596,14 +596,14 @@ function RowEditor({
                   value={String(form[field.name])}
                   onChange={(event) => setField(field.name, event.target.value)}
                   rows={field.type === 'json' ? 5 : 3}
-                  className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 font-mono text-sm text-stone-800 outline-none focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                  className="w-full rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 font-mono text-sm text-stone-800 outline-none focus:border-orange-300 focus:ring-4 focus:ring-bark"
                 />
               ) : (
                 <input
                   type={field.type === 'number' ? 'number' : 'text'}
                   value={String(form[field.name])}
                   onChange={(event) => setField(field.name, event.target.value)}
-                  className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                  className="w-full rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none focus:border-orange-300 focus:ring-4 focus:ring-bark"
                 />
               )}
             </div>
