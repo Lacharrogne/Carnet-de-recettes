@@ -38,6 +38,7 @@ import {
 } from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import { getRecipeNote, saveRecipeNote } from '../services/recipeNotes'
+import AddToCollectionMenu from '../components/recipes/AddToCollectionMenu'
 import type { Recipe } from '../types/recipe'
 
 export default function RecipeDetailsPage() {
@@ -1077,6 +1078,8 @@ export default function RecipeDetailsPage() {
                   >
                     📄 {isDuplicating ? 'Duplication...' : 'Dupliquer'}
                   </Button>
+
+                  <AddToCollectionMenu recipeId={recipe.id} />
 
                   {isOwner && (
                     <>

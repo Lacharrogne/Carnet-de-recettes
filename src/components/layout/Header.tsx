@@ -58,6 +58,13 @@ const personalLinks: NavLinkItem[] = [
     premium: true,
   },
   {
+    label: 'Mes collections',
+    description: 'Vos dossiers de recettes par thème',
+    to: '/collections',
+    emoji: '🗂️',
+    premium: true,
+  },
+  {
     label: 'Favoris',
     description: 'Retrouver vos recettes préférées',
     to: '/favorites',

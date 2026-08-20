@@ -29,6 +29,8 @@ const AdminPage = lazy(() => import('./pages/AdminPage'))
 const IdeasPage = lazy(() => import('./pages/IdeasPage'))
 const ToolsPage = lazy(() => import('./pages/ToolsPage'))
 const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'))
+const CollectionsPage = lazy(() => import('./pages/CollectionsPage'))
+const CollectionDetailPage = lazy(() => import('./pages/CollectionDetailPage'))
 
 function getPageBackgroundClass(pathname: string) {
   if (pathname === '/') {
@@ -178,6 +180,24 @@ export default function App() {
             element={
               <PremiumRoute>
                 <MealPlannerPage />
+              </PremiumRoute>
+            }
+          />
+
+          <Route
+            path="/collections"
+            element={
+              <PremiumRoute>
+                <CollectionsPage />
+              </PremiumRoute>
+            }
+          />
+
+          <Route
+            path="/collections/:id"
+            element={
+              <PremiumRoute>
+                <CollectionDetailPage />
               </PremiumRoute>
             }
           />

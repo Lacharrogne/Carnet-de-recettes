@@ -6,7 +6,7 @@ import type {
   RecipeStatus,
 } from '../types/recipe'
 
-type RecipeRow = {
+export type RecipeRow = {
   id: number
   user_id: string | null
   title: string
@@ -27,7 +27,7 @@ type RecipeRow = {
   status?: string | null
 }
 
-function mapRecipe(row: RecipeRow): Recipe {
+export function mapRecipe(row: RecipeRow): Recipe {
   return {
     id: row.id,
     userId: row.user_id,
@@ -51,7 +51,7 @@ function mapRecipe(row: RecipeRow): Recipe {
 // Colonnes utiles aux LISTES (catalogue, cartes, frigo, planning…). On exclut
 // volontairement `steps` (champ le plus lourd) : seules les pages de DÉTAIL en
 // ont besoin. mapRecipe() retombe sur [] si la colonne est absente.
-const RECIPE_LIST_COLUMNS =
+export const RECIPE_LIST_COLUMNS =
   'id,user_id,title,category,difficulty,prep_time,cook_time,servings,description,image,image_url,tags,ingredients,related_recipe_ids,created_at'
 
 const RECIPE_LIST_COLUMNS_WITH_STATUS = `${RECIPE_LIST_COLUMNS},status`
