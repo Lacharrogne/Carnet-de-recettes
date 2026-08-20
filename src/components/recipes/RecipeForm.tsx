@@ -14,6 +14,12 @@ import {
   RECIPE_TAG_GROUPS,
 } from '../../data/recipeOptions'
 import type { Difficulty, Recipe, RecipeCategory } from '../../types/recipe'
+import {
+  clearRecipeDraftSnapshot,
+  loadRecipeDraftSnapshot,
+  saveRecipeDraftSnapshot,
+  snapshotHasContent,
+} from '../../lib/recipeDraftAutosave'
 import Alert from '../ui/Alert'
 import { EmojiPicker } from '../ui/EmojiPicker'
 import ImageCropper from './ImageCropper'
@@ -46,6 +52,8 @@ type RecipeFormProps = {
   onSaveDraft?: (values: RecipeFormValues) => Promise<void>
   isSavingDraft?: boolean
   draftLabel?: string
+  // Sauvegarde automatique locale du formulaire (création uniquement).
+  autosave?: boolean
 }
 
 const inputClass =
@@ -69,55 +77,84 @@ export default function RecipeForm({
   onSaveDraft,
   isSavingDraft = false,
   draftLabel = 'Enregistrer le brouillon',
+  autosave = false,
 }: RecipeFormProps) {
   const ingredientInputRefs = useRef<Array<HTMLInputElement | null>>([])
   const stepTextareaRefs = useRef<Array<HTMLTextAreaElement | null>>([])
   const ingredientFocusIndexRef = useRef<number | null>(null)
   const stepFocusIndexRef = useRef<number | null>(null)
 
-  const [title, setTitle] = useState(initialValues?.title ?? '')
+  // Sauvegarde auto (locale) : uniquement en création (pas en édition).
+  const autosaveEnabled = autosave && !initialValues
+  const restoredSnapshot = useMemo(
+    () => (autosaveEnabled ? loadRecipeDraftSnapshot() : null),
+    [autosaveEnabled],
+  )
+
+  const [title, setTitle] = useState(
+    initialValues?.title ?? restoredSnapshot?.title ?? '',
+  )
   const [draftError, setDraftError] = useState('')
+  const [restoredNotice, setRestoredNotice] = useState(() =>
+    snapshotHasContent(restoredSnapshot),
+  )
 
   const [category, setCategory] = useState<RecipeCategory>(
-    initialValues?.category ?? DEFAULT_RECIPE_CATEGORY,
+    initialValues?.category ??
+      (restoredSnapshot?.category as RecipeCategory) ??
+      DEFAULT_RECIPE_CATEGORY,
   )
 
   const [difficulty, setDifficulty] = useState<Difficulty>(
-    initialValues?.difficulty ?? 'Facile',
+    initialValues?.difficulty ??
+      (restoredSnapshot?.difficulty as Difficulty) ??
+      'Facile',
   )
 
   const [prepTime, setPrepTime] = useState(
-    initialValues ? String(initialValues.prepTime) : '',
+    initialValues ? String(initialValues.prepTime) : restoredSnapshot?.prepTime ?? '',
   )
 
   const [cookTime, setCookTime] = useState(
-    initialValues ? String(initialValues.cookTime) : '',
+    initialValues ? String(initialValues.cookTime) : restoredSnapshot?.cookTime ?? '',
   )
 
   const [servings, setServings] = useState(
-    initialValues ? String(initialValues.servings) : '1',
+    initialValues
+      ? String(initialValues.servings)
+      : restoredSnapshot?.servings ?? '1',
   )
 
   const [description, setDescription] = useState(
-    initialValues?.description ?? '',
+    initialValues?.description ?? restoredSnapshot?.description ?? '',
   )
 
-  const [image, setImage] = useState(initialValues?.image ?? '🍽️')
+  const [image, setImage] = useState(
+    initialValues?.image ?? restoredSnapshot?.image ?? '🍽️',
+  )
 
   const [selectedTags, setSelectedTags] = useState<string[]>(
-    initialValues?.tags ?? [],
+    initialValues?.tags ?? restoredSnapshot?.tags ?? [],
   )
 
   const [ingredients, setIngredients] = useState<string[]>(
-    initialValues?.ingredients?.length ? initialValues.ingredients : [''],
+    initialValues?.ingredients?.length
+      ? initialValues.ingredients
+      : restoredSnapshot?.ingredients?.length
+        ? restoredSnapshot.ingredients
+        : [''],
   )
 
   const [steps, setSteps] = useState<string[]>(
-    initialValues?.steps?.length ? initialValues.steps : [''],
+    initialValues?.steps?.length
+      ? initialValues.steps
+      : restoredSnapshot?.steps?.length
+        ? restoredSnapshot.steps
+        : [''],
   )
 
   const [relatedRecipeIds, setRelatedRecipeIds] = useState<number[]>(
-    initialValues?.relatedRecipeIds ?? [],
+    initialValues?.relatedRecipeIds ?? restoredSnapshot?.relatedRecipeIds ?? [],
   )
 
   const [relatedSearch, setRelatedSearch] = useState('')
@@ -369,6 +406,63 @@ export default function RecipeForm({
       .filter((value) => value.length > 0)
   }
 
+  // Sauvegarde automatique (débounce) du formulaire tant qu'on saisit.
+  useEffect(() => {
+    if (!autosaveEnabled) return
+
+    const timeoutId = setTimeout(() => {
+      saveRecipeDraftSnapshot({
+        title,
+        category,
+        difficulty,
+        prepTime,
+        cookTime,
+        servings,
+        description,
+        image,
+        tags: selectedTags,
+        ingredients,
+        steps,
+        relatedRecipeIds,
+      })
+    }, 600)
+
+    return () => clearTimeout(timeoutId)
+  }, [
+    autosaveEnabled,
+    title,
+    category,
+    difficulty,
+    prepTime,
+    cookTime,
+    servings,
+    description,
+    image,
+    selectedTags,
+    ingredients,
+    steps,
+    relatedRecipeIds,
+  ])
+
+  function handleDiscardAutosave() {
+    clearRecipeDraftSnapshot()
+    setRestoredNotice(false)
+    setTitle('')
+    setCategory(DEFAULT_RECIPE_CATEGORY)
+    setDifficulty('Facile')
+    setPrepTime('')
+    setCookTime('')
+    setServings('1')
+    setDescription('')
+    setImage('🍽️')
+    setSelectedTags([])
+    setIngredients([''])
+    setSteps([''])
+    setRelatedRecipeIds([])
+    setImageFile(null)
+    setDraftError('')
+  }
+
   function collectValues(): RecipeFormValues {
     return {
       title: title.trim(),
@@ -408,6 +502,22 @@ export default function RecipeForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-7">
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
+
+      {restoredNotice && (
+        <div className="flex flex-col gap-2 rounded-2xl bg-honey-soft px-4 py-3 text-sm ring-1 ring-honey/40 sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-semibold text-stone-700">
+            ✎ On a récupéré votre saisie en cours, vous pouvez continuer.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleDiscardAutosave}
+            className="shrink-0 self-start rounded-full bg-card px-3 py-1.5 text-xs font-bold text-cacao ring-1 ring-bark transition hover:bg-linen sm:self-auto"
+          >
+            Repartir de zéro
+          </button>
+        </div>
+      )}
 
       <div className="rounded-[1.75rem] bg-honey-soft/60 p-5 ring-1 ring-honey/30 sm:rounded-[2rem] sm:p-6">
         <p className="text-sm font-bold text-terracotta sm:text-base">

@@ -30,8 +30,14 @@ import {
   type MealKey,
 } from '../lib/weeklyPlanner'
 import { getProfile, type UserProfile } from '../services/profiles'
-import { deleteRecipe, getRecipeById, getRecipes } from '../services/recipes'
+import {
+  deleteRecipe,
+  duplicateRecipe,
+  getRecipeById,
+  getRecipes,
+} from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
+import { getRecipeNote, saveRecipeNote } from '../services/recipeNotes'
 import type { Recipe } from '../types/recipe'
 
 export default function RecipeDetailsPage() {
@@ -59,7 +65,13 @@ export default function RecipeDetailsPage() {
   const [successMessage, setSuccessMessage] = useState('')
 
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isDuplicating, setIsDuplicating] = useState(false)
   const [favoriteLoading, setFavoriteLoading] = useState(false)
+
+  const [noteText, setNoteText] = useState('')
+  const [noteInitial, setNoteInitial] = useState('')
+  const [savingNote, setSavingNote] = useState(false)
+  const [noteSaved, setNoteSaved] = useState(false)
   const [addingIngredientIndex, setAddingIngredientIndex] = useState<
     number | null
   >(null)
@@ -293,6 +305,88 @@ export default function RecipeDetailsPage() {
       setErrorMessage('Impossible de modifier les favoris.')
     } finally {
       setFavoriteLoading(false)
+    }
+  }
+
+  // Charge la note personnelle privée pour cette recette.
+  useEffect(() => {
+    let ignore = false
+
+    if (!user || !recipe) {
+      setNoteText('')
+      setNoteInitial('')
+      return
+    }
+
+    getRecipeNote(recipe.id).then((note) => {
+      if (!ignore) {
+        setNoteText(note)
+        setNoteInitial(note)
+      }
+    })
+
+    return () => {
+      ignore = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, recipe?.id])
+
+  async function handleSaveNote() {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+
+    if (!hasAccess) {
+      navigate('/premium')
+      return
+    }
+
+    if (!recipe) return
+
+    try {
+      setSavingNote(true)
+      setNoteSaved(false)
+      setErrorMessage('')
+
+      await saveRecipeNote(recipe.id, noteText)
+
+      setNoteInitial(noteText)
+      setNoteSaved(true)
+      window.setTimeout(() => setNoteSaved(false), 2500)
+    } catch (error) {
+      console.error(error)
+      setErrorMessage("Impossible d'enregistrer la note.")
+    } finally {
+      setSavingNote(false)
+    }
+  }
+
+  async function handleDuplicate() {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+
+    if (!hasAccess) {
+      navigate('/premium')
+      return
+    }
+
+    if (!recipe) return
+
+    try {
+      setIsDuplicating(true)
+      setErrorMessage('')
+
+      const copy = await duplicateRecipe(recipe)
+
+      // On ouvre la copie (brouillon) pour l'adapter puis la publier.
+      navigate(`/recipes/${copy.id}/edit`)
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible de dupliquer la recette.')
+      setIsDuplicating(false)
     }
   }
 
@@ -974,6 +1068,16 @@ export default function RecipeDetailsPage() {
                     🖨️ Imprimer
                   </Button>
 
+                  <Button
+                    type="button"
+                    onClick={handleDuplicate}
+                    disabled={isDuplicating}
+                    variant="ghost"
+                    fullWidth
+                  >
+                    📄 {isDuplicating ? 'Duplication...' : 'Dupliquer'}
+                  </Button>
+
                   {isOwner && (
                     <>
                       <Button
@@ -997,6 +1101,51 @@ export default function RecipeDetailsPage() {
                   )}
                 </div>
               </div>
+
+              {user && (
+                <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-honey-soft text-2xl">
+                      📝
+                    </span>
+
+                    <div>
+                      <h3 className="text-lg font-black text-stone-950">
+                        Mes notes
+                      </h3>
+                      <p className="text-sm text-stone-500">
+                        Privé — visible de vous seul.
+                      </p>
+                    </div>
+                  </div>
+
+                  <textarea
+                    value={noteText}
+                    onChange={(event) => {
+                      setNoteText(event.target.value)
+                      setNoteSaved(false)
+                    }}
+                    rows={4}
+                    placeholder="Vos ajustements : « la prochaine fois, moins de sucre »…"
+                    className="mt-4 w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 text-cacao outline-none transition focus:border-orange-500"
+                  />
+
+                  {noteSaved && (
+                    <p className="mt-2 text-sm font-semibold text-sage-deep">
+                      Note enregistrée ✓
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleSaveNote}
+                    disabled={savingNote || noteText === noteInitial}
+                    className="mt-3 w-full rounded-full bg-terracotta px-6 py-3 font-bold text-white shadow-soft transition hover:bg-terracotta-deep disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {savingNote ? 'Enregistrement...' : 'Enregistrer ma note'}
+                  </button>
+                </div>
+              )}
 
               <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

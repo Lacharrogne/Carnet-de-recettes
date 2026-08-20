@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import RecipeForm from '../components/recipes/RecipeForm'
 import type { RecipeFormValues } from '../components/recipes/RecipeForm'
 import { createRecipe, getRecipes, uploadRecipeImage } from '../services/recipes'
+import { clearRecipeDraftSnapshot } from '../lib/recipeDraftAutosave'
 import type { Recipe } from '../types/recipe'
 
 export default function AddRecipePage() {
@@ -45,6 +46,7 @@ export default function AddRecipePage() {
         imageUrl,
       })
 
+      clearRecipeDraftSnapshot()
       navigate(`/recipes/${newRecipe.id}`)
     } catch (error) {
       console.error(error)
@@ -72,6 +74,7 @@ export default function AddRecipePage() {
         status: 'draft',
       })
 
+      clearRecipeDraftSnapshot()
       // On retrouve le brouillon dans « Mes recettes ».
       navigate('/my-recipes')
     } catch (error) {
@@ -151,6 +154,7 @@ export default function AddRecipePage() {
           onSaveDraft={handleSaveDraft}
           isSavingDraft={isSavingDraft}
           draftLabel="Enregistrer comme brouillon"
+          autosave
         />
       </div>
     </section>

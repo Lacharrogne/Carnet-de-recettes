@@ -199,6 +199,30 @@ export async function createRecipe(recipe: {
   return mapRecipe(data as RecipeRow)
 }
 
+/**
+ * Duplique une recette (la sienne ou celle d'un autre) en un nouveau
+ * BROUILLON appartenant à l'utilisateur courant, prêt à être adapté puis
+ * publié. Le titre reçoit le suffixe « (copie) ».
+ */
+export async function duplicateRecipe(source: Recipe): Promise<Recipe> {
+  return createRecipe({
+    title: `${source.title} (copie)`,
+    category: source.category,
+    difficulty: source.difficulty,
+    prepTime: source.prepTime,
+    cookTime: source.cookTime,
+    servings: source.servings,
+    description: source.description,
+    image: source.image,
+    imageUrl: source.imageUrl,
+    tags: source.tags,
+    ingredients: source.ingredients,
+    steps: source.steps,
+    relatedRecipeIds: source.relatedRecipeIds,
+    status: 'draft',
+  })
+}
+
 export async function updateRecipe(
   id: number,
   recipe: {
