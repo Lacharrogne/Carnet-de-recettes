@@ -12,9 +12,14 @@ import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import CategoryBadge from '../components/recipes/CategoryBadge'
 import { getCategoryAmbience, getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES, RECIPE_DIFFICULTIES } from '../data/recipeOptions'
+import RecipeVisibilitySelector from '../components/recipes/RecipeVisibilitySelector'
+import { useAuth } from '../context/useAuth'
+import { useRecipeVisibility } from '../context/useRecipeVisibility'
+import { recipeMatchesVisibility } from '../lib/recipeVisibility'
 import { useDebounce } from '../lib/useDebounce'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { getRecipes } from '../services/recipes'
+import { getFriends, type SocialProfile } from '../services/social'
 import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import type { Difficulty, Recipe } from '../types/recipe'
 
@@ -42,6 +47,44 @@ export default function RecipesPage() {
   const [maxTime, setMaxTime] = useState(0)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [showTags, setShowTags] = useState(false)
+
+  const { user } = useAuth()
+  const { visibility } = useRecipeVisibility()
+  const [friends, setFriends] = useState<SocialProfile[]>([])
+
+  // Vue par défaut réinterprétée « communauté » pour un visiteur non connecté
+  // (les modes « mes recettes » / « amis » n'ont alors pas de sens).
+  const effectiveVisibility = user
+    ? visibility
+    : ({ mode: 'community', friendId: null } as const)
+
+  const friendIds = useMemo(
+    () => new Set(friends.map((friend) => friend.user_id)),
+    [friends],
+  )
+
+  useEffect(() => {
+    let ignore = false
+
+    if (!user) {
+      setFriends([])
+      return
+    }
+
+    getFriends(user.id)
+      .then((data) => {
+        if (!ignore) {
+          setFriends(data)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [user])
 
   const categoryParam = searchParams.get('category')
 
@@ -126,6 +169,17 @@ export default function RecipesPage() {
 
   const filteredRecipes = useMemo(() => {
     let result = [...recipes]
+
+    if (effectiveVisibility.mode !== 'community') {
+      result = result.filter((recipe) =>
+        recipeMatchesVisibility(
+          recipe,
+          effectiveVisibility,
+          user?.id ?? null,
+          friendIds,
+        ),
+      )
+    }
 
     if (selectedCategory) {
       result = result.filter(
@@ -214,6 +268,9 @@ export default function RecipesPage() {
     difficulty,
     maxTime,
     selectedTags,
+    effectiveVisibility,
+    friendIds,
+    user,
   ])
 
   const hasActiveFilters =
@@ -227,7 +284,9 @@ export default function RecipesPage() {
   // (ajustement d'état pendant le rendu, sans effet).
   const filtersKey = `${debouncedSearch.trim().toLowerCase()}|${
     selectedCategory?.value ?? ''
-  }|${sort}|${difficulty}|${maxTime}|${[...selectedTags].sort().join(',')}`
+  }|${sort}|${difficulty}|${maxTime}|${[...selectedTags].sort().join(',')}|${
+    effectiveVisibility.mode
+  }:${effectiveVisibility.friendId ?? ''}`
 
   const [paginationKey, setPaginationKey] = useState(filtersKey)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -335,6 +394,15 @@ export default function RecipesPage() {
                 </button>
               )}
             </div>
+
+            {user && (
+              <div className="mt-4">
+                <RecipeVisibilitySelector
+                  friends={friends}
+                  variant="compact"
+                />
+              </div>
+            )}
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
               <select

@@ -6,6 +6,7 @@ import './index.css'
 import { initCursor } from './lib/cursorPreference'
 import { AuthProvider } from './context/AuthContext'
 import EntitlementProvider from './context/EntitlementProvider'
+import RecipeVisibilityProvider from './context/RecipeVisibilityProvider'
 import FavoritesProvider from './context/FavoritesProvider'
 import ToastProvider from './context/ToastProvider'
 import { Analytics } from '@vercel/analytics/react'
@@ -18,12 +19,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <AuthProvider>
         <EntitlementProvider>
-          <FavoritesProvider>
-            <ToastProvider>
-              <Analytics />
-              <App />
-            </ToastProvider>
-          </FavoritesProvider>
+          <RecipeVisibilityProvider>
+            <FavoritesProvider>
+              <ToastProvider>
+                <Analytics />
+                <App />
+              </ToastProvider>
+            </FavoritesProvider>
+          </RecipeVisibilityProvider>
         </EntitlementProvider>
       </AuthProvider>
     </BrowserRouter>
