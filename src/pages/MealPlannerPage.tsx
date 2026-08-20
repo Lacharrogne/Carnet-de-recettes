@@ -16,7 +16,13 @@ import {
   getSavedPlanner,
 } from '../lib/weeklyPlanner'
 import { getRecipes } from '../services/recipes'
+import {
+  getCollectionRecipes,
+  getCollections,
+  type RecipeCollection,
+} from '../services/collections'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
+import { generateWeeklyPlan } from '../lib/weeklyPlanGenerator'
 import type { Recipe } from '../types/recipe'
 
 type DayKey =
@@ -192,6 +198,30 @@ export default function MealPlannerPage() {
 
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+
+  const [collections, setCollections] = useState<RecipeCollection[]>([])
+  const [planSource, setPlanSource] = useState('all')
+  const [generating, setGenerating] = useState(false)
+
+  // Collections de l'utilisateur (source possible pour « Surprends-moi »).
+  useEffect(() => {
+    let ignore = false
+
+    if (!user) {
+      setCollections([])
+      return
+    }
+
+    getCollections()
+      .then((data) => {
+        if (!ignore) setCollections(data)
+      })
+      .catch((error) => console.error(error))
+
+    return () => {
+      ignore = true
+    }
+  }, [user])
 
   useEffect(() => {
     let ignore = false
@@ -513,6 +543,49 @@ export default function MealPlannerPage() {
     }, 3000)
   }
 
+  async function handleGenerate() {
+    if (
+      plannedRecipeIds.length > 0 &&
+      !window.confirm(
+        'Remplacer le planning actuel par une semaine générée automatiquement ?',
+      )
+    ) {
+      return
+    }
+
+    clearMessages()
+    setGenerating(true)
+
+    try {
+      let pool = recipes
+
+      if (planSource === 'mine' && user) {
+        pool = recipes.filter((recipe) => recipe.userId === user.id)
+      } else if (planSource.startsWith('col:')) {
+        pool = await getCollectionRecipes(planSource.slice(4))
+      }
+
+      if (pool.length === 0) {
+        setErrorMessage(
+          'Aucune recette dans cette source pour générer un planning.',
+        )
+        return
+      }
+
+      const nextPlanner = generateWeeklyPlan(pool)
+      setPlanner(nextPlanner)
+      savePlanner(nextPlanner)
+      setSuccessMessage(
+        'Nouvelle semaine générée ! Ajustez chaque repas à votre goût.',
+      )
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible de générer le planning.')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   async function handleClearPlanning() {
     if (plannedRecipeIds.length === 0) {
       return
@@ -654,7 +727,41 @@ export default function MealPlannerPage() {
                 </div>
               </div>
 
-              <div className="mt-8 grid max-w-xl gap-3 sm:grid-cols-2">
+              <div className="mt-8 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+                <p className="font-black text-stone-950">✨ Surprends-moi</p>
+                <p className="mt-1 text-sm leading-6 text-stone-600">
+                  Génère une semaine équilibrée automatiquement, puis ajuste ce
+                  que tu veux.
+                </p>
+
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <select
+                    value={planSource}
+                    onChange={(event) => setPlanSource(event.target.value)}
+                    aria-label="Source des recettes"
+                    className="min-w-0 flex-1 rounded-full border border-orange-100 bg-[#fffaf5] px-4 py-3 font-bold text-stone-700 outline-none transition focus:border-orange-500"
+                  >
+                    <option value="all">Toutes les recettes</option>
+                    {user && <option value="mine">Mes recettes</option>}
+                    {collections.map((collection) => (
+                      <option key={collection.id} value={`col:${collection.id}`}>
+                        {collection.emoji} {collection.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={handleGenerate}
+                    disabled={generating}
+                    className="shrink-0 rounded-full bg-terracotta px-6 py-3 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-terracotta-deep disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {generating ? 'Génération...' : '✨ Générer la semaine'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4 grid max-w-xl gap-3 sm:grid-cols-2">
                 <Link
                   to="/shopping-list"
                   className="rounded-full bg-orange-500 px-6 py-4 text-center font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md"
