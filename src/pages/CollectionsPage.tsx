@@ -115,7 +115,7 @@ export default function CollectionsPage() {
             value={newName}
             onChange={(event) => setNewName(event.target.value)}
             placeholder="Ex. Desserts gourmands"
-            className="w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
+            className="w-full rounded-2xl bg-linen px-4 py-3 text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
           />
         </div>
 

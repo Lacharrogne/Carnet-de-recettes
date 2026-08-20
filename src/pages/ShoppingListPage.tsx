@@ -470,7 +470,7 @@ export default function ShoppingListPage() {
                   setSuccessMessage('')
                 }}
                 aria-label="Ajouter un article à la liste" placeholder="Exemple : 6 œufs, 500 g pâtes, lait..."
-                className="rounded-[1.5rem] border border-orange-100 bg-cream-50 px-5 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                className="w-full rounded-2xl bg-linen px-5 py-4 font-semibold text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
               />
 
               <button

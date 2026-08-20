@@ -181,7 +181,7 @@ export default function AddToCollectionMenu({ recipeId }: { recipeId: number }) 
                   value={newName}
                   onChange={(event) => setNewName(event.target.value)}
                   placeholder="Nouvelle collection…"
-                  className="min-w-0 flex-1 rounded-xl border border-orange-100 bg-white px-3 py-2 text-sm outline-none transition focus:border-orange-500"
+                  className="min-w-0 flex-1 rounded-xl bg-linen px-3 py-2 text-sm text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                 />
                 <button
                   type="submit"

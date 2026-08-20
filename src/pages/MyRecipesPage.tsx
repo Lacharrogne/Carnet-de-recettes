@@ -4,6 +4,7 @@ import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
+import Select from '../components/ui/Select'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -318,16 +319,15 @@ export default function MyRecipesPage() {
             onChange={(event) => setSearch(event.target.value)}
             aria-label="Rechercher dans mes recettes"
             placeholder="Rechercher dans mes recettes..."
-            className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
+            className="w-full rounded-2xl bg-linen px-4 py-3 text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
           />
 
-          <select
+          <Select
             value={selectedCategory}
             onChange={(event) =>
               setSelectedCategory(event.target.value as RecipeCategory | '')
             }
             aria-label="Filtrer par catégorie"
-            className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="">Toutes les catégories</option>
 
@@ -336,19 +336,18 @@ export default function MyRecipesPage() {
                 {category.label}
               </option>
             ))}
-          </select>
+          </Select>
 
-          <select
+          <Select
             value={sort}
             onChange={(event) => setSort(event.target.value as SortOption)}
             aria-label="Trier mes recettes"
-            className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="recent">Plus récentes</option>
             <option value="name">Trier par nom</option>
             <option value="time">Temps le plus court</option>
             <option value="difficulty">Difficulté</option>
-          </select>
+          </Select>
         </div>
 
         {hasActiveFilters && (

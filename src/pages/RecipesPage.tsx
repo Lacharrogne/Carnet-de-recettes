@@ -7,6 +7,7 @@ import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import Chip from '../components/ui/Chip'
 import EmptyState from '../components/ui/EmptyState'
+import Select from '../components/ui/Select'
 import SectionHeader from '../components/ui/SectionHeader'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import CategoryBadge from '../components/recipes/CategoryBadge'
@@ -432,9 +433,9 @@ export default function RecipesPage() {
             </p>
           </div>
 
-          <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
+          <div className="rounded-[1.75rem] bg-card p-4 shadow-card ring-1 ring-bark sm:rounded-[2rem] sm:p-6">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-hazel" />
 
               <input
                 type="text"
@@ -448,7 +449,7 @@ export default function RecipesPage() {
                 }}
                 aria-label="Rechercher une recette"
                 placeholder="Exemple : tarte, poulet, chocolat..."
-                className="w-full rounded-2xl border border-orange-100 bg-cream-input py-4 pl-12 pr-12 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                className="w-full rounded-2xl bg-linen py-4 pl-12 pr-12 text-base text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
               />
 
               {search && (
@@ -459,7 +460,7 @@ export default function RecipesPage() {
                     if (!selectedCategory) setSearchParams({})
                   }}
                   aria-label="Effacer la recherche"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-hazel transition hover:bg-linen hover:text-cacao"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -505,7 +506,7 @@ export default function RecipesPage() {
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
-              <select
+              <Select
                 value={selectedCategory?.value ?? ''}
                 onChange={(event) => {
                   const value = event.target.value
@@ -518,7 +519,6 @@ export default function RecipesPage() {
                   selectCategory(value)
                 }}
                 aria-label="Filtrer par catégorie"
-                className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
               >
                 <option value="">Toutes les catégories</option>
 
@@ -527,15 +527,14 @@ export default function RecipesPage() {
                     {category.label}
                   </option>
                 ))}
-              </select>
+              </Select>
 
-              <select
+              <Select
                 value={difficulty}
                 onChange={(event) =>
                   setDifficulty(event.target.value as DifficultyFilter)
                 }
                 aria-label="Filtrer par difficulté"
-                className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
               >
                 <option value="all">Toutes difficultés</option>
 
@@ -544,13 +543,12 @@ export default function RecipesPage() {
                     {level}
                   </option>
                 ))}
-              </select>
+              </Select>
 
-              <select
+              <Select
                 value={maxTime}
                 onChange={(event) => setMaxTime(Number(event.target.value))}
                 aria-label="Filtrer par temps maximum"
-                className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
               >
                 <option value={0}>Tous les temps</option>
 
@@ -561,18 +559,17 @@ export default function RecipesPage() {
                       : `≤ ${minutes / 60} h`}
                   </option>
                 ))}
-              </select>
+              </Select>
 
-              <select
+              <Select
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortOption)}
                 aria-label="Trier les recettes"
-                className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-4 text-base text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 sm:px-5"
               >
                 <option value="name">Trier par nom</option>
                 <option value="time">Temps le plus court</option>
                 <option value="difficulty">Difficulté</option>
-              </select>
+              </Select>
             </div>
 
             {availableTags.length > 0 && (
