@@ -6,6 +6,7 @@ import TrialBanner from './components/layout/TrialBanner'
 import Footer from './components/layout/Footer'
 import BottomNav from './components/layout/BottomNav'
 import ProtectedRoute from './components/ProtectedRoute'
+import PremiumRoute from './components/PremiumRoute'
 import ScrollToTop from './components/ScrollToTop'
 import PageSkeleton from './components/ui/PageSkeleton'
 
@@ -97,9 +98,23 @@ export default function App() {
 
           <Route path="/recipes" element={<RecipesPage />} />
           <Route path="/recipes/:id" element={<RecipeDetailsPage />} />
-          <Route path="/frigo" element={<FridgePage />} />
+          <Route
+            path="/frigo"
+            element={
+              <PremiumRoute>
+                <FridgePage />
+              </PremiumRoute>
+            }
+          />
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/shopping-list" element={<ShoppingListPage />} />
+          <Route
+            path="/shopping-list"
+            element={
+              <PremiumRoute>
+                <ShoppingListPage />
+              </PremiumRoute>
+            }
+          />
           <Route path="/users/:userId" element={<PublicProfilePage />} />
           <Route
             path="/admin"
@@ -125,45 +140,45 @@ export default function App() {
           <Route
             path="/add-recipe"
             element={
-              <ProtectedRoute>
+              <PremiumRoute>
                 <AddRecipePage />
-              </ProtectedRoute>
+              </PremiumRoute>
             }
           />
 
           <Route
             path="/recipes/:id/edit"
             element={
-              <ProtectedRoute>
+              <PremiumRoute>
                 <EditRecipePage />
-              </ProtectedRoute>
+              </PremiumRoute>
             }
           />
 
           <Route
             path="/my-recipes"
             element={
-              <ProtectedRoute>
+              <PremiumRoute>
                 <MyRecipesPage />
-              </ProtectedRoute>
+              </PremiumRoute>
             }
           />
 
           <Route
             path="/favorites"
             element={
-              <ProtectedRoute>
+              <PremiumRoute>
                 <FavoritesPage />
-              </ProtectedRoute>
+              </PremiumRoute>
             }
           />
 
           <Route
             path="/planning"
             element={
-              <ProtectedRoute>
+              <PremiumRoute>
                 <MealPlannerPage />
-              </ProtectedRoute>
+              </PremiumRoute>
             }
           />
 

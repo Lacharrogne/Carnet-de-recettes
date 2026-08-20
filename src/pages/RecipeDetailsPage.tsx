@@ -8,6 +8,7 @@ import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
+import { useEntitlement } from '../lib/useEntitlement'
 import { useFavorites } from '../context/useFavorites'
 import { scaleIngredientText } from '../lib/ingredientScaling'
 import { useWakeLock } from '../lib/useWakeLock'
@@ -37,6 +38,7 @@ export default function RecipeDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { hasAccess } = useEntitlement()
   const { isFavorite: isFavoriteCtx, toggleFavorite: toggleFavoriteCtx } =
     useFavorites()
 
@@ -267,6 +269,11 @@ export default function RecipeDetailsPage() {
 
     if (!recipe) return
 
+    if (!hasAccess) {
+      navigate('/premium')
+      return
+    }
+
     try {
       setFavoriteLoading(true)
       setErrorMessage('')
@@ -299,6 +306,11 @@ export default function RecipeDetailsPage() {
     }
 
     if (!recipe) return
+
+    if (!hasAccess) {
+      navigate('/premium')
+      return
+    }
 
     try {
       setAddingIngredientIndex(index)
@@ -333,6 +345,11 @@ export default function RecipeDetailsPage() {
     }
 
     if (!recipe) return
+
+    if (!hasAccess) {
+      navigate('/premium')
+      return
+    }
 
     const currentPlanner = getSavedPlanner()
     const currentRecipeId =

@@ -5,6 +5,7 @@ import App from './App'
 import './index.css'
 import { initCursor } from './lib/cursorPreference'
 import { AuthProvider } from './context/AuthContext'
+import EntitlementProvider from './context/EntitlementProvider'
 import FavoritesProvider from './context/FavoritesProvider'
 import ToastProvider from './context/ToastProvider'
 import { Analytics } from '@vercel/analytics/react'
@@ -16,12 +17,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <FavoritesProvider>
-          <ToastProvider>
-            <Analytics />
-            <App />
-          </ToastProvider>
-        </FavoritesProvider>
+        <EntitlementProvider>
+          <FavoritesProvider>
+            <ToastProvider>
+              <Analytics />
+              <App />
+            </ToastProvider>
+          </FavoritesProvider>
+        </EntitlementProvider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>,

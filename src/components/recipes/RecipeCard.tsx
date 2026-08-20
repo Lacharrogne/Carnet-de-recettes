@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/useAuth'
+import { useEntitlement } from '../../lib/useEntitlement'
 import { useFavorites } from '../../context/useFavorites'
 import { useToast } from '../../context/useToast'
 import { getRecipeCardStyle } from '../../data/categoryStyles'
@@ -26,6 +27,7 @@ export default function RecipeCard({
 }: RecipeCardProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { hasAccess } = useEntitlement()
   const { isFavorite, toggleFavorite } = useFavorites()
   const { showToast } = useToast()
 
@@ -70,6 +72,15 @@ export default function RecipeCard({
   async function handleFavoriteClick() {
     if (!user) {
       navigate('/auth')
+      return
+    }
+
+    if (!hasAccess) {
+      showToast({
+        message: 'Les favoris font partie de l’abonnement.',
+        tone: 'info',
+      })
+      navigate('/premium')
       return
     }
 
