@@ -4,9 +4,12 @@ export type RecipeCategory =
   | 'Boisson'
   | 'Sucré'
   | 'Petit-déjeuner'
-  | 'Healthy'
+  | 'Végétarien'
 
 export type Difficulty = 'Facile' | 'Moyen' | 'Difficile'
+
+/** Brouillon (visible du seul auteur) ou recette publiée (visible de tous). */
+export type RecipeStatus = 'draft' | 'published'
 
 export type Recipe = {
   id: number
@@ -24,4 +27,5 @@ export type Recipe = {
   ingredients: string[]
   steps: string[]
   relatedRecipeIds: number[]
+  status: RecipeStatus
 }

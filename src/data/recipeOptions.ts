@@ -4,12 +4,15 @@ export const RECIPE_CATEGORIES: {
   label: string
   value: RecipeCategory
   emoji: string
+  /** Badge illustré de la catégorie (repli sur l'emoji si l'image manque). */
+  image: string
   description: string
 }[] = [
   {
     label: 'Apéritifs & entrées',
     value: 'Entrée',
     emoji: '🥗',
+    image: '/categories/aperitifs-entrees.png',
     description:
       'Des petites recettes pour commencer le repas ou partager un apéritif.',
   },
@@ -17,6 +20,7 @@ export const RECIPE_CATEGORIES: {
     label: 'Plats & accompagnements',
     value: 'Plat',
     emoji: '🍝',
+    image: '/categories/plats-accompagnements.png',
     description:
       'Les recettes complètes du quotidien, avec leurs accompagnements.',
   },
@@ -24,6 +28,7 @@ export const RECIPE_CATEGORIES: {
     label: 'Desserts & goûters',
     value: 'Sucré',
     emoji: '🍰',
+    image: '/categories/desserts-gouters.png',
     description:
       'Des recettes sucrées pour finir le repas ou se faire plaisir.',
   },
@@ -31,6 +36,7 @@ export const RECIPE_CATEGORIES: {
     label: 'Petit-déjeuner & brunch',
     value: 'Petit-déjeuner',
     emoji: '🥞',
+    image: '/categories/petit-dejeuner-brunch.png',
     description:
       'Des idées pour le matin, le brunch ou les petits-déjeuners gourmands.',
   },
@@ -38,15 +44,17 @@ export const RECIPE_CATEGORIES: {
     label: 'Boissons',
     value: 'Boisson',
     emoji: '🥤',
+    image: '/categories/boissons.png',
     description:
       'Des boissons fraîches, chaudes ou originales à préparer à la maison.',
   },
   {
-    label: 'Healthy',
-    value: 'Healthy',
-    emoji: '🥦',
+    label: 'Vegan & Végétarien',
+    value: 'Végétarien',
+    emoji: '🌱',
+    image: '/categories/vegan-vegetarien.png',
     description:
-      'Des recettes plus équilibrées, légères ou riches en bons ingrédients.',
+      'Des recettes gourmandes sans viande — vegan ou végétariennes, pour se régaler autrement.',
   },
 ]
 

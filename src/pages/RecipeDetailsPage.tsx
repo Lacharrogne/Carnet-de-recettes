@@ -4,19 +4,22 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import PrintableRecipeSheet from '../components/recipes/PrintableRecipeSheet'
 import RecipeCard from '../components/recipes/RecipeCard'
 import RecipeReviews from '../components/reviews/RecipeReviews'
+import RecipeSeo from '../components/recipes/RecipeSeo'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import Select from '../components/ui/Select'
 import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
+import { useEntitlement } from '../lib/useEntitlement'
 import { useFavorites } from '../context/useFavorites'
 import { scaleIngredientText } from '../lib/ingredientScaling'
+import { useWakeLock } from '../lib/useWakeLock'
 import { findLinkedRecipe } from '../lib/recipeLinks'
 import {
   formatTimerTime,
   getStepTimers,
   type StepTimer,
 } from '../lib/stepTimers'
-import { useDocumentTitle } from '../lib/useDocumentTitle'
 import {
   DAYS,
   MEALS,
@@ -28,14 +31,23 @@ import {
   type MealKey,
 } from '../lib/weeklyPlanner'
 import { getProfile, type UserProfile } from '../services/profiles'
-import { deleteRecipe, getRecipeById, getRecipes } from '../services/recipes'
+import {
+  deleteRecipe,
+  duplicateRecipe,
+  getRecipeById,
+  getRecipes,
+} from '../services/recipes'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
+import { getRecipeNote, saveRecipeNote } from '../services/recipeNotes'
+import AddToCollectionMenu from '../components/recipes/AddToCollectionMenu'
+import RecipeNutritionCard from '../components/recipes/RecipeNutritionCard'
 import type { Recipe } from '../types/recipe'
 
 export default function RecipeDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { hasAccess } = useEntitlement()
   const { isFavorite: isFavoriteCtx, toggleFavorite: toggleFavoriteCtx } =
     useFavorites()
 
@@ -47,7 +59,6 @@ export default function RecipeDetailsPage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [authorProfile, setAuthorProfile] = useState<UserProfile | null>(null)
 
-  useDocumentTitle(recipe?.title)
   const [similarRecipes, setSimilarRecipes] = useState<Recipe[]>([])
   const [allRecipes, setAllRecipes] = useState<Recipe[]>([])
 
@@ -56,7 +67,13 @@ export default function RecipeDetailsPage() {
   const [successMessage, setSuccessMessage] = useState('')
 
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isDuplicating, setIsDuplicating] = useState(false)
   const [favoriteLoading, setFavoriteLoading] = useState(false)
+
+  const [noteText, setNoteText] = useState('')
+  const [noteInitial, setNoteInitial] = useState('')
+  const [savingNote, setSavingNote] = useState(false)
+  const [noteSaved, setNoteSaved] = useState(false)
   const [addingIngredientIndex, setAddingIngredientIndex] = useState<
     number | null
   >(null)
@@ -70,6 +87,9 @@ export default function RecipeDetailsPage() {
 
   const [guidedCookingOpen, setGuidedCookingOpen] = useState(false)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
+
+  // Maintient l'écran allumé pendant la cuisine guidée.
+  const screenKeptAwake = useWakeLock(guidedCookingOpen)
 
   const [activeTimerSeconds, setActiveTimerSeconds] = useState<number | null>(
     null,
@@ -263,6 +283,11 @@ export default function RecipeDetailsPage() {
 
     if (!recipe) return
 
+    if (!hasAccess) {
+      navigate('/premium')
+      return
+    }
+
     try {
       setFavoriteLoading(true)
       setErrorMessage('')
@@ -285,6 +310,88 @@ export default function RecipeDetailsPage() {
     }
   }
 
+  // Charge la note personnelle privée pour cette recette.
+  useEffect(() => {
+    let ignore = false
+
+    if (!user || !recipe) {
+      setNoteText('')
+      setNoteInitial('')
+      return
+    }
+
+    getRecipeNote(recipe.id).then((note) => {
+      if (!ignore) {
+        setNoteText(note)
+        setNoteInitial(note)
+      }
+    })
+
+    return () => {
+      ignore = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, recipe?.id])
+
+  async function handleSaveNote() {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+
+    if (!hasAccess) {
+      navigate('/premium')
+      return
+    }
+
+    if (!recipe) return
+
+    try {
+      setSavingNote(true)
+      setNoteSaved(false)
+      setErrorMessage('')
+
+      await saveRecipeNote(recipe.id, noteText)
+
+      setNoteInitial(noteText)
+      setNoteSaved(true)
+      window.setTimeout(() => setNoteSaved(false), 2500)
+    } catch (error) {
+      console.error(error)
+      setErrorMessage("Impossible d'enregistrer la note.")
+    } finally {
+      setSavingNote(false)
+    }
+  }
+
+  async function handleDuplicate() {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+
+    if (!hasAccess) {
+      navigate('/premium')
+      return
+    }
+
+    if (!recipe) return
+
+    try {
+      setIsDuplicating(true)
+      setErrorMessage('')
+
+      const copy = await duplicateRecipe(recipe)
+
+      // On ouvre la copie (brouillon) pour l'adapter puis la publier.
+      navigate(`/recipes/${copy.id}/edit`)
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible de dupliquer la recette.')
+      setIsDuplicating(false)
+    }
+  }
+
   async function handleAddIngredientToShoppingList(
     ingredient: string,
     index: number,
@@ -296,6 +403,11 @@ export default function RecipeDetailsPage() {
 
     if (!recipe) return
 
+    if (!hasAccess) {
+      navigate('/premium')
+      return
+    }
+
     try {
       setAddingIngredientIndex(index)
       setErrorMessage('')
@@ -306,9 +418,9 @@ export default function RecipeDetailsPage() {
       ])
 
       if (addedItems.length === 0) {
-        showSuccessMessage(`"${ingredient}" est déjà dans ta liste de courses.`)
+        showSuccessMessage(`"${ingredient}" est déjà dans votre liste de courses.`)
       } else {
-        showSuccessMessage(`"${ingredient}" a été ajouté à ta liste de courses.`)
+        showSuccessMessage(`"${ingredient}" a été ajouté à votre liste de courses.`)
       }
     } catch (error) {
       console.error(error)
@@ -330,6 +442,11 @@ export default function RecipeDetailsPage() {
 
     if (!recipe) return
 
+    if (!hasAccess) {
+      navigate('/premium')
+      return
+    }
+
     const currentPlanner = getSavedPlanner()
     const currentRecipeId =
       currentPlanner[selectedPlanningDay][selectedPlanningMeal]
@@ -339,7 +456,7 @@ export default function RecipeDetailsPage() {
 
     if (currentRecipeId && currentRecipeId !== String(recipe.id)) {
       const confirmReplace = window.confirm(
-        `Il y a déjà une recette prévue pour ${dayLabel.toLowerCase()} ${mealLabel.toLowerCase()}.\n\nVeux-tu vraiment la remplacer par "${recipe.title}" ?`,
+        `Il y a déjà une recette prévue pour ${dayLabel.toLowerCase()} ${mealLabel.toLowerCase()}.\n\nVoulez-vous vraiment la remplacer par "${recipe.title}" ?`,
       )
 
       if (!confirmReplace) {
@@ -484,13 +601,41 @@ export default function RecipeDetailsPage() {
     }
   }
 
+  async function handleShare() {
+    if (!recipe) return
+
+    const url = window.location.href
+    const shareData: ShareData = {
+      title: recipe.title,
+      text: recipe.description
+        ? `${recipe.title} — ${recipe.description}`
+        : `${recipe.title} — une recette à découvrir sur Carnet de recettes`,
+      url,
+    }
+
+    // Partage natif (feuille de partage du système) si dispo, sinon on copie.
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share(shareData)
+      } catch (error) {
+        // L'utilisateur a annulé la feuille de partage : on ignore.
+        if ((error as Error)?.name !== 'AbortError') {
+          console.error(error)
+        }
+      }
+      return
+    }
+
+    await handleCopyLink()
+  }
+
   function handlePrint() {
     window.print()
   }
 
   if (invalidRecipeId) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-bark">
         <Alert tone="error" className="mb-6">
           Recette introuvable.
         </Alert>
@@ -511,7 +656,7 @@ export default function RecipeDetailsPage() {
 
   if (!recipe) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-bark">
         <Alert tone="error" className="mb-6">
           {errorMessage || 'Recette introuvable.'}
         </Alert>
@@ -553,6 +698,7 @@ export default function RecipeDetailsPage() {
 
   return (
     <>
+    <RecipeSeo recipe={recipe} authorName={authorProfile?.username || undefined} />
     <PrintableRecipeSheet
       recipe={recipe}
       imageToDisplay={typeof imageToDisplay === 'string' ? imageToDisplay : undefined}
@@ -577,13 +723,13 @@ export default function RecipeDetailsPage() {
               <button
                 type="button"
                 onClick={closeGuidedCooking}
-                className="w-full rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-orange-700 shadow-sm transition hover:bg-orange-50 sm:w-auto"
+                className="w-full rounded-full bg-card ring-1 ring-bark px-5 py-3 font-black text-orange-700 shadow-sm transition hover:bg-orange-50 sm:w-auto"
               >
                 Quitter
               </button>
             </div>
 
-            <div className="mb-5 rounded-full bg-white p-2 shadow-sm ring-1 ring-orange-100 sm:mb-8">
+            <div className="mb-5 rounded-full bg-white p-2 shadow-sm ring-1 ring-bark sm:mb-8">
               <div
                 className="h-3 rounded-full bg-orange-500 transition-all sm:h-4"
                 style={{ width: `${guidedProgress}%` }}
@@ -591,7 +737,7 @@ export default function RecipeDetailsPage() {
             </div>
 
             <div className="grid flex-1 gap-5 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
-              <aside className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-6">
+              <aside className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:rounded-[2rem] sm:p-6">
                 <p className="font-black text-orange-600">Ingrédients</p>
 
                 <p className="mt-1 text-sm font-semibold text-stone-500">
@@ -611,16 +757,27 @@ export default function RecipeDetailsPage() {
                 </ul>
               </aside>
 
-              <main className="flex flex-col justify-between rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:p-8 md:rounded-[2.5rem] md:p-10">
+              <main className="flex flex-col justify-between rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-8 md:rounded-[2.5rem] md:p-10">
                 <div>
                   <div className="mb-5 flex flex-wrap items-center justify-between gap-3 sm:mb-6">
                     <span className="rounded-full bg-orange-100 px-4 py-2 text-sm font-black text-orange-700 sm:px-5">
                       Étape {currentStepIndex + 1} sur {recipe.steps.length}
                     </span>
 
-                    <span className="rounded-full bg-cream-50 px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 sm:px-5">
-                      {guidedProgress} %
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {screenKeptAwake && (
+                        <span
+                          title="L’écran reste allumé pendant la cuisine"
+                          className="rounded-full bg-green-50 px-4 py-2 text-sm font-black text-green-700 ring-1 ring-green-100 sm:px-5"
+                        >
+                          🔆 Écran allumé
+                        </span>
+                      )}
+
+                      <span className="rounded-full bg-cream-50 px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-bark sm:px-5">
+                        {guidedProgress} %
+                      </span>
+                    </div>
                   </div>
 
                   <p className="text-2xl font-black leading-relaxed text-stone-950 sm:text-3xl md:text-5xl md:leading-relaxed">
@@ -628,7 +785,7 @@ export default function RecipeDetailsPage() {
                   </p>
 
                   {currentStepTimers.length > 0 && (
-                    <div className="mt-6 rounded-[1.75rem] bg-cream-50 p-5 ring-1 ring-orange-100 sm:mt-8 sm:rounded-[2rem]">
+                    <div className="mt-6 rounded-[1.75rem] bg-cream-50 p-5 ring-1 ring-bark sm:mt-8 sm:rounded-[2rem]">
                       <p className="font-black text-orange-600">
                         Minuteur détecté
                       </p>
@@ -694,7 +851,7 @@ export default function RecipeDetailsPage() {
                     type="button"
                     onClick={goToPreviousStep}
                     disabled={currentStepIndex === 0}
-                    className="rounded-full border border-orange-200 bg-white px-6 py-4 font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-full bg-card ring-1 ring-bark px-6 py-4 font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     ← Précédent
                   </button>
@@ -727,7 +884,7 @@ export default function RecipeDetailsPage() {
         <div className="print:hidden">
           <Link
             to="/recipes"
-            className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 font-bold text-orange-700 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 font-bold text-orange-700 shadow-sm ring-1 ring-bark transition hover:bg-orange-50 sm:w-auto"
           >
             ← Retour aux recettes
           </Link>
@@ -745,24 +902,27 @@ export default function RecipeDetailsPage() {
           </Alert>
         )}
 
-        <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-card ring-1 ring-bark sm:rounded-[2.5rem]">
-          <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="relative min-h-[260px] bg-cream-200 sm:min-h-[340px]">
+        <div className="space-y-8">
+          <div className="min-w-0 space-y-8">
+          <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-card ring-1 ring-bark sm:rounded-[2.5rem]">
+          <div>
+            <div className="relative w-full bg-cream-200">
               {typeof imageToDisplay === 'string' &&
               imageToDisplay.startsWith('http') ? (
                 <img
                   src={imageToDisplay}
                   alt={recipe.title}
-                  className="h-full max-h-[360px] min-h-[260px] w-full object-cover sm:max-h-[560px] sm:min-h-[340px] lg:h-full"
+                  className="h-72 w-full object-cover sm:h-96 lg:h-[30rem]"
                 />
               ) : (
-                <div className="flex min-h-[260px] items-center justify-center text-7xl sm:min-h-[340px] sm:text-8xl">
+                <div className="flex h-72 items-center justify-center text-7xl sm:h-96 sm:text-8xl lg:h-[30rem]">
                   {recipe.image || '🍽️'}
                 </div>
               )}
             </div>
 
-            <div className="flex flex-col justify-center px-5 py-7 sm:px-6 sm:py-8 lg:px-10">
+            <div className="px-5 py-7 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
+              <div className="min-w-0">
               <div className="mb-5 flex flex-wrap items-center gap-2 sm:gap-3">
                 <span className="rounded-full bg-terracotta-soft px-4 py-2 text-xs font-bold text-terracotta-deep sm:text-sm">
                   {recipe.category}
@@ -788,7 +948,7 @@ export default function RecipeDetailsPage() {
               {recipe.userId && (
                 <Link
                   to={`/users/${recipe.userId}`}
-                  className="mt-6 block rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 transition hover:bg-orange-50 print:hidden sm:mt-7 sm:rounded-[2rem] sm:p-5"
+                  className="mt-6 block rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-bark transition hover:bg-orange-50 print:hidden sm:mt-7 sm:rounded-[2rem] sm:p-5"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-xl font-black text-white ring-2 ring-white sm:h-16 sm:w-16 sm:text-2xl">
@@ -826,8 +986,8 @@ export default function RecipeDetailsPage() {
                 </Link>
               )}
 
-              <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4 lg:grid-cols-4">
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+              <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
+                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-bark sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Préparation
                   </p>
@@ -837,7 +997,7 @@ export default function RecipeDetailsPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-bark sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Cuisson
                   </p>
@@ -847,7 +1007,7 @@ export default function RecipeDetailsPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-bark sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Total
                   </p>
@@ -857,7 +1017,7 @@ export default function RecipeDetailsPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-orange-100 sm:rounded-[1.5rem]">
+                <div className="rounded-[1.35rem] bg-white px-4 py-4 shadow-sm ring-1 ring-bark sm:rounded-[1.5rem]">
                   <p className="text-xs font-medium text-stone-500 sm:text-sm">
                     Portions
                   </p>
@@ -880,8 +1040,13 @@ export default function RecipeDetailsPage() {
                   ))}
                 </div>
               )}
+              </div>
 
-              <div className="mt-7 rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-5">
+                        </div>
+          </div>
+        </article>
+
+        <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-bark print:hidden sm:rounded-[2rem] sm:p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
                     Actions rapides
@@ -889,170 +1054,134 @@ export default function RecipeDetailsPage() {
 
                   {isOwner && (
                     <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
-                      Ta recette
+                      Votre recette
                     </span>
                   )}
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-4">
                   <Button
                     type="button"
                     onClick={openGuidedCooking}
                     disabled={recipe.steps.length === 0}
                     fullWidth
+                    size="lg"
                   >
                     <span>▶</span>
                     <span>Lancer la recette</span>
                   </Button>
 
-                  <Button
-                    type="button"
-                    onClick={handleToggleFavorite}
-                    disabled={favoriteLoading}
-                    variant="secondary"
-                    fullWidth
-                  >
-                    <span>{isFavorite ? '♥' : '♡'}</span>
-
-                    <span>
-                      {isFavorite
-                        ? 'Retirer des favoris'
-                        : 'Ajouter aux favoris'}
-                    </span>
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handleCopyLink}
-                    variant="ghost"
-                    fullWidth
-                  >
-                    🔗 Copier le lien
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handlePrint}
-                    variant="ghost"
-                    fullWidth
-                  >
-                    🖨️ Imprimer
-                  </Button>
-
-                  {isOwner && (
-                    <>
-                      <Button
-                        to={`/recipes/${recipe.id}/edit`}
-                        variant="secondary"
-                        fullWidth
+                  <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
+                    <button
+                      type="button"
+                      onClick={handleToggleFavorite}
+                      disabled={favoriteLoading}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <span
+                        className={`flex h-11 w-11 items-center justify-center rounded-full text-xl transition group-hover:scale-110 ${
+                          isFavorite
+                            ? 'bg-terracotta text-white'
+                            : 'bg-terracotta-soft text-terracotta-deep'
+                        }`}
                       >
-                        ✏️ Modifier
-                      </Button>
+                        {isFavorite ? '♥' : '♡'}
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        Favoris
+                      </span>
+                    </button>
 
-                      <Button
-                        type="button"
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        variant="danger"
-                        fullWidth
-                      >
-                        🗑️ {isDeleting ? 'Suppression...' : 'Supprimer'}
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
+                    <button
+                      type="button"
+                      onClick={handleShare}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-honey-soft text-xl transition group-hover:scale-110">
+                        📤
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        Partager
+                      </span>
+                    </button>
 
-              <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
-                      Planning de semaine
-                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCopyLink}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-honey-soft text-xl transition group-hover:scale-110">
+                        🔗
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        Copier
+                      </span>
+                    </button>
 
-                    <h2 className="mt-2 text-xl font-black text-stone-950 sm:text-2xl">
-                      Ajouter cette recette au planning
-                    </h2>
+                    <button
+                      type="button"
+                      onClick={handlePrint}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-sage-soft text-xl transition group-hover:scale-110">
+                        🖨️
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        Imprimer
+                      </span>
+                    </button>
 
-                    <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
-                      Choisis un jour et un repas pour retrouver cette recette
-                      dans ton planning.
-                    </p>
+                    <button
+                      type="button"
+                      onClick={handleDuplicate}
+                      disabled={isDuplicating}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-terracotta-soft text-xl transition group-hover:scale-110">
+                        📄
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        {isDuplicating ? '…' : 'Dupliquer'}
+                      </span>
+                    </button>
+
+                    <AddToCollectionMenu recipeId={recipe.id} />
+
+                    {isOwner && (
+                      <>
+                        <Link
+                          to={`/recipes/${recipe.id}/edit`}
+                          className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40"
+                        >
+                          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-honey-soft text-xl transition group-hover:scale-110">
+                            ✏️
+                          </span>
+                          <span className="text-xs font-bold leading-tight text-cacao">
+                            Modifier
+                          </span>
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                          className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-[#e9c4bc] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f7e3de] text-xl transition group-hover:scale-110">
+                            🗑️
+                          </span>
+                          <span className="text-xs font-bold leading-tight text-[#b23b2e]">
+                            {isDeleting ? '…' : 'Supprimer'}
+                          </span>
+                        </button>
+                      </>
+                    )}
                   </div>
-
-                  <Link
-                    to="/planning"
-                    className="w-full rounded-full border border-orange-200 bg-cream-50 px-5 py-3 text-center text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
-                  >
-                    Voir le planning
-                  </Link>
                 </div>
-
-                <div className="mt-5 space-y-4">
-  <div>
-    <p className="mb-2 text-sm font-black uppercase tracking-wide text-stone-500">
-      Jour
-    </p>
-
-    <select
-      value={selectedPlanningDay}
-      onChange={(event) =>
-        setSelectedPlanningDay(event.target.value as DayKey)
-      }
-      aria-label="Jour du planning"
-      className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-4 font-bold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-    >
-      {DAYS.map((day) => (
-        <option key={day.key} value={day.key}>
-          {day.label}
-        </option>
-      ))}
-    </select>
-  </div>
-
-  <div>
-    <p className="mb-2 text-sm font-black uppercase tracking-wide text-stone-500">
-      Repas
-    </p>
-
-    <div className="grid grid-cols-2 gap-3">
-      {MEALS.map((meal) => {
-        const isSelected = selectedPlanningMeal === meal.key
-
-        return (
-          <button
-            key={meal.key}
-            type="button"
-            onClick={() => setSelectedPlanningMeal(meal.key)}
-            className={`rounded-2xl px-4 py-4 text-left font-black transition ${
-              isSelected
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-cream-50 text-stone-800 ring-1 ring-orange-100 hover:bg-orange-50'
-            }`}
-          >
-            <span className="block text-2xl">{meal.emoji}</span>
-            <span className="mt-2 block">{meal.label}</span>
-          </button>
-        )
-      })}
-    </div>
-  </div>
-
-  <button
-    type="button"
-    onClick={handleAddRecipeToPlanning}
-    className="w-full rounded-2xl bg-orange-500 px-6 py-4 font-black text-white shadow-sm transition hover:bg-orange-600"
-  >
-    Ajouter au planning
-  </button>
-</div>
               </div>
-            </div>
-          </div>
-        </article>
 
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
-          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:p-6">
+          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-6">
             <div>
               <p className="font-bold text-orange-600">À préparer</p>
 
@@ -1061,12 +1190,12 @@ export default function RecipeDetailsPage() {
               </h2>
 
               <p className="mt-1 text-sm leading-6 text-stone-500 print:hidden">
-                Clique sur + pour ajouter uniquement les ingrédients souhaités à
-                ta liste de courses.
+                Cliquez sur + pour ajouter uniquement les ingrédients souhaités à
+                votre liste de courses.
               </p>
             </div>
 
-            <div className="mt-6 rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100 print:hidden sm:p-5">
+            <div className="mt-6 rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark print:hidden sm:p-5">
               <p className="text-sm font-black uppercase tracking-wide text-orange-600">
                 Adapter les portions
               </p>
@@ -1082,12 +1211,12 @@ export default function RecipeDetailsPage() {
                   type="button"
                   onClick={decreaseServings}
                   disabled={selectedServings <= 1}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-orange-200 bg-white text-xl font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-card ring-1 ring-bark text-xl font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   −
                 </button>
 
-                <div className="flex-1 rounded-full bg-white px-5 py-3 text-center font-black text-stone-950 shadow-sm ring-1 ring-orange-100 sm:flex-none sm:px-6">
+                <div className="flex-1 rounded-full bg-white px-5 py-3 text-center font-black text-stone-950 shadow-sm ring-1 ring-bark sm:flex-none sm:px-6">
                   {selectedServings} personne{selectedServings > 1 ? 's' : ''}
                 </div>
 
@@ -1102,7 +1231,7 @@ export default function RecipeDetailsPage() {
                 <button
                   type="button"
                   onClick={resetServings}
-                  className="w-full rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
+                  className="w-full rounded-full bg-card ring-1 ring-bark px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
                 >
                   Revenir à {recipe.servings} pers.
                 </button>
@@ -1117,7 +1246,7 @@ export default function RecipeDetailsPage() {
                     className={`rounded-full px-3 py-2 text-sm font-black transition sm:px-4 ${
                       selectedServings === servingValue
                         ? 'bg-orange-500 text-white'
-                        : 'bg-white text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
+                        : 'bg-white text-orange-700 ring-1 ring-bark hover:bg-orange-50'
                     }`}
                   >
                     {servingValue}
@@ -1179,7 +1308,7 @@ export default function RecipeDetailsPage() {
             )}
           </section>
 
-          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 sm:p-6">
+          <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-bold text-orange-600">En cuisine</p>
@@ -1189,14 +1318,14 @@ export default function RecipeDetailsPage() {
                 </h2>
               </div>
 
-              <button
+              <Button
                 type="button"
                 onClick={openGuidedCooking}
                 disabled={recipe.steps.length === 0}
-                className="w-full rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden sm:w-auto"
+                className="w-full print:hidden sm:w-auto"
               >
                 ▶ Lancer
-              </button>
+              </Button>
             </div>
 
             {recipe.steps.length > 0 ? (
@@ -1204,7 +1333,7 @@ export default function RecipeDetailsPage() {
                 {recipe.steps.map((step, index) => (
                   <li
                     key={`${step}-${index}`}
-                    className="flex gap-3 rounded-[1.4rem] bg-cream-50 px-4 py-4 text-stone-700 ring-1 ring-orange-50 sm:gap-4"
+                    className="flex gap-3 rounded-[1.4rem] bg-cream-50 px-4 py-4 text-stone-700 ring-1 ring-bark/60 sm:gap-4"
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white">
                       {index + 1}
@@ -1220,6 +1349,143 @@ export default function RecipeDetailsPage() {
               <p className="mt-4 text-stone-500">Aucune étape renseignée.</p>
             )}
           </section>
+        </div>
+
+        </div>
+          <div>
+              <RecipeNutritionCard recipe={recipe} />
+
+              {user && (
+                <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-bark print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-honey-soft text-2xl">
+                      📝
+                    </span>
+
+                    <div>
+                      <h3 className="text-lg font-black text-stone-950">
+                        Mes notes
+                      </h3>
+                      <p className="text-sm text-stone-500">
+                        Privé — visible de vous seul.
+                      </p>
+                    </div>
+                  </div>
+
+                  <textarea
+                    value={noteText}
+                    onChange={(event) => {
+                      setNoteText(event.target.value)
+                      setNoteSaved(false)
+                    }}
+                    rows={4}
+                    placeholder="Vos ajustements : « la prochaine fois, moins de sucre »…"
+                    className="mt-4 w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 text-cacao outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
+                  />
+
+                  {noteSaved && (
+                    <p className="mt-2 text-sm font-semibold text-sage-deep">
+                      Note enregistrée ✓
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleSaveNote}
+                    disabled={savingNote || noteText === noteInitial}
+                    className="mt-3 w-full rounded-full bg-terracotta px-6 py-3 font-bold text-white shadow-soft transition hover:bg-terracotta-deep disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {savingNote ? 'Enregistrement...' : 'Enregistrer ma note'}
+                  </button>
+                </div>
+              )}
+
+              <div className="mt-7 rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-bark print:hidden sm:mt-8 sm:rounded-[2rem] sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
+                      Planning de semaine
+                    </p>
+
+                    <h2 className="mt-2 text-xl font-black text-stone-950 sm:text-2xl">
+                      Ajouter cette recette au planning
+                    </h2>
+
+                    <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
+                      Choisissez un jour et un repas pour retrouver cette recette
+                      dans votre planning.
+                    </p>
+                  </div>
+
+                  <Link
+                    to="/planning"
+                    className="w-full rounded-full ring-1 ring-bark bg-cream-50 px-5 py-3 text-center text-sm font-bold text-orange-700 transition hover:bg-orange-50 sm:w-auto"
+                  >
+                    Voir le planning
+                  </Link>
+                </div>
+
+                <div className="mt-5 space-y-4">
+  <div>
+    <p className="mb-2 text-sm font-black uppercase tracking-wide text-stone-500">
+      Jour
+    </p>
+
+    <Select
+      value={selectedPlanningDay}
+      onChange={(event) =>
+        setSelectedPlanningDay(event.target.value as DayKey)
+      }
+      aria-label="Jour du planning"
+    >
+      {DAYS.map((day) => (
+        <option key={day.key} value={day.key}>
+          {day.label}
+        </option>
+      ))}
+    </Select>
+  </div>
+
+  <div>
+    <p className="mb-2 text-sm font-black uppercase tracking-wide text-stone-500">
+      Repas
+    </p>
+
+    <div className="grid grid-cols-2 gap-3">
+      {MEALS.map((meal) => {
+        const isSelected = selectedPlanningMeal === meal.key
+
+        return (
+          <button
+            key={meal.key}
+            type="button"
+            onClick={() => setSelectedPlanningMeal(meal.key)}
+            className={`rounded-2xl px-4 py-4 text-left font-black transition ${
+              isSelected
+                ? 'bg-orange-500 text-white shadow-sm'
+                : 'bg-cream-50 text-stone-800 ring-1 ring-bark hover:bg-orange-50'
+            }`}
+          >
+            <span className="block text-2xl">{meal.emoji}</span>
+            <span className="mt-2 block">{meal.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  </div>
+
+  <Button
+    type="button"
+    size="lg"
+    fullWidth
+    onClick={handleAddRecipeToPlanning}
+  >
+    Ajouter au planning
+  </Button>
+</div>
+              </div>
+
+          </div>
         </div>
 
         <RecipeReviews recipeId={recipe.id} />

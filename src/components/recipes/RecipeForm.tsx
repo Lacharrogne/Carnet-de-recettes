@@ -14,7 +14,16 @@ import {
   RECIPE_TAG_GROUPS,
 } from '../../data/recipeOptions'
 import type { Difficulty, Recipe, RecipeCategory } from '../../types/recipe'
+import {
+  clearRecipeDraftSnapshot,
+  loadRecipeDraftSnapshot,
+  saveRecipeDraftSnapshot,
+  snapshotHasContent,
+} from '../../lib/recipeDraftAutosave'
 import Alert from '../ui/Alert'
+import { EmojiPicker } from '../ui/EmojiPicker'
+import Select from '../ui/Select'
+import ImageCropper from './ImageCropper'
 
 export type RecipeFormValues = {
   title: string
@@ -40,6 +49,12 @@ type RecipeFormProps = {
   // Autres recettes proposées pour créer des liens manuels.
   availableRecipes?: Recipe[]
   onSubmit: (values: RecipeFormValues) => Promise<void>
+  // Enregistrement en brouillon (facultatif) : n'exige qu'un titre.
+  onSaveDraft?: (values: RecipeFormValues) => Promise<void>
+  isSavingDraft?: boolean
+  draftLabel?: string
+  // Sauvegarde automatique locale du formulaire (création uniquement).
+  autosave?: boolean
 }
 
 const inputClass =
@@ -60,59 +75,93 @@ export default function RecipeForm({
   errorMessage,
   availableRecipes = [],
   onSubmit,
+  onSaveDraft,
+  isSavingDraft = false,
+  draftLabel = 'Enregistrer le brouillon',
+  autosave = false,
 }: RecipeFormProps) {
   const ingredientInputRefs = useRef<Array<HTMLInputElement | null>>([])
   const stepTextareaRefs = useRef<Array<HTMLTextAreaElement | null>>([])
   const ingredientFocusIndexRef = useRef<number | null>(null)
   const stepFocusIndexRef = useRef<number | null>(null)
 
-  const [title, setTitle] = useState(initialValues?.title ?? '')
+  // Sauvegarde auto (locale) : uniquement en création (pas en édition).
+  const autosaveEnabled = autosave && !initialValues
+  const restoredSnapshot = useMemo(
+    () => (autosaveEnabled ? loadRecipeDraftSnapshot() : null),
+    [autosaveEnabled],
+  )
+
+  const [title, setTitle] = useState(
+    initialValues?.title ?? restoredSnapshot?.title ?? '',
+  )
+  const [draftError, setDraftError] = useState('')
+  const [restoredNotice, setRestoredNotice] = useState(() =>
+    snapshotHasContent(restoredSnapshot),
+  )
 
   const [category, setCategory] = useState<RecipeCategory>(
-    initialValues?.category ?? DEFAULT_RECIPE_CATEGORY,
+    initialValues?.category ??
+      (restoredSnapshot?.category as RecipeCategory) ??
+      DEFAULT_RECIPE_CATEGORY,
   )
 
   const [difficulty, setDifficulty] = useState<Difficulty>(
-    initialValues?.difficulty ?? 'Facile',
+    initialValues?.difficulty ??
+      (restoredSnapshot?.difficulty as Difficulty) ??
+      'Facile',
   )
 
   const [prepTime, setPrepTime] = useState(
-    initialValues ? String(initialValues.prepTime) : '',
+    initialValues ? String(initialValues.prepTime) : restoredSnapshot?.prepTime ?? '',
   )
 
   const [cookTime, setCookTime] = useState(
-    initialValues ? String(initialValues.cookTime) : '',
+    initialValues ? String(initialValues.cookTime) : restoredSnapshot?.cookTime ?? '',
   )
 
   const [servings, setServings] = useState(
-    initialValues ? String(initialValues.servings) : '1',
+    initialValues
+      ? String(initialValues.servings)
+      : restoredSnapshot?.servings ?? '1',
   )
 
   const [description, setDescription] = useState(
-    initialValues?.description ?? '',
+    initialValues?.description ?? restoredSnapshot?.description ?? '',
   )
 
-  const [image, setImage] = useState(initialValues?.image ?? '🍽️')
+  const [image, setImage] = useState(
+    initialValues?.image ?? restoredSnapshot?.image ?? '🍽️',
+  )
 
   const [selectedTags, setSelectedTags] = useState<string[]>(
-    initialValues?.tags ?? [],
+    initialValues?.tags ?? restoredSnapshot?.tags ?? [],
   )
 
   const [ingredients, setIngredients] = useState<string[]>(
-    initialValues?.ingredients?.length ? initialValues.ingredients : [''],
+    initialValues?.ingredients?.length
+      ? initialValues.ingredients
+      : restoredSnapshot?.ingredients?.length
+        ? restoredSnapshot.ingredients
+        : [''],
   )
 
   const [steps, setSteps] = useState<string[]>(
-    initialValues?.steps?.length ? initialValues.steps : [''],
+    initialValues?.steps?.length
+      ? initialValues.steps
+      : restoredSnapshot?.steps?.length
+        ? restoredSnapshot.steps
+        : [''],
   )
 
   const [relatedRecipeIds, setRelatedRecipeIds] = useState<number[]>(
-    initialValues?.relatedRecipeIds ?? [],
+    initialValues?.relatedRecipeIds ?? restoredSnapshot?.relatedRecipeIds ?? [],
   )
 
   const [relatedSearch, setRelatedSearch] = useState('')
 
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
 
   const previewUrl = useMemo(() => {
     if (!imageFile) return null
@@ -358,10 +407,65 @@ export default function RecipeForm({
       .filter((value) => value.length > 0)
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  // Sauvegarde automatique (débounce) du formulaire tant qu'on saisit.
+  useEffect(() => {
+    if (!autosaveEnabled) return
 
-    await onSubmit({
+    const timeoutId = setTimeout(() => {
+      saveRecipeDraftSnapshot({
+        title,
+        category,
+        difficulty,
+        prepTime,
+        cookTime,
+        servings,
+        description,
+        image,
+        tags: selectedTags,
+        ingredients,
+        steps,
+        relatedRecipeIds,
+      })
+    }, 600)
+
+    return () => clearTimeout(timeoutId)
+  }, [
+    autosaveEnabled,
+    title,
+    category,
+    difficulty,
+    prepTime,
+    cookTime,
+    servings,
+    description,
+    image,
+    selectedTags,
+    ingredients,
+    steps,
+    relatedRecipeIds,
+  ])
+
+  function handleDiscardAutosave() {
+    clearRecipeDraftSnapshot()
+    setRestoredNotice(false)
+    setTitle('')
+    setCategory(DEFAULT_RECIPE_CATEGORY)
+    setDifficulty('Facile')
+    setPrepTime('')
+    setCookTime('')
+    setServings('1')
+    setDescription('')
+    setImage('🍽️')
+    setSelectedTags([])
+    setIngredients([''])
+    setSteps([''])
+    setRelatedRecipeIds([])
+    setImageFile(null)
+    setDraftError('')
+  }
+
+  function collectValues(): RecipeFormValues {
+    return {
       title: title.trim(),
       category,
       difficulty,
@@ -375,12 +479,46 @@ export default function RecipeForm({
       steps: cleanList(steps),
       relatedRecipeIds,
       imageFile,
-    })
+    }
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    await onSubmit(collectValues())
+  }
+
+  async function handleSaveDraft() {
+    if (!onSaveDraft) return
+
+    // Un brouillon n'exige qu'un titre (le reste est facultatif).
+    if (!title.trim()) {
+      setDraftError('Donne au moins un titre à ton brouillon pour l’enregistrer.')
+      return
+    }
+
+    setDraftError('')
+    await onSaveDraft(collectValues())
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-7">
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
+
+      {restoredNotice && (
+        <div className="flex flex-col gap-2 rounded-2xl bg-honey-soft px-4 py-3 text-sm ring-1 ring-honey/40 sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-semibold text-stone-700">
+            ✎ On a récupéré votre saisie en cours, vous pouvez continuer.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleDiscardAutosave}
+            className="shrink-0 self-start rounded-full bg-card px-3 py-1.5 text-xs font-bold text-cacao ring-1 ring-bark transition hover:bg-linen sm:self-auto"
+          >
+            Repartir de zéro
+          </button>
+        </div>
+      )}
 
       <div className="rounded-[1.75rem] bg-honey-soft/60 p-5 ring-1 ring-honey/30 sm:rounded-[2rem] sm:p-6">
         <p className="text-sm font-bold text-terracotta sm:text-base">
@@ -424,37 +562,37 @@ export default function RecipeForm({
           <div>
             <label className={labelClass}>Catégorie principale</label>
 
-            <select
+            <Select
               value={category}
               onChange={(event) =>
                 setCategory(event.target.value as RecipeCategory)
               }
-              className={inputClass}
+              aria-label="Catégorie principale"
             >
               {RECIPE_CATEGORIES.map((recipeCategory) => (
                 <option key={recipeCategory.value} value={recipeCategory.value}>
                   {recipeCategory.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           <div>
             <label className={labelClass}>Difficulté</label>
 
-            <select
+            <Select
               value={difficulty}
               onChange={(event) =>
                 setDifficulty(event.target.value as Difficulty)
               }
-              className={inputClass}
+              aria-label="Difficulté"
             >
               {RECIPE_DIFFICULTIES.map((difficultyValue) => (
                 <option key={difficultyValue} value={difficultyValue}>
                   {difficultyValue}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
       </div>
@@ -520,7 +658,7 @@ export default function RecipeForm({
           </div>
         </div>
 
-        <div className="mt-5 rounded-[1.5rem] bg-linen px-5 py-4 ring-1 ring-orange-100">
+        <div className="mt-5 rounded-[1.5rem] bg-linen px-5 py-4 ring-1 ring-bark">
           <p className="text-sm font-bold text-stone-600">Temps total</p>
 
           <p className="mt-1 text-3xl font-black text-stone-950">
@@ -544,11 +682,10 @@ export default function RecipeForm({
           <div>
             <label className={labelClass}>Emoji de secours</label>
 
-            <input
+            <EmojiPicker
               value={image}
-              onChange={(event) => setImage(event.target.value)}
+              onChange={(emoji) => setImage(emoji)}
               placeholder="🍽️"
-              className={inputClass}
             />
 
             <p className="mt-2 text-sm leading-6 text-stone-500">
@@ -562,11 +699,21 @@ export default function RecipeForm({
             <input
               type="file"
               accept="image/*"
-              onChange={(event) =>
-                setImageFile(event.target.files ? event.target.files[0] : null)
-              }
+              onChange={(event) => {
+                const selected = event.target.files?.[0] ?? null
+                if (selected) {
+                  setPendingFile(selected)
+                }
+                // Réinitialise pour permettre de re-choisir le même fichier.
+                event.target.value = ''
+              }}
               className={`${inputClass} file:mr-4 file:rounded-full file:border-0 file:bg-orange-100 file:px-4 file:py-2 file:text-sm file:font-bold file:text-orange-700`}
             />
+
+            <p className="mt-2 text-sm leading-6 text-stone-500">
+              Vous pourrez recadrer et redimensionner la photo avant
+              l’enregistrement.
+            </p>
 
             {initialValues?.imageUrl && !previewUrl && (
               <p className="mt-2 text-sm leading-6 text-stone-500">
@@ -577,13 +724,36 @@ export default function RecipeForm({
         </div>
 
         {previewUrl && (
-          <img
-            src={previewUrl}
-            alt="Aperçu de la recette"
-            className="mt-5 h-44 w-full rounded-[1.5rem] object-cover ring-1 ring-bark sm:h-56"
-          />
+          <div className="mt-5">
+            <img
+              src={previewUrl}
+              alt="Aperçu de la recette"
+              className="h-44 w-full rounded-[1.5rem] object-cover ring-1 ring-bark sm:h-56"
+            />
+
+            {imageFile && (
+              <button
+                type="button"
+                onClick={() => setPendingFile(imageFile)}
+                className={`${smallButtonClass} mt-3`}
+              >
+                Recadrer la photo
+              </button>
+            )}
+          </div>
         )}
       </div>
+
+      {pendingFile && (
+        <ImageCropper
+          file={pendingFile}
+          onCancel={() => setPendingFile(null)}
+          onConfirm={(croppedFile) => {
+            setImageFile(croppedFile)
+            setPendingFile(null)
+          }}
+        />
+      )}
 
       <div className={sectionClass}>
         <div className="mb-5 sm:mb-6">
@@ -842,14 +1012,27 @@ export default function RecipeForm({
         </div>
       )}
 
-      <div className="z-20 rounded-[1.75rem] bg-cream-50/90 p-2 shadow-lift ring-1 ring-bark backdrop-blur print:static">
+      <div className="z-20 space-y-2 rounded-[1.75rem] bg-cream-50/90 p-2 shadow-lift ring-1 ring-bark backdrop-blur print:static">
+        {draftError && <Alert tone="error">{draftError}</Alert>}
+
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isSavingDraft}
           className="w-full rounded-[1.5rem] bg-terracotta px-6 py-4 text-lg font-bold text-white shadow-soft transition hover:bg-terracotta-deep disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? 'Enregistrement...' : submitLabel}
         </button>
+
+        {onSaveDraft && (
+          <button
+            type="button"
+            onClick={handleSaveDraft}
+            disabled={isSubmitting || isSavingDraft}
+            className="w-full rounded-[1.5rem] bg-card px-6 py-3.5 text-base font-bold text-cacao ring-1 ring-bark transition hover:bg-linen disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSavingDraft ? 'Enregistrement...' : draftLabel}
+          </button>
+        )}
       </div>
     </form>
   )

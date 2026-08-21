@@ -3,13 +3,41 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 import { LOGO_SRC } from '../../data/brand'
 import { useAuth } from '../../context/useAuth'
+import { useEntitlement } from '../../lib/useEntitlement'
+import { SUBSCRIPTION_HUB_URL } from '../../config/subscription'
+import { VITRINE_URL } from '../../config/site'
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
 import { supabase } from '../../lib/supabase'
 import { getProfile, type UserProfile } from '../../services/profiles'
 
+function PlusIcon({ className = 'h-4 w-4' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={3}
+      strokeLinecap="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  )
+}
+
 type DropdownName = 'recipes' | 'tools' | 'profile' | null
 
-const personalLinks = [
+type NavLinkItem = {
+  label: string
+  description: string
+  to: string
+  emoji: string
+  /** Réservé à l'abonnement (affiche un cadenas une fois l'essai terminé). */
+  premium?: boolean
+}
+
+const personalLinks: NavLinkItem[] = [
   {
     label: 'Mon profil',
     description: 'Avatar, pseudo et présentation',
@@ -24,36 +52,48 @@ const personalLinks = [
   },
   {
     label: 'Mes recettes',
-    description: 'Voir et modifier tes recettes',
+    description: 'Voir et modifier vos recettes',
     to: '/my-recipes',
     emoji: '📖',
+    premium: true,
+  },
+  {
+    label: 'Mes collections',
+    description: 'Vos dossiers de recettes par thème',
+    to: '/collections',
+    emoji: '🗂️',
+    premium: true,
   },
   {
     label: 'Favoris',
-    description: 'Retrouver tes recettes préférées',
+    description: 'Retrouver vos recettes préférées',
     to: '/favorites',
     emoji: '❤️',
+    premium: true,
   },
 ]
 
-const toolLinks = [
+const toolLinks: NavLinkItem[] = [
   {
     label: 'Mode frigo',
-    description: 'Trouver une recette avec ce que tu as',
+    description: 'Trouver une recette avec ce que vous avez',
     to: '/frigo',
     emoji: '🥕',
+    premium: true,
   },
   {
     label: 'Liste de courses',
     description: 'Regrouper les ingrédients à acheter',
     to: '/shopping-list',
     emoji: '🛒',
+    premium: true,
   },
   {
     label: 'Planning',
     description: 'Organiser les repas de la semaine',
     to: '/planning',
     emoji: '📅',
+    premium: true,
   },
   {
     label: 'Boîte à idées',
@@ -101,6 +141,8 @@ export default function Header() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
+  const { hasAccess } = useEntitlement()
+  const locked = !hasAccess
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<DropdownName>(null)
@@ -177,18 +219,18 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-orange-100/80 bg-cream-50/95 backdrop-blur-xl print:hidden">
+    <header className="sticky top-0 z-50 border-b border-bark/80 bg-cream-50/95 backdrop-blur-xl print:hidden">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-5">
         <Link
           to="/"
           onClick={closeMenu}
           className="group flex min-w-0 items-center gap-3 sm:gap-5"
         >
-          <div className="relative h-11 w-14 shrink-0 overflow-visible sm:h-12 sm:w-20 lg:w-24">
+          <div className="relative h-12 w-12 shrink-0 overflow-visible sm:h-14 sm:w-14">
             <img
               src={LOGO_SRC}
               alt="Logo Carnet de recettes"
-              className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-lg transition group-hover:-rotate-2 group-hover:scale-105 sm:h-28 sm:w-28 lg:h-32 lg:w-32"
+              className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-lg transition group-hover:-rotate-2 group-hover:scale-105 sm:h-[4.5rem] sm:w-[4.5rem]"
             />
           </div>
 
@@ -203,7 +245,7 @@ export default function Header() {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-2 rounded-full bg-white/70 px-2 py-2 shadow-sm ring-1 ring-orange-100 lg:flex">
+        <nav className="hidden items-center gap-2 rounded-full bg-white/70 px-2 py-2 shadow-sm ring-1 ring-bark lg:flex">
           <NavLink to="/" onClick={closeDropdowns} className={navLinkClass}>
             Accueil
           </NavLink>
@@ -227,7 +269,7 @@ export default function Header() {
                 'w-[520px]',
               )}
             >
-              <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-bark">
                 <div className="mb-3 flex items-center justify-between gap-4 px-2">
                   <div>
                     <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -291,7 +333,7 @@ export default function Header() {
                 'w-[430px]',
               )}
             >
-              <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100">
+              <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-bark">
                 <div className="mb-3 px-2">
                   <p className="text-sm font-black uppercase tracking-wide text-orange-600">
                     Outils du carnet
@@ -316,8 +358,13 @@ export default function Header() {
                         </span>
 
                         <div className="min-w-0">
-                          <p className="truncate font-black text-stone-950">
+                          <p className="flex items-center gap-1.5 truncate font-black text-stone-950">
                             {link.label}
+                            {locked && link.premium && (
+                              <span aria-hidden="true" className="text-xs">
+                                🔒
+                              </span>
+                            )}
                           </p>
 
                           <p className="truncate text-xs font-semibold text-stone-500">
@@ -331,41 +378,44 @@ export default function Header() {
               </div>
             </div>
           </div>
-          <NavLink
-            to="/pricing"
-            onClick={closeDropdowns}
-            className={({ isActive }) =>
-              `rounded-full px-5 py-3 text-sm font-bold transition ${
-                isActive
-                  ? 'bg-honey text-espresso'
-                  : 'text-[#8a5a1e] hover:bg-honey-soft'
-              }`
-            }
-          >
-            ✨ Premium
-          </NavLink>
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <a
+            href={VITRINE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Découvrir toute la suite Les Carnets"
+            className="inline-flex items-center gap-2 rounded-full bg-cream-300 px-4 py-2.5 text-sm font-bold text-stone-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-50 hover:text-orange-600"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              className="h-4 w-4"
+            >
+              <rect x="3" y="3" width="7.5" height="7.5" rx="1.6" />
+              <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6" />
+              <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6" />
+              <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6" />
+            </svg>
+            Les Carnets
+          </a>
+
           {user ? (
             <>
               <Link
                 to="/add-recipe"
                 onClick={closeDropdowns}
-                className={`group flex items-center gap-3 rounded-full px-4 py-2 font-black shadow-sm ring-1 transition ${
+                aria-label="Ajouter une recette"
+                className={`group inline-flex items-center gap-2.5 rounded-full py-2.5 pl-2.5 pr-5 font-black text-white transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 ${
                   isAddRecipeActive
-                    ? 'bg-orange-500 text-white ring-orange-200'
-                    : 'bg-cream-300 text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
+                    ? 'bg-orange-600 shadow-md shadow-orange-600/30 ring-2 ring-orange-300'
+                    : 'bg-gradient-to-r from-orange-500 to-orange-600 shadow-sm shadow-orange-500/20 hover:from-orange-600 hover:to-orange-700 hover:shadow-md hover:shadow-orange-500/30'
                 }`}
               >
-                <span
-                  className={`flex h-11 w-11 items-center justify-center rounded-full text-xl font-black ring-2 ring-white transition group-hover:scale-105 ${
-                    isAddRecipeActive
-                      ? 'bg-white/20 text-white'
-                      : 'bg-orange-500 text-white'
-                  }`}
-                >
-                  +
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 transition duration-200 group-hover:rotate-90">
+                  <PlusIcon />
                 </span>
 
                 <span className="whitespace-nowrap">Ajouter une recette</span>
@@ -404,8 +454,8 @@ export default function Header() {
                     'right-0',
                   )}
                 >
-                  <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-orange-100">
-                    <div className="mb-3 rounded-[1.5rem] bg-cream-50 p-3 ring-1 ring-orange-100">
+                  <div className="rounded-[2rem] bg-white p-4 shadow-xl ring-1 ring-bark">
+                    <div className="mb-3 rounded-[1.5rem] bg-cream-50 p-3 ring-1 ring-bark">
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-lg font-black text-white ring-2 ring-white">
                           {displayedAvatarUrl ? (
@@ -445,8 +495,13 @@ export default function Header() {
                             </span>
 
                             <div className="min-w-0">
-                              <p className="truncate font-black text-stone-950">
+                              <p className="flex items-center gap-1.5 truncate font-black text-stone-950">
                                 {link.label}
+                                {locked && link.premium && (
+                                  <span aria-hidden="true" className="text-xs">
+                                    🔒
+                                  </span>
+                                )}
                               </p>
 
                               <p className="truncate text-xs font-semibold text-stone-500">
@@ -457,10 +512,32 @@ export default function Header() {
                         </Link>
                       ))}
 
+                      <a
+                        href={SUBSCRIPTION_HUB_URL}
+                        onClick={closeDropdowns}
+                        className="group/item rounded-2xl p-2.5 transition hover:bg-orange-50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-xl transition group-hover/item:scale-105">
+                            💎
+                          </span>
+
+                          <div className="min-w-0">
+                            <p className="truncate font-black text-stone-950">
+                              Abonnement
+                            </p>
+
+                            <p className="truncate text-xs font-semibold text-stone-500">
+                              S'abonner ou gérer sur Les Carnets
+                            </p>
+                          </div>
+                        </div>
+                      </a>
+
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="mt-2 rounded-2xl border border-orange-200 bg-white p-2.5 text-left transition hover:bg-orange-50"
+                        className="mt-2 rounded-2xl bg-card ring-1 ring-bark p-2.5 text-left transition hover:bg-orange-50"
                       >
                         <div className="flex items-center gap-3">
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-xl">
@@ -473,7 +550,7 @@ export default function Header() {
                             </p>
 
                             <p className="text-xs font-semibold text-stone-500">
-                              Quitter ton compte
+                              Quitter votre compte
                             </p>
                           </div>
                         </div>
@@ -493,7 +570,7 @@ export default function Header() {
         <button
           type="button"
           onClick={() => setMenuOpen((current) => !current)}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-orange-100 bg-white text-2xl font-black text-stone-900 shadow-sm transition hover:bg-orange-50 lg:hidden"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ring-1 ring-bark bg-white text-2xl font-black text-stone-900 shadow-sm transition hover:bg-orange-50 lg:hidden"
           aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
           aria-expanded={menuOpen}
         >
@@ -502,7 +579,7 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <div className="max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-orange-100 bg-cream-50 px-4 py-5 shadow-xl lg:hidden">
+        <div className="max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-bark bg-cream-50 px-4 py-5 shadow-xl lg:hidden">
           <nav className="mx-auto grid max-w-7xl gap-3 pb-4">
             <NavLink
               to="/"
@@ -517,32 +594,26 @@ export default function Header() {
               <Link
                 to="/add-recipe"
                 onClick={closeMenu}
-                className={`flex items-center justify-between rounded-2xl px-4 py-4 font-black shadow-sm ring-1 transition ${
+                className={`flex items-center justify-between rounded-2xl px-4 py-4 font-black text-white shadow-sm transition ${
                   isAddRecipeActive
-                    ? 'bg-orange-500 text-white ring-orange-200'
-                    : 'bg-cream-300 text-stone-900 ring-orange-100 hover:bg-orange-50 hover:text-orange-600'
+                    ? 'bg-orange-600 ring-2 ring-orange-300'
+                    : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
                 }`}
               >
                 <span className="flex items-center gap-3">
-                  <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-full text-xl ring-2 ring-white ${
-                      isAddRecipeActive
-                        ? 'bg-white/20 text-white'
-                        : 'bg-orange-500 text-white'
-                    }`}
-                  >
-                    +
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                    <PlusIcon className="h-5 w-5" />
                   </span>
                   Ajouter une recette
                 </span>
 
-                <span>→</span>
+                <span aria-hidden="true">→</span>
               </Link>
             )}
 
             <details
               open={isRecipesActive}
-              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden"
+              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-bark [&>summary::-webkit-details-marker]:hidden"
             >
               <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
                 <span>📖 Recettes</span>
@@ -576,7 +647,7 @@ export default function Header() {
 
             <details
               open={isToolsActive}
-              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden"
+              className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-bark [&>summary::-webkit-details-marker]:hidden"
             >
               <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
                 <span>🧰 Outils</span>
@@ -605,8 +676,13 @@ export default function Header() {
                       </span>
 
                       <div className="min-w-0">
-                        <p className="font-black text-stone-900">
+                        <p className="flex items-center gap-1.5 font-black text-stone-900">
                           {link.label}
+                          {locked && link.premium && (
+                            <span aria-hidden="true" className="text-xs">
+                              🔒
+                            </span>
+                          )}
                         </p>
 
                         <p className="truncate text-sm font-semibold text-stone-500">
@@ -619,23 +695,8 @@ export default function Header() {
               </div>
             </details>
 
-            <NavLink
-              to="/pricing"
-              onClick={closeMenu}
-              className={({ isActive }) =>
-                `flex items-center justify-between rounded-2xl px-4 py-4 text-base font-black shadow-soft ring-1 transition ${
-                  isActive
-                    ? 'bg-honey text-espresso ring-honey'
-                    : 'bg-honey-soft text-[#8a5a1e] ring-honey/40 hover:bg-honey/30'
-                }`
-              }
-            >
-              <span>✨ Passer à Premium</span>
-              <span>→</span>
-            </NavLink>
-
             {user ? (
-              <details className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-orange-100 [&>summary::-webkit-details-marker]:hidden">
+              <details className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-bark [&>summary::-webkit-details-marker]:hidden">
                 <summary className="flex cursor-pointer items-center justify-between rounded-2xl px-2 py-2 font-black text-stone-900">
                   <span className="flex min-w-0 items-center gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">
@@ -670,8 +731,13 @@ export default function Header() {
                         </span>
 
                         <div className="min-w-0">
-                          <p className="font-black text-stone-900">
+                          <p className="flex items-center gap-1.5 font-black text-stone-900">
                             {link.label}
+                            {locked && link.premium && (
+                              <span aria-hidden="true" className="text-xs">
+                                🔒
+                              </span>
+                            )}
                           </p>
 
                           <p className="truncate text-sm font-semibold text-stone-500">
@@ -681,6 +747,26 @@ export default function Header() {
                       </div>
                     </Link>
                   ))}
+
+                  <a
+                    href={SUBSCRIPTION_HUB_URL}
+                    onClick={closeMenu}
+                    className="rounded-2xl bg-cream-50 px-4 py-3.5 transition hover:bg-orange-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cream-200 text-xl">
+                        💎
+                      </span>
+
+                      <div className="min-w-0">
+                        <p className="font-black text-stone-900">Abonnement</p>
+
+                        <p className="truncate text-sm font-semibold text-stone-500">
+                          S'abonner ou gérer sur Les Carnets
+                        </p>
+                      </div>
+                    </div>
+                  </a>
 
                   <button
                     type="button"

@@ -2,8 +2,13 @@ import { Link } from 'react-router-dom'
 import { Heart, Leaf, ShieldCheck } from 'lucide-react'
 
 import { APP_NAME, LOGO_SRC } from '../../data/brand'
+import { VITRINE_PRICING_URL } from '../../config/site'
 
 type FooterLink = { label: string; to: string }
+
+function isExternalLink(to: string) {
+  return to.startsWith('http')
+}
 
 const FOOTER_SECTIONS: { title: string; links: FooterLink[] }[] = [
   {
@@ -11,7 +16,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Recettes', to: '/recipes' },
       { label: 'Outils', to: '/tools' },
-      { label: 'Tarifs', to: '/pricing' },
+      { label: 'Tarifs', to: VITRINE_PRICING_URL },
       { label: 'Boîte à idées', to: '/ideas' },
       { label: 'Mon frigo', to: '/frigo' },
     ],
@@ -42,7 +47,7 @@ const TRUST_SIGNALS: { icon: typeof Heart; label: string }[] = [
 
 export default function Footer() {
   return (
-    <footer className="mt-16 border-t border-orange-100 bg-cream-50 print:hidden">
+    <footer className="mt-16 border-t border-bark bg-cream-50 print:hidden">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 md:grid-cols-[1.2fr_2fr]">
         <div>
           <div className="flex items-center gap-3">
@@ -61,9 +66,9 @@ export default function Footer() {
           </div>
 
           <p className="mt-5 max-w-sm text-sm leading-6 text-stone-600">
-            Le carnet de famille qui réunit tes recettes, tes courses et tes
+            Le carnet de famille qui réunit vos recettes, vos courses et vos
             idées de repas au même endroit. Simple, chaleureux, toujours prêt
-            quand tu cuisines.
+            quand vous cuisinez.
           </p>
 
           <ul className="mt-6 space-y-2">
@@ -91,23 +96,36 @@ export default function Footer() {
               </p>
 
               <ul className="mt-4 space-y-2.5">
-                {section.links.map((link) => (
-                  <li key={link.to}>
-                    <Link
-                      to={link.to}
-                      className="text-sm font-bold text-stone-600 transition hover:text-orange-600"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+                {section.links.map((link) =>
+                  isExternalLink(link.to) ? (
+                    <li key={link.to}>
+                      <a
+                        href={link.to}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-bold text-stone-600 transition hover:text-orange-600"
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ) : (
+                    <li key={link.to}>
+                      <Link
+                        to={link.to}
+                        className="text-sm font-bold text-stone-600 transition hover:text-orange-600"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ),
+                )}
               </ul>
             </nav>
           ))}
         </div>
       </div>
 
-      <div className="border-t border-orange-100/70">
+      <div className="border-t border-bark/70">
         <p className="mx-auto max-w-6xl px-6 py-4 text-sm text-stone-500">
           © 2026 — {APP_NAME}
         </p>

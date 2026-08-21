@@ -50,14 +50,18 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
 
-      <div className="pointer-events-none fixed bottom-24 left-4 right-4 z-[120] flex flex-col items-center gap-2 print:hidden sm:bottom-6 sm:left-auto sm:right-6 sm:items-end">
+      <div
+        aria-live="polite"
+        aria-atomic="false"
+        className="pointer-events-none fixed bottom-24 left-4 right-4 z-[120] flex flex-col items-center gap-2 print:hidden sm:bottom-6 sm:left-auto sm:right-6 sm:items-end"
+      >
         {toasts.map((toast) => {
           const style = TONE_STYLE[toast.tone]
 
           return (
             <div
               key={toast.id}
-              role="status"
+              role={toast.tone === 'error' ? 'alert' : 'status'}
               className={`pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold shadow-lift ${style.wrapper}`}
             >
               {style.icon}

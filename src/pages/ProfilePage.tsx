@@ -2,9 +2,13 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
 import RecipeBadgesPanel, {
   RecipeBadgePill,
 } from '../components/badges/RecipeBadgesPanel'
+import CursorSelector from '../components/settings/CursorSelector'
+import NutritionPreference from '../components/settings/NutritionPreference'
+import RecipeVisibilitySettings from '../components/settings/RecipeVisibilitySettings'
 import { ProfileSkeleton } from '../components/ui/Skeleton'
 import { getRecipePublicationBadge } from '../data/recipeBadges'
 import { useAuth } from '../context/useAuth'
@@ -183,7 +187,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-bark">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
           👤
         </div>
@@ -193,22 +197,19 @@ export default function ProfilePage() {
         </p>
 
         <p className="mt-2 text-stone-600">
-          Connecte-toi pour retrouver ton carnet de recettes.
+          Connectez-vous pour retrouver votre carnet de recettes.
         </p>
 
-        <Link
-          to="/auth"
-          className="mt-6 inline-block rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-        >
+        <Button to="/auth" className="mt-6">
           Se connecter
-        </Link>
+        </Button>
       </section>
     )
   }
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-cream-100 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-100 shadow-sm ring-1 ring-bark">
         <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <div className="relative">
@@ -226,7 +227,7 @@ export default function ProfilePage() {
 
               <div
                 title={profileBadgeName}
-                className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-sm ring-1 ring-orange-100"
+                className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-sm ring-1 ring-bark"
               >
                 {profileBadgeEmoji}
               </div>
@@ -254,32 +255,31 @@ export default function ProfilePage() {
                 </p>
               ) : (
                 <p className="mt-4 max-w-2xl leading-7 text-stone-500">
-                  Ajoute une petite bio pour personnaliser ton profil.
+                  Ajoutez une petite bio pour personnaliser votre profil.
                 </p>
               )}
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3 lg:justify-end">
-            <button
+            <Button
               type="button"
               onClick={() => {
                 setIsEditing((current) => !current)
                 setSuccessMessage('')
                 setErrorMessage('')
               }}
-              className="rounded-2xl bg-orange-600 px-5 py-3 font-bold text-white transition hover:bg-orange-700"
             >
               {isEditing ? 'Fermer' : 'Modifier le profil'}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={handleLogout}
-              className="rounded-2xl border border-orange-200 bg-white px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
             >
               Déconnexion
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -291,7 +291,7 @@ export default function ProfilePage() {
       {isEditing && (
         <form
           onSubmit={handleSaveProfile}
-          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark"
         >
           <div className="mb-6">
             <p className="font-bold text-orange-700">Profil public</p>
@@ -301,7 +301,7 @@ export default function ProfilePage() {
             </h2>
 
             <p className="mt-2 text-stone-600">
-              Ajoute un pseudo, une bio et une photo de profil pour rendre ton
+              Ajoutez un pseudo, une bio et une photo de profil pour rendre votre
               espace plus personnel.
             </p>
           </div>
@@ -312,7 +312,7 @@ export default function ProfilePage() {
                 Photo de profil
               </label>
 
-              <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-full bg-orange-600 text-5xl font-black text-white ring-4 ring-orange-50">
+              <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-full bg-orange-600 text-5xl font-black text-white ring-4 ring-bark/60">
                 {displayedAvatarUrl ? (
                   <img
                     src={displayedAvatarUrl}
@@ -330,7 +330,7 @@ export default function ProfilePage() {
                 onChange={(event) =>
                   setAvatarFile(event.target.files?.[0] ?? null)
                 }
-                className="mt-5 w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 text-sm outline-none transition focus:border-orange-500"
+                className="mt-5 w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 text-cacao text-sm outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
               />
 
               <p className="mt-2 text-sm text-stone-500">
@@ -348,7 +348,7 @@ export default function ProfilePage() {
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
                   placeholder="Exemple : Chloé, Maxime, Studio C&M..."
-                  className="w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
+                  className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 text-cacao outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                 />
               </div>
 
@@ -361,36 +361,32 @@ export default function ProfilePage() {
                   value={bio}
                   onChange={(event) => setBio(event.target.value)}
                   rows={5}
-                  placeholder="Une petite description de ton profil..."
-                  className="w-full rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
+                  placeholder="Une petite description de votre profil..."
+                  className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 text-cacao outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                 />
               </div>
             </div>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <Button type="submit" disabled={saving}>
               {saving ? 'Sauvegarde...' : 'Enregistrer le profil'}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={cancelEdit}
               disabled={saving}
-              className="rounded-2xl border border-orange-100 bg-white px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Annuler
-            </button>
+            </Button>
           </div>
         </form>
       )}
 
       <div className="grid gap-5 md:grid-cols-3">
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             📖
           </div>
@@ -404,7 +400,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             ♥
           </div>
@@ -416,7 +412,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             🏷️
           </div>
@@ -432,6 +428,12 @@ export default function ProfilePage() {
       </div>
 
       <RecipeBadgesPanel recipeCount={myRecipes.length} />
+
+      <RecipeVisibilitySettings />
+
+      <NutritionPreference />
+
+      <CursorSelector />
 
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <Link
@@ -449,7 +451,7 @@ export default function ProfilePage() {
 
         <Link
           to="/my-recipes"
-          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
         >
           <p className="text-3xl">📖</p>
 
@@ -458,13 +460,13 @@ export default function ProfilePage() {
           </h2>
 
           <p className="mt-2 text-stone-600">
-            Voir et modifier les recettes que tu as créées.
+            Voir et modifier les recettes que vous avez créées.
           </p>
         </Link>
 
         <Link
           to="/favorites"
-          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
         >
           <p className="text-3xl">♥</p>
 
@@ -477,7 +479,7 @@ export default function ProfilePage() {
 
         <Link
           to="/shopping-list"
-          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
+          className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark transition hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-md"
         >
           <p className="text-3xl">🛒</p>
 
@@ -491,7 +493,7 @@ export default function ProfilePage() {
         </Link>
       </div>
 
-      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="font-bold text-orange-700">Activité récente</p>
@@ -516,15 +518,12 @@ export default function ProfilePage() {
             </p>
 
             <p className="mt-2 text-stone-600">
-              Ajoute ta première recette pour commencer ton carnet.
+              Ajoutez votre première recette pour commencer votre carnet.
             </p>
 
-            <Link
-              to="/add-recipe"
-              className="mt-4 inline-block rounded-2xl bg-orange-600 px-5 py-3 font-bold text-white transition hover:bg-orange-700"
-            >
+            <Button to="/add-recipe" className="mt-4">
               Ajouter ma première recette
-            </Link>
+            </Button>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-3">

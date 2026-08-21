@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import DashboardHero from '../components/home/DashboardHero'
 import LandingValue from '../components/home/LandingValue'
+import OnboardingCard from '../components/home/OnboardingCard'
 import { LOGO_SRC } from '../data/brand'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
@@ -11,16 +12,19 @@ import Chip from '../components/ui/Chip'
 import IconTile, { type IconTileTone } from '../components/ui/IconTile'
 import Modal from '../components/ui/Modal'
 import SectionHeader from '../components/ui/SectionHeader'
+import CategoryBadge from '../components/recipes/CategoryBadge'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { getHomeCardStyle } from '../data/categoryStyles'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { getProfile } from '../services/profiles'
-import { getRecipes } from '../services/recipes'
+import { getMyRecipes, getRecipes } from '../services/recipes'
 import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import { getShoppingListItems } from '../services/shoppingList'
 import { PLANNER_STORAGE_KEY } from '../lib/weeklyPlanner'
 import type { Recipe } from '../types/recipe'
+
+const ONBOARDING_DISMISS_KEY = 'cdr-onboarding-dismissed'
 
 const WEEK_DAY_KEYS = [
   'sunday',
@@ -70,14 +74,14 @@ const QUICK_LINKS: {
     to: '/frigo',
     emoji: '🥕',
     label: 'Mode frigo',
-    description: 'Cuisiner avec ce que tu as',
+    description: 'Cuisiner avec ce que vous avez',
     tone: 'sage',
   },
   {
     to: '/shopping-list',
     emoji: '🛒',
     label: 'Liste de courses',
-    description: 'Tes ingrédients à acheter',
+    description: 'Vos ingrédients à acheter',
     tone: 'terracotta',
   },
   {
@@ -105,6 +109,49 @@ export default function HomePage() {
   const [randomRecipe, setRandomRecipe] = useState<Recipe | null>(null)
   const [randomModalOpen, setRandomModalOpen] = useState(false)
   const [randomizing, setRandomizing] = useState(false)
+
+  const [ownRecipeCount, setOwnRecipeCount] = useState<number | null>(null)
+  const [onboardingDismissed, setOnboardingDismissed] = useState(() => {
+    try {
+      return window.localStorage.getItem(ONBOARDING_DISMISS_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    let ignore = false
+
+    getMyRecipes()
+      .then((data) => {
+        if (!ignore) {
+          setOwnRecipeCount(data.length)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+        if (!ignore) {
+          setOwnRecipeCount(null)
+        }
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [user])
+
+  function dismissOnboarding() {
+    setOnboardingDismissed(true)
+    try {
+      window.localStorage.setItem(ONBOARDING_DISMISS_KEY, '1')
+    } catch {
+      // ignore
+    }
+  }
 
   useEffect(() => {
     let ignore = false
@@ -229,16 +276,23 @@ export default function HomePage() {
     <>
       <section className="space-y-8 sm:space-y-10 lg:space-y-14">
         {user ? (
-          <DashboardHero
-            userName={userName || 'chef'}
-            todayMealLabel={todayPlan.mealLabel}
-            todayRecipe={todayRecipe}
-            shoppingCount={shoppingCount}
-            onSurprise={launchRandomRecipe}
-            surpriseDisabled={loading || recipes.length === 0 || randomizing}
-          />
+          ownRecipeCount === 0 && !onboardingDismissed ? (
+            <OnboardingCard
+              userName={userName || 'chef'}
+              onDismiss={dismissOnboarding}
+            />
+          ) : (
+            <DashboardHero
+              userName={userName || 'chef'}
+              todayMealLabel={todayPlan.mealLabel}
+              todayRecipe={todayRecipe}
+              shoppingCount={shoppingCount}
+              onSurprise={launchRandomRecipe}
+              surpriseDisabled={loading || recipes.length === 0 || randomizing}
+            />
+          )
         ) : (
-          <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-orange-100 sm:rounded-[2.5rem]">
+          <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem]">
           <div className="grid gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
             <div className="flex flex-col justify-center">
               <Chip emoji="🍲" className="mb-5">
@@ -331,7 +385,7 @@ export default function HomePage() {
                       </p>
 
                       <p className="mt-3 max-w-sm text-sm font-bold leading-6 text-orange-50 sm:mt-4 sm:text-base sm:leading-7">
-                        Clique ici et le carnet choisit une recette au hasard.
+                        Cliquez ici et le carnet choisit une recette au hasard.
                       </p>
                     </div>
 
@@ -352,13 +406,13 @@ export default function HomePage() {
 
                   <p className="mt-3 line-clamp-3 text-sm leading-6 text-cacao/80">
                     {latestRecipes[0]?.description ??
-                      'Ajoute une première recette pour commencer ton carnet.'}
+                      'Ajoutez une première recette pour commencer votre carnet.'}
                   </p>
                 </div>
 
                 <div className="mt-5 rounded-[1.5rem] border border-dashed border-honey/50 bg-honey-soft/50 p-4 text-sm font-medium leading-6 text-cacao sm:mt-6">
-                  💡 Astuce : ajoute tes recettes du quotidien, tes favoris et
-                  les ingrédients à ta liste de courses.
+                  💡 Astuce : ajoutez vos recettes du quotidien, vos favoris et
+                  les ingrédients à votre liste de courses.
                 </div>
               </div>
             </div>
@@ -414,13 +468,13 @@ export default function HomePage() {
           {loading ? (
             <RecipeCardGridSkeleton count={3} />
           ) : latestRecipes.length === 0 ? (
-            <div className="rounded-[1.5rem] bg-white p-6 text-center shadow-sm ring-1 ring-orange-100 sm:rounded-[2rem] sm:p-8">
+            <div className="rounded-[1.5rem] bg-white p-6 text-center shadow-sm ring-1 ring-bark sm:rounded-[2rem] sm:p-8">
               <p className="text-lg font-bold text-stone-950">
                 Aucune recette pour le moment.
               </p>
 
               <p className="mt-2 text-stone-600">
-                Ajoute ta première recette pour la voir apparaître ici.
+                Ajoutez votre première recette pour la voir apparaître ici.
               </p>
 
               <Button
@@ -450,7 +504,7 @@ export default function HomePage() {
             className="mb-6 sm:mb-8"
             eyebrow="Explorer"
             title="Les grandes familles de recettes"
-            subtitle="Parcours le carnet selon tes envies du moment."
+            subtitle="Parcourez le carnet selon vos envies du moment."
             action={
               <Button
                 to="/recipes"
@@ -476,7 +530,7 @@ export default function HomePage() {
                     to={`/recipes?category=${encodeURIComponent(
                       category.value,
                     )}`}
-                    className={`group relative overflow-hidden rounded-[1.75rem] border ${visualStyle.border} ${visualStyle.cardBg} p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)] sm:rounded-[2rem] sm:p-6`}
+                    className={`group relative flex flex-col overflow-hidden rounded-[1.75rem] border ${visualStyle.border} ${visualStyle.cardBg} p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(28,25,23,0.08)] sm:rounded-[2rem] sm:p-6`}
                   >
                     <div
                       className={`pointer-events-none absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full blur-3xl sm:h-28 sm:w-28 ${visualStyle.topGlow}`}
@@ -486,20 +540,22 @@ export default function HomePage() {
                       className={`pointer-events-none absolute bottom-0 left-0 h-20 w-20 -translate-x-6 translate-y-6 rounded-full blur-3xl sm:h-24 sm:w-24 ${visualStyle.bottomGlow}`}
                     />
 
-                    <div className="relative z-10">
-                      <div className="mb-5 flex items-start justify-between gap-3 sm:mb-6 sm:gap-4">
-                        <div
-                          className={`flex h-16 w-16 items-center justify-center rounded-[1.35rem] ${visualStyle.iconBg} text-3xl shadow-sm transition group-hover:scale-105 sm:h-20 sm:w-20 sm:rounded-[1.6rem] sm:text-4xl`}
-                        >
-                          {category.emoji}
-                        </div>
+                    <div className="relative z-10 flex flex-1 flex-col">
+                      <span
+                        className={`absolute right-0 top-0 shrink-0 rounded-full ${visualStyle.badgeBg} px-3 py-2 text-xs font-bold ${visualStyle.badgeText} sm:px-4 sm:text-sm`}
+                      >
+                        {category.count} recette
+                        {category.count > 1 ? 's' : ''}
+                      </span>
 
-                        <span
-                          className={`shrink-0 rounded-full ${visualStyle.badgeBg} px-3 py-2 text-xs font-bold ${visualStyle.badgeText} sm:px-4 sm:text-sm`}
-                        >
-                          {category.count} recette
-                          {category.count > 1 ? 's' : ''}
-                        </span>
+                      <div className="mb-4 flex justify-center pt-1 sm:mb-5">
+                        <CategoryBadge
+                          image={category.image}
+                          emoji={category.emoji}
+                          label={category.label}
+                          className="h-52 w-52 drop-shadow-sm transition duration-300 group-hover:-rotate-2 group-hover:scale-105 sm:h-64 sm:w-64"
+                          emojiClassName="flex items-center justify-center text-7xl"
+                        />
                       </div>
 
                       <div className="mb-4 flex gap-2">
@@ -513,17 +569,15 @@ export default function HomePage() {
                         ))}
                       </div>
 
-                      <h3 className="mb-3 text-xl font-black leading-tight text-stone-950 sm:text-2xl">
+                      <h3 className="mb-3 flex min-h-[3.5rem] items-start text-xl font-black leading-tight text-stone-950 sm:min-h-[4rem] sm:text-2xl">
                         {category.label}
                       </h3>
 
-                      <p
-                        className={`leading-7 ${visualStyle.subtleText} sm:min-h-[84px]`}
-                      >
+                      <p className={`leading-7 ${visualStyle.subtleText}`}>
                         {category.description}
                       </p>
 
-                      <div className="mt-6 flex items-center justify-between border-t border-black/5 pt-4">
+                      <div className="mt-auto flex items-center justify-between border-t border-black/5 pt-4">
                         <span className={`font-bold ${visualStyle.accentText}`}>
                           Voir les recettes
                         </span>
@@ -634,7 +688,7 @@ export default function HomePage() {
             </p>
 
             <p className="mt-2 text-cacao/80">
-              Ajoute une recette pour utiliser le bouton magique.
+              Ajoutez une recette pour utiliser le bouton magique.
             </p>
           </div>
         )}

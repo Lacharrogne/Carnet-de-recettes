@@ -7,8 +7,8 @@ import {
   ShoppingCart,
   Sparkles,
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
 
+import { VITRINE_PRICING_URL } from '../../config/site'
 import Button from '../ui/Button'
 import IconTile, { type IconTileTone } from '../ui/IconTile'
 import SectionHeader from '../ui/SectionHeader'
@@ -24,37 +24,37 @@ const BENEFITS: Benefit[] = [
   {
     icon: BookOpen,
     tone: 'terracotta',
-    title: 'Toutes tes recettes au même endroit',
+    title: 'Toutes vos recettes au même endroit',
     description:
-      'Ajoute les plats de la maison, retrouve-les en un instant et garde la main même sans réseau dans la cuisine.',
+      'Ajoutez les plats de la maison, retrouvez-les en un instant et gardez la main même sans réseau dans la cuisine.',
   },
   {
     icon: ShoppingCart,
     tone: 'sage',
     title: 'Une liste de courses qui se remplit seule',
     description:
-      'Les ingrédients d’une recette filent dans ta liste, regroupés par rayon, prêts pour le marché.',
+      'Les ingrédients d’une recette filent dans votre liste, regroupés par rayon, prêts pour le marché.',
   },
   {
     icon: CalendarDays,
     tone: 'honey',
     title: 'Un planning de la semaine sans prise de tête',
     description:
-      'Glisse tes repas sur la semaine et sache toujours quoi préparer ce soir.',
+      'Glissez vos repas sur la semaine et sachez toujours quoi préparer ce soir.',
   },
   {
     icon: Refrigerator,
     tone: 'sage',
-    title: 'Cuisine avec ce que tu as déjà',
+    title: 'Cuisinez avec ce que vous avez déjà',
     description:
-      'Dis ce qu’il reste dans le frigo, le carnet te propose les recettes possibles. Anti-gaspi.',
+      'Dites ce qu’il reste dans le frigo, le carnet vous propose les recettes possibles. Anti-gaspi.',
   },
   {
     icon: Heart,
     tone: 'terracotta',
-    title: 'Tes favoris toujours sous la main',
+    title: 'Vos favoris toujours sous la main',
     description:
-      'Mets de côté les recettes que la famille réclame et reviens-y en un geste.',
+      'Mettez de côté les recettes que la famille réclame et revenez-y en un geste.',
   },
   {
     icon: Lightbulb,
@@ -68,18 +68,18 @@ const BENEFITS: Benefit[] = [
 const STEPS = [
   {
     number: '1',
-    title: 'Crée ton carnet',
-    description: 'Inscris-toi en quelques secondes et ajoute tes premières recettes.',
+    title: 'Créez votre carnet',
+    description: 'Inscrivez-vous en quelques secondes et ajoutez vos premières recettes.',
   },
   {
     number: '2',
-    title: 'Planifie & fais tes courses',
-    description: 'Organise la semaine et laisse la liste de courses se construire toute seule.',
+    title: 'Planifiez & faites vos courses',
+    description: 'Organisez la semaine et laissez la liste de courses se construire toute seule.',
   },
   {
     number: '3',
-    title: 'Cuisine sereinement',
-    description: 'Suis les étapes, ajuste les portions, et régale la maisonnée.',
+    title: 'Cuisinez sereinement',
+    description: 'Suivez les étapes, ajustez les portions, et régalez la maisonnée.',
   },
 ]
 
@@ -95,7 +95,7 @@ export default function LandingValue() {
           eyebrowClassName="text-terracotta"
           eyebrow="Pourquoi Carnet de recettes"
           title="Tout ce qu’il faut pour la cuisine de tous les jours"
-          subtitle="Pensé comme un vrai carnet de famille : chaleureux, simple, et toujours prêt quand tu cuisines."
+          subtitle="Pensé comme un vrai carnet de famille : chaleureux, simple, et toujours prêt quand vous cuisinez."
         />
 
         <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -167,12 +167,12 @@ export default function LandingValue() {
           </span>
 
           <h2 className="mx-auto mt-5 max-w-2xl font-display text-3xl font-black leading-tight text-white sm:text-4xl">
-            Commence ton carnet de cuisine aujourd’hui
+            Commencez votre carnet de cuisine aujourd’hui
           </h2>
 
           <p className="mx-auto mt-4 max-w-xl leading-7 text-cream-100/85">
-            Rejoins le carnet et garde enfin toutes tes recettes, tes courses et
-            tes idées de repas réunies au même endroit.
+            Rejoignez le carnet et gardez enfin toutes vos recettes, vos courses et
+            vos idées de repas réunies au même endroit.
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -190,12 +190,14 @@ export default function LandingValue() {
             </Button>
           </div>
 
-          <Link
-            to="/pricing"
+          <a
+            href={VITRINE_PRICING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-6 inline-block text-sm font-bold text-cream-100/80 underline-offset-4 transition hover:text-white hover:underline"
           >
             Voir le détail des offres →
-          </Link>
+          </a>
         </div>
       </div>
     </div>

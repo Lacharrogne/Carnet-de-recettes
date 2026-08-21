@@ -39,7 +39,7 @@ const DEFAULT_HOME_CARD_STYLE: HomeCardStyle = {
 
 const HOME_CARD_STYLES: Record<string, HomeCardStyle> = {
   'Apéritifs & entrées': {
-    cardBg: 'bg-gradient-to-br from-[#fffaf5] to-[#fffefb]',
+    cardBg: 'bg-gradient-to-br from-[#ffe9d5] to-[#fff5ea]',
     border: 'border-[#f1dcc8]',
     iconBg: 'bg-[#fff1e6]',
     badgeBg: 'bg-[#f8e7d8]',
@@ -52,7 +52,7 @@ const HOME_CARD_STYLES: Record<string, HomeCardStyle> = {
   },
 
   'Plats & accompagnements': {
-    cardBg: 'bg-gradient-to-br from-[#fff8f1] to-[#fffdf9]',
+    cardBg: 'bg-gradient-to-br from-[#ffe6cc] to-[#fff3e1]',
     border: 'border-[#ecd8c2]',
     iconBg: 'bg-[#fff0df]',
     badgeBg: 'bg-[#f8e5cf]',
@@ -65,7 +65,7 @@ const HOME_CARD_STYLES: Record<string, HomeCardStyle> = {
   },
 
   'Desserts & goûters': {
-    cardBg: 'bg-gradient-to-br from-[#fff7f8] to-[#fffdfa]',
+    cardBg: 'bg-gradient-to-br from-[#ffdfe8] to-[#fff0f4]',
     border: 'border-[#f2d9df]',
     iconBg: 'bg-[#fff0f3]',
     badgeBg: 'bg-[#fde4ea]',
@@ -78,7 +78,7 @@ const HOME_CARD_STYLES: Record<string, HomeCardStyle> = {
   },
 
   'Petit-déjeuner & brunch': {
-    cardBg: 'bg-gradient-to-br from-[#fffaf0] to-[#fffef9]',
+    cardBg: 'bg-gradient-to-br from-[#ffeecb] to-[#fff8e6]',
     border: 'border-[#f1e0b9]',
     iconBg: 'bg-[#fff4d9]',
     badgeBg: 'bg-[#f9edc8]',
@@ -91,7 +91,7 @@ const HOME_CARD_STYLES: Record<string, HomeCardStyle> = {
   },
 
   Boissons: {
-    cardBg: 'bg-gradient-to-br from-[#f3fbff] to-[#fbffff]',
+    cardBg: 'bg-gradient-to-br from-[#d8effb] to-[#edf9ff]',
     border: 'border-[#d7ebf4]',
     iconBg: 'bg-[#eaf7fd]',
     badgeBg: 'bg-[#dff1fb]',
@@ -103,8 +103,8 @@ const HOME_CARD_STYLES: Record<string, HomeCardStyle> = {
     miniIcons: ['🍋', '🧊'],
   },
 
-  Healthy: {
-    cardBg: 'bg-gradient-to-br from-[#f6fcf4] to-[#fcfffb]',
+  'Vegan & Végétarien': {
+    cardBg: 'bg-gradient-to-br from-[#dbf3d8] to-[#eef9ec]',
     border: 'border-[#dcebd8]',
     iconBg: 'bg-[#ebf7e7]',
     badgeBg: 'bg-[#dff0d9]',
@@ -250,7 +250,7 @@ const RECIPE_CARD_STYLES: Record<string, RecipeCardStyle> = {
     decorations: ['🍋', '🧊'],
   },
 
-  Healthy: {
+  Végétarien: {
     cardBg: 'bg-gradient-to-br from-[#f1fbef] via-[#fffefb] to-[#eef9ec]',
     imageBg: 'bg-[#e7f6e3]',
     ring: 'ring-[#d6ecd1]',
@@ -350,7 +350,7 @@ const CATEGORY_AMBIENCES: Record<string, CategoryAmbience> = {
     emojis: ['🍋', '🧊', '🥤', '🍹'],
   },
 
-  Healthy: {
+  'Vegan & Végétarien': {
     pageBg: 'bg-gradient-to-br from-[#effbea] via-[#fcfffb] to-[#e2f7dc]',
     ring: 'ring-[#cce5c5]',
     accentText: 'text-[#4d8f48]',

@@ -1,12 +1,26 @@
 import { Link, NavLink } from 'react-router-dom'
 
 import { useAuth } from '../../context/useAuth'
+import { useEntitlement } from '../../lib/useEntitlement'
 
 type Tab = {
   to: string
   emoji: string
   label: string
   end?: boolean
+  premium?: boolean
+}
+
+/** Petit cadenas d'angle sur une entrée premium verrouillée. */
+function LockDot() {
+  return (
+    <span
+      aria-hidden="true"
+      className="absolute -right-1.5 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-espresso text-[0.55rem] text-white shadow-soft"
+    >
+      🔒
+    </span>
+  )
 }
 
 function tabClass({ isActive }: { isActive: boolean }) {
@@ -18,6 +32,8 @@ function tabClass({ isActive }: { isActive: boolean }) {
 // Barre d'onglets fixe, mobile uniquement : l'accès rapide "vraie app".
 export default function BottomNav() {
   const { user } = useAuth()
+  const { hasAccess } = useEntitlement()
+  const locked = !hasAccess
 
   const leftTabs: Tab[] = [
     { to: '/', emoji: '🏠', label: 'Accueil', end: true },
@@ -25,7 +41,7 @@ export default function BottomNav() {
   ]
 
   const rightTabs: Tab[] = [
-    { to: '/shopping-list', emoji: '🛒', label: 'Courses' },
+    { to: '/shopping-list', emoji: '🛒', label: 'Courses', premium: true },
     { to: user ? '/profile' : '/auth', emoji: '👤', label: 'Profil' },
   ]
 
@@ -34,7 +50,10 @@ export default function BottomNav() {
       <div className="mx-auto flex max-w-md items-end justify-around px-2">
         {leftTabs.map((tab) => (
           <NavLink key={tab.to} to={tab.to} end={tab.end} className={tabClass}>
-            <span className="text-xl">{tab.emoji}</span>
+            <span className="relative text-xl">
+              {tab.emoji}
+              {locked && tab.premium && <LockDot />}
+            </span>
             <span>{tab.label}</span>
           </NavLink>
         ))}
@@ -44,8 +63,9 @@ export default function BottomNav() {
           className="flex flex-1 flex-col items-center"
           aria-label="Ajouter une recette"
         >
-          <span className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-terracotta text-3xl font-light leading-none text-white shadow-lift ring-4 ring-card transition hover:bg-terracotta-deep">
+          <span className="relative -mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-terracotta text-3xl font-light leading-none text-white shadow-lift ring-4 ring-card transition hover:bg-terracotta-deep">
             +
+            {locked && <LockDot />}
           </span>
           <span className="mt-1 text-[0.65rem] font-bold text-hazel">
             Ajouter
@@ -54,7 +74,10 @@ export default function BottomNav() {
 
         {rightTabs.map((tab) => (
           <NavLink key={tab.to} to={tab.to} className={tabClass}>
-            <span className="text-xl">{tab.emoji}</span>
+            <span className="relative text-xl">
+              {tab.emoji}
+              {locked && tab.premium && <LockDot />}
+            </span>
             <span>{tab.label}</span>
           </NavLink>
         ))}

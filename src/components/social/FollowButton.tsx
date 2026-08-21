@@ -56,7 +56,7 @@ export default function FollowButton({
 
   async function handleFollowToggle() {
     if (!currentUserId) {
-      setErrorMessage('Connecte-toi pour t’abonner à ce profil.')
+      setErrorMessage('Connectez-vous pour vous abonner à ce profil.')
       return
     }
 

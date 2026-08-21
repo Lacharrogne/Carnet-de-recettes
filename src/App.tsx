@@ -2,10 +2,13 @@ import { lazy, Suspense } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 
 import Header from './components/layout/Header'
+import TrialBanner from './components/layout/TrialBanner'
 import Footer from './components/layout/Footer'
 import BottomNav from './components/layout/BottomNav'
 import ProtectedRoute from './components/ProtectedRoute'
+import PremiumRoute from './components/PremiumRoute'
 import ScrollToTop from './components/ScrollToTop'
+import ErrorBoundary from './components/ErrorBoundary'
 import PageSkeleton from './components/ui/PageSkeleton'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -26,7 +29,9 @@ const SocialPage = lazy(() => import('./pages/SocialPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const IdeasPage = lazy(() => import('./pages/IdeasPage'))
 const ToolsPage = lazy(() => import('./pages/ToolsPage'))
-const PricingPage = lazy(() => import('./pages/PricingPage'))
+const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'))
+const CollectionsPage = lazy(() => import('./pages/CollectionsPage'))
+const CollectionDetailPage = lazy(() => import('./pages/CollectionDetailPage'))
 
 function getPageBackgroundClass(pathname: string) {
   if (pathname === '/') {
@@ -69,10 +74,6 @@ function getPageBackgroundClass(pathname: string) {
     return 'page-background-auth'
   }
 
-  if (pathname.startsWith('/pricing')) {
-    return 'page-background-profile'
-  }
-
   return 'page-background-default'
 }
 
@@ -91,21 +92,45 @@ export default function App() {
 
       <Header />
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <TrialBanner />
+
+      <main className="mx-auto max-w-6xl px-4 pt-8 pb-28 lg:pb-8">
+        <ErrorBoundary resetKey={location.pathname}>
         <Suspense fallback={<PageSkeleton />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
 
           <Route path="/recipes" element={<RecipesPage />} />
           <Route path="/recipes/:id" element={<RecipeDetailsPage />} />
-          <Route path="/frigo" element={<FridgePage />} />
+          <Route
+            path="/frigo"
+            element={
+              <PremiumRoute>
+                <FridgePage />
+              </PremiumRoute>
+            }
+          />
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/shopping-list" element={<ShoppingListPage />} />
+          <Route
+            path="/shopping-list"
+            element={
+              <PremiumRoute>
+                <ShoppingListPage />
+              </PremiumRoute>
+            }
+          />
           <Route path="/users/:userId" element={<PublicProfilePage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/ideas" element={<IdeasPage />} />
           <Route path="/tools" element={<ToolsPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/premium" element={<SubscriptionPage />} />
 
           <Route
             path="/profile"
@@ -119,45 +144,63 @@ export default function App() {
           <Route
             path="/add-recipe"
             element={
-              <ProtectedRoute>
+              <PremiumRoute>
                 <AddRecipePage />
-              </ProtectedRoute>
+              </PremiumRoute>
             }
           />
 
           <Route
             path="/recipes/:id/edit"
             element={
-              <ProtectedRoute>
+              <PremiumRoute>
                 <EditRecipePage />
-              </ProtectedRoute>
+              </PremiumRoute>
             }
           />
 
           <Route
             path="/my-recipes"
             element={
-              <ProtectedRoute>
+              <PremiumRoute>
                 <MyRecipesPage />
-              </ProtectedRoute>
+              </PremiumRoute>
             }
           />
 
           <Route
             path="/favorites"
             element={
-              <ProtectedRoute>
+              <PremiumRoute>
                 <FavoritesPage />
-              </ProtectedRoute>
+              </PremiumRoute>
             }
           />
 
           <Route
             path="/planning"
             element={
-              <ProtectedRoute>
+              <PremiumRoute>
                 <MealPlannerPage />
-              </ProtectedRoute>
+              </PremiumRoute>
+            }
+          />
+
+          <Route
+            path="/collections"
+            element={
+              <PremiumRoute>
+                <CollectionsPage />
+              </PremiumRoute>
+            }
+          />
+
+          <Route
+            path="/collections/:id"
+            element={
+              <PremiumRoute>
+                <CollectionDetailPage />
+              </PremiumRoute>
             }
           />
 
@@ -173,6 +216,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </Suspense>
+        </ErrorBoundary>
       </main>
 
       <Footer />

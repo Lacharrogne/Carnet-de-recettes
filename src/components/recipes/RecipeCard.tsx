@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/useAuth'
+import { useEntitlement } from '../../lib/useEntitlement'
+import { getRecipeNutrition } from '../../lib/recipeNutrition'
 import { useFavorites } from '../../context/useFavorites'
 import { useToast } from '../../context/useToast'
 import { getRecipeCardStyle } from '../../data/categoryStyles'
@@ -10,22 +12,27 @@ import {
   getRecipeReviews,
   type RecipeRating,
 } from '../../services/reviews'
+import type { SocialProfile } from '../../services/social'
 import type { Recipe } from '../../types/recipe'
 
 type RecipeCardProps = {
   recipe: Recipe
   // Note agrégée fournie par la page (évite une requête par carte).
   rating?: RecipeRating
+  // Profil de l'auteur (fourni par la page ; évite une requête par carte).
+  author?: SocialProfile
   onFavoriteChange?: () => void
 }
 
 export default function RecipeCard({
   recipe,
   rating,
+  author,
   onFavoriteChange,
 }: RecipeCardProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { hasAccess } = useEntitlement()
   const { isFavorite, toggleFavorite } = useFavorites()
   const { showToast } = useToast()
 
@@ -38,6 +45,8 @@ export default function RecipeCard({
 
   const displayedFavorite = user ? isFavorite(recipe.id) : false
   const visualStyle = getRecipeCardStyle(recipe.category)
+
+  const nutrition = useMemo(() => getRecipeNutrition(recipe), [recipe])
 
   const effectiveRating = rating ?? fetchedRating
   const averageRating = effectiveRating?.average ?? 0
@@ -73,6 +82,15 @@ export default function RecipeCard({
       return
     }
 
+    if (!hasAccess) {
+      showToast({
+        message: 'Les favoris font partie de l’abonnement.',
+        tone: 'info',
+      })
+      navigate('/premium')
+      return
+    }
+
     try {
       setLoadingFavorite(true)
 
@@ -81,8 +99,8 @@ export default function RecipeCard({
       onFavoriteChange?.()
       showToast({
         message: newValue
-          ? 'Recette ajoutée à tes favoris ❤️'
-          : 'Recette retirée de tes favoris',
+          ? 'Recette ajoutée à vos favoris ❤️'
+          : 'Recette retirée de vos favoris',
         tone: 'success',
       })
     } catch (error) {
@@ -166,15 +184,45 @@ export default function RecipeCard({
                 ★ {averageRating}/5
               </span>
             )}
+
+            {nutrition.recognized > 0 && (
+              <span className="rounded-full bg-card/95 px-3 py-1 text-xs font-bold text-orange-700 shadow-soft">
+                ≈{nutrition.perServing.kcal} kcal
+              </span>
+            )}
           </div>
         </div>
 
         <div className="flex flex-1 flex-col p-4 sm:p-5">
-          <p
-            className={`mb-1 text-[0.7rem] font-bold uppercase tracking-[0.12em] sm:text-xs ${visualStyle.accentText}`}
-          >
-            Recette maison
-          </p>
+          {author ? (
+            <div className="mb-1 flex items-center gap-2">
+              {author.avatar_url ? (
+                <img
+                  src={author.avatar_url}
+                  alt=""
+                  className="h-5 w-5 shrink-0 rounded-full object-cover ring-1 ring-bark/60"
+                />
+              ) : (
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-terracotta/15 text-[0.6rem] font-black text-terracotta">
+                  {(author.full_name || author.username || '?')
+                    .charAt(0)
+                    .toUpperCase()}
+                </span>
+              )}
+
+              <span
+                className={`truncate text-[0.7rem] font-bold uppercase tracking-[0.12em] sm:text-xs ${visualStyle.accentText}`}
+              >
+                {author.full_name || author.username || 'Cuisinier·ère'}
+              </span>
+            </div>
+          ) : (
+            <p
+              className={`mb-1 text-[0.7rem] font-bold uppercase tracking-[0.12em] sm:text-xs ${visualStyle.accentText}`}
+            >
+              Recette maison
+            </p>
+          )}
 
           <h3 className="line-clamp-2 font-display text-lg font-bold leading-snug text-espresso transition group-hover:text-terracotta sm:text-xl">
             {recipe.title}

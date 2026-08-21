@@ -28,7 +28,7 @@ export default function PlannerExtrasPanel({
   onRemoveExtra,
 }: PlannerExtrasPanelProps) {
   return (
-    <div className="rounded-[2rem] bg-white/90 p-6 shadow-sm ring-1 ring-orange-100 backdrop-blur">
+    <div className="rounded-[2rem] bg-white/90 p-6 shadow-sm ring-1 ring-bark backdrop-blur">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -55,7 +55,7 @@ export default function PlannerExtrasPanel({
           return (
             <div
               key={extraMeal.key}
-              className="rounded-[1.8rem] bg-cream-50 p-5 ring-1 ring-orange-100"
+              className="rounded-[1.8rem] bg-cream-50 p-5 ring-1 ring-bark"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -77,7 +77,7 @@ export default function PlannerExtrasPanel({
                 </button>
               </div>
 
-              <div className="mt-4 space-y-3 rounded-[1.4rem] border border-dashed border-orange-200 bg-white/70 p-4">
+              <div className="mt-4 space-y-3 rounded-[1.4rem] border border-dashed border-bark bg-white/70 p-4">
                 {extraRecipes.length > 0 ? (
                   extraRecipes.map((recipe) => (
                     <div key={`${extraMeal.key}-${recipe.id}`}>

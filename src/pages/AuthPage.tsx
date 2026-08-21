@@ -102,7 +102,7 @@ export default function AuthPage() {
         const cleanUsername = username.trim()
 
         if (!cleanUsername) {
-          setErrorMessage('Tu dois choisir un pseudo.')
+          setErrorMessage('Vous devez choisir un pseudo.')
           setLoading(false)
           return
         }
@@ -137,7 +137,7 @@ export default function AuthPage() {
         }
 
         setMessage(
-          "Compte créé. Vérifie ta boîte mail avant de te connecter. Le pseudo a bien été enregistré. La photo pourra être ajoutée depuis ton profil après confirmation du compte.",
+          'Compte créé. Vérifiez votre boîte mail avant de vous connecter. Le pseudo a bien été enregistré. La photo pourra être ajoutée depuis votre profil après confirmation du compte.',
         )
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -169,13 +169,13 @@ export default function AuthPage() {
         />
 
         <h2 className="mt-3 font-display text-3xl font-black text-espresso">
-          {mode === 'login' ? 'Bon retour !' : 'Crée ton carnet'}
+          {mode === 'login' ? 'Heureux de vous revoir !' : 'Créez votre carnet'}
         </h2>
 
         <p className="mt-2 leading-7 text-cacao/80">
           {mode === 'login'
-            ? 'Connecte-toi pour retrouver tes recettes, tes courses et ton planning.'
-            : 'Quelques secondes suffisent pour commencer ton carnet de cuisine.'}
+            ? 'Connectez-vous pour retrouver vos recettes, vos courses et votre planning.'
+            : 'Quelques secondes suffisent pour commencer votre carnet de cuisine.'}
         </p>
       </div>
 
@@ -192,7 +192,7 @@ export default function AuthPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Exemple : Toudou"
-                className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                 required
               />
             </div>
@@ -215,7 +215,7 @@ export default function AuthPage() {
                   )}
                 </div>
 
-                <label className="cursor-pointer rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50">
+                <label className="cursor-pointer rounded-full bg-card ring-1 ring-bark px-5 py-3 text-sm font-bold text-orange-700 transition hover:bg-orange-50">
                   Choisir une photo
                   <input
                     type="file"
@@ -240,7 +240,7 @@ export default function AuthPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+            className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
             required
           />
         </div>
@@ -255,7 +255,7 @@ export default function AuthPage() {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-2xl border border-orange-100 bg-cream-input px-4 py-3 pr-14 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+              className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-3 pr-14 outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
               required
             />
 

@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 
 import Alert from '../ui/Alert'
+import Button from '../ui/Button'
 import { RowsSkeleton } from '../ui/Skeleton'
+import Textarea from '../ui/Textarea'
 import { useAuth } from '../../context/useAuth'
 import { getProfile, type UserProfile } from '../../services/profiles'
+import { uploadRecipeImage } from '../../services/recipes'
 import {
   addReviewReply,
   deleteRecipeReview,
@@ -75,6 +77,8 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
   const [replyingReviewId, setReplyingReviewId] = useState<number | null>(null)
   const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({})
@@ -119,6 +123,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
           if (loadedMyReview) {
             setRating(loadedMyReview.rating)
             setComment(loadedMyReview.comment)
+            setPhotoPreview(loadedMyReview.imageUrl)
           } else {
             setRating(5)
             setComment('')
@@ -161,8 +166,8 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
     const authorName = isMine
       ? profile?.username
-        ? `${profile.username} · toi`
-        : 'Toi'
+        ? `${profile.username} · vous`
+        : 'Vous'
       : profile?.username || 'Utilisateur'
 
     return {
@@ -183,11 +188,21 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
       const cleanComment = comment.trim()
 
+      // Nouvelle photo → upload ; sinon on garde celle déjà présente.
+      let imageUrl = myReview?.imageUrl ?? undefined
+      if (photoFile) {
+        imageUrl = await uploadRecipeImage(photoFile)
+      }
+
       const savedReview = await saveRecipeReview({
         recipeId,
         rating,
         comment: cleanComment,
+        imageUrl,
       })
+
+      setPhotoFile(null)
+      setPhotoPreview(imageUrl ?? null)
 
       const existingReview = reviews.find((review) => review.id === savedReview.id)
 
@@ -226,11 +241,11 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       })
 
       setSuccessMessage(
-        myReview ? 'Ton avis a été modifié.' : 'Ton avis a été ajouté.',
+        myReview ? 'Votre avis a été modifié.' : 'Votre avis a été ajouté.',
       )
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible d’enregistrer ton avis.')
+      setErrorMessage('Impossible d’enregistrer votre avis.')
     } finally {
       setSaving(false)
     }
@@ -258,10 +273,10 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       setMyReview(null)
       setRating(5)
       setComment('')
-      setSuccessMessage('Ton avis a été supprimé.')
+      setSuccessMessage('Votre avis a été supprimé.')
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible de supprimer ton avis.')
+      setErrorMessage('Impossible de supprimer votre avis.')
     } finally {
       setDeleting(false)
     }
@@ -269,7 +284,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
 
   async function handleToggleLike(review: RecipeReview) {
     if (!userId) {
-      setErrorMessage('Connecte-toi pour aimer un commentaire.')
+      setErrorMessage('Connectez-vous pour aimer un commentaire.')
       setSuccessMessage('')
       return
     }
@@ -328,7 +343,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
     event.preventDefault()
 
     if (!userId) {
-      setErrorMessage('Connecte-toi pour répondre à un commentaire.')
+      setErrorMessage('Connectez-vous pour répondre à un commentaire.')
       setSuccessMessage('')
       return
     }
@@ -379,10 +394,10 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       }))
 
       setReplyingReviewId(null)
-      setSuccessMessage('Ta réponse a été ajoutée.')
+      setSuccessMessage('Votre réponse a été ajoutée.')
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible d’ajouter ta réponse.')
+      setErrorMessage('Impossible d’ajouter votre réponse.')
     } finally {
       setReplySavingReviewId(null)
     }
@@ -416,7 +431,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
         }),
       )
 
-      setSuccessMessage('Ta réponse a été supprimée.')
+      setSuccessMessage('Votre réponse a été supprimée.')
     } catch (error) {
       console.error(error)
       setErrorMessage('Impossible de supprimer cette réponse.')
@@ -430,7 +445,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
   }
 
   return (
-    <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-7">
+    <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark md:p-7">
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="font-bold text-orange-600">Avis de la famille</p>
@@ -474,14 +489,14 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
       {user ? (
         <form
           onSubmit={handleSubmit}
-          className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-orange-100"
+          className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-bark"
         >
           <h3 className="text-xl font-black text-stone-950">
             {myReview ? 'Modifier mon avis' : 'Donner mon avis'}
           </h3>
 
           <p className="mt-1 text-sm font-medium text-stone-500">
-            Laisse une note et un petit commentaire sur cette recette.
+            Laissez une note et un petit commentaire sur cette recette.
           </p>
 
           <div className="mt-5">
@@ -498,7 +513,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                   className={`rounded-2xl px-4 py-3 text-xl font-black shadow-sm transition ${
                     value <= rating
                       ? 'bg-orange-500 text-white hover:bg-orange-600'
-                      : 'bg-white text-stone-300 ring-1 ring-orange-100 hover:bg-orange-50 hover:text-orange-400'
+                      : 'bg-white text-stone-300 ring-1 ring-bark hover:bg-orange-50 hover:text-orange-400'
                   }`}
                   aria-label={`Mettre ${value} étoile${
                     value > 1 ? 's' : ''
@@ -515,68 +530,98 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
               Commentaire
             </label>
 
-            <textarea
+            <Textarea
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               rows={4}
               placeholder="Exemple : recette facile, très bonne, parfaite pour le soir..."
-              className="w-full rounded-[1.4rem] border border-orange-100 bg-white px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 md:text-[15px]"
+              className="text-sm md:text-[15px]"
+            />
+          </div>
+
+          <div className="mt-5">
+            <label className="mb-2 block text-sm font-black text-stone-800">
+              Photo du plat <span className="font-medium text-stone-400">(facultatif)</span>
+            </label>
+
+            {photoPreview && (
+              <div className="mb-3 flex items-center gap-3">
+                <img
+                  src={photoPreview}
+                  alt="Aperçu du plat"
+                  className="h-20 w-20 rounded-2xl object-cover ring-1 ring-bark"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPhotoFile(null)
+                    setPhotoPreview(null)
+                  }}
+                  className="rounded-full ring-1 ring-bark bg-white px-4 py-2 text-sm font-bold text-stone-600 transition hover:bg-orange-50"
+                >
+                  Retirer la photo
+                </button>
+              </div>
+            )}
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null
+                setPhotoFile(file)
+                setPhotoPreview(file ? URL.createObjectURL(file) : null)
+              }}
+              className="block w-full text-sm text-stone-600 file:mr-3 file:rounded-full file:border-0 file:bg-orange-100 file:px-4 file:py-2 file:font-bold file:text-orange-700 hover:file:bg-orange-200"
             />
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-full bg-orange-500 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <Button type="submit" disabled={saving}>
               {saving
                 ? 'Enregistrement...'
                 : myReview
                   ? 'Modifier mon avis'
                   : 'Publier mon avis'}
-            </button>
+            </Button>
 
             {myReview && (
-              <button
+              <Button
                 type="button"
+                variant="danger"
                 onClick={handleDeleteReview}
                 disabled={deleting}
-                className="rounded-full border border-red-200 bg-white px-6 py-3 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {deleting ? 'Suppression...' : 'Supprimer mon avis'}
-              </button>
+              </Button>
             )}
           </div>
         </form>
       ) : (
-        <div className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-orange-100">
+        <div className="mb-7 rounded-[2rem] bg-cream-50 p-5 ring-1 ring-bark">
           <p className="font-bold text-stone-900">
-            Connecte-toi pour donner ton avis.
+            Connectez-vous pour donner votre avis.
           </p>
 
           <p className="mt-1 text-sm text-stone-600">
-            Tu pourras noter la recette, aimer les commentaires et répondre aux
+            Vous pourrez noter la recette, aimer les commentaires et répondre aux
             autres utilisateurs.
           </p>
 
-          <Link
-            to="/auth"
-            className="mt-4 inline-block rounded-full bg-orange-500 px-5 py-3 font-bold text-white transition hover:bg-orange-600"
-          >
+          <Button to="/auth" className="mt-4">
             Se connecter
-          </Link>
+          </Button>
         </div>
       )}
 
       {reviews.length === 0 ? (
-        <div className="rounded-[2rem] bg-cream-50 p-6 text-center ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-cream-50 p-6 text-center ring-1 ring-bark">
           <p className="font-bold text-stone-900">
             Aucun commentaire pour le moment.
           </p>
 
           <p className="mt-2 text-stone-600">
-            Sois le premier à donner ton avis sur cette recette.
+            Soyez le premier à donner votre avis sur cette recette.
           </p>
         </div>
       ) : (
@@ -595,7 +640,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
             return (
               <article
                 key={review.id}
-                className="rounded-[2rem] bg-cream-50 p-4 ring-1 ring-orange-100 md:p-5"
+                className="rounded-[2rem] bg-cream-50 p-4 ring-1 ring-bark md:p-5"
               >
                 <div className="mb-4 flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-base font-black text-white ring-2 ring-white md:h-12 md:w-12">
@@ -639,7 +684,23 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                   </p>
                 )}
 
-                <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-orange-100 pt-4">
+                {review.imageUrl && (
+                  <a
+                    href={review.imageUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 block w-fit"
+                  >
+                    <img
+                      src={review.imageUrl}
+                      alt="Plat réalisé"
+                      loading="lazy"
+                      className="max-h-64 rounded-2xl object-cover ring-1 ring-bark transition hover:opacity-95"
+                    />
+                  </a>
+                )}
+
+                <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-bark pt-4">
                   <button
                     type="button"
                     onClick={() => void handleToggleLike(review)}
@@ -647,7 +708,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                     className={`rounded-full px-4 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-60 ${
                       review.likedByMe
                         ? 'bg-orange-500 text-white hover:bg-orange-600'
-                        : 'bg-white text-orange-700 ring-1 ring-orange-100 hover:bg-orange-50'
+                        : 'bg-white text-orange-700 ring-1 ring-bark hover:bg-orange-50'
                     }`}
                   >
                     {review.likedByMe ? '♥ Aimé' : '♡ J’aime'}
@@ -659,7 +720,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                     onClick={() => {
                       if (!userId) {
                         setErrorMessage(
-                          'Connecte-toi pour répondre à un commentaire.',
+                          'Connectez-vous pour répondre à un commentaire.',
                         )
                         setSuccessMessage('')
                         return
@@ -670,7 +731,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       )
                       clearMessages()
                     }}
-                    className="rounded-full bg-white px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-orange-100 transition hover:bg-orange-50 hover:text-orange-700"
+                    className="rounded-full bg-white px-4 py-2 text-sm font-black text-stone-700 ring-1 ring-bark transition hover:bg-orange-50 hover:text-orange-700"
                   >
                     Répondre
                     {replyCount > 0 ? ` · ${replyCount}` : ''}
@@ -680,49 +741,50 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                 {replyingReviewId === review.id && (
                   <form
                     onSubmit={(event) => handleReplySubmit(event, review.id)}
-                    className="mt-4 rounded-[1.5rem] bg-white p-4 ring-1 ring-orange-100"
+                    className="mt-4 rounded-[1.5rem] bg-white p-4 ring-1 ring-bark"
                   >
                     <label className="mb-2 block text-sm font-black text-stone-800">
-                      Ta réponse
+                      Votre réponse
                     </label>
 
-                    <textarea
+                    <Textarea
                       value={replyDraft}
                       onChange={(event) =>
                         updateReplyDraft(review.id, event.target.value)
                       }
                       rows={3}
                       placeholder={`Répondre à ${authorName.replace(
-                        ' · toi',
+                        ' · vous',
                         '',
                       )}...`}
-                      className="w-full rounded-[1.2rem] border border-orange-100 bg-cream-input px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                      className="text-sm"
                     />
 
                     <div className="mt-3 flex flex-wrap gap-3">
-                      <button
+                      <Button
                         type="submit"
+                        size="sm"
                         disabled={replySavingReviewId === review.id}
-                        className="rounded-full bg-orange-500 px-5 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {replySavingReviewId === review.id
                           ? 'Publication...'
                           : 'Publier la réponse'}
-                      </button>
+                      </Button>
 
-                      <button
+                      <Button
                         type="button"
+                        size="sm"
+                        variant="secondary"
                         onClick={() => setReplyingReviewId(null)}
-                        className="rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-black text-orange-700 transition hover:bg-orange-50"
                       >
                         Annuler
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 )}
 
                 {review.replies.length > 0 && (
-                  <div className="mt-5 space-y-3 border-l-2 border-orange-200 pl-4">
+                  <div className="mt-5 space-y-3 border-l-2 border-bark pl-4">
                     {review.replies.map((reply) => {
                       const replyIsMine = userId === reply.userId
                       const replyAuthor = getAuthorInfo(
@@ -735,7 +797,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       return (
                         <div
                           key={reply.id}
-                          className="rounded-[1.5rem] bg-white p-4 ring-1 ring-orange-100"
+                          className="rounded-[1.5rem] bg-white p-4 ring-1 ring-bark"
                         >
                           <div className="mb-3 flex items-center gap-3">
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-sm font-black text-white ring-2 ring-white">

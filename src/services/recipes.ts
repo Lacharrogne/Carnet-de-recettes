@@ -1,7 +1,12 @@
 import { supabase } from '../lib/supabase'
-import type { RecipeCategory, Difficulty, Recipe } from '../types/recipe'
+import type {
+  RecipeCategory,
+  Difficulty,
+  Recipe,
+  RecipeStatus,
+} from '../types/recipe'
 
-type RecipeRow = {
+export type RecipeRow = {
   id: number
   user_id: string | null
   title: string
@@ -15,11 +20,14 @@ type RecipeRow = {
   image_url: string | null
   tags: string[] | null
   ingredients: string[] | null
-  steps: string[] | null
+  // Optionnel : absent des requêtes de liste (chargé seulement au détail).
+  steps?: string[] | null
   related_recipe_ids: number[] | null
+  // Optionnel : absent tant que la migration `status` n'est pas lancée.
+  status?: string | null
 }
 
-function mapRecipe(row: RecipeRow): Recipe {
+export function mapRecipe(row: RecipeRow): Recipe {
   return {
     id: row.id,
     userId: row.user_id,
@@ -36,16 +44,38 @@ function mapRecipe(row: RecipeRow): Recipe {
     ingredients: row.ingredients ?? [],
     steps: row.steps ?? [],
     relatedRecipeIds: row.related_recipe_ids ?? [],
+    status: (row.status as RecipeStatus) ?? 'published',
   }
 }
 
+// Colonnes utiles aux LISTES (catalogue, cartes, frigo, planning…). On exclut
+// volontairement `steps` (champ le plus lourd) : seules les pages de DÉTAIL en
+// ont besoin. mapRecipe() retombe sur [] si la colonne est absente.
+export const RECIPE_LIST_COLUMNS =
+  'id,user_id,title,category,difficulty,prep_time,cook_time,servings,description,image,image_url,tags,ingredients,related_recipe_ids,created_at'
+
+const RECIPE_LIST_COLUMNS_WITH_STATUS = `${RECIPE_LIST_COLUMNS},status`
+
 export async function getRecipes(): Promise<Recipe[]> {
+  // Catalogue communautaire : on n'affiche que les recettes publiées.
   const { data, error } = await supabase
     .from('recipes')
-    .select('*')
+    .select(RECIPE_LIST_COLUMNS_WITH_STATUS)
+    .eq('status', 'published')
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  if (error) {
+    // Repli si la colonne `status` n'existe pas encore (migration non lancée) :
+    // on renvoie toutes les recettes plutôt que de casser le catalogue.
+    const fallback = await supabase
+      .from('recipes')
+      .select(RECIPE_LIST_COLUMNS)
+      .order('created_at', { ascending: false })
+
+    if (fallback.error) throw fallback.error
+
+    return (fallback.data ?? []).map((row) => mapRecipe(row as RecipeRow))
+  }
 
   return (data ?? []).map((row) => mapRecipe(row as RecipeRow))
 }
@@ -128,6 +158,7 @@ export async function createRecipe(recipe: {
   ingredients: string[]
   steps: string[]
   relatedRecipeIds: number[]
+  status?: RecipeStatus
 }): Promise<Recipe> {
   const {
     data: { user },
@@ -155,6 +186,9 @@ export async function createRecipe(recipe: {
         ingredients: recipe.ingredients,
         steps: recipe.steps,
         related_recipe_ids: recipe.relatedRecipeIds,
+        // On n'écrit `status` que pour un brouillon : une publication normale
+        // s'appuie sur la valeur par défaut (reste tolérant sans la migration).
+        ...(recipe.status === 'draft' ? { status: 'draft' } : {}),
       },
     ])
     .select()
@@ -163,6 +197,30 @@ export async function createRecipe(recipe: {
   if (error) throw error
 
   return mapRecipe(data as RecipeRow)
+}
+
+/**
+ * Duplique une recette (la sienne ou celle d'un autre) en un nouveau
+ * BROUILLON appartenant à l'utilisateur courant, prêt à être adapté puis
+ * publié. Le titre reçoit le suffixe « (copie) ».
+ */
+export async function duplicateRecipe(source: Recipe): Promise<Recipe> {
+  return createRecipe({
+    title: `${source.title} (copie)`,
+    category: source.category,
+    difficulty: source.difficulty,
+    prepTime: source.prepTime,
+    cookTime: source.cookTime,
+    servings: source.servings,
+    description: source.description,
+    image: source.image,
+    imageUrl: source.imageUrl,
+    tags: source.tags,
+    ingredients: source.ingredients,
+    steps: source.steps,
+    relatedRecipeIds: source.relatedRecipeIds,
+    status: 'draft',
+  })
 }
 
 export async function updateRecipe(
@@ -181,8 +239,19 @@ export async function updateRecipe(
     ingredients: string[]
     steps: string[]
     relatedRecipeIds: number[]
+    status?: RecipeStatus
   }
 ): Promise<Recipe> {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError) throw userError
+  if (!user) throw new Error('Utilisateur non connecté')
+
+  // On restreint la modification à la recette de l'utilisateur (défense en
+  // profondeur, en complément des politiques RLS côté Supabase).
   const { data, error } = await supabase
     .from('recipes')
     .update({
@@ -199,8 +268,12 @@ export async function updateRecipe(
       ingredients: recipe.ingredients,
       steps: recipe.steps,
       related_recipe_ids: recipe.relatedRecipeIds,
+      // Écrit seulement lors d'un changement d'état (publier / repasser en
+      // brouillon) — une simple modification n'y touche pas.
+      ...(recipe.status ? { status: recipe.status } : {}),
     })
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single()
 
@@ -210,10 +283,20 @@ export async function updateRecipe(
 }
 
 export async function deleteRecipe(id: number): Promise<void> {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError) throw userError
+  if (!user) throw new Error('Utilisateur non connecté')
+
+  // Suppression limitée à sa propre recette (défense en profondeur + RLS).
   const { error } = await supabase
     .from('recipes')
     .delete()
     .eq('id', id)
+    .eq('user_id', user.id)
 
   if (error) throw error
 }
@@ -227,13 +310,25 @@ export async function getMyRecipes(): Promise<Recipe[]> {
   if (userError) throw userError
   if (!user) throw new Error('Utilisateur non connecté')
 
+  // On récupère aussi les brouillons de l'auteur (colonne `status`), avec repli
+  // si la migration n'est pas encore lancée.
   const { data, error } = await supabase
     .from('recipes')
-    .select('*')
+    .select(RECIPE_LIST_COLUMNS_WITH_STATUS)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  if (error) {
+    const fallback = await supabase
+      .from('recipes')
+      .select(RECIPE_LIST_COLUMNS)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (fallback.error) throw fallback.error
+
+    return (fallback.data ?? []).map((row) => mapRecipe(row as RecipeRow))
+  }
 
   return (data ?? []).map((row) => mapRecipe(row as RecipeRow))
 }

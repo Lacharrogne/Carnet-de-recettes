@@ -25,7 +25,7 @@ function ProfileCard({ profile }: { profile: SocialProfile }) {
   return (
     <Link
       to={`/users/${profile.user_id}`}
-      className="group rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-md"
+      className="group rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark transition hover:-translate-y-1 hover:shadow-md"
     >
       <div className="flex items-center gap-4">
         <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-xl font-black text-white shadow-sm">
@@ -81,7 +81,7 @@ export default function SocialPage() {
         }
 
         if (!data.user) {
-          setErrorMessage('Connecte-toi pour voir tes relations.')
+          setErrorMessage('Connectez-vous pour voir vos relations.')
           return
         }
 
@@ -100,7 +100,7 @@ export default function SocialPage() {
         console.error(error)
 
         if (!ignore) {
-          setErrorMessage('Impossible de charger tes relations.')
+          setErrorMessage('Impossible de charger vos relations.')
         }
       } finally {
         if (!ignore) {
@@ -124,19 +124,19 @@ export default function SocialPage() {
 
   const emptyMessage = useMemo(() => {
     if (activeTab === 'friends') {
-      return 'Tu n’as pas encore d’ami. Une amitié apparaît quand deux utilisateurs se suivent mutuellement.'
+      return 'Vous n’avez pas encore d’ami. Une amitié apparaît quand deux utilisateurs se suivent mutuellement.'
     }
 
     if (activeTab === 'followers') {
-      return 'Personne ne suit encore ton carnet.'
+      return 'Personne ne suit encore votre carnet.'
     }
 
-    return 'Tu ne suis encore aucun carnet.'
+    return 'Vous ne suivez encore aucun carnet.'
   }, [activeTab])
 
   return (
     <section className="space-y-10">
-      <div className="overflow-hidden rounded-[2.5rem] bg-cream-50/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="overflow-hidden rounded-[2.5rem] bg-cream-50/95 p-8 shadow-sm ring-1 ring-bark md:p-10">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="mb-4 flex w-fit items-center gap-2 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
@@ -149,14 +149,14 @@ export default function SocialPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-lg leading-8 text-stone-600">
-              Retrouve tes amis, les personnes qui suivent ton carnet et les
-              carnets que tu suis.
+              Retrouvez vos amis, les personnes qui suivent votre carnet et les
+              carnets que vous suivez.
             </p>
           </div>
 
           <Link
             to="/profile"
-            className="w-fit rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+            className="w-fit rounded-full bg-card ring-1 ring-bark px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
           >
             Retour au profil
           </Link>
@@ -175,8 +175,8 @@ export default function SocialPage() {
           onClick={() => setActiveTab('friends')}
           className={`rounded-[2rem] p-6 text-left shadow-sm ring-1 transition ${
             activeTab === 'friends'
-              ? 'bg-orange-500 text-white ring-orange-500'
-              : 'bg-white text-stone-950 ring-orange-100 hover:bg-orange-50'
+              ? 'bg-orange-500 text-white ring-bark/600'
+              : 'bg-white text-stone-950 ring-bark hover:bg-orange-50'
           }`}
         >
           <p className="text-sm font-bold opacity-80">Amis</p>
@@ -192,15 +192,15 @@ export default function SocialPage() {
           onClick={() => setActiveTab('followers')}
           className={`rounded-[2rem] p-6 text-left shadow-sm ring-1 transition ${
             activeTab === 'followers'
-              ? 'bg-orange-500 text-white ring-orange-500'
-              : 'bg-white text-stone-950 ring-orange-100 hover:bg-orange-50'
+              ? 'bg-orange-500 text-white ring-bark/600'
+              : 'bg-white text-stone-950 ring-bark hover:bg-orange-50'
           }`}
         >
           <p className="text-sm font-bold opacity-80">Abonnés</p>
           <p className="mt-3 text-4xl font-black">{followers.length}</p>
           <p className="mt-1 text-sm font-medium opacity-80">
             personne{followers.length > 1 ? 's' : ''} suit
-            {followers.length > 1 ? 'vent' : ''} ton carnet
+            {followers.length > 1 ? 'vent' : ''} votre carnet
           </p>
         </button>
 
@@ -209,8 +209,8 @@ export default function SocialPage() {
           onClick={() => setActiveTab('following')}
           className={`rounded-[2rem] p-6 text-left shadow-sm ring-1 transition ${
             activeTab === 'following'
-              ? 'bg-orange-500 text-white ring-orange-500'
-              : 'bg-white text-stone-950 ring-orange-100 hover:bg-orange-50'
+              ? 'bg-orange-500 text-white ring-bark/600'
+              : 'bg-white text-stone-950 ring-bark hover:bg-orange-50'
           }`}
         >
           <p className="text-sm font-bold opacity-80">Abonnements</p>
@@ -222,7 +222,7 @@ export default function SocialPage() {
         </button>
       </div>
 
-      <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="rounded-[2.5rem] bg-white/95 p-8 shadow-sm ring-1 ring-bark md:p-10">
         <div className="mb-8">
           <p className="font-bold text-orange-600">
             {activeTab === 'friends'
@@ -234,17 +234,17 @@ export default function SocialPage() {
 
           <h2 className="text-3xl font-black text-stone-950">
             {activeTab === 'friends'
-              ? 'Tes amis'
+              ? 'Vos amis'
               : activeTab === 'followers'
-                ? 'Ils suivent ton carnet'
-                : 'Les carnets que tu suis'}
+                ? 'Ils suivent votre carnet'
+                : 'Les carnets que vous suivez'}
           </h2>
         </div>
 
         {loading ? (
           <RowsSkeleton rows={4} />
         ) : displayedProfiles.length === 0 ? (
-          <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-bark">
             <p className="text-lg font-black text-stone-950">
               Rien à afficher pour le moment.
             </p>

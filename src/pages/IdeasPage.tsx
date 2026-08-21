@@ -1,8 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
+import Select from '../components/ui/Select'
 import { RowsSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { getProfile, type UserProfile } from '../services/profiles'
@@ -155,7 +156,7 @@ export default function IdeasPage() {
     const cleanedMessage = message.trim()
 
     if (!cleanedTitle || !cleanedMessage) {
-      setErrorMessage('Ajoute un titre et un message avant de publier.')
+      setErrorMessage('Ajoutez un titre et un message avant de publier.')
       return
     }
 
@@ -184,14 +185,14 @@ export default function IdeasPage() {
       setTitle('')
       setMessage('')
       setCategory('amelioration')
-      setSuccessMessage('Ton idée a bien été publiée.')
+      setSuccessMessage('Votre idée a bien été publiée.')
 
       window.setTimeout(() => {
         setSuccessMessage('')
       }, 3000)
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible de publier ton idée.')
+      setErrorMessage('Impossible de publier votre idée.')
     } finally {
       setSaving(false)
     }
@@ -230,7 +231,7 @@ export default function IdeasPage() {
 
   return (
     <section className="space-y-8">
-      <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-bark">
         <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
           <span>💡</span>
           <span>Boîte à idées</span>
@@ -239,16 +240,16 @@ export default function IdeasPage() {
         <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-start">
           <div>
             <h1 className="text-4xl font-black leading-tight text-stone-950 md:text-6xl">
-              Propose tes idées pour améliorer le site.
+              Proposez vos idées pour améliorer le site.
             </h1>
 
             <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
-              Tu peux laisser une suggestion, signaler un bug ou proposer une
+              Vous pouvez laisser une suggestion, signaler un bug ou proposer une
               nouvelle fonctionnalité pour faire évoluer le carnet de recettes.
             </p>
           </div>
 
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Participer
             </p>
@@ -260,15 +261,11 @@ export default function IdeasPage() {
             {user ? (
               <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
                 <div>
-                  <label className="mb-2 block text-sm font-black text-stone-800">
-                    Type d’idée
-                  </label>
-
-                  <select
+                  <Select
+                    label="Type d’idée"
                     value={category}
                     onChange={(event) => setCategory(event.target.value)}
                     aria-label="Type d’idée"
-                    className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 font-semibold text-stone-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                   >
                     {IDEA_CATEGORIES.map((currentCategory) => (
                       <option
@@ -278,7 +275,7 @@ export default function IdeasPage() {
                         {currentCategory.emoji} {currentCategory.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
@@ -293,7 +290,7 @@ export default function IdeasPage() {
                       setErrorMessage('')
                     }}
                     placeholder="Exemple : Ajouter un mode anti-gaspillage"
-                    className="w-full rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                    className="w-full rounded-2xl bg-linen px-4 py-3 font-semibold text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                   />
                 </div>
 
@@ -309,36 +306,29 @@ export default function IdeasPage() {
                       setErrorMessage('')
                     }}
                     rows={5}
-                    placeholder="Explique ton idée en quelques phrases..."
-                    className="w-full rounded-[1.4rem] border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold leading-7 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                    placeholder="Expliquez votre idée en quelques phrases..."
+                    className="w-full rounded-2xl bg-linen px-4 py-3 text-sm font-semibold leading-7 text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-                >
+                <Button type="submit" disabled={saving}>
                   {saving ? 'Publication...' : 'Publier mon idée'}
-                </button>
+                </Button>
               </form>
             ) : (
-              <div className="mt-5 rounded-[1.5rem] bg-cream-50 p-5 ring-1 ring-orange-100">
+              <div className="mt-5 rounded-[1.5rem] bg-cream-50 p-5 ring-1 ring-bark">
                 <p className="font-bold text-stone-900">
-                  Connecte-toi pour proposer une idée.
+                  Connectez-vous pour proposer une idée.
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-stone-600">
-                  Les idées sont liées à ton profil pour que les autres
+                  Les idées sont liées à votre profil pour que les autres
                   utilisateurs voient qui les propose.
                 </p>
 
-                <Link
-                  to="/auth"
-                  className="mt-4 inline-flex rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-                >
+                <Button to="/auth" className="mt-4">
                   Se connecter
-                </Link>
+                </Button>
               </div>
             )}
           </div>
@@ -349,7 +339,7 @@ export default function IdeasPage() {
 
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
-      <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+      <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark md:p-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -373,7 +363,7 @@ export default function IdeasPage() {
             tone="honey"
             emoji="💭"
             title="Aucune idée pour le moment"
-            description="Sois le premier à proposer une amélioration : une fonctionnalité, une recette à ajouter, une envie…"
+            description="Soyez le premier à proposer une amélioration : une fonctionnalité, une recette à ajouter, une envie…"
           />
         ) : (
           <div className="grid gap-5 lg:grid-cols-2">
@@ -390,7 +380,7 @@ export default function IdeasPage() {
               return (
                 <article
                   key={idea.id}
-                  className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-orange-100"
+                  className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-bark"
                 >
                   <div className="mb-4 flex items-start justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-3">
@@ -409,7 +399,7 @@ export default function IdeasPage() {
                       <div className="min-w-0">
                         <p className="truncate font-black text-stone-950">
                           {authorName}
-                          {isMine ? ' · toi' : ''}
+                          {isMine ? ' · vous' : ''}
                         </p>
 
                         <p className="text-sm font-semibold text-stone-500">
@@ -425,7 +415,7 @@ export default function IdeasPage() {
                     </span>
                   </div>
 
-                  <div className="mb-3 flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-black text-orange-700 ring-1 ring-orange-100">
+                  <div className="mb-3 flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-black text-orange-700 ring-1 ring-bark">
                     <span>{categoryInfo.emoji}</span>
                     <span>{categoryInfo.label}</span>
                   </div>

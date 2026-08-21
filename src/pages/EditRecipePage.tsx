@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import RecipeForm from '../components/recipes/RecipeForm'
 import type { RecipeFormValues } from '../components/recipes/RecipeForm'
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
 import {
   deleteRecipeImageByUrl,
   getRecipeById,
@@ -21,6 +22,9 @@ export default function EditRecipePage() {
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
+
+  const isDraft = recipe?.status === 'draft'
 
   useEffect(() => {
     async function loadRecipe() {
@@ -77,6 +81,8 @@ export default function EditRecipePage() {
       const updatedRecipe = await updateRecipe(Number(id), {
         ...recipeValues,
         imageUrl,
+        // Le bouton principal d'un brouillon le publie.
+        ...(isDraft ? { status: 'published' as const } : {}),
       })
 
       if (imageFile && oldImageUrl) {
@@ -95,9 +101,50 @@ export default function EditRecipePage() {
     }
   }
 
+  // Enregistre les modifications sans publier (le brouillon reste privé).
+  async function handleSaveDraft(values: RecipeFormValues) {
+    setErrorMessage('')
+    setIsSavingDraft(true)
+
+    try {
+      if (!id || !recipe) {
+        throw new Error('Recette introuvable')
+      }
+
+      const { imageFile, ...recipeValues } = values
+
+      const oldImageUrl = recipe.imageUrl
+      let imageUrl = oldImageUrl
+
+      if (imageFile) {
+        imageUrl = await uploadRecipeImage(imageFile)
+      }
+
+      await updateRecipe(Number(id), {
+        ...recipeValues,
+        imageUrl,
+        status: 'draft',
+      })
+
+      if (imageFile && oldImageUrl) {
+        try {
+          await deleteRecipeImageByUrl(oldImageUrl)
+        } catch (error) {
+          console.warn("L'ancienne image n'a pas pu être supprimée.", error)
+        }
+      }
+
+      navigate('/my-recipes')
+    } catch (error) {
+      console.error(error)
+      setErrorMessage("Impossible d'enregistrer le brouillon.")
+      setIsSavingDraft(false)
+    }
+  }
+
   if (loading) {
     return (
-      <section className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-bark">
         <p className="font-medium text-stone-600">
           Chargement de la recette...
         </p>
@@ -107,7 +154,7 @@ export default function EditRecipePage() {
 
   if (!recipe) {
     return (
-      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-bark">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-3xl">
           🍽️
         </div>
@@ -126,19 +173,16 @@ export default function EditRecipePage() {
           </Alert>
         )}
 
-        <Link
-          to="/recipes"
-          className="mt-6 inline-block rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-        >
+        <Button to="/recipes" className="mt-6">
           Retour aux recettes
-        </Link>
+        </Button>
       </section>
     )
   }
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-linen p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-linen p-8 shadow-sm ring-1 ring-bark">
         <Link
           to={`/recipes/${recipe.id}`}
           className="font-bold text-orange-700 transition hover:text-orange-800"
@@ -150,24 +194,30 @@ export default function EditRecipePage() {
           <p className="font-bold text-orange-600">Carnet familial</p>
 
           <h1 className="mt-2 text-4xl font-black leading-tight text-stone-950">
-            Modifier la recette
+            {isDraft ? 'Terminer le brouillon' : 'Modifier la recette'}
           </h1>
 
           <p className="mt-3 max-w-2xl leading-7 text-stone-600">
-            Mets à jour les informations de ta recette, puis enregistre les
-            modifications pour les retrouver dans le carnet.
+            {isDraft
+              ? 'Complétez votre brouillon, puis publiez-le pour le partager — ou gardez-le en brouillon pour plus tard.'
+              : 'Mettez à jour les informations de votre recette, puis enregistrez les modifications pour les retrouver dans le carnet.'}
           </p>
         </div>
       </div>
 
-      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:p-8">
+      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark md:p-8">
         <RecipeForm
           initialValues={recipe}
           availableRecipes={availableRecipes}
-          submitLabel="Enregistrer les modifications"
+          submitLabel={
+            isDraft ? 'Publier la recette' : 'Enregistrer les modifications'
+          }
           isSubmitting={isSubmitting}
           errorMessage={errorMessage}
           onSubmit={handleSubmit}
+          onSaveDraft={isDraft ? handleSaveDraft : undefined}
+          isSavingDraft={isSavingDraft}
+          draftLabel="Garder en brouillon"
         />
       </div>
     </section>

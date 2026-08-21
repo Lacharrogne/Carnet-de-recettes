@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 
 import PlannerExtrasPanel from '../components/planner/PlannerExtrasPanel'
 import PlannerPrintView from '../components/planner/PlannerPrintView'
@@ -7,6 +6,8 @@ import PlannerWeekGrid from '../components/planner/PlannerWeekGrid'
 import RecipeMiniCard from '../components/planner/RecipeMiniCard'
 import RecipePickerModal from '../components/planner/RecipePickerModal'
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
+import Select from '../components/ui/Select'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -16,7 +17,13 @@ import {
   getSavedPlanner,
 } from '../lib/weeklyPlanner'
 import { getRecipes } from '../services/recipes'
+import {
+  getCollectionRecipes,
+  getCollections,
+  type RecipeCollection,
+} from '../services/collections'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
+import { generateWeeklyPlan } from '../lib/weeklyPlanGenerator'
 import type { Recipe } from '../types/recipe'
 
 type DayKey =
@@ -192,6 +199,30 @@ export default function MealPlannerPage() {
 
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+
+  const [collections, setCollections] = useState<RecipeCollection[]>([])
+  const [planSource, setPlanSource] = useState('all')
+  const [generating, setGenerating] = useState(false)
+
+  // Collections de l'utilisateur (source possible pour « Surprends-moi »).
+  useEffect(() => {
+    let ignore = false
+
+    if (!user) {
+      setCollections([])
+      return
+    }
+
+    getCollections()
+      .then((data) => {
+        if (!ignore) setCollections(data)
+      })
+      .catch((error) => console.error(error))
+
+    return () => {
+      ignore = true
+    }
+  }, [user])
 
   useEffect(() => {
     let ignore = false
@@ -437,7 +468,7 @@ export default function MealPlannerPage() {
     setSuccessMessage(
       shoppingListUpdated
         ? `"${recipe.title}" a été ajouté au planning. La liste de courses a été mise à jour.`
-        : `"${recipe.title}" a été ajouté au planning. Connecte-toi pour synchroniser la liste de courses.`,
+        : `"${recipe.title}" a été ajouté au planning. Connectez-vous pour synchroniser la liste de courses.`,
     )
 
     window.setTimeout(() => {
@@ -513,6 +544,72 @@ export default function MealPlannerPage() {
     }, 3000)
   }
 
+  async function handleGenerate() {
+    if (
+      plannedRecipeIds.length > 0 &&
+      !window.confirm(
+        'Remplacer le planning actuel par une semaine générée automatiquement ?',
+      )
+    ) {
+      return
+    }
+
+    clearMessages()
+    setGenerating(true)
+
+    try {
+      let pool = recipes
+
+      if (planSource === 'mine' && user) {
+        pool = recipes.filter((recipe) => recipe.userId === user.id)
+      } else if (planSource.startsWith('col:')) {
+        pool = await getCollectionRecipes(planSource.slice(4))
+      }
+
+      if (pool.length === 0) {
+        setErrorMessage(
+          'Aucune recette dans cette source pour générer un planning.',
+        )
+        return
+      }
+
+      const nextPlanner = generateWeeklyPlan(pool)
+      setPlanner(nextPlanner)
+      savePlanner(nextPlanner)
+
+      // On remplit la liste de courses depuis la semaine générée (si connecté).
+      if (user) {
+        const plannedRecipes = Array.from(
+          new Set(getAllPlannedRecipeIds(nextPlanner)),
+        )
+          .map((id) => recipes.find((recipe) => String(recipe.id) === id))
+          .filter((recipe): recipe is Recipe => Boolean(recipe))
+
+        await Promise.all(
+          plannedRecipes.map((recipe) =>
+            addRecipeIngredientsToShoppingList(
+              recipe.id,
+              recipe.ingredients,
+            ).catch((error) => console.error(error)),
+          ),
+        )
+
+        setSuccessMessage(
+          'Nouvelle semaine générée et liste de courses mise à jour ! Ajustez ce que vous voulez.',
+        )
+      } else {
+        setSuccessMessage(
+          'Nouvelle semaine générée ! Connectez-vous pour remplir automatiquement la liste de courses.',
+        )
+      }
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible de générer le planning.')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   async function handleClearPlanning() {
     if (plannedRecipeIds.length === 0) {
       return
@@ -570,7 +667,7 @@ export default function MealPlannerPage() {
       />
 
       <section className="space-y-10">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-cream-50 shadow-sm ring-1 ring-orange-100">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-cream-50 shadow-sm ring-1 ring-bark">
           <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-orange-100/80 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-amber-100/80 blur-3xl" />
 
@@ -586,12 +683,12 @@ export default function MealPlannerPage() {
               </h1>
 
               <p className="mt-6 max-w-xl text-lg leading-8 text-stone-600">
-                Prévois tes déjeuners, tes dîners et tes petites envies de la
+                Prévoyez vos déjeuners, vos dîners et vos petites envies de la
                 semaine. Le carnet peut aussi alimenter automatiquement ta liste
                 de courses.
               </p>
 
-              <div className="mt-8 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+              <div className="mt-8 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -617,7 +714,7 @@ export default function MealPlannerPage() {
               </div>
 
               <div className="mt-6 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                   <p className="text-3xl font-black text-orange-600">
                     {plannedMealsCount}
                   </p>
@@ -626,7 +723,7 @@ export default function MealPlannerPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                   <p className="text-3xl font-black text-green-800">
                     {plannedDaysCount}
                   </p>
@@ -635,7 +732,7 @@ export default function MealPlannerPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                   <p className="text-3xl font-black text-stone-950">
                     {estimatedIngredientsCount}
                   </p>
@@ -644,7 +741,7 @@ export default function MealPlannerPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+                <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                   <p className="text-3xl font-black text-stone-950">
                     {estimatedCookingTime}
                   </p>
@@ -654,26 +751,54 @@ export default function MealPlannerPage() {
                 </div>
               </div>
 
-              <div className="mt-8 grid max-w-xl gap-3 sm:grid-cols-2">
-                <Link
-                  to="/shopping-list"
-                  className="rounded-full bg-orange-500 px-6 py-4 text-center font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md"
-                >
-                  Voir ma liste de courses
-                </Link>
+              <div className="mt-8 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
+                <p className="font-black text-stone-950">✨ Surprends-moi</p>
+                <p className="mt-1 text-sm leading-6 text-stone-600">
+                  Génère une semaine équilibrée automatiquement et remplit ta
+                  liste de courses. Tu ajustes ensuite ce que tu veux.
+                </p>
 
-                <Link
-                  to="/recipes"
-                  className="rounded-full border border-orange-200 bg-white px-6 py-4 text-center font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50"
-                >
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <Select
+                    value={planSource}
+                    onChange={(event) => setPlanSource(event.target.value)}
+                    aria-label="Source des recettes"
+                    wrapperClassName="min-w-0 flex-1"
+                  >
+                    <option value="all">Toutes les recettes</option>
+                    {user && <option value="mine">Mes recettes</option>}
+                    {collections.map((collection) => (
+                      <option key={collection.id} value={`col:${collection.id}`}>
+                        {collection.emoji} {collection.name}
+                      </option>
+                    ))}
+                  </Select>
+
+                  <Button
+                    type="button"
+                    onClick={handleGenerate}
+                    disabled={generating}
+                    className="shrink-0"
+                  >
+                    {generating ? 'Génération...' : '✨ Générer la semaine'}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-4 grid max-w-xl gap-3 sm:grid-cols-2">
+                <Button to="/shopping-list" size="lg" fullWidth>
+                  Voir ma liste de courses
+                </Button>
+
+                <Button to="/recipes" variant="secondary" size="lg" fullWidth>
                   Parcourir les catégories
-                </Link>
+                </Button>
 
                 <button
                   type="button"
                   onClick={handlePrintPlanning}
                   disabled={plannedRecipeIds.length === 0}
-                  className="rounded-full border border-orange-200 bg-white px-6 py-4 font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full bg-card ring-1 ring-bark px-6 py-4 font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Imprimer le planning
                 </button>
@@ -689,8 +814,8 @@ export default function MealPlannerPage() {
               </div>
 
               {!user && (
-                <div className="mt-6 rounded-[1.5rem] bg-white/80 p-4 text-sm font-bold leading-6 text-stone-600 ring-1 ring-orange-100">
-                  💡 Ton planning est enregistré sur cet appareil. Connecte-toi
+                <div className="mt-6 rounded-[1.5rem] bg-white/80 p-4 text-sm font-bold leading-6 text-stone-600 ring-1 ring-bark">
+                  💡 Votre planning est enregistré sur cet appareil. Connectez-vous
                   pour synchroniser automatiquement la liste de courses.
                 </div>
               )}
@@ -720,7 +845,7 @@ export default function MealPlannerPage() {
         )}
 
         {uniquePlannedRecipes.length > 0 && (
-          <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 md:p-8">
+          <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark md:p-8">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="font-bold text-orange-600">Récapitulatif</p>
@@ -734,12 +859,9 @@ export default function MealPlannerPage() {
                 </p>
               </div>
 
-              <Link
-                to="/shopping-list"
-                className="rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-              >
+              <Button to="/shopping-list">
                 Préparer les courses
-              </Link>
+              </Button>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

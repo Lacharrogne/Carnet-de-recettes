@@ -30,4 +30,28 @@ describe('scaleIngredientText', () => {
   it('laisse inchangé si le nombre de portions est invalide', () => {
     expect(scaleIngredientText('200 g de farine', 0, 2)).toBe('200 g de farine')
   })
+
+  it('recalcule les deux bornes d’une fourchette « à »', () => {
+    expect(scaleIngredientText('2 à 3 cuillères', 2, 4)).toBe(
+      '4 à 6 cuillères',
+    )
+  })
+
+  it('recalcule les deux bornes d’une fourchette avec tiret', () => {
+    expect(scaleIngredientText('2-3 tomates', 2, 4)).toBe('4-6 tomates')
+  })
+
+  it('ne confond pas « cuillère à soupe » avec une fourchette', () => {
+    expect(scaleIngredientText('1 cuillère à soupe de sucre', 1, 2)).toBe(
+      '2 cuillères à soupe de sucre',
+    )
+  })
+
+  it('gère une fraction unicode', () => {
+    expect(scaleIngredientText('½ citron', 2, 4)).toBe('1 citron')
+  })
+
+  it('gère un nombre entier suivi d’une fraction unicode', () => {
+    expect(scaleIngredientText('1 ½ pomme', 1, 2)).toBe('3 pommes')
+  })
 })

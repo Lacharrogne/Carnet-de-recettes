@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
+import Select from '../components/ui/Select'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -11,6 +11,9 @@ import { getFavoriteRecipes } from '../services/favorites'
 import type { Recipe, RecipeCategory } from '../types/recipe'
 
 type SortOption = 'recent' | 'name' | 'time' | 'difficulty'
+
+/** Nombre de recettes affichées par page (pagination « Voir plus »). */
+const PAGE_SIZE = 12
 
 export default function FavoritesPage() {
   useDocumentTitle('Mes favoris')
@@ -43,7 +46,7 @@ export default function FavoritesPage() {
       .catch((error) => {
         if (!ignore) {
           console.error(error)
-          setErrorMessage('Impossible de charger tes favoris.')
+          setErrorMessage('Impossible de charger vos favoris.')
         }
       })
       .finally(() => {
@@ -131,6 +134,20 @@ export default function FavoritesPage() {
 
   const hasActiveFilters = search.trim().length > 0 || selectedCategory !== ''
 
+  // Pagination : on réinitialise le nombre visible dès qu'un filtre change
+  // (ajustement d'état pendant le rendu, sans effet).
+  const filtersKey = `${search.trim().toLowerCase()}|${selectedCategory}|${sort}`
+  const [paginationKey, setPaginationKey] = useState(filtersKey)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  if (paginationKey !== filtersKey) {
+    setPaginationKey(filtersKey)
+    setVisibleCount(PAGE_SIZE)
+  }
+
+  const visibleRecipes = filteredRecipes.slice(0, visibleCount)
+  const remainingCount = filteredRecipes.length - visibleRecipes.length
+
   function resetFilters() {
     setSearch('')
     setSelectedCategory('')
@@ -147,10 +164,10 @@ export default function FavoritesPage() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="overflow-hidden rounded-[2rem] bg-cream-100 p-8 shadow-sm ring-1 ring-bark">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-5">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-orange-100">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-white text-3xl shadow-sm ring-1 ring-bark">
               ♥
             </div>
 
@@ -162,25 +179,22 @@ export default function FavoritesPage() {
               </h1>
 
               <p className="mt-3 max-w-2xl leading-7 text-stone-600">
-                Retrouve les recettes que tu as gardées de côté pour les refaire
-                plus tard, les partager ou préparer tes repas.
+                Retrouvez les recettes que vous avez gardées de côté pour les refaire
+                plus tard, les partager ou préparer vos repas.
               </p>
             </div>
           </div>
 
-          <Link
-            to="/recipes"
-            className="w-fit rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-          >
+          <Button to="/recipes" className="w-fit">
             Explorer les recettes
-          </Link>
+          </Button>
         </div>
       </div>
 
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
       <div className="grid gap-5 md:grid-cols-3">
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             ❤️
           </div>
@@ -197,7 +211,7 @@ export default function FavoritesPage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             🔎
           </div>
@@ -214,7 +228,7 @@ export default function FavoritesPage() {
           </p>
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+        <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             🧺
           </div>
@@ -233,7 +247,7 @@ export default function FavoritesPage() {
         </div>
       </div>
 
-      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+      <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
         <div className="mb-5">
           <p className="font-bold text-orange-700">Recherche</p>
 
@@ -242,7 +256,7 @@ export default function FavoritesPage() {
           </h2>
 
           <p className="mt-2 text-stone-600">
-            Cherche une recette par nom, ingrédient, tag ou catégorie.
+            Cherchez une recette par nom, ingrédient, tag ou catégorie.
           </p>
         </div>
 
@@ -253,16 +267,15 @@ export default function FavoritesPage() {
             onChange={(event) => setSearch(event.target.value)}
             aria-label="Rechercher dans mes favoris"
             placeholder="Rechercher dans mes favoris..."
-            className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
+            className="w-full rounded-2xl bg-linen px-4 py-3 text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
           />
 
-          <select
+          <Select
             value={selectedCategory}
             onChange={(event) =>
               setSelectedCategory(event.target.value as RecipeCategory | '')
             }
             aria-label="Filtrer par catégorie"
-            className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="">Toutes les catégories</option>
 
@@ -271,29 +284,29 @@ export default function FavoritesPage() {
                 {category.label}
               </option>
             ))}
-          </select>
+          </Select>
 
-          <select
+          <Select
             value={sort}
             onChange={(event) => setSort(event.target.value as SortOption)}
             aria-label="Trier les favoris"
-            className="rounded-2xl border border-orange-100 bg-[#fffaf5] px-4 py-3 outline-none transition focus:border-orange-500"
           >
             <option value="recent">Plus récentes</option>
             <option value="name">Trier par nom</option>
             <option value="time">Temps le plus court</option>
             <option value="difficulty">Difficulté</option>
-          </select>
+          </Select>
         </div>
 
         {hasActiveFilters && (
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={resetFilters}
-            className="mt-4 rounded-2xl border border-orange-200 bg-white px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+            className="mt-4"
           >
             Réinitialiser les filtres
-          </button>
+          </Button>
         )}
       </div>
 
@@ -302,14 +315,14 @@ export default function FavoritesPage() {
           emoji="❤️"
           tone="plum"
           title="Aucune recette favorite pour le moment"
-          description="Ajoute des recettes en favori avec le bouton cœur pour les retrouver ici facilement."
+          description="Ajoutez des recettes en favori avec le bouton cœur pour les retrouver ici facilement."
           action={<Button to="/recipes">Explorer les recettes</Button>}
         />
       ) : filteredRecipes.length === 0 ? (
         <EmptyState
           emoji="🔎"
           title="Aucun favori trouvé"
-          description="Essaie une autre recherche ou une autre catégorie."
+          description="Essayez une autre recherche ou une autre catégorie."
           action={
             <Button type="button" onClick={resetFilters}>
               Voir tous mes favoris
@@ -333,7 +346,7 @@ export default function FavoritesPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredRecipes.map((recipe) => (
+            {visibleRecipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
@@ -341,6 +354,20 @@ export default function FavoritesPage() {
               />
             ))}
           </div>
+
+          {remainingCount > 0 && (
+            <div className="mt-8 flex justify-center">
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
+              >
+                Voir plus de recettes ({remainingCount} restante
+                {remainingCount > 1 ? 's' : ''})
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </section>

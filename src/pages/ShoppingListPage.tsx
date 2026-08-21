@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
@@ -114,7 +113,7 @@ export default function ShoppingListPage() {
     const cleanedText = newItemText.trim()
 
     if (!cleanedText) {
-      setErrorMessage('Écris un ingrédient avant de l’ajouter.')
+      setErrorMessage('Écrivez un ingrédient avant de l’ajouter.')
       return
     }
 
@@ -127,7 +126,7 @@ export default function ShoppingListPage() {
 
       setItems((currentItems) => [createdItem, ...currentItems])
       setNewItemText('')
-      setSuccessMessage('Ingrédient ajouté à ta liste de courses.')
+      setSuccessMessage('Ingrédient ajouté à votre liste de courses.')
     } catch (error) {
       console.error(error)
       setSuccessMessage('')
@@ -299,22 +298,19 @@ export default function ShoppingListPage() {
 
   if (!user) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-bark">
         <p className="text-2xl font-black text-stone-950">
-          Connecte-toi pour voir ta liste de courses.
+          Connectez-vous pour voir votre liste de courses.
         </p>
 
         <p className="mx-auto mt-3 max-w-xl text-stone-600">
-          Ta liste de courses est liée à ton compte pour pouvoir la retrouver
+          Votre liste de courses est liée à votre compte pour pouvoir la retrouver
           plus tard.
         </p>
 
-        <Link
-          to="/auth"
-          className="mt-6 inline-flex rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-        >
+        <Button to="/auth" className="mt-6">
           Aller à la connexion
-        </Link>
+        </Button>
       </section>
     )
   }
@@ -365,14 +361,14 @@ export default function ShoppingListPage() {
 
       <section className="screen-shopping-list space-y-8">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-bark">
             <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
               <span>🛒</span>
               <span>Liste de courses</span>
             </div>
 
             <h1 className="text-4xl font-black leading-tight text-stone-950 md:text-6xl">
-              Fais tes courses sans rien oublier.
+              Faites vos courses sans rien oublier.
             </h1>
 
             <p className="mt-5 max-w-xl text-lg leading-8 text-stone-600">
@@ -382,7 +378,7 @@ export default function ShoppingListPage() {
             </p>
 
             <div className="mt-8 grid grid-cols-3 gap-3">
-              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                 <p className="text-3xl font-black text-orange-600">
                   {activeLines.length}
                 </p>
@@ -390,7 +386,7 @@ export default function ShoppingListPage() {
                 <p className="mt-1 text-sm font-bold text-stone-700">lignes</p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                 <p className="text-3xl font-black text-green-700">
                   {checkedLines.length}
                 </p>
@@ -400,7 +396,7 @@ export default function ShoppingListPage() {
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                 <p className="text-3xl font-black text-stone-900">
                   {activeCategoryCount}
                 </p>
@@ -410,44 +406,43 @@ export default function ShoppingListPage() {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <button
+              <Button
                 type="button"
                 onClick={handlePrint}
                 disabled={visibleItems.length === 0}
-                className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Imprimer la liste
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={() => setShowCheckedItems((current) => !current)}
-                className="rounded-full border border-orange-200 bg-white px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
               >
                 {showCheckedItems ? 'Masquer les cochés' : 'Afficher les cochés'}
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={handleDeleteCheckedItems}
                 disabled={checkedItems.length === 0 || bulkActionLoading}
-                className="rounded-full border border-orange-100 bg-white px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Supprimer les cochés
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
+                variant="danger"
                 onClick={handleDeleteAllItems}
                 disabled={visibleItems.length === 0 || bulkActionLoading}
-                className="rounded-full border border-red-100 bg-white px-6 py-3 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Vider la liste
-              </button>
+              </Button>
             </div>
           </div>
 
-          <div className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+          <div className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Ajouter rapidement
             </p>
@@ -469,24 +464,20 @@ export default function ShoppingListPage() {
                   setErrorMessage('')
                   setSuccessMessage('')
                 }}
-                placeholder="Exemple : 6 œufs, 500 g pâtes, lait..."
-                className="rounded-[1.5rem] border border-orange-100 bg-cream-50 px-5 py-4 font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                aria-label="Ajouter un article à la liste" placeholder="Exemple : 6 œufs, 500 g pâtes, lait..."
+                className="w-full rounded-2xl bg-linen px-5 py-4 font-semibold text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
               />
 
-              <button
-                type="submit"
-                disabled={adding}
-                className="rounded-full bg-orange-500 px-6 py-4 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-              >
+              <Button type="submit" size="lg" disabled={adding}>
                 {adding ? 'Ajout en cours...' : 'Ajouter à la liste'}
-              </button>
+              </Button>
             </form>
 
             <div className="mt-6 rounded-[1.5rem] bg-orange-50 p-5 text-sm leading-7 text-orange-900">
               <p className="font-black">Astuce</p>
 
               <p>
-                Si tu ajoutes plusieurs fois la même recette dans le planning,
+                Si vous ajoutez plusieurs fois la même recette dans le planning,
                 les quantités se regroupent ici automatiquement.
               </p>
             </div>
@@ -498,7 +489,7 @@ export default function ShoppingListPage() {
         {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
         {loading ? (
-          <div className="space-y-3 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100 sm:p-8">
+          <div className="space-y-3 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark sm:p-8">
             {Array.from({ length: 5 }, (_, index) => (
               <div key={index} className="flex items-center gap-3">
                 <Skeleton className="h-6 w-6 rounded-md" />
@@ -511,13 +502,13 @@ export default function ShoppingListPage() {
           <EmptyState
             tone="sage"
             emoji="🧺"
-            title="Ta liste est vide"
-            description="Ajoute un ingrédient à la main, ou envoie une recette depuis sa fiche ou le planning pour générer automatiquement tes courses."
+            title="Votre liste est vide"
+            description="Ajoutez un ingrédient à la main, ou envoyez une recette depuis sa fiche ou le planning pour générer automatiquement vos courses."
             action={<Button to="/recipes">Parcourir les recettes</Button>}
           />
         ) : (
           <div className="space-y-8">
-            <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
+            <section className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark">
               <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-black uppercase tracking-wide text-orange-600">
@@ -539,7 +530,7 @@ export default function ShoppingListPage() {
                   <p className="font-black">Tout est coché.</p>
 
                   <p className="mt-1 text-sm">
-                    Tu peux supprimer les ingrédients cochés ou garder
+                    Vous pouvez supprimer les ingrédients cochés ou garder
                     l’historique pour le moment.
                   </p>
                 </div>
@@ -548,7 +539,7 @@ export default function ShoppingListPage() {
                   {activeSections.map((section) => (
                     <article
                       key={section.category}
-                      className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-orange-100"
+                      className="rounded-[2rem] bg-cream-50 p-5 shadow-sm ring-1 ring-bark"
                     >
                       <div className="mb-4 flex items-center justify-between gap-4">
                         <div>
@@ -573,13 +564,13 @@ export default function ShoppingListPage() {
                         {section.lines.map((line) => (
                           <div
                             key={line.key}
-                            className="flex items-center gap-3 rounded-[1.25rem] bg-white px-4 py-3 shadow-sm ring-1 ring-orange-50"
+                            className="flex items-center gap-3 rounded-[1.25rem] bg-white px-4 py-3 shadow-sm ring-1 ring-bark/60"
                           >
                             <button
                               type="button"
                               onClick={() => handleToggleLine(line)}
                               disabled={bulkActionLoading}
-                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-orange-200 text-sm font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-1 ring-bark text-sm font-black text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
                               aria-label={`Cocher ${line.displayText}`}
                             >
                               ✓

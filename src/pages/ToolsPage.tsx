@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 
+import Button from '../components/ui/Button'
+
 type ToolCard = {
   label: string
   subtitle: string
@@ -20,9 +22,9 @@ type ToolCard = {
 const tools: ToolCard[] = [
   {
     label: 'Mode frigo',
-    subtitle: 'Cuisiner avec ce que tu as déjà',
+    subtitle: 'Cuisiner avec ce que vous avez déjà',
     description:
-      'Indique les ingrédients disponibles chez toi et le carnet te propose les recettes les plus adaptées.',
+      'Indiquez les ingrédients disponibles chez vous et le carnet vous propose les recettes les plus adaptées.',
     to: '/frigo',
     emoji: '🥕',
     buttonLabel: 'Ouvrir le mode frigo',
@@ -34,7 +36,7 @@ const tools: ToolCard[] = [
     accentText: 'text-green-700',
     glow: 'bg-green-200/60',
     points: [
-      'Recettes selon ton frigo',
+      'Recettes selon votre frigo',
       'Ingrédients manquants visibles',
       'Priorité anti-gaspillage',
     ],
@@ -64,7 +66,7 @@ const tools: ToolCard[] = [
     label: 'Planning',
     subtitle: 'Organiser les repas de la semaine',
     description:
-      'Prévois les déjeuners et les dîners de la semaine pour mieux anticiper les courses.',
+      'Prévoyez les déjeuners et les dîners de la semaine pour mieux anticiper les courses.',
     to: '/planning',
     emoji: '📅',
     buttonLabel: 'Planifier mes repas',
@@ -85,7 +87,7 @@ const tools: ToolCard[] = [
     label: 'Boîte à idées',
     subtitle: 'Faire évoluer le carnet',
     description:
-      'Propose une amélioration, une nouvelle fonctionnalité ou un retour pour rendre le site encore plus utile.',
+      'Proposez une amélioration, une nouvelle fonctionnalité ou un retour pour rendre le site encore plus utile.',
     to: '/ideas',
     emoji: '💡',
     buttonLabel: 'Donner une idée',
@@ -107,7 +109,7 @@ const tools: ToolCard[] = [
 export default function ToolsPage() {
   return (
     <section className="space-y-10">
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-bark md:p-10">
         <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-orange-100/80 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-amber-100/80 blur-3xl" />
 
@@ -123,29 +125,21 @@ export default function ToolsPage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
-              Retrouve ici les fonctions pratiques du carnet : trouver une
-              recette avec ce que tu as, préparer tes courses, organiser la
-              semaine et proposer tes idées.
+              Retrouvez ici les fonctions pratiques du carnet : trouver une
+              recette avec ce que vous avez, préparer vos courses, organiser la
+              semaine et proposer vos idées.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/frigo"
-                className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md"
-              >
-                Commencer avec le frigo
-              </Link>
+              <Button to="/frigo">Commencer avec le frigo</Button>
 
-              <Link
-                to="/shopping-list"
-                className="rounded-full border border-orange-200 bg-white px-6 py-3 font-black text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
-              >
+              <Button to="/shopping-list" variant="secondary">
                 Voir les courses
-              </Link>
+              </Button>
             </div>
           </div>
 
-          <div className="rounded-[2rem] bg-white/85 p-5 shadow-sm ring-1 ring-orange-100 backdrop-blur">
+          <div className="rounded-[2rem] bg-white/85 p-5 shadow-sm ring-1 ring-bark backdrop-blur">
             <p className="text-sm font-black uppercase tracking-wide text-orange-600">
               Le carnet intelligent
             </p>
@@ -155,24 +149,24 @@ export default function ToolsPage() {
             </h2>
 
             <div className="mt-5 grid gap-3">
-              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark">
                 <p className="text-2xl">🥕</p>
                 <p className="mt-2 font-black text-stone-950">
-                  Tu pars de ce que tu as déjà.
+                  Vous partez de ce que vous avez déjà.
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark">
                 <p className="text-2xl">🛒</p>
                 <p className="mt-2 font-black text-stone-950">
                   Les courses se préparent toutes seules.
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100">
+              <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark">
                 <p className="text-2xl">📅</p>
                 <p className="mt-2 font-black text-stone-950">
-                  Tu organises tes repas sans prise de tête.
+                  Vous organisez vos repas sans prise de tête.
                 </p>
               </div>
             </div>
@@ -185,7 +179,7 @@ export default function ToolsPage() {
           <Link
             key={tool.to}
             to={tool.to}
-            className={`group relative overflow-hidden rounded-[2.5rem] ${tool.cardBg} p-6 shadow-sm ring-1 ring-orange-100 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(28,25,23,0.1)]`}
+            className={`group relative overflow-hidden rounded-[2.5rem] ${tool.cardBg} p-6 shadow-sm ring-1 ring-bark transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(28,25,23,0.1)]`}
           >
             <div
               className={`pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full ${tool.glow} blur-3xl`}
@@ -248,7 +242,7 @@ export default function ToolsPage() {
         ))}
       </div>
 
-      <div className="rounded-[2.5rem] bg-white p-8 shadow-sm ring-1 ring-orange-100 md:p-10">
+      <div className="rounded-[2.5rem] bg-white p-8 shadow-sm ring-1 ring-bark md:p-10">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="font-bold text-orange-600">Par quoi commencer ?</p>
@@ -265,19 +259,13 @@ export default function ToolsPage() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/frigo"
-              className="rounded-full bg-orange-500 px-6 py-3 text-center font-black text-white shadow-sm transition hover:bg-orange-600"
-            >
+            <Button to="/frigo" fullWidth className="sm:w-auto">
               Tester le frigo
-            </Link>
+            </Button>
 
-            <Link
-              to="/recipes"
-              className="rounded-full border border-orange-200 bg-cream-50 px-6 py-3 text-center font-black text-orange-700 transition hover:bg-orange-50"
-            >
+            <Button to="/recipes" variant="secondary" fullWidth className="sm:w-auto">
               Parcourir les catégories
-            </Link>
+            </Button>
           </div>
         </div>
       </div>

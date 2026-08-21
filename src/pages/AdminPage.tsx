@@ -1,25 +1,18 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
 
-import { Skeleton } from '../components/ui/Skeleton'
+import ResourceManager from '../components/admin/ResourceManager'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
-import {
-  deleteAdminProfile,
-  deleteAdminRecipe,
-  deleteAdminReview,
-  getAdminStats,
-  getRecentAdminProfiles,
-  getRecentAdminRecipes,
-  getRecentAdminReviews,
-  searchAdminProfiles,
-  searchAdminRecipes,
-  searchAdminReviews,
-  type AdminProfilePreview,
-  type AdminRecipePreview,
-  type AdminReviewPreview,
-  type AdminStats,
-} from '../services/admin'
+import { getAdminStats, type AdminStats } from '../services/admin'
+
+type CompAccess = {
+  user_id: string
+  email: string | null
+  username: string | null
+  granted_at: string | null
+}
 
 function formatDate(value: string | null) {
   if (!value) return 'Date inconnue'
@@ -37,23 +30,13 @@ export default function AdminPage() {
   const [checkingAdmin, setCheckingAdmin] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
 
-  const [loadingData, setLoadingData] = useState(true)
   const [stats, setStats] = useState<AdminStats | null>(null)
-  const [profiles, setProfiles] = useState<AdminProfilePreview[]>([])
-  const [recipes, setRecipes] = useState<AdminRecipePreview[]>([])
-  const [reviews, setReviews] = useState<AdminReviewPreview[]>([])
-
-  const [actionLoading, setActionLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
-  const [profileSearch, setProfileSearch] = useState('')
-const [recipeSearch, setRecipeSearch] = useState('')
-const [reviewSearch, setReviewSearch] = useState('')
-
-const [profileSearchLoading, setProfileSearchLoading] = useState(false)
-const [recipeSearchLoading, setRecipeSearchLoading] = useState(false)
-const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
+  const [compEmail, setCompEmail] = useState('')
+  const [compList, setCompList] = useState<CompAccess[]>([])
+  const [compBusy, setCompBusy] = useState(false)
 
   useEffect(() => {
     let ignore = false
@@ -64,7 +47,6 @@ const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
           setCheckingAdmin(false)
           setIsAdmin(false)
         }
-
         return
       }
 
@@ -82,7 +64,6 @@ const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
         }
       } catch (error) {
         console.error(error)
-
         if (!ignore) {
           setIsAdmin(false)
           setErrorMessage('Impossible de vérifier les droits administrateur.')
@@ -101,212 +82,122 @@ const [reviewSearchLoading, setReviewSearchLoading] = useState(false)
     }
   }, [user])
 
-  async function loadAdminData() {
-    const [loadedStats, loadedProfiles, loadedRecipes, loadedReviews] =
-      await Promise.all([
-        getAdminStats(),
-        getRecentAdminProfiles(),
-        getRecentAdminRecipes(),
-        getRecentAdminReviews(),
-      ])
+  const refreshCompList = useCallback(async () => {
+    const { data, error } = await supabase.rpc('list_comp_access')
 
-    setStats(loadedStats)
-    setProfiles(loadedProfiles)
-    setRecipes(loadedRecipes)
-    setReviews(loadedReviews)
-  }
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    setCompList((data ?? []) as CompAccess[])
+  }, [])
 
   useEffect(() => {
-    let ignore = false
+    if (!isAdmin) {
+      return
+    }
 
-    async function fetchAdminData() {
-      if (!isAdmin) {
-        return
-      }
-
+    async function loadAdmin() {
       try {
-        setLoadingData(true)
-
-        const [loadedStats, loadedProfiles, loadedRecipes, loadedReviews] =
-          await Promise.all([
-            getAdminStats(),
-            getRecentAdminProfiles(),
-            getRecentAdminRecipes(),
-            getRecentAdminReviews(),
-          ])
-
-        if (!ignore) {
-          setStats(loadedStats)
-          setProfiles(loadedProfiles)
-          setRecipes(loadedRecipes)
-          setReviews(loadedReviews)
-          setErrorMessage('')
-        }
+        const loadedStats = await getAdminStats()
+        setStats(loadedStats)
       } catch (error) {
         console.error(error)
-
-        if (!ignore) {
-          setErrorMessage('Impossible de charger les données administrateur.')
-        }
-      } finally {
-        if (!ignore) {
-          setLoadingData(false)
-        }
       }
+
+      await refreshCompList()
     }
 
-    void fetchAdminData()
+    void loadAdmin()
+  }, [isAdmin, refreshCompList])
 
-    return () => {
-      ignore = true
-    }
-  }, [isAdmin])
+  async function handleGrantComp(event: FormEvent) {
+    event.preventDefault()
 
-  async function refreshAfterAction(message: string) {
-    try {
-      await loadAdminData()
-      setSuccessMessage(message)
-
-      window.setTimeout(() => {
-        setSuccessMessage('')
-      }, 3000)
-    } catch (error) {
-      console.error(error)
-      setErrorMessage('Impossible de recharger les données administrateur.')
-    }
-  }
-
-  async function handleSearchProfiles() {
-  try {
-    setProfileSearchLoading(true)
-    setErrorMessage('')
-
-    const results = await searchAdminProfiles(profileSearch)
-    setProfiles(results)
-  } catch (error) {
-    console.error(error)
-    setErrorMessage('Impossible de rechercher les profils.')
-  } finally {
-    setProfileSearchLoading(false)
-  }
-}
-
-async function handleSearchRecipes() {
-  try {
-    setRecipeSearchLoading(true)
-    setErrorMessage('')
-
-    const results = await searchAdminRecipes(recipeSearch)
-    setRecipes(results)
-  } catch (error) {
-    console.error(error)
-    setErrorMessage('Impossible de rechercher les recettes.')
-  } finally {
-    setRecipeSearchLoading(false)
-  }
-}
-
-async function handleSearchReviews() {
-  try {
-    setReviewSearchLoading(true)
-    setErrorMessage('')
-
-    const results = await searchAdminReviews(reviewSearch)
-    setReviews(results)
-  } catch (error) {
-    console.error(error)
-    setErrorMessage('Impossible de rechercher les commentaires.')
-  } finally {
-    setReviewSearchLoading(false)
-  }
-}
-
-  async function handleDeleteReview(review: AdminReviewPreview) {
-    const confirmDelete = window.confirm(
-      `Supprimer ce commentaire ?\n\n"${review.comment}"`,
-    )
-
-    if (!confirmDelete) return
+    const email = compEmail.trim()
+    if (!email) return
 
     try {
-      setActionLoading(true)
+      setCompBusy(true)
       setErrorMessage('')
       setSuccessMessage('')
 
-      await deleteAdminReview(review.id)
-      await refreshAfterAction('Commentaire supprimé.')
+      const { error } = await supabase.rpc('grant_comp_access', {
+        target_email: email,
+      })
+
+      if (error) throw error
+
+      setCompEmail('')
+      await refreshCompList()
+      setSuccessMessage(`Accès offert à ${email}.`)
+
+      window.setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible de supprimer ce commentaire.')
+      setErrorMessage(
+        error instanceof Error && error.message
+          ? error.message
+          : "Impossible d'offrir l'accès.",
+      )
     } finally {
-      setActionLoading(false)
+      setCompBusy(false)
     }
   }
 
-  async function handleDeleteRecipe(recipe: AdminRecipePreview) {
-    const confirmDelete = window.confirm(
-      `Supprimer la recette "${recipe.title}" ?\n\nCette action supprimera aussi les éléments liés à cette recette.`,
-    )
+  async function handleRevokeComp(access: CompAccess) {
+    const label = access.email ?? access.username ?? 'ce compte'
 
-    if (!confirmDelete) return
-
-    try {
-      setActionLoading(true)
-      setErrorMessage('')
-      setSuccessMessage('')
-
-      await deleteAdminRecipe(recipe.id)
-      await refreshAfterAction('Recette supprimée.')
-    } catch (error) {
-      console.error(error)
-      setErrorMessage('Impossible de supprimer cette recette.')
-    } finally {
-      setActionLoading(false)
+    if (!window.confirm(`Retirer l'accès offert à ${label} ?`)) {
+      return
     }
-  }
 
-  async function handleDeleteProfile(profile: AdminProfilePreview) {
-    const confirmDelete = window.confirm(
-      `Supprimer le profil "${profile.username}" ?\n\nAttention : cela supprime le profil et ses données liées, mais pas encore le compte Auth Supabase.`,
-    )
-
-    if (!confirmDelete) return
+    if (!access.email) {
+      setErrorMessage('Email manquant pour ce compte, retrait impossible.')
+      return
+    }
 
     try {
-      setActionLoading(true)
+      setCompBusy(true)
       setErrorMessage('')
       setSuccessMessage('')
 
-      await deleteAdminProfile(profile.userId)
-      await refreshAfterAction('Profil supprimé.')
+      const { error } = await supabase.rpc('revoke_comp_access', {
+        target_email: access.email,
+      })
+
+      if (error) throw error
+
+      await refreshCompList()
+      setSuccessMessage(`Accès retiré à ${label}.`)
+
+      window.setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
       console.error(error)
-      setErrorMessage('Impossible de supprimer ce profil.')
+      setErrorMessage("Impossible de retirer l'accès.")
     } finally {
-      setActionLoading(false)
+      setCompBusy(false)
     }
   }
 
   if (!user) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-bark">
         <p className="text-2xl font-black text-stone-950">
-          Connecte-toi pour accéder à l’administration.
+          Connectez-vous pour accéder à l’administration.
         </p>
 
-        <Link
-          to="/auth"
-          className="mt-6 inline-flex rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-        >
+        <Button to="/auth" className="mt-6">
           Aller à la connexion
-        </Link>
+        </Button>
       </section>
     )
   }
 
   if (checkingAdmin) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 shadow-sm ring-1 ring-bark">
         <p className="font-bold text-stone-600">
           Vérification des droits administrateur...
         </p>
@@ -316,26 +207,23 @@ async function handleSearchReviews() {
 
   if (!isAdmin) {
     return (
-      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-orange-100">
+      <section className="rounded-[2rem] bg-white px-6 py-10 text-center shadow-sm ring-1 ring-bark">
         <p className="text-3xl font-black text-stone-950">Accès refusé</p>
 
         <p className="mx-auto mt-3 max-w-xl text-stone-600">
           Cette page est réservée aux administrateurs du carnet de recettes.
         </p>
 
-        <Link
-          to="/"
-          className="mt-6 inline-flex rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-        >
+        <Button to="/" className="mt-6">
           Retour à l’accueil
-        </Link>
+        </Button>
       </section>
     )
   }
 
   return (
     <section className="space-y-8">
-      <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-orange-100">
+      <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-bark">
         <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
           <span>🛡️</span>
           <span>Mode administrateur</span>
@@ -348,36 +236,33 @@ async function handleSearchReviews() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
-              Ici tu peux surveiller le carnet de recettes et supprimer les
-              contenus problématiques.
+              Vous pouvez tout consulter, modifier et supprimer dans le carnet
+              de recettes.
             </p>
           </div>
 
-          <Link
-            to="/"
-            className="rounded-full border border-orange-200 bg-white px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
-          >
+          <Button to="/" variant="secondary">
             Retour au site
-          </Link>
+          </Button>
         </div>
 
         {stats && (
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
               <p className="text-4xl font-black text-orange-600">
                 {stats.profilesCount}
               </p>
               <p className="mt-1 font-bold text-stone-700">profils</p>
             </div>
 
-            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
               <p className="text-4xl font-black text-orange-600">
                 {stats.recipesCount}
               </p>
               <p className="mt-1 font-bold text-stone-700">recettes</p>
             </div>
 
-            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-orange-100">
+            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
               <p className="text-4xl font-black text-orange-600">
                 {stats.reviewsCount}
               </p>
@@ -399,252 +284,75 @@ async function handleSearchReviews() {
         </p>
       )}
 
-      {loadingData ? (
-        <div className="grid gap-8 xl:grid-cols-3">
-          {Array.from({ length: 3 }, (_, index) => (
-            <div
-              key={index}
-              className="space-y-4 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100"
-            >
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-9 w-20" />
-              <Skeleton className="h-3 w-full" />
-              <Skeleton className="h-3 w-2/3" />
-            </div>
-          ))}
+      <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
+        <p className="text-sm font-black uppercase tracking-wide text-orange-600">
+          Accès offerts
+        </p>
+
+        <h2 className="mt-2 text-2xl font-black text-stone-950">
+          Offrir un accès premium
+        </h2>
+
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">
+          Débloquez l’accès complet pour un compte, sans paiement (proches,
+          testeurs…). La personne doit d’abord avoir créé son compte avec
+          l’email indiqué.
+        </p>
+
+        <form
+          onSubmit={handleGrantComp}
+          className="mt-5 flex flex-col gap-2 sm:flex-row"
+        >
+          <Input
+            type="email"
+            value={compEmail}
+            onChange={(event) => setCompEmail(event.target.value)}
+            aria-label="Email du compte"
+            placeholder="email@exemple.com"
+            wrapperClassName="min-w-0 flex-1"
+            className="text-sm"
+          />
+
+          <Button type="submit" size="sm" disabled={compBusy}>
+            {compBusy ? '...' : "Offrir l'accès"}
+          </Button>
+        </form>
+
+        <div className="mt-6 space-y-3">
+          {compList.length === 0 ? (
+            <p className="text-stone-500">Aucun accès offert pour le moment.</p>
+          ) : (
+            compList.map((access) => (
+              <div
+                key={access.user_id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark"
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-black text-stone-950">
+                    {access.email ?? '(email inconnu)'}
+                  </p>
+
+                  <p className="text-xs font-semibold text-stone-500">
+                    {access.username ? `${access.username} — ` : ''}
+                    Depuis le {formatDate(access.granted_at)}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleRevokeComp(access)}
+                  disabled={compBusy}
+                  className="shrink-0 rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Retirer
+                </button>
+              </div>
+            ))
+          )}
         </div>
-      ) : (
-        <div className="grid gap-8 xl:grid-cols-3">
-          <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-            <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-              Utilisateurs
-            </p>
+      </section>
 
-            <h2 className="mt-2 text-2xl font-black text-stone-950">
-              Profils récents
-            </h2>
-
-            <form
-  onSubmit={(event) => {
-    event.preventDefault()
-    void handleSearchProfiles()
-  }}
-  className="mt-5 flex gap-2"
->
-  <input
-    value={profileSearch}
-    onChange={(event) => setProfileSearch(event.target.value)}
-    placeholder="Rechercher un profil..."
-    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
-  />
-
-  <button
-    type="submit"
-    disabled={profileSearchLoading}
-    className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    {profileSearchLoading ? '...' : 'OK'}
-  </button>
-</form>
-
-            <div className="mt-6 space-y-3">
-              {profiles.length === 0 ? (
-                <p className="text-stone-500">Aucun profil trouvé.</p>
-              ) : (
-                profiles.map((profile) => (
-                  <div
-                    key={profile.userId}
-                    className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-500 font-black text-white">
-                        {profile.avatarUrl ? (
-                          <img
-                            src={profile.avatarUrl}
-                            alt={profile.username}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          profile.username.charAt(0).toUpperCase()
-                        )}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-black text-stone-950">
-                          {profile.username}
-                        </p>
-
-                        <p className="text-xs font-semibold text-stone-500">
-                          {formatDate(profile.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteProfile(profile)}
-                      disabled={actionLoading}
-                      className="mt-4 w-full rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      Supprimer le profil
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-
-          <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-            <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-              Recettes
-            </p>
-
-            <h2 className="mt-2 text-2xl font-black text-stone-950">
-              Recettes récentes
-            </h2>
-
-            <form
-  onSubmit={(event) => {
-    event.preventDefault()
-    void handleSearchRecipes()
-  }}
-  className="mt-5 flex gap-2"
->
-  <input
-    value={recipeSearch}
-    onChange={(event) => setRecipeSearch(event.target.value)}
-    placeholder="Rechercher une recette..."
-    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
-  />
-
-  <button
-    type="submit"
-    disabled={recipeSearchLoading}
-    className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    {recipeSearchLoading ? '...' : 'OK'}
-  </button>
-</form>
-
-            <div className="mt-6 space-y-3">
-              {recipes.length === 0 ? (
-                <p className="text-stone-500">Aucune recette trouvée.</p>
-              ) : (
-                recipes.map((recipe) => (
-                  <div
-                    key={recipe.id}
-                    className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100"
-                  >
-                    <p className="font-black text-stone-950">{recipe.title}</p>
-
-                    <p className="mt-1 text-sm font-semibold text-orange-700">
-                      {recipe.category}
-                    </p>
-
-                    <p className="mt-1 text-xs font-semibold text-stone-500">
-                      {formatDate(recipe.createdAt)}
-                    </p>
-
-                    <div className="mt-4 flex gap-2">
-                      <Link
-                        to={`/recipes/${recipe.id}`}
-                        className="flex-1 rounded-full border border-orange-200 bg-white px-4 py-2 text-center text-sm font-black text-orange-700 transition hover:bg-orange-50"
-                      >
-                        Voir
-                      </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteRecipe(recipe)}
-                        disabled={actionLoading}
-                        className="flex-1 rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-
-          <section className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-orange-100">
-            <p className="text-sm font-black uppercase tracking-wide text-orange-600">
-              Commentaires
-            </p>
-
-            <h2 className="mt-2 text-2xl font-black text-stone-950">
-              Avis récents
-            </h2>
-
-            <form
-  onSubmit={(event) => {
-    event.preventDefault()
-    void handleSearchReviews()
-  }}
-  className="mt-5 flex gap-2"
->
-  <input
-    value={reviewSearch}
-    onChange={(event) => setReviewSearch(event.target.value)}
-    placeholder="Rechercher un commentaire..."
-    className="min-w-0 flex-1 rounded-2xl border border-orange-100 bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
-  />
-
-  <button
-    type="submit"
-    disabled={reviewSearchLoading}
-    className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    {reviewSearchLoading ? '...' : 'OK'}
-  </button>
-</form>
-
-            <div className="mt-6 space-y-3">
-              {reviews.length === 0 ? (
-                <p className="text-stone-500">Aucun commentaire trouvé.</p>
-              ) : (
-                reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-orange-100"
-                  >
-                    <p className="font-black text-orange-600">
-                      Note : {review.rating}/5
-                    </p>
-
-                    <p className="mt-2 text-sm leading-6 text-stone-700">
-                      {review.comment || 'Aucun commentaire écrit.'}
-                    </p>
-
-                    <p className="mt-2 text-xs font-semibold text-stone-500">
-                      Recette #{review.recipeId} — {formatDate(review.createdAt)}
-                    </p>
-
-                    <div className="mt-4 flex gap-2">
-                      <Link
-                        to={`/recipes/${review.recipeId}`}
-                        className="flex-1 rounded-full border border-orange-200 bg-white px-4 py-2 text-center text-sm font-black text-orange-700 transition hover:bg-orange-50"
-                      >
-                        Voir
-                      </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteReview(review)}
-                        disabled={actionLoading}
-                        className="flex-1 rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-        </div>
-      )}
+      <ResourceManager />
     </section>
   )
 }

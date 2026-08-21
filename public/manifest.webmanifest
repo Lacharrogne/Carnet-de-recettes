@@ -1,0 +1,27 @@
+{
+  "name": "Carnet de recettes",
+  "short_name": "Recettes",
+  "description": "Le carnet de cuisine familial : recettes, courses, planning et idées du quotidien.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#faf5ee",
+  "theme_color": "#c2683d",
+  "lang": "fr",
+  "categories": ["food", "lifestyle"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

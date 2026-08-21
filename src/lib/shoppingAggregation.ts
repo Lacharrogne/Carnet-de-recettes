@@ -9,9 +9,9 @@ type ShoppingCategory = {
   terms: string[]
 }
 
-type UnitKind = 'weight' | 'volume' | 'container' | 'piece'
+export type UnitKind = 'weight' | 'volume' | 'container' | 'piece'
 
-type QuantityInfo = {
+export type QuantityInfo = {
   baseValue: number
   baseUnit: string
   unitKind: UnitKind
@@ -471,7 +471,7 @@ function parseQuantityValue(value: string) {
   return parsedValue
 }
 
-function parseQuantityInfo(
+export function parseQuantityInfo(
   value: string,
   fallbackName: string,
 ): QuantityInfo | null {
