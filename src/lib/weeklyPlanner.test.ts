@@ -15,21 +15,23 @@ describe('weeklyPlanner', () => {
     expect(PLANNER_STORAGE_KEY).toBe('carnet-recettes-weekly-planner')
   })
 
-  it('définit 7 jours et 2 repas principaux', () => {
+  it('définit 7 jours et 5 repas par jour', () => {
     expect(DAYS).toHaveLength(7)
-    expect(MEALS).toHaveLength(2)
+    expect(MEALS).toHaveLength(5)
   })
 
-  it('crée un planning vide complet', () => {
+  it('crée un planning vide complet (5 repas par jour)', () => {
     const planner = createEmptyPlanner()
 
-    expect(planner.monday).toEqual({ lunch: '', dinner: '' })
-    expect(planner.sunday).toEqual({ lunch: '', dinner: '' })
-    expect(planner.weeklyExtras).toEqual({
-      breakfast: [],
-      snack: [],
-      dessert: [],
-    })
+    const emptyDay = {
+      breakfast: '',
+      lunch: '',
+      snack: '',
+      dinner: '',
+      dessert: '',
+    }
+    expect(planner.monday).toEqual(emptyDay)
+    expect(planner.sunday).toEqual(emptyDay)
   })
 
   it('traduit les clés de jour et de repas', () => {

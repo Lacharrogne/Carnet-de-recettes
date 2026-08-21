@@ -2,6 +2,9 @@ import type { Recipe } from '../types/recipe'
 
 // Planning de repas de la semaine, persisté en localStorage.
 // Source de vérité partagée (détail recette, planning, accueil).
+//
+// Depuis la refonte : chaque jour a ses 5 repas à part entière
+// (petit déjeuner, déjeuner, goûter, dîner, dessert).
 
 export type DayKey =
   | 'monday'
@@ -12,15 +15,9 @@ export type DayKey =
   | 'saturday'
   | 'sunday'
 
-export type MealKey = 'lunch' | 'dinner'
-export type ExtraMealKey = 'breakfast' | 'snack' | 'dessert'
+export type MealKey = 'breakfast' | 'lunch' | 'snack' | 'dinner' | 'dessert'
 
-type DayPlannerState = Record<DayKey, Record<MealKey, string>>
-type WeeklyExtrasState = Record<ExtraMealKey, string[]>
-
-export type MealPlannerState = DayPlannerState & {
-  weeklyExtras: WeeklyExtrasState
-}
+export type MealPlannerState = Record<DayKey, Record<MealKey, string>>
 
 export const PLANNER_STORAGE_KEY = 'carnet-recettes-weekly-planner'
 
@@ -35,35 +32,32 @@ export const DAYS: { key: DayKey; label: string }[] = [
 ]
 
 export const MEALS: { key: MealKey; label: string; emoji: string }[] = [
+  { key: 'breakfast', label: 'Petit déjeuner', emoji: '☕' },
   { key: 'lunch', label: 'Déjeuner', emoji: '☀️' },
+  { key: 'snack', label: 'Goûter', emoji: '🍎' },
   { key: 'dinner', label: 'Dîner', emoji: '🌙' },
+  { key: 'dessert', label: 'Dessert', emoji: '🍰' },
 ]
+
+/** Repas « principaux » (utilisés pour la barre de progression de la semaine). */
+export const MAIN_MEALS = MEALS.filter(
+  (meal) => meal.key === 'lunch' || meal.key === 'dinner',
+)
+
+function createEmptyDay(): Record<MealKey, string> {
+  return { breakfast: '', lunch: '', snack: '', dinner: '', dessert: '' }
+}
 
 export function createEmptyPlanner(): MealPlannerState {
   return {
-    monday: { lunch: '', dinner: '' },
-    tuesday: { lunch: '', dinner: '' },
-    wednesday: { lunch: '', dinner: '' },
-    thursday: { lunch: '', dinner: '' },
-    friday: { lunch: '', dinner: '' },
-    saturday: { lunch: '', dinner: '' },
-    sunday: { lunch: '', dinner: '' },
-    weeklyExtras: {
-      breakfast: [],
-      snack: [],
-      dessert: [],
-    },
+    monday: createEmptyDay(),
+    tuesday: createEmptyDay(),
+    wednesday: createEmptyDay(),
+    thursday: createEmptyDay(),
+    friday: createEmptyDay(),
+    saturday: createEmptyDay(),
+    sunday: createEmptyDay(),
   }
-}
-
-function cleanRecipeIds(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value
-    .map((item) => String(item))
-    .filter((item) => item.trim().length > 0)
 }
 
 export function getSavedPlanner(): MealPlannerState {
@@ -79,22 +73,18 @@ export function getSavedPlanner(): MealPlannerState {
       return emptyPlanner
     }
 
-    const parsedPlanner = JSON.parse(savedPlanner) as Partial<MealPlannerState>
+    // On fusionne chaque jour sur un jour vide : les anciens plannings
+    // (déjeuner/dîner seulement) sont conservés, les nouveaux repas passent à ''.
+    const parsed = JSON.parse(savedPlanner) as Record<
+      string,
+      Partial<Record<MealKey, string>> | undefined
+    >
 
-    return {
-      monday: { ...emptyPlanner.monday, ...parsedPlanner.monday },
-      tuesday: { ...emptyPlanner.tuesday, ...parsedPlanner.tuesday },
-      wednesday: { ...emptyPlanner.wednesday, ...parsedPlanner.wednesday },
-      thursday: { ...emptyPlanner.thursday, ...parsedPlanner.thursday },
-      friday: { ...emptyPlanner.friday, ...parsedPlanner.friday },
-      saturday: { ...emptyPlanner.saturday, ...parsedPlanner.saturday },
-      sunday: { ...emptyPlanner.sunday, ...parsedPlanner.sunday },
-      weeklyExtras: {
-        breakfast: cleanRecipeIds(parsedPlanner.weeklyExtras?.breakfast),
-        snack: cleanRecipeIds(parsedPlanner.weeklyExtras?.snack),
-        dessert: cleanRecipeIds(parsedPlanner.weeklyExtras?.dessert),
-      },
+    const result = createEmptyPlanner()
+    for (const day of DAYS) {
+      result[day.key] = { ...emptyPlanner[day.key], ...(parsed[day.key] ?? {}) }
     }
+    return result
   } catch {
     return createEmptyPlanner()
   }
@@ -116,6 +106,25 @@ export function saveRecipeToPlanner(
   }
 
   window.localStorage.setItem(PLANNER_STORAGE_KEY, JSON.stringify(nextPlanner))
+}
+
+/** Tous les IDs de recettes planifiées (tous jours, tous repas). */
+export function getAllPlannedRecipeIds(planner: MealPlannerState): string[] {
+  const ids: string[] = []
+  for (const day of DAYS) {
+    for (const meal of MEALS) {
+      const value = planner[day.key][meal.key]
+      if (value) ids.push(value)
+    }
+  }
+  return ids
+}
+
+export function isRecipeInPlanner(
+  planner: MealPlannerState,
+  recipeId: Recipe['id'],
+): boolean {
+  return getAllPlannedRecipeIds(planner).includes(String(recipeId))
 }
 
 export function getDayLabel(day: DayKey) {

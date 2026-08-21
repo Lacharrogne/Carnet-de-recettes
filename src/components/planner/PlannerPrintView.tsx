@@ -1,7 +1,6 @@
 import { LOGO_SRC } from '../../data/brand'
 import type {
   DayKey,
-  ExtraMealKey,
   MealKey,
   MealPlannerState,
 } from '../../lib/weeklyPlanner'
@@ -15,14 +14,7 @@ type PlannerPrintViewProps = {
   planner: MealPlannerState
   recipesById: Map<string, Recipe>
   days: { key: DayKey; label: string; shortLabel: string; emoji: string }[]
-  mainMeals: { key: MealKey; label: string; emoji: string }[]
-  extraMeals: {
-    key: ExtraMealKey
-    label: string
-    emoji: string
-    description: string
-    emptyText: string
-  }[]
+  meals: { key: MealKey; label: string; emoji: string }[]
 }
 
 // Vue dédiée à l'impression du planning (masquée à l'écran, visible à l'impression).
@@ -34,8 +26,7 @@ export default function PlannerPrintView({
   planner,
   recipesById,
   days,
-  mainMeals,
-  extraMeals,
+  meals,
 }: PlannerPrintViewProps) {
   return (
     <>
@@ -166,40 +157,11 @@ export default function PlannerPrintView({
           </div>
         </div>
 
-        <p className="print-section-title">Habitudes et envies</p>
-
-        <div className="grid grid-cols-3 gap-3">
-          {extraMeals.map((extraMeal) => {
-            const recipeIds = planner.weeklyExtras[extraMeal.key]
-            const extraRecipes = recipeIds
-              .map((recipeId) => recipesById.get(recipeId))
-              .filter((recipe): recipe is Recipe => Boolean(recipe))
-
-            return (
-              <div key={extraMeal.key} className="print-card">
-                <p className="mb-2 font-black">
-                  {extraMeal.emoji} {extraMeal.label}
-                </p>
-
-                {extraRecipes.length > 0 ? (
-                  <ul className="space-y-1 text-sm">
-                    {extraRecipes.map((recipe) => (
-                      <li key={recipe.id}>• {recipe.title}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm print-muted">Aucun prévu.</p>
-                )}
-              </div>
-            )
-          })}
-        </div>
-
         <p className="print-section-title">Semaine détaillée</p>
 
         <div className="print-day-grid">
           {days.map((day) => {
-            const dayMealsCount = mainMeals.filter(
+            const dayMealsCount = meals.filter(
               (meal) => planner[day.key][meal.key],
             ).length
 
@@ -215,12 +177,12 @@ export default function PlannerPrintView({
                   </div>
 
                   <p className="rounded-full ring-1 ring-bark bg-white px-3 py-1 text-xs font-black">
-                    {dayMealsCount}/2
+                    {dayMealsCount}/{meals.length}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  {mainMeals.map((meal) => {
+                  {meals.map((meal) => {
                     const recipeId = planner[day.key][meal.key]
                     const recipe = recipeId ? recipesById.get(recipeId) : null
 
