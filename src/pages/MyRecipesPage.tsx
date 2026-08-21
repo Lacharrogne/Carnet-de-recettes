@@ -190,12 +190,9 @@ export default function MyRecipesPage() {
             </div>
           </div>
 
-          <Link
-            to="/add-recipe"
-            className="w-fit rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-          >
+          <Button to="/add-recipe" className="w-fit">
             + Ajouter une recette
-          </Link>
+          </Button>
         </div>
       </div>
 

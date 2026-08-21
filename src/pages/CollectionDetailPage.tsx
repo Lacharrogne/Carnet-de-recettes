@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -111,12 +112,9 @@ export default function CollectionDetailPage() {
           Collection introuvable
         </h2>
 
-        <Link
-          to="/collections"
-          className="mt-6 inline-block rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-        >
+        <Button to="/collections" className="mt-6">
           Retour aux collections
-        </Link>
+        </Button>
       </section>
     )
   }

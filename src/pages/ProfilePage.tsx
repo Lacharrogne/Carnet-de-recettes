@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
 import RecipeBadgesPanel, {
   RecipeBadgePill,
 } from '../components/badges/RecipeBadgesPanel'
@@ -198,12 +199,9 @@ export default function ProfilePage() {
           Connectez-vous pour retrouver votre carnet de recettes.
         </p>
 
-        <Link
-          to="/auth"
-          className="mt-6 inline-block rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-        >
+        <Button to="/auth" className="mt-6">
           Se connecter
-        </Link>
+        </Button>
       </section>
     )
   }
@@ -263,25 +261,24 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex flex-wrap gap-3 lg:justify-end">
-            <button
+            <Button
               type="button"
               onClick={() => {
                 setIsEditing((current) => !current)
                 setSuccessMessage('')
                 setErrorMessage('')
               }}
-              className="rounded-2xl bg-orange-600 px-5 py-3 font-bold text-white transition hover:bg-orange-700"
             >
               {isEditing ? 'Fermer' : 'Modifier le profil'}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={handleLogout}
-              className="rounded-2xl bg-card ring-1 ring-bark px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
             >
               Déconnexion
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -371,22 +368,18 @@ export default function ProfilePage() {
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <Button type="submit" disabled={saving}>
               {saving ? 'Sauvegarde...' : 'Enregistrer le profil'}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={cancelEdit}
               disabled={saving}
-              className="rounded-2xl ring-1 ring-bark bg-white px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Annuler
-            </button>
+            </Button>
           </div>
         </form>
       )}
@@ -525,12 +518,9 @@ export default function ProfilePage() {
               Ajoutez votre première recette pour commencer votre carnet.
             </p>
 
-            <Link
-              to="/add-recipe"
-              className="mt-4 inline-block rounded-2xl bg-orange-600 px-5 py-3 font-bold text-white transition hover:bg-orange-700"
-            >
+            <Button to="/add-recipe" className="mt-4">
               Ajouter ma première recette
-            </Link>
+            </Button>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-3">

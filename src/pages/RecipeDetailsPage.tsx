@@ -1317,14 +1317,14 @@ export default function RecipeDetailsPage() {
                 </h2>
               </div>
 
-              <button
+              <Button
                 type="button"
                 onClick={openGuidedCooking}
                 disabled={recipe.steps.length === 0}
-                className="w-full rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 print:hidden sm:w-auto"
+                className="w-full print:hidden sm:w-auto"
               >
                 ▶ Lancer
-              </button>
+              </Button>
             </div>
 
             {recipe.steps.length > 0 ? (
@@ -1474,13 +1474,14 @@ export default function RecipeDetailsPage() {
     </div>
   </div>
 
-  <button
+  <Button
     type="button"
+    size="lg"
+    fullWidth
     onClick={handleAddRecipeToPlanning}
-    className="w-full rounded-2xl bg-orange-500 px-6 py-4 font-black text-white shadow-sm transition hover:bg-orange-600"
   >
     Ajouter au planning
-  </button>
+  </Button>
 </div>
               </div>
 

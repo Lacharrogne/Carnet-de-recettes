@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import {
@@ -156,16 +157,17 @@ function FridgeResultCard({
 
       {match.missingIngredients.length > 0 && (
         <div className="border-t border-bark p-5 sm:p-6">
-          <button
+          <Button
             type="button"
+            size="sm"
+            fullWidth
             onClick={() => onAddMissingIngredients(match)}
             disabled={adding}
-            className="w-full rounded-full bg-orange-500 px-5 py-3.5 text-sm font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {adding
               ? 'Ajout en cours...'
               : 'Ajouter les ingrédients manquants'}
-          </button>
+          </Button>
         </div>
       )}
     </article>
@@ -368,21 +370,13 @@ export default function FridgePage() {
             </p>
 
             <div className="mt-6 grid gap-3 sm:mt-8 sm:flex sm:flex-wrap">
-              <button
-                type="button"
-                onClick={useExampleFridge}
-                className="rounded-full bg-orange-500 px-6 py-3.5 font-bold text-white shadow-sm transition hover:bg-orange-600"
-              >
+              <Button type="button" onClick={useExampleFridge}>
                 Essayer un exemple
-              </button>
+              </Button>
 
-              <button
-                type="button"
-                onClick={clearFridge}
-                className="rounded-full bg-card ring-1 ring-bark px-6 py-3.5 font-bold text-orange-700 transition hover:bg-orange-50"
-              >
+              <Button type="button" variant="secondary" onClick={clearFridge}>
                 Vider mon frigo
-              </button>
+              </Button>
             </div>
           </div>
 

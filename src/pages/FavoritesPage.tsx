@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
@@ -186,12 +185,9 @@ export default function FavoritesPage() {
             </div>
           </div>
 
-          <Link
-            to="/recipes"
-            className="w-fit rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-          >
+          <Button to="/recipes" className="w-fit">
             Explorer les recettes
-          </Link>
+          </Button>
         </div>
       </div>
 
@@ -303,13 +299,14 @@ export default function FavoritesPage() {
         </div>
 
         {hasActiveFilters && (
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={resetFilters}
-            className="mt-4 rounded-2xl bg-card ring-1 ring-bark px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
+            className="mt-4"
           >
             Réinitialiser les filtres
-          </button>
+          </Button>
         )}
       </div>
 

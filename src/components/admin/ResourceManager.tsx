@@ -17,6 +17,7 @@ import {
   type AdminResource,
   type AdminRow,
 } from '../../services/adminResources'
+import Button from '../ui/Button'
 
 const PAGE_SIZE = 20
 
@@ -284,13 +285,9 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
           className="min-w-0 flex-1 rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-bark disabled:opacity-50"
         />
 
-        <button
-          type="submit"
-          disabled={loading || !searchable}
-          className="rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button type="submit" size="sm" disabled={loading || !searchable}>
           {loading ? '...' : 'OK'}
-        </button>
+        </Button>
       </form>
 
       {success && (
@@ -610,21 +607,13 @@ function RowEditor({
           ))}
 
           <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full bg-card ring-1 ring-bark px-5 py-3 font-black text-stone-700 transition hover:bg-orange-50"
-            >
+            <Button type="button" variant="secondary" onClick={onClose}>
               Annuler
-            </button>
+            </Button>
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-full bg-orange-500 px-6 py-3 font-black text-white transition hover:bg-orange-600 disabled:opacity-50"
-            >
+            <Button type="submit" disabled={saving}>
               {saving ? 'Enregistrement…' : 'Enregistrer'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

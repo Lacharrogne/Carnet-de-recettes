@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 
+import Button from '../components/ui/Button'
+
 type ToolCard = {
   label: string
   subtitle: string
@@ -129,19 +131,11 @@ export default function ToolsPage() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/frigo"
-                className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md"
-              >
-                Commencer avec le frigo
-              </Link>
+              <Button to="/frigo">Commencer avec le frigo</Button>
 
-              <Link
-                to="/shopping-list"
-                className="rounded-full bg-card ring-1 ring-bark px-6 py-3 font-black text-orange-700 transition hover:-translate-y-0.5 hover:bg-orange-50"
-              >
+              <Button to="/shopping-list" variant="secondary">
                 Voir les courses
-              </Link>
+              </Button>
             </div>
           </div>
 
@@ -265,19 +259,13 @@ export default function ToolsPage() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/frigo"
-              className="rounded-full bg-orange-500 px-6 py-3 text-center font-black text-white shadow-sm transition hover:bg-orange-600"
-            >
+            <Button to="/frigo" fullWidth className="sm:w-auto">
               Tester le frigo
-            </Link>
+            </Button>
 
-            <Link
-              to="/recipes"
-              className="rounded-full ring-1 ring-bark bg-cream-50 px-6 py-3 text-center font-black text-orange-700 transition hover:bg-orange-50"
-            >
+            <Button to="/recipes" variant="secondary" fullWidth className="sm:w-auto">
               Parcourir les catégories
-            </Link>
+            </Button>
           </div>
         </div>
       </div>

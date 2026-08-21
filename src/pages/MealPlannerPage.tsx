@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 
 import PlannerExtrasPanel from '../components/planner/PlannerExtrasPanel'
 import PlannerPrintView from '../components/planner/PlannerPrintView'
@@ -7,6 +6,7 @@ import PlannerWeekGrid from '../components/planner/PlannerWeekGrid'
 import RecipeMiniCard from '../components/planner/RecipeMiniCard'
 import RecipePickerModal from '../components/planner/RecipePickerModal'
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -773,31 +773,25 @@ export default function MealPlannerPage() {
                     ))}
                   </select>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={handleGenerate}
                     disabled={generating}
-                    className="shrink-0 rounded-full bg-terracotta px-6 py-3 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-terracotta-deep disabled:cursor-not-allowed disabled:opacity-60"
+                    className="shrink-0"
                   >
                     {generating ? 'Génération...' : '✨ Générer la semaine'}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               <div className="mt-4 grid max-w-xl gap-3 sm:grid-cols-2">
-                <Link
-                  to="/shopping-list"
-                  className="rounded-full bg-orange-500 px-6 py-4 text-center font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md"
-                >
+                <Button to="/shopping-list" size="lg" fullWidth>
                   Voir ma liste de courses
-                </Link>
+                </Button>
 
-                <Link
-                  to="/recipes"
-                  className="rounded-full bg-card ring-1 ring-bark px-6 py-4 text-center font-black text-stone-900 transition hover:-translate-y-0.5 hover:bg-orange-50"
-                >
+                <Button to="/recipes" variant="secondary" size="lg" fullWidth>
                   Parcourir les catégories
-                </Link>
+                </Button>
 
                 <button
                   type="button"
@@ -864,12 +858,9 @@ export default function MealPlannerPage() {
                 </p>
               </div>
 
-              <Link
-                to="/shopping-list"
-                className="rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-              >
+              <Button to="/shopping-list">
                 Préparer les courses
-              </Link>
+              </Button>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

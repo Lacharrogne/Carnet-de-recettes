@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import RecipeForm from '../components/recipes/RecipeForm'
 import type { RecipeFormValues } from '../components/recipes/RecipeForm'
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
 import {
   deleteRecipeImageByUrl,
   getRecipeById,
@@ -172,12 +173,9 @@ export default function EditRecipePage() {
           </Alert>
         )}
 
-        <Link
-          to="/recipes"
-          className="mt-6 inline-block rounded-2xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700"
-        >
+        <Button to="/recipes" className="mt-6">
           Retour aux recettes
-        </Link>
+        </Button>
       </section>
     )
   }

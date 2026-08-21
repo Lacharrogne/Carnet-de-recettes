@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
 import Select from '../components/ui/Select'
 import { RowsSkeleton } from '../components/ui/Skeleton'
@@ -311,13 +311,9 @@ export default function IdeasPage() {
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-                >
+                <Button type="submit" disabled={saving}>
                   {saving ? 'Publication...' : 'Publier mon idée'}
-                </button>
+                </Button>
               </form>
             ) : (
               <div className="mt-5 rounded-[1.5rem] bg-cream-50 p-5 ring-1 ring-bark">
@@ -330,12 +326,9 @@ export default function IdeasPage() {
                   utilisateurs voient qui les propose.
                 </p>
 
-                <Link
-                  to="/auth"
-                  className="mt-4 inline-flex rounded-full bg-orange-500 px-5 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-                >
+                <Button to="/auth" className="mt-4">
                   Se connecter
-                </Link>
+                </Button>
               </div>
             )}
           </div>

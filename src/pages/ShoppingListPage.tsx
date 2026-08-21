@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
@@ -309,12 +308,9 @@ export default function ShoppingListPage() {
           plus tard.
         </p>
 
-        <Link
-          to="/auth"
-          className="mt-6 inline-flex rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-        >
+        <Button to="/auth" className="mt-6">
           Aller à la connexion
-        </Link>
+        </Button>
       </section>
     )
   }
@@ -410,40 +406,39 @@ export default function ShoppingListPage() {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <button
+              <Button
                 type="button"
                 onClick={handlePrint}
                 disabled={visibleItems.length === 0}
-                className="rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Imprimer la liste
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={() => setShowCheckedItems((current) => !current)}
-                className="rounded-full bg-card ring-1 ring-bark px-6 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
               >
                 {showCheckedItems ? 'Masquer les cochés' : 'Afficher les cochés'}
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={handleDeleteCheckedItems}
                 disabled={checkedItems.length === 0 || bulkActionLoading}
-                className="rounded-full ring-1 ring-bark bg-white px-6 py-3 font-bold text-stone-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Supprimer les cochés
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
+                variant="danger"
                 onClick={handleDeleteAllItems}
                 disabled={visibleItems.length === 0 || bulkActionLoading}
-                className="rounded-full border border-red-100 bg-white px-6 py-3 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Vider la liste
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -473,13 +468,9 @@ export default function ShoppingListPage() {
                 className="w-full rounded-2xl bg-linen px-5 py-4 font-semibold text-cacao ring-1 ring-bark outline-none transition placeholder:text-hazel focus:bg-card focus:ring-2 focus:ring-terracotta/40"
               />
 
-              <button
-                type="submit"
-                disabled={adding}
-                className="rounded-full bg-orange-500 px-6 py-4 font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-              >
+              <Button type="submit" size="lg" disabled={adding}>
                 {adding ? 'Ajout en cours...' : 'Ajouter à la liste'}
-              </button>
+              </Button>
             </form>
 
             <div className="mt-6 rounded-[1.5rem] bg-orange-50 p-5 text-sm leading-7 text-orange-900">

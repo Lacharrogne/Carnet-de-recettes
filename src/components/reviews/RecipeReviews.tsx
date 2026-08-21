@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 
 import Alert from '../ui/Alert'
+import Button from '../ui/Button'
 import { RowsSkeleton } from '../ui/Skeleton'
 import { useAuth } from '../../context/useAuth'
 import { getProfile, type UserProfile } from '../../services/profiles'
@@ -576,27 +576,23 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-full bg-orange-500 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <Button type="submit" disabled={saving}>
               {saving
                 ? 'Enregistrement...'
                 : myReview
                   ? 'Modifier mon avis'
                   : 'Publier mon avis'}
-            </button>
+            </Button>
 
             {myReview && (
-              <button
+              <Button
                 type="button"
+                variant="danger"
                 onClick={handleDeleteReview}
                 disabled={deleting}
-                className="rounded-full border border-red-200 bg-white px-6 py-3 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {deleting ? 'Suppression...' : 'Supprimer mon avis'}
-              </button>
+              </Button>
             )}
           </div>
         </form>
@@ -611,12 +607,9 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
             autres utilisateurs.
           </p>
 
-          <Link
-            to="/auth"
-            className="mt-4 inline-block rounded-full bg-orange-500 px-5 py-3 font-bold text-white transition hover:bg-orange-600"
-          >
+          <Button to="/auth" className="mt-4">
             Se connecter
-          </Link>
+          </Button>
         </div>
       )}
 
@@ -767,23 +760,24 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                     />
 
                     <div className="mt-3 flex flex-wrap gap-3">
-                      <button
+                      <Button
                         type="submit"
+                        size="sm"
                         disabled={replySavingReviewId === review.id}
-                        className="rounded-full bg-orange-500 px-5 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {replySavingReviewId === review.id
                           ? 'Publication...'
                           : 'Publier la réponse'}
-                      </button>
+                      </Button>
 
-                      <button
+                      <Button
                         type="button"
+                        size="sm"
+                        variant="secondary"
                         onClick={() => setReplyingReviewId(null)}
-                        className="rounded-full bg-card ring-1 ring-bark px-5 py-3 text-sm font-black text-orange-700 transition hover:bg-orange-50"
                       >
                         Annuler
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 )}

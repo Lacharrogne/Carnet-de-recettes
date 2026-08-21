@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 
 import ResourceManager from '../components/admin/ResourceManager'
+import Button from '../components/ui/Button'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { getAdminStats, type AdminStats } from '../services/admin'
@@ -187,12 +187,9 @@ export default function AdminPage() {
           Connectez-vous pour accéder à l’administration.
         </p>
 
-        <Link
-          to="/auth"
-          className="mt-6 inline-flex rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-        >
+        <Button to="/auth" className="mt-6">
           Aller à la connexion
-        </Link>
+        </Button>
       </section>
     )
   }
@@ -216,12 +213,9 @@ export default function AdminPage() {
           Cette page est réservée aux administrateurs du carnet de recettes.
         </p>
 
-        <Link
-          to="/"
-          className="mt-6 inline-flex rounded-full bg-orange-500 px-6 py-3 font-black text-white shadow-sm transition hover:bg-orange-600"
-        >
+        <Button to="/" className="mt-6">
           Retour à l’accueil
-        </Link>
+        </Button>
       </section>
     )
   }
@@ -246,12 +240,9 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <Link
-            to="/"
-            className="rounded-full bg-card ring-1 ring-bark px-5 py-3 font-bold text-orange-700 transition hover:bg-orange-50"
-          >
+          <Button to="/" variant="secondary">
             Retour au site
-          </Link>
+          </Button>
         </div>
 
         {stats && (
@@ -320,13 +311,9 @@ export default function AdminPage() {
             className="min-w-0 flex-1 rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-bark"
           />
 
-          <button
-            type="submit"
-            disabled={compBusy}
-            className="rounded-2xl bg-orange-500 px-5 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <Button type="submit" size="sm" disabled={compBusy}>
             {compBusy ? '...' : "Offrir l'accès"}
-          </button>
+          </Button>
         </form>
 
         <div className="mt-6 space-y-3">
