@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/useAuth'
 import { useEntitlement } from '../../lib/useEntitlement'
-import Button from '../ui/Button'
 import {
   addRecipeToCollection,
   createCollection,
@@ -121,18 +120,27 @@ export default function AddToCollectionMenu({ recipeId }: { recipeId: number }) 
   }
 
   return (
-    <div>
-      <Button
+    <div className="relative">
+      <button
         type="button"
         onClick={handleTogglePanel}
-        variant="ghost"
-        fullWidth
+        aria-expanded={open}
+        className="group flex w-full flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40"
       >
-        🗂️ {open ? 'Fermer' : 'Ajouter à une collection'}
-      </Button>
+        <span
+          className={`flex h-11 w-11 items-center justify-center rounded-full text-xl transition group-hover:scale-110 ${
+            open ? 'bg-sage text-white' : 'bg-sage-soft'
+          }`}
+        >
+          🗂️
+        </span>
+        <span className="text-xs font-bold leading-tight text-cacao">
+          Collection
+        </span>
+      </button>
 
       {open && (
-        <div className="mt-3 rounded-[1.5rem] ring-1 ring-bark bg-[#fffaf5] p-4">
+        <div className="absolute right-0 z-30 mt-2 w-72 max-w-[85vw] rounded-2xl bg-card p-4 text-left shadow-lift ring-1 ring-bark">
           {error && (
             <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-bold text-red-700">
               {error}

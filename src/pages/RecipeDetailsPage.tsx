@@ -1144,6 +1144,8 @@ export default function RecipeDetailsPage() {
                       </span>
                     </button>
 
+                    <AddToCollectionMenu recipeId={recipe.id} />
+
                     {isOwner && (
                       <>
                         <Link
@@ -1174,8 +1176,6 @@ export default function RecipeDetailsPage() {
                       </>
                     )}
                   </div>
-
-                  <AddToCollectionMenu recipeId={recipe.id} />
                 </div>
               </div>
 
