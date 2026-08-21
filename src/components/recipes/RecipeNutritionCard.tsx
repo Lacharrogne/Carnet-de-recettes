@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 import { getRecipeNutrition, formatEuro } from '../../lib/recipeNutrition'
+import { useNutritionPreference } from '../../lib/nutritionPreference'
 import type { Recipe } from '../../types/recipe'
 
 /**
@@ -10,10 +11,14 @@ import type { Recipe } from '../../types/recipe'
  */
 export default function RecipeNutritionCard({ recipe }: { recipe: Recipe }) {
   const nutrition = useMemo(() => getRecipeNutrition(recipe), [recipe])
+  const { blurNutrition } = useNutritionPreference()
+  const [revealed, setRevealed] = useState(false)
 
   if (nutrition.recognized === 0) {
     return null
   }
+
+  const isHidden = blurNutrition && !revealed
 
   const { perServing, costPerServing, totalCost, recognized, totalIngredients } =
     nutrition
@@ -41,11 +46,53 @@ export default function RecipeNutritionCard({ recipe }: { recipe: Recipe }) {
           </div>
         </div>
 
-        <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700">
-          ≈ estimation
-        </span>
+        {isHidden ? (
+          <button
+            type="button"
+            onClick={() => setRevealed(true)}
+            className="shrink-0 rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700 transition hover:bg-orange-100"
+          >
+            👁️ Afficher
+          </button>
+        ) : blurNutrition ? (
+          <button
+            type="button"
+            onClick={() => setRevealed(false)}
+            className="shrink-0 rounded-full bg-cream-50 px-3 py-1 text-xs font-black text-stone-500 ring-1 ring-bark transition hover:bg-white"
+          >
+            Masquer
+          </button>
+        ) : (
+          <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700">
+            ≈ estimation
+          </span>
+        )}
       </div>
 
+      <div className="relative">
+        {isHidden && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 text-center">
+            <p className="text-sm font-black text-stone-600">
+              Infos nutritionnelles masquées
+            </p>
+            <button
+              type="button"
+              onClick={() => setRevealed(true)}
+              className="text-xs font-bold text-orange-700 underline underline-offset-2"
+            >
+              Afficher quand même
+            </button>
+          </div>
+        )}
+
+        <div
+          aria-hidden={isHidden}
+          className={
+            isHidden
+              ? 'pointer-events-none select-none blur-md'
+              : undefined
+          }
+        >
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
           <p className="text-3xl font-black text-orange-600">
@@ -94,6 +141,8 @@ export default function RecipeNutritionCard({ recipe }: { recipe: Recipe }) {
         🏃 Ces calories peuvent nourrir votre suivi dans Carnet de sport · 🪙 le
         coût, votre budget repas.
       </p>
+        </div>
+      </div>
     </div>
   )
 }

@@ -7,6 +7,7 @@ import RecipeBadgesPanel, {
   RecipeBadgePill,
 } from '../components/badges/RecipeBadgesPanel'
 import CursorSelector from '../components/settings/CursorSelector'
+import NutritionPreference from '../components/settings/NutritionPreference'
 import RecipeVisibilitySettings from '../components/settings/RecipeVisibilitySettings'
 import { ProfileSkeleton } from '../components/ui/Skeleton'
 import { getRecipePublicationBadge } from '../data/recipeBadges'
@@ -429,6 +430,8 @@ export default function ProfilePage() {
       <RecipeBadgesPanel recipeCount={myRecipes.length} />
 
       <RecipeVisibilitySettings />
+
+      <NutritionPreference />
 
       <CursorSelector />
 
