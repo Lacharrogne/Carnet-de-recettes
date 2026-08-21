@@ -1058,13 +1058,13 @@ export default function RecipeDetailsPage() {
                   )}
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
                   <Button
                     type="button"
                     onClick={openGuidedCooking}
                     disabled={recipe.steps.length === 0}
                     fullWidth
-                    className="sm:col-span-2"
+                    className="sm:col-span-3 lg:col-span-4"
                   >
                     <span>▶</span>
                     <span>Lancer la recette</span>

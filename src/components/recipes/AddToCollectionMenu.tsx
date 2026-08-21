@@ -121,7 +121,7 @@ export default function AddToCollectionMenu({ recipeId }: { recipeId: number }) 
   }
 
   return (
-    <div className="sm:col-span-2">
+    <div className="sm:col-span-3 lg:col-span-4">
       <Button
         type="button"
         onClick={handleTogglePanel}
