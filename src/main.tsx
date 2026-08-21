@@ -14,6 +14,16 @@ import { Analytics } from '@vercel/analytics/react'
 // Applique la préférence de curseur enregistrée avant le premier rendu.
 initCursor()
 
+// Service worker (PWA) : installable + coquille disponible hors-ligne.
+// Uniquement en production, pour ne pas gêner le rechargement à chaud en dev.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((error) => {
+      console.error('Échec de l’enregistrement du service worker :', error)
+    })
+  })
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
