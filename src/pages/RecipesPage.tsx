@@ -29,7 +29,7 @@ import {
 import { getRecipeRatings, type RecipeRating } from '../services/reviews'
 import type { Difficulty, Recipe } from '../types/recipe'
 
-type SortOption = 'name' | 'time' | 'difficulty'
+type SortOption = 'popular' | 'recent' | 'name' | 'time' | 'difficulty'
 type DifficultyFilter = 'all' | Difficulty
 
 /** Options de temps maximum (préparation + cuisson), en minutes. 0 = illimité. */
@@ -291,6 +291,25 @@ export default function RecipesPage() {
       })
     }
 
+    if (sort === 'popular') {
+      // Mieux notées d'abord (moyenne puis nombre d'avis), le reste ensuite.
+      result.sort((a, b) => {
+        const ra = ratings.get(a.id)
+        const rb = ratings.get(b.id)
+        const avgA = ra?.average ?? 0
+        const avgB = rb?.average ?? 0
+        if (avgB !== avgA) return avgB - avgA
+        const countA = ra?.count ?? 0
+        const countB = rb?.count ?? 0
+        if (countB !== countA) return countB - countA
+        return b.id - a.id
+      })
+    }
+
+    if (sort === 'recent') {
+      result.sort((a, b) => b.id - a.id)
+    }
+
     if (sort === 'name') {
       result.sort((a, b) => a.title.localeCompare(b.title))
     }
@@ -318,6 +337,7 @@ export default function RecipesPage() {
     return result
   }, [
     recipes,
+    ratings,
     debouncedSearch,
     selectedCategory,
     sort,
@@ -338,6 +358,21 @@ export default function RecipesPage() {
     maxTime > 0 ||
     selectedTags.length > 0 ||
     selectedDiets.length > 0
+
+  // « Tendances » : les recettes les mieux notées (au moins un avis).
+  const trendingRecipes = useMemo(() => {
+    return recipes
+      .filter((recipe) => (ratings.get(recipe.id)?.count ?? 0) > 0)
+      .sort((a, b) => {
+        const ra = ratings.get(a.id)
+        const rb = ratings.get(b.id)
+        const avgA = ra?.average ?? 0
+        const avgB = rb?.average ?? 0
+        if (avgB !== avgA) return avgB - avgA
+        return (rb?.count ?? 0) - (ra?.count ?? 0)
+      })
+      .slice(0, 3)
+  }, [recipes, ratings])
 
   function toggleDiet(diet: DietKey) {
     setSelectedDiets((current) =>
@@ -566,6 +601,8 @@ export default function RecipesPage() {
                 onChange={(event) => setSort(event.target.value as SortOption)}
                 aria-label="Trier les recettes"
               >
+                <option value="popular">Les plus populaires</option>
+                <option value="recent">Les plus récentes</option>
                 <option value="name">Trier par nom</option>
                 <option value="time">Temps le plus court</option>
                 <option value="difficulty">Difficulté</option>
@@ -626,6 +663,27 @@ export default function RecipesPage() {
       </div>
 
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
+
+      {!hasActiveFilters && trendingRecipes.length >= 3 && (
+        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
+          <SectionHeader
+            className="mb-6 sm:mb-8"
+            eyebrow="Tendances"
+            title="Les mieux notées du moment"
+            subtitle="Les recettes qui plaisent le plus à la communauté."
+          />
+
+          <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {trendingRecipes.map((recipe) => (
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                rating={ratings.get(recipe.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {!hasActiveFilters && (
         <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
