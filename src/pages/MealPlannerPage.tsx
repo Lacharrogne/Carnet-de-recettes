@@ -23,8 +23,17 @@ import {
   type RecipeCollection,
 } from '../services/collections'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
-import { generateWeeklyPlan } from '../lib/weeklyPlanGenerator'
+import {
+  generateWeeklyPlan,
+  getMainRecipeIds,
+} from '../lib/weeklyPlanGenerator'
+import { getRecipeNutrition, formatEuro } from '../lib/recipeNutrition'
+import { useNutritionPreference } from '../lib/nutritionPreference'
+import { DIET_OPTIONS, type DietKey } from '../lib/dietFilters'
+import { findBatchCookingGroups } from '../lib/batchCooking'
 import type { Recipe } from '../types/recipe'
+
+const LAST_PLAN_IDS_KEY = 'carnet-recettes-last-plan-ids'
 
 type DayKey =
   | 'monday'
@@ -204,6 +213,19 @@ export default function MealPlannerPage() {
   const [planSource, setPlanSource] = useState('all')
   const [generating, setGenerating] = useState(false)
 
+  // Options « intelligentes » de génération.
+  const [genDiets, setGenDiets] = useState<DietKey[]>([])
+  const [genEconomical, setGenEconomical] = useState(false)
+  const [genAvoidRepeats, setGenAvoidRepeats] = useState(true)
+
+  function toggleGenDiet(diet: DietKey) {
+    setGenDiets((current) =>
+      current.includes(diet)
+        ? current.filter((value) => value !== diet)
+        : [...current, diet],
+    )
+  }
+
   // Collections de l'utilisateur (source possible pour « Surprends-moi »).
   useEffect(() => {
     let ignore = false
@@ -299,6 +321,42 @@ export default function MealPlannerPage() {
   }, 0)
 
   const weekCompletion = Math.round((mainPlannedMealsCount / 14) * 100)
+
+  // Bilan nutrition + coût de la semaine (estimation, par personne).
+  const { blurNutrition } = useNutritionPreference()
+  const weekNutrition = useMemo(() => {
+    let kcal = 0
+    let prot = 0
+    let carb = 0
+    let fat = 0
+    let cost = 0
+    let counted = 0
+
+    for (const recipeId of plannedRecipeIds) {
+      const recipe = recipesById.get(recipeId)
+      if (!recipe) continue
+
+      const nutrition = getRecipeNutrition(recipe)
+      if (nutrition.recognized === 0) continue
+
+      kcal += nutrition.perServing.kcal
+      prot += nutrition.perServing.prot
+      carb += nutrition.perServing.carb
+      fat += nutrition.perServing.fat
+      cost += nutrition.costPerServing
+      counted += 1
+    }
+
+    return { kcal, prot, carb, fat, cost, counted }
+  }, [plannedRecipeIds, recipesById])
+
+  const nutritionDaysDivisor = Math.max(1, plannedDaysCount)
+
+  // Astuces batch-cooking : recettes planifiées qui partagent des ingrédients.
+  const batchGroups = useMemo(
+    () => findBatchCookingGroups(uniquePlannedRecipes),
+    [uniquePlannedRecipes],
+  )
 
   const filteredRecipes = useMemo(() => {
     const query = normalizeText(searchValue)
@@ -573,9 +631,37 @@ export default function MealPlannerPage() {
         return
       }
 
-      const nextPlanner = generateWeeklyPlan(pool)
+      // Éviter les recettes de la semaine précédente (si l'option est active).
+      let avoidRecipeIds: Set<number> | undefined
+      if (genAvoidRepeats) {
+        try {
+          const raw = window.localStorage.getItem(LAST_PLAN_IDS_KEY)
+          const ids = raw ? (JSON.parse(raw) as number[]) : []
+          if (Array.isArray(ids) && ids.length > 0) {
+            avoidRecipeIds = new Set(ids)
+          }
+        } catch {
+          avoidRecipeIds = undefined
+        }
+      }
+
+      const nextPlanner = generateWeeklyPlan(pool, {
+        diets: genDiets,
+        economical: genEconomical,
+        avoidRecipeIds,
+      })
       setPlanner(nextPlanner)
       savePlanner(nextPlanner)
+
+      // Mémorise les recettes de cette semaine pour la prochaine génération.
+      try {
+        window.localStorage.setItem(
+          LAST_PLAN_IDS_KEY,
+          JSON.stringify(getMainRecipeIds(nextPlanner)),
+        )
+      } catch {
+        // Stockage indisponible → l'évitement sera simplement sans effet.
+      }
 
       // On remplit la liste de courses depuis la semaine générée (si connecté).
       if (user) {
@@ -751,7 +837,113 @@ export default function MealPlannerPage() {
                 </div>
               </div>
 
-              <div className="mt-8 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
+              {weekNutrition.counted > 0 && (
+                <div className="mt-6 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-lg">
+                        📊
+                      </span>
+                      <p className="font-black text-stone-950">
+                        Bilan de la semaine
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700">
+                      ≈ par personne
+                    </span>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    {!blurNutrition && (
+                      <>
+                        <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
+                          <p className="text-2xl font-black text-orange-600">
+                            {weekNutrition.kcal.toLocaleString('fr-FR')}
+                          </p>
+                          <p className="mt-1 text-sm font-bold text-stone-600">
+                            kcal / semaine
+                          </p>
+                        </div>
+                        <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
+                          <p className="text-2xl font-black text-stone-900">
+                            {Math.round(
+                              weekNutrition.kcal / nutritionDaysDivisor,
+                            ).toLocaleString('fr-FR')}
+                          </p>
+                          <p className="mt-1 text-sm font-bold text-stone-600">
+                            kcal / jour
+                          </p>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
+                      <p className="text-2xl font-black text-green-700">
+                        {formatEuro(weekNutrition.cost)}
+                      </p>
+                      <p className="mt-1 text-sm font-bold text-stone-600">
+                        coût / semaine
+                      </p>
+                    </div>
+                    <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
+                      <p className="text-2xl font-black text-stone-900">
+                        {formatEuro(weekNutrition.cost / nutritionDaysDivisor)}
+                      </p>
+                      <p className="mt-1 text-sm font-bold text-stone-600">
+                        coût / jour
+                      </p>
+                    </div>
+                  </div>
+
+                  {!blurNutrition && (
+                    <p className="mt-3 text-sm font-semibold text-stone-600">
+                      Moyenne / jour : 💪 {Math.round(weekNutrition.prot / nutritionDaysDivisor)} g ·
+                      🌾 {Math.round(weekNutrition.carb / nutritionDaysDivisor)} g ·
+                      🫒 {Math.round(weekNutrition.fat / nutritionDaysDivisor)} g
+                    </p>
+                  )}
+
+                  <p className="mt-2 text-xs leading-5 text-stone-400">
+                    Estimation sur {weekNutrition.counted} repas planifié
+                    {weekNutrition.counted > 1 ? 's' : ''} (ingrédients reconnus).
+                  </p>
+                </div>
+              )}
+
+              {batchGroups.length > 0 && (
+                <div className="mt-6 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-lg">
+                      🧑‍🍳
+                    </span>
+                    <p className="font-black text-stone-950">
+                      Astuces batch-cooking
+                    </p>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-stone-600">
+                    Ces recettes partagent des ingrédients : prépare-les ensemble
+                    pour gagner du temps et limiter le gaspillage.
+                  </p>
+
+                  <ul className="mt-3 space-y-2.5">
+                    {batchGroups.map((group) => (
+                      <li
+                        key={group.recipes.map((r) => r.id).join('-')}
+                        className="rounded-[1.1rem] bg-cream-50 p-3 ring-1 ring-bark"
+                      >
+                        <p className="text-sm font-bold text-stone-900">
+                          {group.recipes.map((r) => r.title).join(' + ')}
+                        </p>
+                        <p className="mt-1 text-xs font-semibold text-orange-700">
+                          En commun : {group.shared.slice(0, 4).join(', ')}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="mt-6 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
                 <p className="font-black text-stone-950">✨ Surprends-moi</p>
                 <p className="mt-1 text-sm leading-6 text-stone-600">
                   Génère une semaine équilibrée automatiquement et remplit ta
@@ -782,6 +974,61 @@ export default function MealPlannerPage() {
                   >
                     {generating ? 'Génération...' : '✨ Générer la semaine'}
                   </Button>
+                </div>
+
+                <div className="mt-4 space-y-3 border-t border-bark pt-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-wide text-stone-500">
+                      Régimes
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {DIET_OPTIONS.map((option) => {
+                        const active = genDiets.includes(option.key)
+                        return (
+                          <button
+                            key={option.key}
+                            type="button"
+                            onClick={() => toggleGenDiet(option.key)}
+                            aria-pressed={active}
+                            className={`rounded-full px-3 py-1.5 text-sm font-bold ring-1 transition ${
+                              active
+                                ? 'bg-orange-500 text-white ring-orange-500'
+                                : 'bg-white text-stone-700 ring-bark hover:bg-orange-50'
+                            }`}
+                          >
+                            {option.emoji} {option.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setGenEconomical((value) => !value)}
+                      aria-pressed={genEconomical}
+                      className={`rounded-full px-3 py-1.5 text-sm font-bold ring-1 transition ${
+                        genEconomical
+                          ? 'bg-green-700 text-white ring-green-700'
+                          : 'bg-white text-stone-700 ring-bark hover:bg-orange-50'
+                      }`}
+                    >
+                      💰 Mode éco
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGenAvoidRepeats((value) => !value)}
+                      aria-pressed={genAvoidRepeats}
+                      className={`rounded-full px-3 py-1.5 text-sm font-bold ring-1 transition ${
+                        genAvoidRepeats
+                          ? 'bg-orange-500 text-white ring-orange-500'
+                          : 'bg-white text-stone-700 ring-bark hover:bg-orange-50'
+                      }`}
+                    >
+                      🔁 Éviter les répétitions
+                    </button>
+                  </div>
                 </div>
               </div>
 
