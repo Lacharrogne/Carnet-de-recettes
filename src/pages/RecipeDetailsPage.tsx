@@ -1058,94 +1058,124 @@ export default function RecipeDetailsPage() {
                   )}
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                <div className="space-y-4">
                   <Button
                     type="button"
                     onClick={openGuidedCooking}
                     disabled={recipe.steps.length === 0}
                     fullWidth
-                    className="sm:col-span-3 lg:col-span-4"
+                    size="lg"
                   >
                     <span>▶</span>
                     <span>Lancer la recette</span>
                   </Button>
 
-                  <Button
-                    type="button"
-                    onClick={handleToggleFavorite}
-                    disabled={favoriteLoading}
-                    variant="secondary"
-                    fullWidth
-                  >
-                    <span>{isFavorite ? '♥' : '♡'}</span>
+                  <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
+                    <button
+                      type="button"
+                      onClick={handleToggleFavorite}
+                      disabled={favoriteLoading}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <span
+                        className={`flex h-11 w-11 items-center justify-center rounded-full text-xl transition group-hover:scale-110 ${
+                          isFavorite
+                            ? 'bg-terracotta text-white'
+                            : 'bg-terracotta-soft text-terracotta-deep'
+                        }`}
+                      >
+                        {isFavorite ? '♥' : '♡'}
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        Favoris
+                      </span>
+                    </button>
 
-                    <span>
-                      {isFavorite
-                        ? 'Retirer des favoris'
-                        : 'Ajouter aux favoris'}
-                    </span>
-                  </Button>
+                    <button
+                      type="button"
+                      onClick={handleShare}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-honey-soft text-xl transition group-hover:scale-110">
+                        📤
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        Partager
+                      </span>
+                    </button>
 
-                  <Button
-                    type="button"
-                    onClick={handleShare}
-                    variant="secondary"
-                    fullWidth
-                  >
-                    📤 Partager
-                  </Button>
+                    <button
+                      type="button"
+                      onClick={handleCopyLink}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-honey-soft text-xl transition group-hover:scale-110">
+                        🔗
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        Copier
+                      </span>
+                    </button>
 
-                  <Button
-                    type="button"
-                    onClick={handleCopyLink}
-                    variant="ghost"
-                    fullWidth
-                  >
-                    🔗 Copier le lien
-                  </Button>
+                    <button
+                      type="button"
+                      onClick={handlePrint}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-sage-soft text-xl transition group-hover:scale-110">
+                        🖨️
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        Imprimer
+                      </span>
+                    </button>
 
-                  <Button
-                    type="button"
-                    onClick={handlePrint}
-                    variant="ghost"
-                    fullWidth
-                  >
-                    🖨️ Imprimer
-                  </Button>
+                    <button
+                      type="button"
+                      onClick={handleDuplicate}
+                      disabled={isDuplicating}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-terracotta-soft text-xl transition group-hover:scale-110">
+                        📄
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        {isDuplicating ? '…' : 'Dupliquer'}
+                      </span>
+                    </button>
 
-                  <Button
-                    type="button"
-                    onClick={handleDuplicate}
-                    disabled={isDuplicating}
-                    variant="ghost"
-                    fullWidth
-                  >
-                    📄 {isDuplicating ? 'Duplication...' : 'Dupliquer'}
-                  </Button>
+                    {isOwner && (
+                      <>
+                        <Link
+                          to={`/recipes/${recipe.id}/edit`}
+                          className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40"
+                        >
+                          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-honey-soft text-xl transition group-hover:scale-110">
+                            ✏️
+                          </span>
+                          <span className="text-xs font-bold leading-tight text-cacao">
+                            Modifier
+                          </span>
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                          className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-[#e9c4bc] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f7e3de] text-xl transition group-hover:scale-110">
+                            🗑️
+                          </span>
+                          <span className="text-xs font-bold leading-tight text-[#b23b2e]">
+                            {isDeleting ? '…' : 'Supprimer'}
+                          </span>
+                        </button>
+                      </>
+                    )}
+                  </div>
 
                   <AddToCollectionMenu recipeId={recipe.id} />
-
-                  {isOwner && (
-                    <>
-                      <Button
-                        to={`/recipes/${recipe.id}/edit`}
-                        variant="secondary"
-                        fullWidth
-                      >
-                        ✏️ Modifier
-                      </Button>
-
-                      <Button
-                        type="button"
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        variant="danger"
-                        fullWidth
-                      >
-                        🗑️ {isDeleting ? 'Suppression...' : 'Supprimer'}
-                      </Button>
-                    </>
-                  )}
                 </div>
               </div>
 
