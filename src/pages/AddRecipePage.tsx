@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RecipeForm from '../components/recipes/RecipeForm'
 import type { RecipeFormValues } from '../components/recipes/RecipeForm'
+import RecipeImportBar from '../components/recipes/RecipeImportBar'
 import { createRecipe, getRecipes, uploadRecipeImage } from '../services/recipes'
+import type { ImportedRecipe } from '../services/recipeImport'
 import { clearRecipeDraftSnapshot } from '../lib/recipeDraftAutosave'
 import type { Recipe } from '../types/recipe'
 
@@ -13,6 +15,45 @@ export default function AddRecipePage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSavingDraft, setIsSavingDraft] = useState(false)
+
+  // Prise en charge de l'import depuis un lien : on préremplit le formulaire
+  // (remonté via `key`) et on conserve l'URL de la photo importée.
+  const [importedValues, setImportedValues] = useState<Recipe | undefined>()
+  const [importedImageUrl, setImportedImageUrl] = useState<string | null>(null)
+  const [importKey, setImportKey] = useState(0)
+  const [importNotice, setImportNotice] = useState('')
+
+  function handleImported(recipe: ImportedRecipe) {
+    setImportedValues({
+      id: 0,
+      userId: null,
+      title: recipe.title,
+      category: 'Plat',
+      difficulty: 'Facile',
+      prepTime: recipe.prepTime,
+      cookTime: recipe.cookTime,
+      servings: recipe.servings || 2,
+      description: recipe.description,
+      image: '🍽️',
+      imageUrl: recipe.imageUrl,
+      tags: [],
+      ingredients: recipe.ingredients,
+      steps: recipe.steps,
+      relatedRecipeIds: [],
+      status: 'published',
+    })
+    setImportedImageUrl(recipe.imageUrl)
+    setImportKey((key) => key + 1)
+    setImportNotice(
+      'Recette importée ✨ Vérifie la catégorie, la difficulté et les détails, puis enregistre.',
+    )
+    // On amène l'utilisateur au formulaire prérempli.
+    requestAnimationFrame(() => {
+      document
+        .getElementById('recipe-form-start')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
 
   useEffect(() => {
     let ignore = false
@@ -35,7 +76,8 @@ export default function AddRecipePage() {
     try {
       const { imageFile, ...recipeValues } = values
 
-      let imageUrl: string | null = null
+      // Priorité à la photo téléversée ; sinon on garde celle de l'import.
+      let imageUrl: string | null = importedImageUrl
 
       if (imageFile) {
         imageUrl = await uploadRecipeImage(imageFile)
@@ -62,7 +104,7 @@ export default function AddRecipePage() {
     try {
       const { imageFile, ...recipeValues } = values
 
-      let imageUrl: string | null = null
+      let imageUrl: string | null = importedImageUrl
 
       if (imageFile) {
         imageUrl = await uploadRecipeImage(imageFile)
@@ -131,7 +173,12 @@ export default function AddRecipePage() {
         </div>
       </div>
 
-      <div className="rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark md:p-8">
+      <RecipeImportBar onImported={handleImported} />
+
+      <div
+        id="recipe-form-start"
+        className="scroll-mt-24 rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-bark md:p-8"
+      >
         <div className="mb-8 border-b border-bark pb-6">
           <p className="font-bold text-orange-600">Formulaire</p>
 
@@ -143,9 +190,17 @@ export default function AddRecipePage() {
             Remplissez le formulaire pour enregistrer une nouvelle recette dans le
             carnet.
           </p>
+
+          {importNotice && (
+            <p className="mt-4 rounded-2xl bg-sage-soft px-4 py-3 text-sm font-bold text-sage-deep">
+              {importNotice}
+            </p>
+          )}
         </div>
 
         <RecipeForm
+          key={importKey}
+          initialValues={importedValues}
           availableRecipes={availableRecipes}
           submitLabel="Ajouter la recette"
           isSubmitting={isSubmitting}
