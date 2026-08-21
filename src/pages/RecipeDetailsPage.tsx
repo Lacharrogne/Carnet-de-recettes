@@ -1045,6 +1045,110 @@ export default function RecipeDetailsPage() {
           </div>
         </article>
 
+        <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-bark print:hidden sm:rounded-[2rem] sm:p-5">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
+                    Actions rapides
+                  </p>
+
+                  {isOwner && (
+                    <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
+                      Votre recette
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Button
+                    type="button"
+                    onClick={openGuidedCooking}
+                    disabled={recipe.steps.length === 0}
+                    fullWidth
+                    className="sm:col-span-2"
+                  >
+                    <span>▶</span>
+                    <span>Lancer la recette</span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={handleToggleFavorite}
+                    disabled={favoriteLoading}
+                    variant="secondary"
+                    fullWidth
+                  >
+                    <span>{isFavorite ? '♥' : '♡'}</span>
+
+                    <span>
+                      {isFavorite
+                        ? 'Retirer des favoris'
+                        : 'Ajouter aux favoris'}
+                    </span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={handleShare}
+                    variant="secondary"
+                    fullWidth
+                  >
+                    📤 Partager
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={handleCopyLink}
+                    variant="ghost"
+                    fullWidth
+                  >
+                    🔗 Copier le lien
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={handlePrint}
+                    variant="ghost"
+                    fullWidth
+                  >
+                    🖨️ Imprimer
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={handleDuplicate}
+                    disabled={isDuplicating}
+                    variant="ghost"
+                    fullWidth
+                  >
+                    📄 {isDuplicating ? 'Duplication...' : 'Dupliquer'}
+                  </Button>
+
+                  <AddToCollectionMenu recipeId={recipe.id} />
+
+                  {isOwner && (
+                    <>
+                      <Button
+                        to={`/recipes/${recipe.id}/edit`}
+                        variant="secondary"
+                        fullWidth
+                      >
+                        ✏️ Modifier
+                      </Button>
+
+                      <Button
+                        type="button"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        variant="danger"
+                        fullWidth
+                      >
+                        🗑️ {isDeleting ? 'Suppression...' : 'Supprimer'}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
           <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-6">
             <div>
@@ -1218,110 +1322,6 @@ export default function RecipeDetailsPage() {
 
         </div>
           <div>
-              <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-bark print:hidden sm:rounded-[2rem] sm:p-5">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
-                    Actions rapides
-                  </p>
-
-                  {isOwner && (
-                    <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
-                      Votre recette
-                    </span>
-                  )}
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Button
-                    type="button"
-                    onClick={openGuidedCooking}
-                    disabled={recipe.steps.length === 0}
-                    fullWidth
-                    className="sm:col-span-2"
-                  >
-                    <span>▶</span>
-                    <span>Lancer la recette</span>
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handleToggleFavorite}
-                    disabled={favoriteLoading}
-                    variant="secondary"
-                    fullWidth
-                  >
-                    <span>{isFavorite ? '♥' : '♡'}</span>
-
-                    <span>
-                      {isFavorite
-                        ? 'Retirer des favoris'
-                        : 'Ajouter aux favoris'}
-                    </span>
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handleShare}
-                    variant="secondary"
-                    fullWidth
-                  >
-                    📤 Partager
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handleCopyLink}
-                    variant="ghost"
-                    fullWidth
-                  >
-                    🔗 Copier le lien
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handlePrint}
-                    variant="ghost"
-                    fullWidth
-                  >
-                    🖨️ Imprimer
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handleDuplicate}
-                    disabled={isDuplicating}
-                    variant="ghost"
-                    fullWidth
-                  >
-                    📄 {isDuplicating ? 'Duplication...' : 'Dupliquer'}
-                  </Button>
-
-                  <AddToCollectionMenu recipeId={recipe.id} />
-
-                  {isOwner && (
-                    <>
-                      <Button
-                        to={`/recipes/${recipe.id}/edit`}
-                        variant="secondary"
-                        fullWidth
-                      >
-                        ✏️ Modifier
-                      </Button>
-
-                      <Button
-                        type="button"
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        variant="danger"
-                        fullWidth
-                      >
-                        🗑️ {isDeleting ? 'Suppression...' : 'Supprimer'}
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-
               <RecipeNutritionCard recipe={recipe} />
 
               {user && (
