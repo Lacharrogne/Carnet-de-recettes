@@ -1,6 +1,6 @@
 import {
   DAYS,
-  MEALS,
+  MAIN_MEALS,
   createEmptyPlanner,
   type MealPlannerState,
 } from './weeklyPlanner'
@@ -9,18 +9,15 @@ import { getRecipeNutrition } from './recipeNutrition'
 import type { Recipe } from '../types/recipe'
 
 /**
- * Génère une semaine de repas « équilibrée » à partir d'un pool de recettes :
- * - privilégie les plats principaux pour déjeuner/dîner,
- * - évite de répéter une même recette sur la semaine (tant que le pool suffit),
- * - évite deux fois la même catégorie dans une journée,
- * - garnit quelques petits-déjeuners et desserts dans les extras.
+ * Génère une semaine de repas « équilibrée » à partir d'un pool de recettes.
+ * Chaque jour reçoit ses 5 repas à part entière : petit déjeuner, déjeuner,
+ * goûter, dîner, dessert — remplis depuis les catégories adaptées quand elles
+ * existent (les repas sans candidat restent vides).
  *
  * Options « intelligentes » (toutes facultatives) :
  * - `diets` : ne garder que les recettes compatibles avec ces régimes,
  * - `economical` : privilégier les recettes les moins chères (mode éco),
  * - `avoidRecipeIds` : éviter ces recettes (ex. celles de la semaine passée).
- *
- * Aléatoire (mélange) → « Surprends-moi » propose une variante à chaque clic.
  */
 
 export type GenerateOptions = {
@@ -48,25 +45,62 @@ function filterByDiets(pool: Recipe[], diets: DietKey[]): Recipe[] {
     const recipeDiets = getRecipeDiets(recipe)
     return diets.every((diet) => recipeDiets[diet])
   })
-  // Si le filtre ne laisse rien, on préfère générer quelque chose plutôt que rien.
   return filtered.length > 0 ? filtered : pool
 }
 
-/**
- * Ordonne le pool : mélange aléatoire, ou tri par coût croissant (avec un peu
- * d'aléa pour garder de la variété) en mode économique.
- */
+/** Mélange aléatoire, ou tri par coût croissant (avec aléa) en mode éco. */
 function orderPool(pool: Recipe[], economical: boolean): Recipe[] {
   if (!economical) return shuffle(pool)
 
   return [...pool]
     .map((recipe) => {
       const cost = getRecipeNutrition(recipe).costPerServing || 99
-      // Jitter ±20 % pour ne pas produire toujours la même semaine.
       return { recipe, score: cost * (0.8 + Math.random() * 0.4) }
     })
     .sort((a, b) => a.score - b.score)
     .map((entry) => entry.recipe)
+}
+
+/**
+ * Pioche tournante sur un pool : évite les répétitions dans la semaine, tente
+ * d'éviter les recettes de la semaine passée et (optionnellement) une catégorie
+ * déjà prise dans la journée. Renvoie null si le pool est vide.
+ */
+function createPicker(
+  items: Recipe[],
+  economical: boolean,
+  avoid?: Set<number>,
+) {
+  let bag = orderPool(items, economical)
+  const used = new Set<number>()
+
+  return function pick(excludeCategories?: Set<string>): Recipe | null {
+    if (items.length === 0) return null
+
+    let candidate =
+      bag.find(
+        (recipe) =>
+          !used.has(recipe.id) &&
+          !avoid?.has(recipe.id) &&
+          !excludeCategories?.has(recipe.category),
+      ) ??
+      bag.find(
+        (recipe) =>
+          !used.has(recipe.id) && !excludeCategories?.has(recipe.category),
+      ) ??
+      bag.find((recipe) => !used.has(recipe.id))
+
+    if (!candidate) {
+      bag = orderPool(items, economical)
+      used.clear()
+      candidate =
+        bag.find((recipe) => !excludeCategories?.has(recipe.category)) ?? bag[0]
+    }
+
+    if (!candidate) return null
+    used.add(candidate.id)
+    return candidate
+  }
 }
 
 export function generateWeeklyPlan(
@@ -86,77 +120,46 @@ export function generateWeeklyPlan(
   const mains = dietPool.filter(
     (recipe) => !NON_MAIN_CATEGORIES.includes(recipe.category),
   )
-  const primary = mains.length > 0 ? mains : dietPool
+  const mainPool = mains.length > 0 ? mains : dietPool
+  const breakfastPool = dietPool.filter(
+    (recipe) => recipe.category === 'Petit-déjeuner',
+  )
+  const sweetPool = dietPool.filter((recipe) => recipe.category === 'Sucré')
 
-  let bag = orderPool(primary, economical)
-  const usedThisWeek = new Set<number>()
+  const pickMain = createPicker(mainPool, economical, avoidRecipeIds)
+  const pickBreakfast = createPicker(breakfastPool, economical, avoidRecipeIds)
+  const pickSweet = createPicker(sweetPool, economical, avoidRecipeIds)
 
-  function pickFrom(predicate: (recipe: Recipe) => boolean): Recipe | undefined {
-    return bag.find(predicate)
-  }
-
-  function pickRecipe(dayCategories: Set<string>): Recipe {
-    // Idéal : pas déjà pris cette semaine, catégorie du jour libre, non évité.
-    let candidate =
-      pickFrom(
-        (recipe) =>
-          !usedThisWeek.has(recipe.id) &&
-          !dayCategories.has(recipe.category) &&
-          !avoidRecipeIds?.has(recipe.id),
-      ) ??
-      // On relâche l'évitement « semaine passée » avant tout.
-      pickFrom(
-        (recipe) =>
-          !usedThisWeek.has(recipe.id) && !dayCategories.has(recipe.category),
-      ) ??
-      pickFrom((recipe) => !usedThisWeek.has(recipe.id))
-
-    // Pool épuisé : on repart sur un nouvel ordre (répétitions autorisées).
-    if (!candidate) {
-      bag = orderPool(primary, economical)
-      usedThisWeek.clear()
-      candidate =
-        pickFrom((recipe) => !dayCategories.has(recipe.category)) ?? bag[0]
-    }
-
-    usedThisWeek.add(candidate.id)
-    return candidate
-  }
+  const set = (recipe: Recipe | null) => (recipe ? String(recipe.id) : '')
 
   for (const day of DAYS) {
     const dayCategories = new Set<string>()
 
-    for (const meal of MEALS) {
-      const recipe = pickRecipe(dayCategories)
-      dayCategories.add(recipe.category)
-      planner[day.key][meal.key] = String(recipe.id)
+    const breakfast = pickBreakfast()
+    const lunch = pickMain(dayCategories)
+    if (lunch) dayCategories.add(lunch.category)
+    const snack = pickSweet()
+    const dinner = pickMain(dayCategories)
+    if (dinner) dayCategories.add(dinner.category)
+    const dessert = pickSweet()
+
+    planner[day.key] = {
+      breakfast: set(breakfast),
+      lunch: set(lunch),
+      snack: set(snack),
+      dinner: set(dinner),
+      dessert: set(dessert),
     }
   }
-
-  // Extras : quelques petits-déjeuners et desserts, si le pool en contient.
-  const breakfasts = shuffle(
-    dietPool.filter((recipe) => recipe.category === 'Petit-déjeuner'),
-  )
-    .slice(0, 3)
-    .map((recipe) => String(recipe.id))
-
-  const desserts = shuffle(
-    dietPool.filter((recipe) => recipe.category === 'Sucré'),
-  )
-    .slice(0, 3)
-    .map((recipe) => String(recipe.id))
-
-  planner.weeklyExtras.breakfast = breakfasts
-  planner.weeklyExtras.dessert = desserts
 
   return planner
 }
 
-/** IDs des recettes principales d'un planning (pour l'évitement « semaine passée »). */
+/** IDs des recettes principales (déjeuner/dîner) — pour l'évitement inter-semaines. */
 export function getMainRecipeIds(planner: MealPlannerState): number[] {
   const ids = new Set<number>()
   for (const day of DAYS) {
-    for (const meal of MEALS) {
+    for (const meal of MAIN_MEALS) {
       const value = planner[day.key][meal.key]
       if (value) ids.add(Number(value))
     }

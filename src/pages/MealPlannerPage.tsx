@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import PlannerExtrasPanel from '../components/planner/PlannerExtrasPanel'
 import PlannerPrintView from '../components/planner/PlannerPrintView'
 import PlannerWeekGrid from '../components/planner/PlannerWeekGrid'
 import RecipeMiniCard from '../components/planner/RecipeMiniCard'
@@ -13,8 +12,16 @@ import { supabase } from '../lib/supabase'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import {
   PLANNER_STORAGE_KEY,
+  MEALS,
+  MAIN_MEALS,
   createEmptyPlanner,
   getSavedPlanner,
+  getAllPlannedRecipeIds,
+  isRecipeInPlanner,
+  getDayLabel,
+  getMealLabel,
+  type MealKey,
+  type MealPlannerState,
 } from '../lib/weeklyPlanner'
 import { getRecipes } from '../services/recipes'
 import {
@@ -44,26 +51,7 @@ type DayKey =
   | 'saturday'
   | 'sunday'
 
-type MainMealKey = 'lunch' | 'dinner'
-type ExtraMealKey = 'breakfast' | 'snack' | 'dessert'
-
-type DayPlannerState = Record<DayKey, Record<MainMealKey, string>>
-type WeeklyExtrasState = Record<ExtraMealKey, string[]>
-
-type MealPlannerState = DayPlannerState & {
-  weeklyExtras: WeeklyExtrasState
-}
-
-type OpenPickerSlot =
-  | {
-      type: 'main'
-      day: DayKey
-      meal: MainMealKey
-    }
-  | {
-      type: 'extra'
-      meal: ExtraMealKey
-    }
+type OpenPickerSlot = { day: DayKey; meal: MealKey }
 
 const ALL_CATEGORIES_VALUE = 'all'
 
@@ -77,41 +65,6 @@ const DAYS: { key: DayKey; label: string; shortLabel: string; emoji: string }[] 
     { key: 'saturday', label: 'Samedi', shortLabel: 'Sam.', emoji: '🥘' },
     { key: 'sunday', label: 'Dimanche', shortLabel: 'Dim.', emoji: '🍰' },
   ]
-
-const MAIN_MEALS: { key: MainMealKey; label: string; emoji: string }[] = [
-  { key: 'lunch', label: 'Déjeuner', emoji: '☀️' },
-  { key: 'dinner', label: 'Dîner', emoji: '🌙' },
-]
-
-const EXTRA_MEALS: {
-  key: ExtraMealKey
-  label: string
-  emoji: string
-  description: string
-  emptyText: string
-}[] = [
-  {
-    key: 'breakfast',
-    label: 'Petit déjeuner',
-    emoji: '🥐',
-    description: 'Une ou plusieurs idées pour la semaine',
-    emptyText: 'Aucune idée prévue pour le petit déjeuner.',
-  },
-  {
-    key: 'snack',
-    label: 'Goûter',
-    emoji: '🍪',
-    description: 'Des idées rapides pour les pauses',
-    emptyText: 'Aucune idée prévue pour le goûter.',
-  },
-  {
-    key: 'dessert',
-    label: 'Dessert',
-    emoji: '🍰',
-    description: 'Des desserts à prévoir pour la semaine',
-    emptyText: 'Aucun dessert prévu.',
-  },
-]
 
 function savePlanner(planner: MealPlannerState) {
   window.localStorage.setItem(PLANNER_STORAGE_KEY, JSON.stringify(planner))
@@ -130,37 +83,6 @@ function normalizeText(value: string) {
     .trim()
 }
 
-function getDayLabel(day: DayKey) {
-  return DAYS.find((currentDay) => currentDay.key === day)?.label ?? day
-}
-
-function getMealLabel(meal: MainMealKey | ExtraMealKey) {
-  const mainMeal = MAIN_MEALS.find((currentMeal) => currentMeal.key === meal)
-
-  if (mainMeal) {
-    return mainMeal.label
-  }
-
-  const extraMeal = EXTRA_MEALS.find((currentMeal) => currentMeal.key === meal)
-
-  return extraMeal?.label ?? meal
-}
-
-function getAllPlannedRecipeIds(planner: MealPlannerState) {
-  const mainRecipeIds = DAYS.flatMap((day) =>
-    MAIN_MEALS.map((meal) => planner[day.key][meal.key]).filter(Boolean),
-  )
-
-  const extraRecipeIds = EXTRA_MEALS.flatMap(
-    (extraMeal) => planner.weeklyExtras[extraMeal.key],
-  ).filter(Boolean)
-
-  return [...mainRecipeIds, ...extraRecipeIds]
-}
-
-function plannerUsesRecipe(planner: MealPlannerState, recipeId: Recipe['id']) {
-  return getAllPlannedRecipeIds(planner).includes(String(recipeId))
-}
 
 async function deleteRecipeIngredientsFromShoppingList(recipeId: Recipe['id']) {
   const {
@@ -434,7 +356,7 @@ export default function MealPlannerPage() {
       return false
     }
 
-    if (plannerUsesRecipe(nextPlanner, recipeId)) {
+    if (isRecipeInPlanner(nextPlanner, recipeId)) {
       return true
     }
 
@@ -471,44 +393,15 @@ export default function MealPlannerPage() {
       return
     }
 
-    let oldRecipeId = ''
-    let nextPlanner: MealPlannerState = planner
+    const { day, meal } = openPickerSlot
+    const oldRecipeId = planner[day][meal]
 
-    if (openPickerSlot.type === 'main') {
-      oldRecipeId = planner[openPickerSlot.day][openPickerSlot.meal]
-
-      nextPlanner = {
-        ...planner,
-        [openPickerSlot.day]: {
-          ...planner[openPickerSlot.day],
-          [openPickerSlot.meal]: String(recipe.id),
-        },
-      }
-    }
-
-    if (openPickerSlot.type === 'extra') {
-      const currentExtraRecipes = planner.weeklyExtras[openPickerSlot.meal]
-
-      if (currentExtraRecipes.includes(String(recipe.id))) {
-        closeRecipePicker()
-        setSuccessMessage(
-          `"${recipe.title}" est déjà présent dans cette section.`,
-        )
-
-        window.setTimeout(() => {
-          setSuccessMessage('')
-        }, 3000)
-
-        return
-      }
-
-      nextPlanner = {
-        ...planner,
-        weeklyExtras: {
-          ...planner.weeklyExtras,
-          [openPickerSlot.meal]: [...currentExtraRecipes, String(recipe.id)],
-        },
-      }
+    const nextPlanner: MealPlannerState = {
+      ...planner,
+      [day]: {
+        ...planner[day],
+        [meal]: String(recipe.id),
+      },
     }
 
     setPlanner(nextPlanner)
@@ -534,7 +427,7 @@ export default function MealPlannerPage() {
     }, 3000)
   }
 
-  async function handleRemoveMainRecipe(day: DayKey, meal: MainMealKey) {
+  async function handleRemoveMainRecipe(day: DayKey, meal: MealKey) {
     const recipeId = planner[day][meal]
 
     if (!recipeId) {
@@ -546,38 +439,6 @@ export default function MealPlannerPage() {
       [day]: {
         ...planner[day],
         [meal]: '',
-      },
-    }
-
-    setPlanner(nextPlanner)
-    savePlanner(nextPlanner)
-
-    clearMessages()
-
-    const shoppingListUpdated = await removeRecipeIngredientsIfUnused(
-      nextPlanner,
-      Number(recipeId),
-    )
-
-    setSuccessMessage(
-      shoppingListUpdated
-        ? 'La recette a été retirée du planning. La liste de courses a été mise à jour.'
-        : 'La recette a été retirée du planning.',
-    )
-
-    window.setTimeout(() => {
-      setSuccessMessage('')
-    }, 3000)
-  }
-
-  async function handleRemoveExtraRecipe(meal: ExtraMealKey, recipeId: string) {
-    const nextPlanner: MealPlannerState = {
-      ...planner,
-      weeklyExtras: {
-        ...planner.weeklyExtras,
-        [meal]: planner.weeklyExtras[meal].filter(
-          (currentRecipeId) => currentRecipeId !== recipeId,
-        ),
       },
     }
 
@@ -748,8 +609,7 @@ export default function MealPlannerPage() {
         planner={planner}
         recipesById={recipesById}
         days={DAYS}
-        mainMeals={MAIN_MEALS}
-        extraMeals={EXTRA_MEALS}
+        meals={MEALS}
       />
 
       <section className="space-y-10">
@@ -757,7 +617,7 @@ export default function MealPlannerPage() {
           <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-orange-100/80 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-amber-100/80 blur-3xl" />
 
-          <div className="relative z-10 grid gap-10 px-6 py-10 xl:grid-cols-[0.9fr_1.1fr] xl:px-10">
+          <div className="relative z-10 mx-auto max-w-3xl px-6 py-10 xl:px-10">
             <div>
               <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
                 <span>🗓️</span>
@@ -799,7 +659,7 @@ export default function MealPlannerPage() {
                 </div>
               </div>
 
-              <div className="mt-6 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div className="rounded-[1.4rem] bg-white p-4 shadow-sm ring-1 ring-bark">
                   <p className="text-3xl font-black text-orange-600">
                     {plannedMealsCount}
@@ -838,7 +698,7 @@ export default function MealPlannerPage() {
               </div>
 
               {weekNutrition.counted > 0 && (
-                <div className="mt-6 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
+                <div className="mt-6 rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-lg">
@@ -911,7 +771,7 @@ export default function MealPlannerPage() {
               )}
 
               {batchGroups.length > 0 && (
-                <div className="mt-6 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
+                <div className="mt-6 rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
                   <div className="flex items-center gap-2">
                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-lg">
                       🧑‍🍳
@@ -943,7 +803,7 @@ export default function MealPlannerPage() {
                 </div>
               )}
 
-              <div className="mt-6 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
+              <div className="mt-6 rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
                 <p className="font-black text-stone-950">✨ Surprends-moi</p>
                 <p className="mt-1 text-sm leading-6 text-stone-600">
                   Génère une semaine équilibrée automatiquement et remplit ta
@@ -1032,7 +892,7 @@ export default function MealPlannerPage() {
                 </div>
               </div>
 
-              <div className="mt-4 grid max-w-xl gap-3 sm:grid-cols-2">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <Button to="/shopping-list" size="lg" fullWidth>
                   Voir ma liste de courses
                 </Button>
@@ -1067,15 +927,6 @@ export default function MealPlannerPage() {
                 </div>
               )}
             </div>
-
-            <PlannerExtrasPanel
-              extraMeals={EXTRA_MEALS}
-              weeklyExtras={planner.weeklyExtras}
-              recipesById={recipesById}
-              getRecipeImage={getRecipeImage}
-              onAddExtra={(meal) => openRecipePicker({ type: 'extra', meal })}
-              onRemoveExtra={handleRemoveExtraRecipe}
-            />
           </div>
         </div>
 
@@ -1126,26 +977,20 @@ export default function MealPlannerPage() {
         <PlannerWeekGrid
           loading={loading}
           days={DAYS}
-          mainMeals={MAIN_MEALS}
+          meals={MEALS}
           planner={planner}
           recipesById={recipesById}
           getRecipeImage={getRecipeImage}
-          onPickMain={(day, meal) =>
-            openRecipePicker({ type: 'main', day, meal })
-          }
-          onRemoveMain={handleRemoveMainRecipe}
+          onPick={(day, meal) => openRecipePicker({ day, meal })}
+          onRemove={handleRemoveMainRecipe}
         />
       </section>
 
       {openPickerSlot && (
         <RecipePickerModal
-          title={
-            openPickerSlot.type === 'main'
-              ? `${getDayLabel(openPickerSlot.day)} — ${getMealLabel(
-                  openPickerSlot.meal,
-                )}`
-              : getMealLabel(openPickerSlot.meal)
-          }
+          title={`${getDayLabel(openPickerSlot.day)} — ${getMealLabel(
+            openPickerSlot.meal,
+          )}`}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           selectedCategory={selectedCategory}
