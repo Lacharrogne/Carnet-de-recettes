@@ -901,7 +901,7 @@ export default function RecipeDetailsPage() {
           </Alert>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_minmax(300px,360px)] lg:items-start lg:gap-8">
+        <div className="space-y-8">
           <div className="min-w-0 space-y-8">
           <article className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-card ring-1 ring-bark sm:rounded-[2.5rem]">
           <div>
@@ -1217,7 +1217,7 @@ export default function RecipeDetailsPage() {
         </div>
 
         </div>
-          <aside className="lg:sticky lg:top-6 lg:self-start">
+          <div>
               <div className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-bark print:hidden sm:rounded-[2rem] sm:p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-xs font-black uppercase tracking-wide text-orange-600 sm:text-sm">
@@ -1454,7 +1454,7 @@ export default function RecipeDetailsPage() {
 </div>
               </div>
 
-          </aside>
+          </div>
         </div>
 
         <RecipeReviews recipeId={recipe.id} />
