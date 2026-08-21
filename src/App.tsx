@@ -8,6 +8,7 @@ import BottomNav from './components/layout/BottomNav'
 import ProtectedRoute from './components/ProtectedRoute'
 import PremiumRoute from './components/PremiumRoute'
 import ScrollToTop from './components/ScrollToTop'
+import ErrorBoundary from './components/ErrorBoundary'
 import PageSkeleton from './components/ui/PageSkeleton'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -94,6 +95,7 @@ export default function App() {
       <TrialBanner />
 
       <main className="mx-auto max-w-6xl px-4 pt-8 pb-28 lg:pb-8">
+        <ErrorBoundary resetKey={location.pathname}>
         <Suspense fallback={<PageSkeleton />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -214,6 +216,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </Suspense>
+        </ErrorBoundary>
       </main>
 
       <Footer />

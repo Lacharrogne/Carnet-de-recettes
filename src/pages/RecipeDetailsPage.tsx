@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import PrintableRecipeSheet from '../components/recipes/PrintableRecipeSheet'
 import RecipeCard from '../components/recipes/RecipeCard'
 import RecipeReviews from '../components/reviews/RecipeReviews'
+import RecipeSeo from '../components/recipes/RecipeSeo'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import Select from '../components/ui/Select'
@@ -19,7 +20,6 @@ import {
   getStepTimers,
   type StepTimer,
 } from '../lib/stepTimers'
-import { useDocumentTitle } from '../lib/useDocumentTitle'
 import {
   DAYS,
   MEALS,
@@ -59,7 +59,6 @@ export default function RecipeDetailsPage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [authorProfile, setAuthorProfile] = useState<UserProfile | null>(null)
 
-  useDocumentTitle(recipe?.title)
   const [similarRecipes, setSimilarRecipes] = useState<Recipe[]>([])
   const [allRecipes, setAllRecipes] = useState<Recipe[]>([])
 
@@ -699,6 +698,7 @@ export default function RecipeDetailsPage() {
 
   return (
     <>
+    <RecipeSeo recipe={recipe} authorName={authorProfile?.username || undefined} />
     <PrintableRecipeSheet
       recipe={recipe}
       imageToDisplay={typeof imageToDisplay === 'string' ? imageToDisplay : undefined}
