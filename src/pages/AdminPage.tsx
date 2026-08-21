@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 
 import ResourceManager from '../components/admin/ResourceManager'
 import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { getAdminStats, type AdminStats } from '../services/admin'
@@ -302,13 +303,14 @@ export default function AdminPage() {
           onSubmit={handleGrantComp}
           className="mt-5 flex flex-col gap-2 sm:flex-row"
         >
-          <input
+          <Input
             type="email"
             value={compEmail}
             onChange={(event) => setCompEmail(event.target.value)}
             aria-label="Email du compte"
             placeholder="email@exemple.com"
-            className="min-w-0 flex-1 rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-bark"
+            wrapperClassName="min-w-0 flex-1"
+            className="text-sm"
           />
 
           <Button type="submit" size="sm" disabled={compBusy}>

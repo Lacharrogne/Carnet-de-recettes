@@ -7,6 +7,7 @@ import RecipeMiniCard from '../components/planner/RecipeMiniCard'
 import RecipePickerModal from '../components/planner/RecipePickerModal'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import Select from '../components/ui/Select'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -758,11 +759,11 @@ export default function MealPlannerPage() {
                 </p>
 
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                  <select
+                  <Select
                     value={planSource}
                     onChange={(event) => setPlanSource(event.target.value)}
                     aria-label="Source des recettes"
-                    className="min-w-0 flex-1 rounded-full ring-1 ring-bark bg-[#fffaf5] px-4 py-3 font-bold text-stone-700 outline-none transition focus:border-orange-500"
+                    wrapperClassName="min-w-0 flex-1"
                   >
                     <option value="all">Toutes les recettes</option>
                     {user && <option value="mine">Mes recettes</option>}
@@ -771,7 +772,7 @@ export default function MealPlannerPage() {
                         {collection.emoji} {collection.name}
                       </option>
                     ))}
-                  </select>
+                  </Select>
 
                   <Button
                     type="button"

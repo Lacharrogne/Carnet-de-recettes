@@ -1,6 +1,7 @@
 import { useRecipeVisibility } from '../../context/useRecipeVisibility'
 import type { RecipeVisibilityMode } from '../../lib/recipeVisibility'
 import type { SocialProfile } from '../../services/social'
+import Select from '../ui/Select'
 
 type Props = {
   /** Amis de l'utilisateur (pour le choix « un ami précis »). */
@@ -92,10 +93,12 @@ export default function RecipeVisibilitySelector({
       <label className="mb-1 block text-xs font-black uppercase tracking-wide text-orange-700">
         Quels amis ?
       </label>
-      <select
+      <Select
         value={visibility.mode === 'friend' ? (visibility.friendId ?? '') : ''}
         onChange={(event) => handleFriendChange(event.target.value)}
-        className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-2.5 text-sm font-semibold text-stone-800 outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40 sm:max-w-xs"
+        aria-label="Quels amis ?"
+        wrapperClassName="sm:max-w-xs"
+        className="text-sm"
       >
         <option value="">Tous mes amis</option>
         {friends.map((friend) => (
@@ -103,7 +106,7 @@ export default function RecipeVisibilitySelector({
             {friendName(friend)}
           </option>
         ))}
-      </select>
+      </Select>
 
       {friends.length === 0 && (
         <p className="mt-2 text-xs font-semibold text-stone-500">

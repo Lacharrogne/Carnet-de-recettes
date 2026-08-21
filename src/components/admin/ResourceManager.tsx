@@ -18,6 +18,9 @@ import {
   type AdminRow,
 } from '../../services/adminResources'
 import Button from '../ui/Button'
+import Input from '../ui/Input'
+import Select from '../ui/Select'
+import Textarea from '../ui/Textarea'
 
 const PAGE_SIZE = 20
 
@@ -274,7 +277,7 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
         }}
         className="mt-5 flex gap-2"
       >
-        <input
+        <Input
           value={searchInput}
           onChange={(event) => setSearchInput(event.target.value)}
           aria-label="Rechercher dans cette table"
@@ -282,7 +285,8 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
             searchable ? 'Rechercher…' : 'Recherche indisponible pour cette table'
           }
           disabled={!searchable}
-          className="min-w-0 flex-1 rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:ring-4 focus:ring-bark disabled:opacity-50"
+          wrapperClassName="min-w-0 flex-1"
+          className="text-sm disabled:opacity-50"
         />
 
         <Button type="submit" size="sm" disabled={loading || !searchable}>
@@ -577,30 +581,33 @@ function RowEditor({
                   {form[field.name] ? 'Oui' : 'Non'}
                 </label>
               ) : field.type === 'select' ? (
-                <select
+                <Select
                   value={String(form[field.name])}
                   onChange={(event) => setField(field.name, event.target.value)}
-                  className="w-full rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none focus:border-orange-300 focus:ring-4 focus:ring-bark"
+                  aria-label={field.label}
+                  className="text-sm"
                 >
                   {(field.options ?? []).map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>
                   ))}
-                </select>
+                </Select>
               ) : field.type === 'longtext' || field.type === 'json' ? (
-                <textarea
+                <Textarea
                   value={String(form[field.name])}
                   onChange={(event) => setField(field.name, event.target.value)}
                   rows={field.type === 'json' ? 5 : 3}
-                  className="w-full rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 font-mono text-sm text-stone-800 outline-none focus:border-orange-300 focus:ring-4 focus:ring-bark"
+                  aria-label={field.label}
+                  className="font-mono text-sm"
                 />
               ) : (
-                <input
+                <Input
                   type={field.type === 'number' ? 'number' : 'text'}
                   value={String(form[field.name])}
                   onChange={(event) => setField(field.name, event.target.value)}
-                  className="w-full rounded-2xl ring-1 ring-bark bg-cream-50 px-4 py-3 text-sm font-semibold text-stone-800 outline-none focus:border-orange-300 focus:ring-4 focus:ring-bark"
+                  aria-label={field.label}
+                  className="text-sm"
                 />
               )}
             </div>

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import Alert from '../ui/Alert'
 import Button from '../ui/Button'
 import { RowsSkeleton } from '../ui/Skeleton'
+import Textarea from '../ui/Textarea'
 import { useAuth } from '../../context/useAuth'
 import { getProfile, type UserProfile } from '../../services/profiles'
 import { uploadRecipeImage } from '../../services/recipes'
@@ -529,12 +530,12 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
               Commentaire
             </label>
 
-            <textarea
+            <Textarea
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               rows={4}
               placeholder="Exemple : recette facile, très bonne, parfaite pour le soir..."
-              className="w-full rounded-[1.4rem] ring-1 ring-bark bg-white px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-bark md:text-[15px]"
+              className="text-sm md:text-[15px]"
             />
           </div>
 
@@ -746,7 +747,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                       Votre réponse
                     </label>
 
-                    <textarea
+                    <Textarea
                       value={replyDraft}
                       onChange={(event) =>
                         updateReplyDraft(review.id, event.target.value)
@@ -756,7 +757,7 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
                         ' · vous',
                         '',
                       )}...`}
-                      className="w-full rounded-[1.2rem] ring-1 ring-bark bg-cream-input px-4 py-3 text-sm leading-7 text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-bark"
+                      className="text-sm"
                     />
 
                     <div className="mt-3 flex flex-wrap gap-3">

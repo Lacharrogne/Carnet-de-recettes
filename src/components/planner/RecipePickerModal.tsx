@@ -1,5 +1,7 @@
 import { RECIPE_CATEGORIES } from '../../data/recipeOptions'
 import type { Recipe } from '../../types/recipe'
+import Input from '../ui/Input'
+import Select from '../ui/Select'
 
 type RecipePickerModalProps = {
   // Titre déjà formaté par la page (ex : « Lundi — Déjeuner »).
@@ -57,18 +59,18 @@ export default function RecipePickerModal({
         </div>
 
         <div className="mt-6 grid gap-3 md:grid-cols-[1fr_0.45fr]">
-          <input
+          <Input
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
-            aria-label="Rechercher une recette" placeholder="Rechercher : pâtes, gâteau, poulet..."
+            aria-label="Rechercher une recette"
+            placeholder="Rechercher : pâtes, gâteau, poulet..."
             autoFocus
-            className="w-full rounded-[1.5rem] bg-card ring-1 ring-bark px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-bark"
           />
 
-          <select
+          <Select
             value={selectedCategory}
             onChange={(event) => onCategoryChange(event.target.value)}
-            className="w-full rounded-[1.5rem] bg-card ring-1 ring-bark px-5 py-4 text-lg font-semibold text-stone-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-bark"
+            aria-label="Filtrer par catégorie"
           >
             <option value={allCategoriesValue}>Toutes les catégories</option>
 
@@ -77,7 +79,7 @@ export default function RecipePickerModal({
                 {category.emoji} {category.label}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">

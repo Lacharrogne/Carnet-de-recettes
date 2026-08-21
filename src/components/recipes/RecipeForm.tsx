@@ -22,6 +22,7 @@ import {
 } from '../../lib/recipeDraftAutosave'
 import Alert from '../ui/Alert'
 import { EmojiPicker } from '../ui/EmojiPicker'
+import Select from '../ui/Select'
 import ImageCropper from './ImageCropper'
 
 export type RecipeFormValues = {
@@ -561,37 +562,37 @@ export default function RecipeForm({
           <div>
             <label className={labelClass}>Catégorie principale</label>
 
-            <select
+            <Select
               value={category}
               onChange={(event) =>
                 setCategory(event.target.value as RecipeCategory)
               }
-              className={inputClass}
+              aria-label="Catégorie principale"
             >
               {RECIPE_CATEGORIES.map((recipeCategory) => (
                 <option key={recipeCategory.value} value={recipeCategory.value}>
                   {recipeCategory.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           <div>
             <label className={labelClass}>Difficulté</label>
 
-            <select
+            <Select
               value={difficulty}
               onChange={(event) =>
                 setDifficulty(event.target.value as Difficulty)
               }
-              className={inputClass}
+              aria-label="Difficulté"
             >
               {RECIPE_DIFFICULTIES.map((difficultyValue) => (
                 <option key={difficultyValue} value={difficultyValue}>
                   {difficultyValue}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
       </div>

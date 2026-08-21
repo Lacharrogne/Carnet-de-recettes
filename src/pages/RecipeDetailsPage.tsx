@@ -6,6 +6,7 @@ import RecipeCard from '../components/recipes/RecipeCard'
 import RecipeReviews from '../components/reviews/RecipeReviews'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import Select from '../components/ui/Select'
 import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
 import { useEntitlement } from '../lib/useEntitlement'
@@ -1430,20 +1431,19 @@ export default function RecipeDetailsPage() {
       Jour
     </p>
 
-    <select
+    <Select
       value={selectedPlanningDay}
       onChange={(event) =>
         setSelectedPlanningDay(event.target.value as DayKey)
       }
       aria-label="Jour du planning"
-      className="w-full rounded-2xl bg-linen ring-1 ring-bark px-4 py-4 font-bold text-stone-800 outline-none transition focus:bg-card focus:ring-2 focus:ring-terracotta/40"
     >
       {DAYS.map((day) => (
         <option key={day.key} value={day.key}>
           {day.label}
         </option>
       ))}
-    </select>
+    </Select>
   </div>
 
   <div>
