@@ -24,6 +24,8 @@ import {
 } from '../services/collections'
 import { addRecipeIngredientsToShoppingList } from '../services/shoppingList'
 import { generateWeeklyPlan } from '../lib/weeklyPlanGenerator'
+import { getRecipeNutrition, formatEuro } from '../lib/recipeNutrition'
+import { useNutritionPreference } from '../lib/nutritionPreference'
 import type { Recipe } from '../types/recipe'
 
 type DayKey =
@@ -299,6 +301,36 @@ export default function MealPlannerPage() {
   }, 0)
 
   const weekCompletion = Math.round((mainPlannedMealsCount / 14) * 100)
+
+  // Bilan nutrition + coût de la semaine (estimation, par personne).
+  const { blurNutrition } = useNutritionPreference()
+  const weekNutrition = useMemo(() => {
+    let kcal = 0
+    let prot = 0
+    let carb = 0
+    let fat = 0
+    let cost = 0
+    let counted = 0
+
+    for (const recipeId of plannedRecipeIds) {
+      const recipe = recipesById.get(recipeId)
+      if (!recipe) continue
+
+      const nutrition = getRecipeNutrition(recipe)
+      if (nutrition.recognized === 0) continue
+
+      kcal += nutrition.perServing.kcal
+      prot += nutrition.perServing.prot
+      carb += nutrition.perServing.carb
+      fat += nutrition.perServing.fat
+      cost += nutrition.costPerServing
+      counted += 1
+    }
+
+    return { kcal, prot, carb, fat, cost, counted }
+  }, [plannedRecipeIds, recipesById])
+
+  const nutritionDaysDivisor = Math.max(1, plannedDaysCount)
 
   const filteredRecipes = useMemo(() => {
     const query = normalizeText(searchValue)
@@ -751,7 +783,80 @@ export default function MealPlannerPage() {
                 </div>
               </div>
 
-              <div className="mt-8 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
+              {weekNutrition.counted > 0 && (
+                <div className="mt-6 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-lg">
+                        📊
+                      </span>
+                      <p className="font-black text-stone-950">
+                        Bilan de la semaine
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700">
+                      ≈ par personne
+                    </span>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    {!blurNutrition && (
+                      <>
+                        <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
+                          <p className="text-2xl font-black text-orange-600">
+                            {weekNutrition.kcal.toLocaleString('fr-FR')}
+                          </p>
+                          <p className="mt-1 text-sm font-bold text-stone-600">
+                            kcal / semaine
+                          </p>
+                        </div>
+                        <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
+                          <p className="text-2xl font-black text-stone-900">
+                            {Math.round(
+                              weekNutrition.kcal / nutritionDaysDivisor,
+                            ).toLocaleString('fr-FR')}
+                          </p>
+                          <p className="mt-1 text-sm font-bold text-stone-600">
+                            kcal / jour
+                          </p>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
+                      <p className="text-2xl font-black text-green-700">
+                        {formatEuro(weekNutrition.cost)}
+                      </p>
+                      <p className="mt-1 text-sm font-bold text-stone-600">
+                        coût / semaine
+                      </p>
+                    </div>
+                    <div className="rounded-[1.25rem] bg-cream-50 p-4 ring-1 ring-bark">
+                      <p className="text-2xl font-black text-stone-900">
+                        {formatEuro(weekNutrition.cost / nutritionDaysDivisor)}
+                      </p>
+                      <p className="mt-1 text-sm font-bold text-stone-600">
+                        coût / jour
+                      </p>
+                    </div>
+                  </div>
+
+                  {!blurNutrition && (
+                    <p className="mt-3 text-sm font-semibold text-stone-600">
+                      Moyenne / jour : 💪 {Math.round(weekNutrition.prot / nutritionDaysDivisor)} g ·
+                      🌾 {Math.round(weekNutrition.carb / nutritionDaysDivisor)} g ·
+                      🫒 {Math.round(weekNutrition.fat / nutritionDaysDivisor)} g
+                    </p>
+                  )}
+
+                  <p className="mt-2 text-xs leading-5 text-stone-400">
+                    Estimation sur {weekNutrition.counted} repas planifié
+                    {weekNutrition.counted > 1 ? 's' : ''} (ingrédients reconnus).
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-6 max-w-xl rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
                 <p className="font-black text-stone-950">✨ Surprends-moi</p>
                 <p className="mt-1 text-sm leading-6 text-stone-600">
                   Génère une semaine équilibrée automatiquement et remplit ta
