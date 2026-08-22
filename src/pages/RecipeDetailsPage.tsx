@@ -14,6 +14,11 @@ import { useEntitlement } from '../lib/useEntitlement'
 import { useFavorites } from '../context/useFavorites'
 import { scaleIngredientText } from '../lib/ingredientScaling'
 import { useWakeLock } from '../lib/useWakeLock'
+import {
+  useCookingHistory,
+  getCookingEntry,
+  formatCookedDate,
+} from '../lib/cookingHistory'
 import { findLinkedRecipe } from '../lib/recipeLinks'
 import {
   formatTimerTime,
@@ -48,6 +53,8 @@ export default function RecipeDetailsPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { hasAccess } = useEntitlement()
+  const { history: cookingHistory, recordCooked, undoCooked } =
+    useCookingHistory()
   const { isFavorite: isFavoriteCtx, toggleFavorite: toggleFavoriteCtx } =
     useFavorites()
 
@@ -122,6 +129,18 @@ export default function RecipeDetailsPage() {
       setSuccessMessage('')
       successTimeoutRef.current = null
     }, duration)
+  }
+
+  function handleMarkCooked() {
+    if (!recipe) return
+    recordCooked(recipe.id)
+    showSuccessMessage('Bravo ! Recette marquée comme cuisinée 🎉')
+  }
+
+  function handleUndoCooked() {
+    if (!recipe) return
+    undoCooked(recipe.id)
+    showSuccessMessage('Enregistrement annulé.')
   }
 
   useEffect(() => {
@@ -688,6 +707,8 @@ export default function RecipeDetailsPage() {
   const authorAvatarUrl = authorProfile?.avatarUrl ?? ''
   const authorLetter = authorName.charAt(0).toUpperCase() || 'U'
 
+  const cookEntry = getCookingEntry(cookingHistory, recipe.id)
+
   const currentStep = recipe.steps[currentStepIndex]
   const currentStepTimers = getStepTimers(currentStep || '')
 
@@ -859,7 +880,10 @@ export default function RecipeDetailsPage() {
                   {currentStepIndex === recipe.steps.length - 1 ? (
                     <button
                       type="button"
-                      onClick={closeGuidedCooking}
+                      onClick={() => {
+                        handleMarkCooked()
+                        closeGuidedCooking()
+                      }}
                       className="rounded-full bg-green-600 px-6 py-4 font-black text-white shadow-sm transition hover:bg-green-700"
                     >
                       Terminer la recette
@@ -1074,6 +1098,19 @@ export default function RecipeDetailsPage() {
                   <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
                     <button
                       type="button"
+                      onClick={handleMarkCooked}
+                      className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-sage-soft text-xl transition group-hover:scale-110">
+                        ✅
+                      </span>
+                      <span className="text-xs font-bold leading-tight text-cacao">
+                        {cookEntry ? `Cuisiné ×${cookEntry.count}` : 'J’ai cuisiné'}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={handleToggleFavorite}
                       disabled={favoriteLoading}
                       className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-cream-50 px-2 py-4 text-center ring-1 ring-bark transition hover:-translate-y-0.5 hover:bg-white hover:ring-terracotta/40 disabled:cursor-not-allowed disabled:opacity-50"
@@ -1177,6 +1214,22 @@ export default function RecipeDetailsPage() {
                       </>
                     )}
                   </div>
+
+                  {cookEntry && (
+                    <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-sage-deep">
+                      <span>
+                        🍳 Déjà cuisiné {cookEntry.count} fois · dernière fois le{' '}
+                        {formatCookedDate(cookEntry.lastCookedAt)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleUndoCooked}
+                        className="text-xs font-bold text-hazel underline underline-offset-2 transition hover:text-cacao"
+                      >
+                        annuler
+                      </button>
+                    </p>
+                  )}
                 </div>
               </div>
 
