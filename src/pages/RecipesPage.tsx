@@ -21,6 +21,8 @@ import { getRecipeDiets, DIET_OPTIONS, type DietKey } from '../lib/dietFilters'
 import { useDebounce } from '../lib/useDebounce'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { useCookingHistory } from '../lib/cookingHistory'
+import { buildTasteProfile, recommendRecipes } from '../lib/recommendations'
+import { useFavorites } from '../context/useFavorites'
 import { getRecipes } from '../services/recipes'
 import {
   getFriends,
@@ -43,6 +45,7 @@ export default function RecipesPage() {
   useDocumentTitle('Toutes les recettes')
   const [searchParams, setSearchParams] = useSearchParams()
   const { history: cookingHistory } = useCookingHistory()
+  const { isFavorite } = useFavorites()
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [ratings, setRatings] = useState<Map<number, RecipeRating>>(new Map())
@@ -376,6 +379,29 @@ export default function RecipesPage() {
       .slice(0, 3)
   }, [recipes, ratings])
 
+  // « Pour toi » : recommandations basées sur les favoris et l'historique.
+  const recommendedRecipes = useMemo(() => {
+    const favoriteRecipes = recipes.filter((recipe) => isFavorite(recipe.id))
+    const cookedRecipes = recipes.filter(
+      (recipe) => (cookingHistory[String(recipe.id)]?.count ?? 0) > 0,
+    )
+
+    const likedRecipes = [
+      ...favoriteRecipes.map((recipe) => ({ recipe, weight: 2 })),
+      ...cookedRecipes.map((recipe) => ({
+        recipe,
+        weight: Math.min(cookingHistory[String(recipe.id)]?.count ?? 1, 3),
+      })),
+    ]
+
+    const profile = buildTasteProfile(likedRecipes)
+    const excludeIds = new Set(
+      [...favoriteRecipes, ...cookedRecipes].map((recipe) => recipe.id),
+    )
+
+    return recommendRecipes(recipes, profile, excludeIds, 6)
+  }, [recipes, cookingHistory, isFavorite])
+
   // « Tes recettes fétiches » : les plus cuisinées (historique local).
   const favoriteCookedRecipes = useMemo(() => {
     return recipes
@@ -677,6 +703,27 @@ export default function RecipesPage() {
       </div>
 
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
+
+      {!hasActiveFilters && recommendedRecipes.length >= 3 && (
+        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
+          <SectionHeader
+            className="mb-6 sm:mb-8"
+            eyebrow="Pour toi"
+            title="Sélection personnalisée"
+            subtitle="D'après tes favoris et les recettes que tu cuisines — des idées à découvrir."
+          />
+
+          <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {recommendedRecipes.map((recipe) => (
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                rating={ratings.get(recipe.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {!hasActiveFilters && favoriteCookedRecipes.length > 0 && (
         <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
