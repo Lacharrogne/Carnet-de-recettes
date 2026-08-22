@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import { useEntitlement } from '../../lib/useEntitlement'
 import { getRecipeNutrition } from '../../lib/recipeNutrition'
+import { useNutritionPreference } from '../../lib/nutritionPreference'
 import { useFavorites } from '../../context/useFavorites'
 import { useToast } from '../../context/useToast'
 import { getRecipeCardStyle } from '../../data/categoryStyles'
@@ -35,6 +36,7 @@ export default function RecipeCard({
   const { hasAccess } = useEntitlement()
   const { isFavorite, toggleFavorite } = useFavorites()
   const { showToast } = useToast()
+  const { blurNutrition } = useNutritionPreference()
 
   const [loadingFavorite, setLoadingFavorite] = useState(false)
   const [fetchedRating, setFetchedRating] = useState<RecipeRating | null>(null)
@@ -185,7 +187,7 @@ export default function RecipeCard({
               </span>
             )}
 
-            {nutrition.recognized > 0 && (
+            {!blurNutrition && nutrition.recognized > 0 && (
               <span className="rounded-full bg-card/95 px-3 py-1 text-xs font-bold text-orange-700 shadow-soft">
                 ≈{nutrition.perServing.kcal} kcal
               </span>

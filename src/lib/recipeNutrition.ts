@@ -33,18 +33,60 @@ const CONTAINER_GRAMS: Record<string, number> = {
 
 const DEFAULT_PIECE_GRAMS = 60
 
-/** Retrouve les infos nutritionnelles d'un nom nettoyé (exact puis approché). */
+/** Découpe un nom nettoyé en mots (sans vides). */
+function toWords(text: string): string[] {
+  return text
+    .split(/\s+/)
+    .map((word) => word.trim())
+    .filter(Boolean)
+}
+
+/** Variante singulier d'un mot (retire un « s » ou « x » final). */
+function singular(word: string): string {
+  if (word.length > 3 && (word.endsWith('s') || word.endsWith('x'))) {
+    return word.slice(0, -1)
+  }
+  return word
+}
+
+/**
+ * Retrouve les infos nutritionnelles d'un nom nettoyé.
+ *
+ * On travaille MOT À MOT (et non par sous-chaîne) pour éviter les faux positifs
+ * du type « volaille » qui contient « ail », ou « the » qui apparaît dans
+ * beaucoup de mots. Une clé n'est retenue que si TOUS ses mots figurent dans le
+ * nom. En cas de plusieurs correspondances, on garde la plus spécifique
+ * (le plus de mots, puis la plus longue) : « huile olive » l'emporte sur « huile ».
+ */
 function lookupFacts(name: string): NutritionFacts | null {
   const exact = INGREDIENT_NUTRITION[name]
   if (exact) return exact
 
+  const nameWords = new Set<string>()
+  for (const word of toWords(name)) {
+    nameWords.add(word)
+    nameWords.add(singular(word))
+  }
+
+  let best: NutritionFacts | null = null
+  let bestScore = 0
+
   for (const key of Object.keys(INGREDIENT_NUTRITION)) {
-    if (name.includes(key) || key.includes(name)) {
-      return INGREDIENT_NUTRITION[key]
+    const keyWords = toWords(key)
+    const allPresent = keyWords.every(
+      (keyWord) => nameWords.has(keyWord) || nameWords.has(singular(keyWord)),
+    )
+    if (!allPresent) continue
+
+    // Plus la clé a de mots, plus elle est spécifique.
+    const score = keyWords.length * 1000 + key.length
+    if (score > bestScore) {
+      bestScore = score
+      best = INGREDIENT_NUTRITION[key]
     }
   }
 
-  return null
+  return best
 }
 
 /** Convertit une quantité analysée en grammes (ou null si non estimable). */

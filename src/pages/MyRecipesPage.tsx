@@ -8,7 +8,7 @@ import Select from '../components/ui/Select'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { RECIPE_CATEGORIES } from '../data/recipeOptions'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
-import { getMyRecipes } from '../services/recipes'
+import { getMyRecipes, deleteRecipe } from '../services/recipes'
 import type { Recipe, RecipeCategory } from '../types/recipe'
 
 type SortOption = 'recent' | 'name' | 'time' | 'difficulty'
@@ -53,6 +53,25 @@ export default function MyRecipesPage() {
       ignore = true
     }
   }, [])
+
+  async function handleDeleteDraft(draft: Recipe) {
+    const label = draft.title || 'Sans titre'
+    if (
+      !window.confirm(
+        `Supprimer le brouillon « ${label} » ? Cette action est définitive.`,
+      )
+    ) {
+      return
+    }
+
+    try {
+      await deleteRecipe(draft.id)
+      setRecipes((current) => current.filter((r) => r.id !== draft.id))
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Impossible de supprimer le brouillon.')
+    }
+  }
 
   // Brouillons (visibles de l'auteur seul) séparés des recettes publiées.
   const drafts = useMemo(
@@ -216,27 +235,36 @@ export default function MyRecipesPage() {
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {drafts.map((draft) => (
-              <Link
+              <div
                 key={draft.id}
-                to={`/recipes/${draft.id}/edit`}
                 className="group flex items-center gap-3 rounded-2xl bg-honey-soft/40 p-4 ring-1 ring-honey/40 transition hover:bg-honey-soft"
               >
-                <span className="text-2xl">{draft.image || '🍽️'}</span>
+                <Link
+                  to={`/recipes/${draft.id}/edit`}
+                  className="flex min-w-0 flex-1 items-center gap-3"
+                >
+                  <span className="text-2xl">{draft.image || '🍽️'}</span>
 
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-black text-stone-950">
-                    {draft.title || 'Sans titre'}
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-black text-stone-950">
+                      {draft.title || 'Sans titre'}
+                    </p>
 
-                  <span className="mt-0.5 inline-block rounded-full bg-honey/20 px-2 py-0.5 text-[0.65rem] font-black uppercase tracking-wide text-stone-700">
-                    Brouillon
-                  </span>
-                </div>
+                    <span className="mt-0.5 inline-block rounded-full bg-honey/20 px-2 py-0.5 text-[0.65rem] font-black uppercase tracking-wide text-stone-700">
+                      Continuer →
+                    </span>
+                  </div>
+                </Link>
 
-                <span className="shrink-0 font-bold text-orange-700 transition group-hover:translate-x-0.5">
-                  Continuer →
-                </span>
-              </Link>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteDraft(draft)}
+                  aria-label={`Supprimer le brouillon ${draft.title || 'Sans titre'}`}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-base text-red-600 ring-1 ring-red-100 transition hover:bg-red-50"
+                >
+                  🗑️
+                </button>
+              </div>
             ))}
           </div>
         </div>
