@@ -20,6 +20,7 @@ import { recipeMatchesVisibility } from '../lib/recipeVisibility'
 import { getRecipeDiets, DIET_OPTIONS, type DietKey } from '../lib/dietFilters'
 import { useDebounce } from '../lib/useDebounce'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { useCookingHistory } from '../lib/cookingHistory'
 import { getRecipes } from '../services/recipes'
 import {
   getFriends,
@@ -41,6 +42,7 @@ const PAGE_SIZE = 12
 export default function RecipesPage() {
   useDocumentTitle('Toutes les recettes')
   const [searchParams, setSearchParams] = useSearchParams()
+  const { history: cookingHistory } = useCookingHistory()
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [ratings, setRatings] = useState<Map<number, RecipeRating>>(new Map())
@@ -374,6 +376,18 @@ export default function RecipesPage() {
       .slice(0, 3)
   }, [recipes, ratings])
 
+  // « Tes recettes fétiches » : les plus cuisinées (historique local).
+  const favoriteCookedRecipes = useMemo(() => {
+    return recipes
+      .filter((recipe) => (cookingHistory[String(recipe.id)]?.count ?? 0) > 0)
+      .sort(
+        (a, b) =>
+          (cookingHistory[String(b.id)]?.count ?? 0) -
+          (cookingHistory[String(a.id)]?.count ?? 0),
+      )
+      .slice(0, 3)
+  }, [recipes, cookingHistory])
+
   function toggleDiet(diet: DietKey) {
     setSelectedDiets((current) =>
       current.includes(diet)
@@ -663,6 +677,27 @@ export default function RecipesPage() {
       </div>
 
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
+
+      {!hasActiveFilters && favoriteCookedRecipes.length > 0 && (
+        <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
+          <SectionHeader
+            className="mb-6 sm:mb-8"
+            eyebrow="Tes habitudes"
+            title="Tes recettes fétiches"
+            subtitle="Celles que tu cuisines le plus souvent."
+          />
+
+          <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {favoriteCookedRecipes.map((recipe) => (
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                rating={ratings.get(recipe.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {!hasActiveFilters && trendingRecipes.length >= 3 && (
         <div className="rounded-[2rem] bg-white/95 p-5 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
