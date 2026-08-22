@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
-import { Dice5, ShoppingCart, Sparkles, UtensilsCrossed } from 'lucide-react'
+import { ShoppingCart, UtensilsCrossed } from 'lucide-react'
 
 import IconTile from '../ui/IconTile'
+import MagicRecipeButton from './MagicRecipeButton'
 import type { Recipe } from '../../types/recipe'
 
 type DashboardHeroProps = {
@@ -47,7 +48,15 @@ export default function DashboardHero({
         </p>
       </div>
 
-      <div className="mt-7 grid gap-3 sm:gap-4 md:grid-cols-3">
+      {/* Bouton magique (même visuel que l'accueil public) */}
+      <div className="mt-7">
+        <MagicRecipeButton
+          onClick={onSurprise}
+          disabled={surpriseDisabled}
+        />
+      </div>
+
+      <div className="mt-3 grid gap-3 sm:mt-4 sm:gap-4 md:grid-cols-2">
         {/* Repas du jour (depuis le planning) */}
         <Link
           to={todayRecipe ? `/recipes/${todayRecipe.id}` : '/planning'}
@@ -97,30 +106,6 @@ export default function DashboardHero({
             <p className="mt-1 text-sm text-hazel">Voir ma liste →</p>
           </div>
         </Link>
-
-        {/* Surprise du carnet */}
-        <button
-          type="button"
-          onClick={onSurprise}
-          disabled={surpriseDisabled}
-          className="group flex flex-col gap-3 rounded-card bg-terracotta p-5 text-left text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-terracotta-deep hover:shadow-card disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          <div className="flex items-center justify-between">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20">
-              <Dice5 className="h-6 w-6" />
-            </span>
-            <Sparkles className="h-5 w-5 text-white/70" />
-          </div>
-
-          <div>
-            <p className="font-display text-lg font-bold">
-              Inspire-moi&nbsp;!
-            </p>
-            <p className="mt-1 text-sm text-white/85">
-              Une recette au hasard du carnet
-            </p>
-          </div>
-        </button>
       </div>
     </div>
   )
