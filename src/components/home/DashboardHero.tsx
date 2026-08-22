@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { ShoppingCart, UtensilsCrossed } from 'lucide-react'
 
+import Button from '../ui/Button'
 import IconTile from '../ui/IconTile'
 import MagicRecipeButton from './MagicRecipeButton'
+import { LOGO_SRC } from '../../data/brand'
 import type { Recipe } from '../../types/recipe'
 
 type DashboardHeroProps = {
@@ -32,80 +34,125 @@ export default function DashboardHero({
   surpriseDisabled,
 }: DashboardHeroProps) {
   return (
-    <div className="overflow-hidden rounded-[2rem] bg-cream-50 p-5 shadow-card ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
-      <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-terracotta">
-          {getGreeting()}, {userName}
-        </p>
+    <div className="relative overflow-hidden rounded-[2rem] bg-cream-50 shadow-card ring-1 ring-bark sm:rounded-[2.5rem]">
+      {/* Décor doux */}
+      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-100/70 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-amber-100/70 blur-3xl" />
 
-        <h1 className="font-display text-3xl font-black leading-tight text-espresso sm:text-4xl md:text-5xl">
-          On mijote quoi aujourd’hui&nbsp;?
-        </h1>
+      <div className="relative grid gap-8 px-5 py-8 md:grid-cols-[1.05fr_0.95fr] md:gap-10 md:px-12 md:py-14">
+        {/* Colonne gauche : accueil personnalisé */}
+        <div className="flex flex-col justify-center">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-terracotta sm:text-sm">
+            {getGreeting()}, {userName}
+          </p>
 
-        <p className="mt-1 max-w-2xl text-base leading-7 text-cacao/80 sm:text-lg">
-          Votre carnet est prêt. Une idée, une envie&nbsp;? Tout est là, bien au
-          chaud.
-        </p>
-      </div>
+          <h1 className="mt-3 font-display text-4xl font-black leading-[1.05] text-espresso sm:text-5xl md:text-6xl">
+            On mijote quoi aujourd’hui&nbsp;?
+          </h1>
 
-      {/* Bouton magique (même visuel que l'accueil public) */}
-      <div className="mt-7">
-        <MagicRecipeButton
-          onClick={onSurprise}
-          disabled={surpriseDisabled}
-        />
-      </div>
+          <p className="mt-5 max-w-md text-base leading-7 text-cacao/80 sm:text-lg sm:leading-8">
+            Ton carnet est prêt. Une envie, une idée&nbsp;? Tout est là, bien au
+            chaud.
+          </p>
 
-      <div className="mt-3 grid gap-3 sm:mt-4 sm:gap-4 md:grid-cols-2">
-        {/* Repas du jour (depuis le planning) */}
-        <Link
-          to={todayRecipe ? `/recipes/${todayRecipe.id}` : '/planning'}
-          className="group flex flex-col gap-3 rounded-card bg-card p-5 shadow-soft ring-1 ring-bark transition hover:-translate-y-0.5 hover:shadow-card"
-        >
-          <div className="flex items-center justify-between">
-            <IconTile tone="terracotta" size="md">
-              <UtensilsCrossed className="h-5 w-5 text-terracotta-deep" />
-            </IconTile>
-            <span className="text-xs font-bold uppercase tracking-[0.12em] text-hazel">
-              {todayMealLabel}
-            </span>
+          <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
+            <Button to="/add-recipe" size="lg" fullWidth className="sm:w-auto">
+              Ajouter une recette
+            </Button>
+
+            <Button
+              to="/planning"
+              variant="secondary"
+              size="lg"
+              fullWidth
+              className="sm:w-auto"
+            >
+              Voir mon planning
+            </Button>
           </div>
+        </div>
 
-          <div>
-            <p className="font-display text-lg font-bold text-espresso">
-              {todayRecipe ? todayRecipe.title : 'Rien de prévu'}
-            </p>
-            <p className="mt-1 text-sm text-hazel">
-              {todayRecipe
-                ? 'Voir la recette →'
-                : 'Planifier un repas →'}
-            </p>
-          </div>
-        </Link>
+        {/* Colonne droite : la carte « On cuisine quoi ? » */}
+        <div className="relative">
+          <div className="rounded-[2rem] bg-card p-5 shadow-card ring-1 ring-bark sm:rounded-[2.25rem] sm:p-6">
+            <div className="mb-5 flex items-center gap-4 sm:mb-6 sm:gap-5">
+              <div className="relative h-16 w-16 shrink-0 overflow-visible sm:h-20 sm:w-20">
+                <img
+                  src={LOGO_SRC}
+                  alt="Logo Carnet de recettes"
+                  className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-md sm:h-28 sm:w-28"
+                />
+              </div>
 
-        {/* Liste de courses */}
-        <Link
-          to="/shopping-list"
-          className="group flex flex-col gap-3 rounded-card bg-card p-5 shadow-soft ring-1 ring-bark transition hover:-translate-y-0.5 hover:shadow-card"
-        >
-          <div className="flex items-center justify-between">
-            <IconTile tone="sage" size="md">
-              <ShoppingCart className="h-5 w-5 text-sage-deep" />
-            </IconTile>
-            <span className="text-xs font-bold uppercase tracking-[0.12em] text-hazel">
-              Courses
-            </span>
-          </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-terracotta sm:text-sm">
+                  Aujourd’hui
+                </p>
+                <p className="font-display text-xl font-bold text-espresso sm:text-2xl">
+                  On cuisine quoi&nbsp;?
+                </p>
+              </div>
+            </div>
 
-          <div>
-            <p className="font-display text-lg font-bold text-espresso">
-              {shoppingCount > 0
-                ? `${shoppingCount} article${shoppingCount > 1 ? 's' : ''} à acheter`
-                : 'Liste à jour'}
-            </p>
-            <p className="mt-1 text-sm text-hazel">Voir ma liste →</p>
+            <MagicRecipeButton onClick={onSurprise} disabled={surpriseDisabled} />
+
+            <div className="mt-4 grid gap-3 sm:mt-5">
+              {/* Repas du jour */}
+              <Link
+                to={todayRecipe ? `/recipes/${todayRecipe.id}` : '/planning'}
+                className="group flex items-center gap-3 rounded-[1.4rem] bg-linen p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-soft"
+              >
+                <IconTile tone="terracotta" size="md">
+                  <UtensilsCrossed className="h-5 w-5 text-terracotta-deep" />
+                </IconTile>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold uppercase tracking-[0.1em] text-hazel">
+                    {todayMealLabel}
+                  </p>
+                  <p className="truncate font-display text-lg font-bold text-espresso">
+                    {todayRecipe ? todayRecipe.title : 'Rien de prévu'}
+                  </p>
+                </div>
+
+                <span
+                  aria-hidden="true"
+                  className="text-hazel transition group-hover:translate-x-0.5 group-hover:text-terracotta"
+                >
+                  →
+                </span>
+              </Link>
+
+              {/* Liste de courses */}
+              <Link
+                to="/shopping-list"
+                className="group flex items-center gap-3 rounded-[1.4rem] bg-linen p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-soft"
+              >
+                <IconTile tone="sage" size="md">
+                  <ShoppingCart className="h-5 w-5 text-sage-deep" />
+                </IconTile>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold uppercase tracking-[0.1em] text-hazel">
+                    Courses
+                  </p>
+                  <p className="truncate font-display text-lg font-bold text-espresso">
+                    {shoppingCount > 0
+                      ? `${shoppingCount} article${shoppingCount > 1 ? 's' : ''} à acheter`
+                      : 'Liste à jour'}
+                  </p>
+                </div>
+
+                <span
+                  aria-hidden="true"
+                  className="text-hazel transition group-hover:translate-x-0.5 group-hover:text-terracotta"
+                >
+                  →
+                </span>
+              </Link>
+            </div>
           </div>
-        </Link>
+        </div>
       </div>
     </div>
   )
