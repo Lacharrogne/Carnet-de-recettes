@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Heart, Leaf, ShieldCheck } from 'lucide-react'
 
 import { APP_NAME, LOGO_SRC } from '../../data/brand'
-import { VITRINE_PRICING_URL } from '../../config/site'
+import { VITRINE_URL, VITRINE_PRICING_URL } from '../../config/site'
 
 type FooterLink = { label: string; to: string }
 
@@ -16,9 +15,9 @@ const FOOTER_SECTIONS: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Recettes', to: '/recipes' },
       { label: 'Outils', to: '/tools' },
-      { label: 'Tarifs', to: VITRINE_PRICING_URL },
       { label: 'Boîte à idées', to: '/ideas' },
       { label: 'Mon frigo', to: '/frigo' },
+      { label: 'Découvrir', to: '/social' },
     ],
   },
   {
@@ -28,21 +27,23 @@ const FOOTER_SECTIONS: { title: string; links: FooterLink[] }[] = [
       { label: 'Mes favoris', to: '/favorites' },
       { label: 'Planning', to: '/planning' },
       { label: 'Liste de courses', to: '/shopping-list' },
+      { label: 'Mon profil', to: '/profile' },
     ],
   },
   {
-    title: 'La communauté',
+    title: 'Les Carnets',
     links: [
-      { label: 'Découvrir', to: '/social' },
-      { label: 'Mon profil', to: '/profile' },
+      { label: 'La suite', to: VITRINE_URL },
+      { label: 'Tarifs', to: VITRINE_PRICING_URL },
+      { label: 'Mon abonnement', to: `${VITRINE_URL}/#hub` },
     ],
   },
 ]
 
-const TRUST_SIGNALS: { icon: typeof Heart; label: string }[] = [
-  { icon: Heart, label: 'Fait maison, avec amour' },
-  { icon: ShieldCheck, label: 'Sans publicité' },
-  { icon: Leaf, label: 'Gratuit, sans engagement' },
+const TRUST_SIGNALS: { icon: string; label: string }[] = [
+  { icon: '❤️', label: 'Fait avec soin' },
+  { icon: '🛡️', label: 'Sans publicité' },
+  { icon: '✨', label: '14 jours d’essai gratuit' },
 ]
 
 export default function Footer() {
@@ -72,19 +73,17 @@ export default function Footer() {
           </p>
 
           <ul className="mt-6 space-y-2">
-            {TRUST_SIGNALS.map((signal) => {
-              const Icon = signal.icon
-
-              return (
-                <li
-                  key={signal.label}
-                  className="flex items-center gap-2 text-sm font-semibold text-stone-600"
-                >
-                  <Icon className="h-4 w-4 text-orange-500" />
-                  {signal.label}
-                </li>
-              )
-            })}
+            {TRUST_SIGNALS.map((signal) => (
+              <li
+                key={signal.label}
+                className="flex items-center gap-2 text-sm font-semibold text-stone-600"
+              >
+                <span aria-hidden className="text-base">
+                  {signal.icon}
+                </span>
+                {signal.label}
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -96,9 +95,9 @@ export default function Footer() {
               </p>
 
               <ul className="mt-4 space-y-2.5">
-                {section.links.map((link) =>
+                {section.links.map((link, index) =>
                   isExternalLink(link.to) ? (
-                    <li key={link.to}>
+                    <li key={`${link.label}-${index}`}>
                       <a
                         href={link.to}
                         target="_blank"
@@ -109,7 +108,7 @@ export default function Footer() {
                       </a>
                     </li>
                   ) : (
-                    <li key={link.to}>
+                    <li key={`${link.label}-${index}`}>
                       <Link
                         to={link.to}
                         className="text-sm font-bold text-stone-600 transition hover:text-orange-600"
