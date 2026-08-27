@@ -579,7 +579,7 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <div className="max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-bark bg-cream-50 px-4 py-5 shadow-xl lg:hidden">
+        <div className="min-h-[calc(100dvh-68px)] max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-bark bg-cream-50 px-4 py-5 shadow-xl lg:hidden">
           <nav className="mx-auto grid max-w-7xl gap-3 pb-4">
             <NavLink
               to="/"
