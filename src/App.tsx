@@ -5,6 +5,7 @@ import Header from './components/layout/Header'
 import TrialBanner from './components/layout/TrialBanner'
 import Footer from './components/layout/Footer'
 import BottomNav from './components/layout/BottomNav'
+import InstallPrompt from './components/InstallPrompt'
 import ProtectedRoute from './components/ProtectedRoute'
 import PremiumRoute from './components/PremiumRoute'
 import ScrollToTop from './components/ScrollToTop'
@@ -224,6 +225,8 @@ export default function App() {
       <div className="pb-[calc(env(safe-area-inset-bottom)+4.5rem)] lg:hidden" />
 
       <BottomNav />
+
+      <InstallPrompt />
 
       <div
         aria-hidden="true"
