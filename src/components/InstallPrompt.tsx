@@ -90,7 +90,7 @@ export default function InstallPrompt() {
   if (!visible) return null
 
   return (
-    <div className="fixed inset-x-3 bottom-24 z-50 mx-auto max-w-md lg:inset-x-auto lg:bottom-4 lg:left-1/2 lg:w-[26rem] lg:-translate-x-1/2">
+    <div className="fixed inset-x-3 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-md lg:inset-x-auto lg:bottom-[calc(1rem+env(safe-area-inset-bottom))] lg:left-1/2 lg:w-[26rem] lg:-translate-x-1/2">
       <div className="rounded-2xl border border-terracotta/15 bg-white/95 p-4 shadow-2xl shadow-terracotta/15 backdrop-blur">
         <div className="flex items-start gap-3">
           <img
