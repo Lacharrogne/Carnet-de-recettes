@@ -79,7 +79,7 @@ export default function PlannerWeekGrid({
               </span>
             </div>
 
-            <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {meals.map((meal) => {
                 const recipeId = planner[day.key][meal.key]
                 const recipe = recipeId ? recipesById.get(recipeId) : null
