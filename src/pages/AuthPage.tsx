@@ -179,7 +179,7 @@ export default function AuthPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid gap-5">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5">
         {mode === 'signup' && (
           <>
             <div>

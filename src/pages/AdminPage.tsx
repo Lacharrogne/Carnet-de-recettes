@@ -247,7 +247,7 @@ export default function AdminPage() {
         </div>
 
         {stats && (
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-bark">
               <p className="text-4xl font-black text-orange-600">
                 {stats.profilesCount}

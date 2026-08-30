@@ -9,7 +9,7 @@ export default function PageSkeleton() {
         <Skeleton className="h-5 w-full max-w-lg" />
       </div>
 
-      <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
           <div
             key={i}

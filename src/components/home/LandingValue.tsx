@@ -98,7 +98,7 @@ export default function LandingValue() {
           subtitle="Pensé comme un vrai carnet de famille : chaleureux, simple, et toujours prêt quand vous cuisinez."
         />
 
-        <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {BENEFITS.map((benefit) => {
             const Icon = benefit.icon
 
@@ -133,7 +133,7 @@ export default function LandingValue() {
           title="Comment ça marche"
         />
 
-        <div className="grid gap-5 sm:gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-3">
           {STEPS.map((step) => (
             <div
               key={step.number}

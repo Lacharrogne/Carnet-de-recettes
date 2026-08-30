@@ -143,7 +143,7 @@ export default function RecipeBadgesPanel({
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {RECIPE_PUBLICATION_BADGES.map((badge) => {
           const unlocked = recipeCount >= badge.minRecipes
 

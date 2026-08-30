@@ -210,7 +210,7 @@ export default function ProfilePage() {
   return (
     <section className="space-y-8">
       <div className="overflow-hidden rounded-[2rem] bg-cream-100 shadow-sm ring-1 ring-bark">
-        <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid grid-cols-1 gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <div className="relative">
               <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-orange-600 text-4xl font-black text-white shadow-sm ring-4 ring-white">
@@ -306,7 +306,7 @@ export default function ProfilePage() {
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-[0.35fr_0.65fr]">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-[0.35fr_0.65fr]">
             <div>
               <label className="mb-3 block font-bold text-stone-900">
                 Photo de profil
@@ -338,7 +338,7 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            <div className="grid gap-5">
+            <div className="grid grid-cols-1 gap-5">
               <div>
                 <label className="mb-2 block font-bold text-stone-900">
                   Pseudo
@@ -385,7 +385,7 @@ export default function ProfilePage() {
         </form>
       )}
 
-      <div className="grid gap-5 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             📖
@@ -435,7 +435,7 @@ export default function ProfilePage() {
 
       <CursorSelector />
 
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
         <Link
           to="/add-recipe"
           className="rounded-[2rem] bg-orange-600 p-6 text-white shadow-sm transition hover:-translate-y-1 hover:bg-orange-700 hover:shadow-md"
@@ -526,7 +526,7 @@ export default function ProfilePage() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {latestRecipes.map((recipe) => (
               <Link
                 key={recipe.id}

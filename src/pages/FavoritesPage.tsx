@@ -193,7 +193,7 @@ export default function FavoritesPage() {
 
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
 
-      <div className="grid gap-5 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl">
             ❤️
@@ -260,7 +260,7 @@ export default function FavoritesPage() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <input
             type="text"
             value={search}
@@ -345,7 +345,7 @@ export default function FavoritesPage() {
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {visibleRecipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id}

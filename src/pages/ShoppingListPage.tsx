@@ -360,7 +360,7 @@ export default function ShoppingListPage() {
       </style>
 
       <section className="screen-shopping-list space-y-8">
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="rounded-[2.5rem] bg-cream-50 p-8 shadow-sm ring-1 ring-bark">
             <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
               <span>🛒</span>
@@ -535,7 +535,7 @@ export default function ShoppingListPage() {
                   </p>
                 </div>
               ) : (
-                <div className="grid gap-5 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                   {activeSections.map((section) => (
                     <article
                       key={section.category}
@@ -625,7 +625,7 @@ export default function ShoppingListPage() {
                   </p>
                 </div>
 
-                <div className="grid gap-5 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                   {checkedSections.map((section) => (
                     <article
                       key={section.category}

@@ -262,7 +262,7 @@ export default function PublicProfilePage() {
       </div>
 
       <article className="overflow-hidden rounded-[2.5rem] bg-cream-50 shadow-sm ring-1 ring-bark">
-        <div className="grid gap-8 px-6 py-8 lg:grid-cols-[0.75fr_1.25fr] lg:px-10 lg:py-10">
+        <div className="grid grid-cols-1 gap-8 px-6 py-8 lg:grid-cols-[0.75fr_1.25fr] lg:px-10 lg:py-10">
           <div className="flex flex-col items-center justify-center rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-bark">
             <div className="relative">
               <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-full bg-orange-500 text-5xl font-black text-white ring-4 ring-white">
@@ -350,7 +350,7 @@ export default function PublicProfilePage() {
           </div>
 
           <div className="flex flex-col justify-center">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
                 <p className="text-sm font-bold text-stone-500">
                   Recettes publiées
@@ -393,7 +393,7 @@ export default function PublicProfilePage() {
               </div>
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-bark">
                 <p className="text-sm font-bold text-stone-500">Abonnés</p>
 
@@ -500,7 +500,7 @@ export default function PublicProfilePage() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {unlockedBadges.map((badge) => (
             <div
               key={badge.name}
@@ -580,7 +580,7 @@ export default function PublicProfilePage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {recipes.map((recipe) => (
               <RecipeCard key={recipe.id} recipe={recipe} />
             ))}

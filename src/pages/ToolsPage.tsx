@@ -113,7 +113,7 @@ export default function ToolsPage() {
         <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-orange-100/80 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-amber-100/80 blur-3xl" />
 
-        <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_0.75fr] lg:items-center">
+        <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_0.75fr] lg:items-center">
           <div>
             <div className="mb-6 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700">
               <span>🧰</span>
@@ -148,7 +148,7 @@ export default function ToolsPage() {
               Un espace pour gagner du temps.
             </h2>
 
-            <div className="mt-5 grid gap-3">
+            <div className="mt-5 grid grid-cols-1 gap-3">
               <div className="rounded-[1.5rem] bg-cream-50 p-4 ring-1 ring-bark">
                 <p className="text-2xl">🥕</p>
                 <p className="mt-2 font-black text-stone-950">
@@ -174,7 +174,7 @@ export default function ToolsPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {tools.map((tool) => (
           <Link
             key={tool.to}
@@ -214,7 +214,7 @@ export default function ToolsPage() {
                 {tool.description}
               </p>
 
-              <div className="mt-6 grid gap-2">
+              <div className="mt-6 grid grid-cols-1 gap-2">
                 {tool.points.map((point) => (
                   <div
                     key={point}

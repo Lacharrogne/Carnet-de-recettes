@@ -39,7 +39,7 @@ export default function DashboardHero({
       <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-100/70 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-amber-100/70 blur-3xl" />
 
-      <div className="relative grid gap-8 px-5 py-8 md:grid-cols-[1.05fr_0.95fr] md:gap-10 md:px-12 md:py-14">
+      <div className="relative grid grid-cols-1 gap-8 px-5 py-8 md:grid-cols-[1.05fr_0.95fr] md:gap-10 md:px-12 md:py-14">
         {/* Colonne gauche : accueil personnalisé */}
         <div className="flex flex-col justify-center">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-terracotta sm:text-sm">
@@ -55,7 +55,7 @@ export default function DashboardHero({
             chaud.
           </p>
 
-          <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
+          <div className="mt-7 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:gap-4">
             <Button to="/add-recipe" size="lg" fullWidth className="sm:w-auto">
               Ajouter une recette
             </Button>
@@ -96,7 +96,7 @@ export default function DashboardHero({
 
             <MagicRecipeButton onClick={onSurprise} disabled={surpriseDisabled} />
 
-            <div className="mt-4 grid gap-3 sm:mt-5">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:mt-5">
               {/* Repas du jour */}
               <Link
                 to={todayRecipe ? `/recipes/${todayRecipe.id}` : '/planning'}

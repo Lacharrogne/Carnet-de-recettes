@@ -34,7 +34,7 @@ export default function CursorSelector() {
       <div
         role="radiogroup"
         aria-label="Choix du curseur"
-        className="grid gap-4 sm:grid-cols-2"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2"
       >
         {CURSOR_OPTIONS.map((option) => {
           const selected = cursor === option.id

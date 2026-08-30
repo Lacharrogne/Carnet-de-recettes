@@ -608,7 +608,7 @@ export default function RecipeForm({
           </h3>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           <div>
             <label className={labelClass}>Préparation</label>
 
@@ -678,7 +678,7 @@ export default function RecipeForm({
           </h3>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-[0.45fr_0.55fr]">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-[0.45fr_0.55fr]">
           <div>
             <label className={labelClass}>Emoji de secours</label>
 

@@ -54,7 +54,7 @@ export default function NutritionPreference() {
       <div
         role="radiogroup"
         aria-label="Affichage des infos nutritionnelles"
-        className="grid gap-4 sm:grid-cols-2"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2"
       >
         {OPTIONS.map((option) => {
           const selected = blurNutrition === option.value

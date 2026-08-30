@@ -169,7 +169,7 @@ export default function SocialPage() {
         </Alert>
       )}
 
-      <div className="grid gap-5 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         <button
           type="button"
           onClick={() => setActiveTab('friends')}
@@ -252,7 +252,7 @@ export default function SocialPage() {
             <p className="mt-2 text-stone-600">{emptyMessage}</p>
           </div>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             {displayedProfiles.map((profile) => (
               <ProfileCard key={profile.user_id} profile={profile} />
             ))}

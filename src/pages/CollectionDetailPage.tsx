@@ -175,7 +175,7 @@ export default function CollectionDetailPage() {
           description="Ajoutez des recettes à cette collection depuis la page d'une recette (bouton « Ajouter à une collection »)."
         />
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
             <div key={recipe.id} className="flex flex-col gap-2">
               <RecipeCard recipe={recipe} />

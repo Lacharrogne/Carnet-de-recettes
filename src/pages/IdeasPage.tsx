@@ -237,7 +237,7 @@ export default function IdeasPage() {
           <span>Boîte à idées</span>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-start">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-start">
           <div>
             <h1 className="text-4xl font-black leading-tight text-stone-950 md:text-6xl">
               Proposez vos idées pour améliorer le site.
@@ -259,7 +259,7 @@ export default function IdeasPage() {
             </h2>
 
             {user ? (
-              <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
+              <form onSubmit={handleSubmit} className="mt-5 grid grid-cols-1 gap-4">
                 <div>
                   <Select
                     label="Type d’idée"
@@ -366,7 +366,7 @@ export default function IdeasPage() {
             description="Soyez le premier à proposer une amélioration : une fonctionnalité, une recette à ajouter, une envie…"
           />
         ) : (
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             {ideas.map((idea) => {
               const profile = profiles[idea.userId]
               const authorName = profile?.username || 'Utilisateur'

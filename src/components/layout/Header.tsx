@@ -344,7 +344,7 @@ export default function Header() {
                   </p>
                 </div>
 
-                <div className="grid gap-1">
+                <div className="grid grid-cols-1 gap-1">
                   {toolLinks.map((link) => (
                     <Link
                       key={link.to}
@@ -481,7 +481,7 @@ export default function Header() {
                       </div>
                     </div>
 
-                    <div className="grid gap-1">
+                    <div className="grid grid-cols-1 gap-1">
                       {personalLinks.map((link) => (
                         <Link
                           key={link.to}
