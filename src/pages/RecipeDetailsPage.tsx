@@ -757,7 +757,7 @@ export default function RecipeDetailsPage() {
               />
             </div>
 
-            <div className="grid flex-1 gap-5 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
+            <div className="grid grid-cols-1 flex-1 gap-5 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
               <aside className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:rounded-[2rem] sm:p-6">
                 <p className="font-black text-orange-600">Ingrédients</p>
 
@@ -811,7 +811,7 @@ export default function RecipeDetailsPage() {
                         Minuteur détecté
                       </p>
 
-                      <div className="mt-4 grid gap-3 sm:flex sm:flex-wrap">
+                      <div className="mt-4 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
                         {currentStepTimers.map((timer) => (
                           <button
                             key={`${timer.label}-${timer.seconds}`}
@@ -842,7 +842,7 @@ export default function RecipeDetailsPage() {
                         </p>
                       )}
 
-                      <div className="mt-5 grid gap-3 sm:flex sm:flex-wrap">
+                      <div className="mt-5 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
                         <button
                           type="button"
                           onClick={toggleTimer}
@@ -867,7 +867,7 @@ export default function RecipeDetailsPage() {
                   )}
                 </div>
 
-                <div className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2">
+                <div className="mt-8 grid grid-cols-1 gap-3 sm:mt-10 sm:grid-cols-2">
                   <button
                     type="button"
                     onClick={goToPreviousStep}
@@ -1233,7 +1233,7 @@ export default function RecipeDetailsPage() {
                 </div>
               </div>
 
-        <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
           <section className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-bark sm:p-6">
             <div>
               <p className="font-bold text-orange-600">À préparer</p>
@@ -1557,7 +1557,7 @@ export default function RecipeDetailsPage() {
               </p>
             </div>
 
-            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {manualLinkedRecipes.map((linkedRecipe) => (
                 <RecipeCard key={linkedRecipe.id} recipe={linkedRecipe} />
               ))}
@@ -1579,7 +1579,7 @@ export default function RecipeDetailsPage() {
               </p>
             </div>
 
-            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {similarRecipes.map((similarRecipe) => (
                 <RecipeCard key={similarRecipe.id} recipe={similarRecipe} />
               ))}

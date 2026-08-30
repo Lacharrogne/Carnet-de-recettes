@@ -129,7 +129,7 @@ export default function AddRecipePage() {
   return (
     <section className="space-y-8">
       <div className="overflow-hidden rounded-[2.5rem] bg-cream-50 shadow-sm ring-1 ring-bark">
-        <div className="grid gap-8 p-6 md:grid-cols-[1fr_0.7fr] md:p-10">
+        <div className="grid grid-cols-1 gap-8 p-6 md:grid-cols-[1fr_0.7fr] md:p-10">
           <div className="flex flex-col justify-center">
             <p className="font-bold text-orange-600">Nouvelle recette</p>
 

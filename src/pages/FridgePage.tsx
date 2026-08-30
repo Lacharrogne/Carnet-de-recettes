@@ -61,7 +61,7 @@ function FridgeResultCard({
           </span>
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <p className="text-xs font-black uppercase tracking-wide text-green-700">
               Vous avez déjà
@@ -352,7 +352,7 @@ export default function FridgePage() {
   return (
     <section className="space-y-8 sm:space-y-12">
       <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem]">
-        <div className="grid gap-7 px-5 py-7 sm:px-6 sm:py-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-12 lg:py-12">
+        <div className="grid grid-cols-1 gap-7 px-5 py-7 sm:px-6 sm:py-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-12 lg:py-12">
           <div className="flex flex-col justify-center">
             <div className="mb-5 flex w-fit items-center gap-3 rounded-full bg-cream-300 px-4 py-2 text-sm font-bold text-orange-700 sm:mb-6">
               <span>🥕</span>
@@ -369,7 +369,7 @@ export default function FridgePage() {
               plus simples à faire maintenant.
             </p>
 
-            <div className="mt-6 grid gap-3 sm:mt-8 sm:flex sm:flex-wrap">
+            <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:flex sm:flex-wrap">
               <Button type="button" onClick={useExampleFridge}>
                 Essayer un exemple
               </Button>
@@ -569,7 +569,7 @@ export default function FridgePage() {
             </div>
           </div>
 
-          <div className="grid gap-5 sm:gap-6 xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:gap-6 xl:grid-cols-2">
             {analyzedRecipes.map((match) => (
               <FridgeResultCard
                 key={match.recipe.id}

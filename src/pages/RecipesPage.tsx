@@ -492,7 +492,7 @@ export default function RecipesPage() {
   return (
     <section className="space-y-8 sm:space-y-10">
       <div className="overflow-hidden rounded-[2rem] bg-cream-50/95 p-5 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem] sm:p-8 md:p-10">
-        <div className="grid gap-7 lg:grid-cols-[0.9fr_1fr] lg:items-center">
+        <div className="grid grid-cols-1 gap-7 lg:grid-cols-[0.9fr_1fr] lg:items-center">
           <div>
             <Chip emoji="📖" className="mb-4">
               Le carnet
@@ -580,7 +580,7 @@ export default function RecipesPage() {
               </div>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <Select
                 value={selectedCategory?.value ?? ''}
                 onChange={(event) => {
@@ -713,7 +713,7 @@ export default function RecipesPage() {
             subtitle="D'après tes favoris et les recettes que tu cuisines — des idées à découvrir."
           />
 
-          <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {recommendedRecipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
@@ -734,7 +734,7 @@ export default function RecipesPage() {
             subtitle="Celles que tu cuisines le plus souvent."
           />
 
-          <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {favoriteCookedRecipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
@@ -755,7 +755,7 @@ export default function RecipesPage() {
             subtitle="Les recettes qui plaisent le plus à la communauté."
           />
 
-          <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {trendingRecipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
@@ -776,7 +776,7 @@ export default function RecipesPage() {
             subtitle="Choisis une famille pour découvrir les recettes associées."
           />
 
-          <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {categoriesWithCount.map((category, index) => {
               const visualStyle = getHomeCardStyle(category.label, index)
 
@@ -943,7 +943,7 @@ export default function RecipesPage() {
               />
             ) : (
               <>
-                <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {visibleRecipes.map((recipe) => (
                     <RecipeCard
                       key={recipe.id}

@@ -58,7 +58,7 @@ export default function RecipePickerModal({
           </button>
         </div>
 
-        <div className="mt-6 grid gap-3 md:grid-cols-[1fr_0.45fr]">
+        <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-[1fr_0.45fr]">
           <Input
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
@@ -117,7 +117,7 @@ export default function RecipePickerModal({
               Aucune recette trouvée.
             </div>
           ) : (
-            <div className="grid gap-3 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
               {filteredRecipes.map((recipe) => {
                 const image = getRecipeImage(recipe)
                 const isImageUrl =

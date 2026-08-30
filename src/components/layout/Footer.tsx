@@ -49,7 +49,7 @@ const TRUST_SIGNALS: { icon: string; label: string }[] = [
 export default function Footer() {
   return (
     <footer className="mt-16 border-t border-bark bg-cream-50 print:hidden">
-      <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 md:grid-cols-[1.2fr_2fr]">
+      <div className="mx-auto grid grid-cols-1 max-w-6xl gap-10 px-6 py-12 md:grid-cols-[1.2fr_2fr]">
         <div>
           <div className="flex items-center gap-3">
             <img

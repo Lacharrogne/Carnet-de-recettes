@@ -294,7 +294,7 @@ export default function HomePage() {
           )
         ) : (
           <div className="overflow-hidden rounded-[2rem] bg-cream-50 shadow-sm ring-1 ring-bark sm:rounded-[2.5rem]">
-          <div className="grid gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
+          <div className="grid grid-cols-1 gap-8 px-5 py-8 md:grid-cols-[1.1fr_0.9fr] md:px-12 md:py-14">
             <div className="flex flex-col justify-center">
               <Chip emoji="🍲" className="mb-5">
                 Carnet de cuisine familial
@@ -310,7 +310,7 @@ export default function HomePage() {
                 jamais rechercher où vous aviez noté ce bon petit plat.
               </p>
 
-              <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
+              <div className="mt-7 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:gap-4">
                 <Button to="/auth" size="lg" fullWidth className="sm:w-auto">
                   Créer mon carnet
                 </Button>
@@ -400,7 +400,7 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
           {QUICK_LINKS.map((link) => (
             <Link
               key={link.to}
@@ -467,7 +467,7 @@ export default function HomePage() {
               </Button>
             </div>
           ) : (
-            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {latestRecipes.map((recipe) => (
                 <RecipeCard
                   key={recipe.id}
@@ -500,7 +500,7 @@ export default function HomePage() {
           {loading ? (
             <RecipeCardGridSkeleton count={6} />
           ) : (
-            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {categoriesWithCount.map((category, index) => {
                 const visualStyle = getHomeCardStyle(category.label, index)
 
@@ -649,7 +649,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
+            <div className="mt-7 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
               <Button to={`/recipes/${randomRecipe.id}`}>Voir la recette</Button>
 
               <Button

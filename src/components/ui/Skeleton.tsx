@@ -36,7 +36,7 @@ type GridSkeletonProps = {
 // Grille de cartes fantômes, alignée sur les grilles de recettes/catégories.
 export function RecipeCardGridSkeleton({ count = 3 }: GridSkeletonProps) {
   return (
-    <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }, (_, index) => (
         <RecipeCardSkeleton key={index} />
       ))}
@@ -80,7 +80,7 @@ export function RecipeDetailSkeleton() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <Skeleton className="h-64 rounded-[2rem]" />
         <Skeleton className="h-64 rounded-[2rem]" />
       </div>
