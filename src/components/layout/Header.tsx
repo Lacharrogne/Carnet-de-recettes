@@ -580,6 +580,12 @@ export default function Header() {
 
       {menuOpen && (
         <div className="min-h-[calc(100dvh-68px)] max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-bark bg-cream-50 px-4 py-5 shadow-xl lg:hidden">
+          {/* Fondu épinglé en haut : le contenu qui défile se fond dans le
+              crème au lieu d'être coupé net sous l'en-tête. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none sticky top-0 z-10 -mx-4 -mt-5 h-6 bg-gradient-to-b from-cream-50 to-transparent"
+          />
           <nav className="mx-auto grid max-w-7xl gap-3 pb-4">
             <NavLink
               to="/"
