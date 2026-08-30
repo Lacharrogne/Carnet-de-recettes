@@ -586,7 +586,7 @@ export default function Header() {
             aria-hidden="true"
             className="pointer-events-none sticky top-0 z-10 -mx-4 -mt-5 h-6 bg-gradient-to-b from-cream-50 to-transparent"
           />
-          <nav className="mx-auto grid max-w-7xl gap-3 pb-4">
+          <nav className="mx-auto grid grid-cols-1 max-w-7xl gap-3 pb-4">
             <NavLink
               to="/"
               onClick={closeMenu}
@@ -626,7 +626,7 @@ export default function Header() {
                 <span className="text-stone-400">▾</span>
               </summary>
 
-              <div className="mt-3 grid gap-2">
+              <div className="mt-3 grid grid-cols-1 gap-2">
                 <Link
                   to="/recipes"
                   onClick={closeMenu}
@@ -660,7 +660,7 @@ export default function Header() {
                 <span className="text-stone-400">▾</span>
               </summary>
 
-              <div className="mt-3 grid gap-2">
+              <div className="mt-3 grid grid-cols-1 gap-2">
                 <Link
                   to="/tools"
                   onClick={closeMenu}
@@ -723,7 +723,7 @@ export default function Header() {
                   <span className="text-stone-400">▾</span>
                 </summary>
 
-                <div className="mt-3 grid gap-2">
+                <div className="mt-3 grid grid-cols-1 gap-2">
                   {personalLinks.map((link) => (
                     <Link
                       key={link.to}
