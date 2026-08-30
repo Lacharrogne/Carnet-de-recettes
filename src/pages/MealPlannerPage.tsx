@@ -962,7 +962,7 @@ export default function MealPlannerPage() {
               </Button>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {uniquePlannedRecipes.map((recipe) => (
                 <RecipeMiniCard
                   key={recipe.id}
