@@ -18,6 +18,7 @@ import {
   type AdminRow,
 } from '../../services/adminResources'
 import Button from '../ui/Button'
+import { useDialogs } from '../../context/dialogContext'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import Textarea from '../ui/Textarea'
@@ -106,6 +107,7 @@ export default function ResourceManager() {
 }
 
 function ResourceTable({ resource }: { resource: AdminResource }) {
+  const { confirm } = useDialogs()
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
@@ -182,9 +184,12 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
       .join(' · ')
 
     if (
-      !window.confirm(
-        `Supprimer définitivement cette ligne ?\n\n${label}\n\nLes données liées sont aussi supprimées.`,
-      )
+      !(await confirm({
+        title: 'Supprimer définitivement',
+        message: `Supprimer définitivement « ${label} » ? Les données liées sont aussi supprimées.`,
+        confirmLabel: 'Supprimer',
+        tone: 'danger',
+      }))
     ) {
       return
     }
@@ -211,9 +216,12 @@ function ResourceTable({ resource }: { resource: AdminResource }) {
     const label = String(row.username ?? row.user_id)
 
     if (
-      !window.confirm(
-        `SUPPRIMER LE COMPTE de « ${label} » ?\n\nCela efface son contenu ET son compte de connexion (auth). Action irréversible.`,
-      )
+      !(await confirm({
+        title: 'Supprimer le compte',
+        message: `Supprimer le compte de « ${label} » ? Cela efface son contenu ET son compte de connexion. Action irréversible.`,
+        confirmLabel: 'Supprimer le compte',
+        tone: 'danger',
+      }))
     ) {
       return
     }

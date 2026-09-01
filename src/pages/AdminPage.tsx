@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import ResourceManager from '../components/admin/ResourceManager'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import { useDialogs } from '../context/dialogContext'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { getAdminStats, type AdminStats } from '../services/admin'
@@ -25,6 +26,7 @@ function formatDate(value: string | null) {
 }
 
 export default function AdminPage() {
+  const { confirm } = useDialogs()
   const { user } = useAuth()
 
   const [checkingAdmin, setCheckingAdmin] = useState(true)
@@ -149,7 +151,13 @@ export default function AdminPage() {
   async function handleRevokeComp(access: CompAccess) {
     const label = access.email ?? access.username ?? 'ce compte'
 
-    if (!window.confirm(`Retirer l'accès offert à ${label} ?`)) {
+    const confirmed = await confirm({
+      title: 'Retirer l’accès',
+      message: `Retirer l'accès offert à ${label} ?`,
+      confirmLabel: 'Retirer',
+      tone: 'danger',
+    })
+    if (!confirmed) {
       return
     }
 

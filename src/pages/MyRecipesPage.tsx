@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import { useDialogs } from '../context/dialogContext'
 import EmptyState from '../components/ui/EmptyState'
 import Select from '../components/ui/Select'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
@@ -17,6 +18,7 @@ type SortOption = 'recent' | 'name' | 'time' | 'difficulty'
 const PAGE_SIZE = 12
 
 export default function MyRecipesPage() {
+  const { confirm } = useDialogs()
   useDocumentTitle('Mes recettes')
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
@@ -56,11 +58,13 @@ export default function MyRecipesPage() {
 
   async function handleDeleteDraft(draft: Recipe) {
     const label = draft.title || 'Sans titre'
-    if (
-      !window.confirm(
-        `Supprimer le brouillon « ${label} » ? Cette action est définitive.`,
-      )
-    ) {
+    const confirmed = await confirm({
+      title: 'Supprimer le brouillon',
+      message: `Voulez-vous vraiment supprimer le brouillon « ${label} » ? Cette action est définitive.`,
+      confirmLabel: 'Supprimer',
+      tone: 'danger',
+    })
+    if (!confirmed) {
       return
     }
 

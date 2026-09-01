@@ -7,6 +7,7 @@ import RecipeReviews from '../components/reviews/RecipeReviews'
 import RecipeSeo from '../components/recipes/RecipeSeo'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import { useDialogs } from '../context/dialogContext'
 import Select from '../components/ui/Select'
 import { RecipeDetailSkeleton } from '../components/ui/Skeleton'
 import { useAuth } from '../context/useAuth'
@@ -49,6 +50,7 @@ import RecipeNutritionCard from '../components/recipes/RecipeNutritionCard'
 import type { Recipe } from '../types/recipe'
 
 export default function RecipeDetailsPage() {
+  const { confirm } = useDialogs()
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -276,9 +278,12 @@ export default function RecipeDetailsPage() {
   async function handleDelete() {
     if (!recipe) return
 
-    const confirmDelete = window.confirm(
-      `Voulez-vous vraiment supprimer la recette "${recipe.title}" ?`,
-    )
+    const confirmDelete = await confirm({
+      title: 'Supprimer la recette',
+      message: `Voulez-vous vraiment supprimer la recette « ${recipe.title} » ?`,
+      confirmLabel: 'Supprimer',
+      tone: 'danger',
+    })
 
     if (!confirmDelete) return
 
@@ -474,9 +479,11 @@ export default function RecipeDetailsPage() {
     const mealLabel = getMealLabel(selectedPlanningMeal)
 
     if (currentRecipeId && currentRecipeId !== String(recipe.id)) {
-      const confirmReplace = window.confirm(
-        `Il y a déjà une recette prévue pour ${dayLabel.toLowerCase()} ${mealLabel.toLowerCase()}.\n\nVoulez-vous vraiment la remplacer par "${recipe.title}" ?`,
-      )
+      const confirmReplace = await confirm({
+        title: 'Remplacer la recette prévue',
+        message: `Il y a déjà une recette prévue pour ${dayLabel.toLowerCase()} ${mealLabel.toLowerCase()}. La remplacer par « ${recipe.title} » ?`,
+        confirmLabel: 'Remplacer',
+      })
 
       if (!confirmReplace) {
         return

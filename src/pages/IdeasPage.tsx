@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import { useDialogs } from '../context/dialogContext'
 import EmptyState from '../components/ui/EmptyState'
 import Select from '../components/ui/Select'
 import { RowsSkeleton } from '../components/ui/Skeleton'
@@ -77,6 +78,7 @@ function formatDate(value: string) {
 }
 
 export default function IdeasPage() {
+  const { confirm } = useDialogs()
   const { user } = useAuth()
   const userId = user?.id ?? null
 
@@ -199,9 +201,12 @@ export default function IdeasPage() {
   }
 
   async function handleDeleteIdea(idea: SiteIdea) {
-    const confirmDelete = window.confirm(
-      `Supprimer cette idée ?\n\n"${idea.title}"`,
-    )
+    const confirmDelete = await confirm({
+      title: 'Supprimer cette idée',
+      message: `Voulez-vous vraiment supprimer « ${idea.title} » ?`,
+      confirmLabel: 'Supprimer',
+      tone: 'danger',
+    })
 
     if (!confirmDelete) return
 

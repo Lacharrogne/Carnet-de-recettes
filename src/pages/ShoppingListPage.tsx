@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import { useDialogs } from '../context/dialogContext'
 import EmptyState from '../components/ui/EmptyState'
 import { Skeleton } from '../components/ui/Skeleton'
 import { LOGO_SRC } from '../data/brand'
@@ -25,6 +26,7 @@ import {
 } from '../services/shoppingList'
 
 export default function ShoppingListPage() {
+  const { confirm } = useDialogs()
   useDocumentTitle('Liste de courses')
   const { user } = useAuth()
   const userId = user?.id ?? null
@@ -199,9 +201,12 @@ export default function ShoppingListPage() {
   }
 
   async function handleDeleteLine(line: ShoppingLine) {
-    const confirmDelete = window.confirm(
-      `Supprimer "${line.displayText}" de la liste de courses ?`,
-    )
+    const confirmDelete = await confirm({
+      title: 'Supprimer l’ingrédient',
+      message: `Retirer « ${line.displayText} » de la liste de courses ?`,
+      confirmLabel: 'Supprimer',
+      tone: 'danger',
+    })
 
     if (!confirmDelete) {
       return
@@ -232,9 +237,12 @@ export default function ShoppingListPage() {
       return
     }
 
-    const confirmDelete = window.confirm(
-      'Supprimer tous les ingrédients cochés ?',
-    )
+    const confirmDelete = await confirm({
+      title: 'Supprimer les articles cochés',
+      message: 'Supprimer tous les ingrédients cochés de la liste ?',
+      confirmLabel: 'Supprimer',
+      tone: 'danger',
+    })
 
     if (!confirmDelete) {
       return
@@ -266,9 +274,12 @@ export default function ShoppingListPage() {
       return
     }
 
-    const confirmDelete = window.confirm(
-      'Voulez-vous vraiment vider toute la liste de courses ?',
-    )
+    const confirmDelete = await confirm({
+      title: 'Vider la liste',
+      message: 'Voulez-vous vraiment vider toute la liste de courses ?',
+      confirmLabel: 'Tout vider',
+      tone: 'danger',
+    })
 
     if (!confirmDelete) {
       return

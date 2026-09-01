@@ -9,6 +9,7 @@ import EntitlementProvider from './context/EntitlementProvider'
 import RecipeVisibilityProvider from './context/RecipeVisibilityProvider'
 import FavoritesProvider from './context/FavoritesProvider'
 import ToastProvider from './context/ToastProvider'
+import DialogProvider from './components/ui/DialogProvider'
 import { Analytics } from '@vercel/analytics/react'
 
 // Applique la préférence de curseur enregistrée avant le premier rendu.
@@ -32,8 +33,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <RecipeVisibilityProvider>
             <FavoritesProvider>
               <ToastProvider>
-                <Analytics />
-                <App />
+                <DialogProvider>
+                  <Analytics />
+                  <App />
+                </DialogProvider>
               </ToastProvider>
             </FavoritesProvider>
           </RecipeVisibilityProvider>

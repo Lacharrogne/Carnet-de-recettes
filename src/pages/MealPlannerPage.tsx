@@ -6,6 +6,7 @@ import RecipeMiniCard from '../components/planner/RecipeMiniCard'
 import RecipePickerModal from '../components/planner/RecipePickerModal'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import { useDialogs } from '../context/dialogContext'
 import Select from '../components/ui/Select'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
@@ -112,6 +113,7 @@ async function deleteRecipeIngredientsFromShoppingList(recipeId: Recipe['id']) {
 export default function MealPlannerPage() {
   useDocumentTitle('Planning des repas')
   const { user } = useAuth()
+  const { confirm } = useDialogs()
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [planner, setPlanner] = useState<MealPlannerState>(() =>
@@ -466,9 +468,12 @@ export default function MealPlannerPage() {
   async function handleGenerate() {
     if (
       plannedRecipeIds.length > 0 &&
-      !window.confirm(
-        'Remplacer le planning actuel par une semaine générée automatiquement ?',
-      )
+      !(await confirm({
+        title: 'Générer une semaine',
+        message:
+          'Remplacer le planning actuel par une semaine générée automatiquement ?',
+        confirmLabel: 'Générer',
+      }))
     ) {
       return
     }
@@ -562,9 +567,12 @@ export default function MealPlannerPage() {
       return
     }
 
-    const confirmClear = window.confirm(
-      'Voulez-vous vraiment vider tout le planning de la semaine ?',
-    )
+    const confirmClear = await confirm({
+      title: 'Vider le planning',
+      message: 'Voulez-vous vraiment vider tout le planning de la semaine ?',
+      confirmLabel: 'Tout vider',
+      tone: 'danger',
+    })
 
     if (!confirmClear) {
       return
