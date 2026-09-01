@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import RecipeCard from '../components/recipes/RecipeCard'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import { useDialogs } from '../context/dialogContext'
 import EmptyState from '../components/ui/EmptyState'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -18,6 +19,7 @@ import {
 import type { Recipe } from '../types/recipe'
 
 export default function CollectionDetailPage() {
+  const { confirm, prompt } = useDialogs()
   const { id } = useParams()
   const navigate = useNavigate()
 
@@ -67,7 +69,13 @@ export default function CollectionDetailPage() {
   async function handleRename() {
     if (!id || !collection) return
 
-    const name = window.prompt('Nouveau nom de la collection :', collection.name)
+    const name = await prompt({
+      title: 'Renommer la collection',
+      message: 'Choisis un nouveau nom pour cette collection.',
+      defaultValue: collection.name,
+      placeholder: 'Nom de la collection',
+      confirmLabel: 'Renommer',
+    })
     if (!name || !name.trim()) return
 
     try {
@@ -81,8 +89,13 @@ export default function CollectionDetailPage() {
 
   async function handleDeleteCollection() {
     if (!id || !collection) return
-    if (!window.confirm(`Supprimer la collection « ${collection.name} » ?`))
-      return
+    const confirmed = await confirm({
+      title: 'Supprimer la collection',
+      message: `Voulez-vous vraiment supprimer la collection « ${collection.name} » ?`,
+      confirmLabel: 'Supprimer',
+      tone: 'danger',
+    })
+    if (!confirmed) return
 
     try {
       await deleteCollection(id)

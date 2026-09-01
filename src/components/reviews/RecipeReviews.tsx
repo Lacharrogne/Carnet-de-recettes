@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 
 import Alert from '../ui/Alert'
 import Button from '../ui/Button'
+import { useDialogs } from '../../context/dialogContext'
 import { RowsSkeleton } from '../ui/Skeleton'
 import Textarea from '../ui/Textarea'
 import { useAuth } from '../../context/useAuth'
@@ -65,6 +66,7 @@ async function loadProfilesForReviews(reviews: RecipeReview[]) {
 }
 
 export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
+  const { confirm } = useDialogs()
   const { user } = useAuth()
   const userId = user?.id
 
@@ -254,9 +256,12 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
   async function handleDeleteReview() {
     if (!myReview) return
 
-    const confirmDelete = window.confirm(
-      'Voulez-vous vraiment supprimer votre avis ?',
-    )
+    const confirmDelete = await confirm({
+      title: 'Supprimer votre avis',
+      message: 'Voulez-vous vraiment supprimer votre avis ?',
+      confirmLabel: 'Supprimer',
+      tone: 'danger',
+    })
 
     if (!confirmDelete) return
 
@@ -404,9 +409,12 @@ export default function RecipeReviews({ recipeId }: RecipeReviewsProps) {
   }
 
   async function handleDeleteReply(reply: RecipeReviewReply) {
-    const confirmDelete = window.confirm(
-      'Voulez-vous vraiment supprimer cette réponse ?',
-    )
+    const confirmDelete = await confirm({
+      title: 'Supprimer la réponse',
+      message: 'Voulez-vous vraiment supprimer cette réponse ?',
+      confirmLabel: 'Supprimer',
+      tone: 'danger',
+    })
 
     if (!confirmDelete) return
 

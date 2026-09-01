@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
+import { useDialogs } from '../context/dialogContext'
 import EmptyState from '../components/ui/EmptyState'
 import { RecipeCardGridSkeleton } from '../components/ui/Skeleton'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -14,6 +15,7 @@ import {
 } from '../services/collections'
 
 export default function CollectionsPage() {
+  const { confirm } = useDialogs()
   useDocumentTitle('Mes collections')
 
   const [collections, setCollections] = useState<RecipeCollection[]>([])
@@ -65,7 +67,13 @@ export default function CollectionsPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Supprimer la collection « ${name} » ?`)) return
+    const confirmed = await confirm({
+      title: 'Supprimer la collection',
+      message: `Voulez-vous vraiment supprimer la collection « ${name} » ?`,
+      confirmLabel: 'Supprimer',
+      tone: 'danger',
+    })
+    if (!confirmed) return
 
     try {
       await deleteCollection(id)
