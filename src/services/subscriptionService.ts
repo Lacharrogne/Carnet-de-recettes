@@ -76,27 +76,3 @@ export async function getSubscription(
     customerPortalUrl: data.customer_portal_url ?? null,
   }
 }
-
-/**
- * Construit l'URL de checkout Lemon Squeezy : pré-remplit l'email et joint le
- * `user_id` en donnée custom (renvoyée par le webhook pour rattacher le
- * paiement au bon compte).
- */
-export function buildCheckoutUrl(
-  baseUrl: string,
-  { userId, email }: { userId: string; email?: string },
-): string {
-  if (!baseUrl) {
-    return ''
-  }
-
-  const url = new URL(baseUrl)
-
-  if (email) {
-    url.searchParams.set('checkout[email]', email)
-  }
-
-  url.searchParams.set('checkout[custom][user_id]', userId)
-
-  return url.toString()
-}

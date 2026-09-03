@@ -32,23 +32,3 @@ export const CONTACT_EMAIL = 'maxi.charr@gmail.com'
  * redirige. Le SSO fait que l'utilisateur y arrive déjà connecté.
  */
 export const SUBSCRIPTION_HUB_URL = 'https://lescarnets.app/#hub'
-
-/**
- * Liens de paiement Lemon Squeezy (checkout hébergé), via les variables
- * d'environnement Vite. Laisser vide tant que le produit n'existe pas : la
- * page d'abonnement affiche alors « bientôt ».
- *
- * - VITE_LS_MONTHLY_URL : lien « Buy » de la variante mensuelle (3,99 €).
- * - VITE_LS_YEARLY_URL  : lien « Buy » de la variante annuelle (39,99 €).
- */
-export const LEMONSQUEEZY = {
-  monthlyUrl: (import.meta.env.VITE_LS_MONTHLY_URL as string | undefined) ?? '',
-  yearlyUrl: (import.meta.env.VITE_LS_YEARLY_URL as string | undefined) ?? '',
-  // Offre unique « Les Carnets » : un seul abonnement débloque tous les carnets.
-  monthlyPrice: '5,99 €',
-  yearlyPrice: '59,99 €',
-}
-
-/** Le paiement est-il configuré (au moins un lien de checkout présent) ? */
-export const IS_BILLING_CONFIGURED =
-  LEMONSQUEEZY.monthlyUrl !== '' || LEMONSQUEEZY.yearlyUrl !== ''
