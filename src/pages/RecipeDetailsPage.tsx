@@ -339,6 +339,10 @@ export default function RecipeDetailsPage() {
     let ignore = false
 
     if (!user || !recipe) {
+      // Non dérivable : `noteText` est un champ éditable, il ne peut pas être
+      // recalculé à chaque rendu sans écraser la saisie en cours. On le remet
+      // à zéro quand il n'y a plus de note à afficher.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- champ éditable, remise à zéro volontaire
       setNoteText('')
       setNoteInitial('')
       return

@@ -25,12 +25,10 @@ jobs:
       - name: Installer les dépendances
         run: npm ci
 
-      # Non bloquant pour l'instant : le lint remonte des erreurs préexistantes
-      # (voir les issues du dépôt). À passer en bloquant une fois nettoyé, en
-      # retirant la ligne `continue-on-error`.
+      # Bloquant : le dépôt est à zéro erreur, on ne laisse pas la dette
+      # revenir par la petite porte.
       - name: Lint
         run: npm run lint
-        continue-on-error: true
 
       - name: Tests
         run: npm run test

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import RecipeVisibilitySelector from '../recipes/RecipeVisibilitySelector'
 import { useAuth } from '../../context/useAuth'
@@ -11,20 +11,23 @@ import { getFriends, type SocialProfile } from '../../services/social'
  */
 export default function RecipeVisibilitySettings() {
   const { user } = useAuth()
-  const [friends, setFriends] = useState<SocialProfile[]>([])
+  const [fetchedFriends, setFetchedFriends] = useState<SocialProfile[]>([])
+  // Un visiteur déconnecté n'a pas d'amis : on le déduit, plutôt que de vider
+  // l'état depuis un effet.
+  const friends = useMemo(
+    () => (user ? fetchedFriends : []),
+    [user, fetchedFriends],
+  )
 
   useEffect(() => {
-    let ignore = false
+    if (!user) return
 
-    if (!user) {
-      setFriends([])
-      return
-    }
+    let ignore = false
 
     getFriends(user.id)
       .then((data) => {
         if (!ignore) {
-          setFriends(data)
+          setFetchedFriends(data)
         }
       })
       .catch((error) => {
