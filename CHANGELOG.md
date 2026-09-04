@@ -12,6 +12,17 @@ Ordre antéchronologique (le plus récent en haut).
 
 ## 2026-09-04
 
+### Lint nettoyé et rendu bloquant
+
+- **Ce qui change** : les 7 erreurs de lint sont traitées — cinq en supprimant des états dérivés (amis, collections, auteurs se déduisent au lieu d'être vidés depuis un effet), une en lisant l'état initial de la bannière d'installation au lieu de le poser depuis un effet, une documentée comme exception. Le lint passe de « informatif » à **bloquant** en CI :
+  une PR qui en réintroduit une ne peut plus être fusionnée.
+- **Pourquoi** : ces erreurs `react-hooks` signalaient de vrais motifs fragiles
+  (états dérivés stockés inutilement, ref écrite pendant le rendu). Et un lint
+  qu'on ignore ne sert à rien.
+- **À savoir** : les rares exceptions restantes sont **annotées avec leur
+  justification** dans le code — restauration d'un brouillon qui dépend de
+  données chargées après coup, et champ éditable qu'on ne peut pas dériver.
+
 ### Le planning de repas et l'historique suivent enfin votre compte
 
 - **Ce qui change** : le planning de la semaine et l'historique « déjà

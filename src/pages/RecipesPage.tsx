@@ -49,7 +49,9 @@ export default function RecipesPage() {
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [ratings, setRatings] = useState<Map<number, RecipeRating>>(new Map())
-  const [authors, setAuthors] = useState<Map<string, SocialProfile>>(new Map())
+  const [fetchedAuthors, setFetchedAuthors] = useState<
+    Map<string, SocialProfile>
+  >(new Map())
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [search, setSearch] = useState('')
@@ -63,7 +65,13 @@ export default function RecipesPage() {
 
   const { user } = useAuth()
   const { visibility } = useRecipeVisibility()
-  const [friends, setFriends] = useState<SocialProfile[]>([])
+  const [fetchedFriends, setFetchedFriends] = useState<SocialProfile[]>([])
+  // Un visiteur déconnecté n'a pas d'amis : on le déduit, plutôt que de vider
+  // l'état depuis un effet.
+  const friends = useMemo(
+    () => (user ? fetchedFriends : []),
+    [user, fetchedFriends],
+  )
 
   // Vue par défaut réinterprétée « communauté » pour un visiteur non connecté
   // (les modes « mes recettes » / « amis » n'ont alors pas de sens).
@@ -77,17 +85,14 @@ export default function RecipesPage() {
   )
 
   useEffect(() => {
-    let ignore = false
+    if (!user) return
 
-    if (!user) {
-      setFriends([])
-      return
-    }
+    let ignore = false
 
     getFriends(user.id)
       .then((data) => {
         if (!ignore) {
-          setFriends(data)
+          setFetchedFriends(data)
         }
       })
       .catch((error) => {
@@ -166,17 +171,14 @@ export default function RecipesPage() {
       ),
     )
 
-    if (authorIds.length === 0) {
-      setAuthors(new Map())
-      return
-    }
+    if (authorIds.length === 0) return
 
     let ignore = false
 
     getProfilesByUserIds(authorIds)
       .then((profiles) => {
         if (!ignore) {
-          setAuthors(
+          setFetchedAuthors(
             new Map(profiles.map((profile) => [profile.user_id, profile])),
           )
         }
@@ -189,6 +191,13 @@ export default function RecipesPage() {
       ignore = true
     }
   }, [recipes])
+
+  // Aucune recette avec auteur → aucune fiche auteur : on le déduit plutôt
+  // que de vider l'état depuis un effet.
+  const authors = useMemo(() => {
+    const hasAuthor = recipes.some((recipe) => Boolean(recipe.userId))
+    return hasAuthor ? fetchedAuthors : new Map<string, SocialProfile>()
+  }, [recipes, fetchedAuthors])
 
   const categoriesWithCount = useMemo(() => {
     return RECIPE_CATEGORIES.map((category) => {

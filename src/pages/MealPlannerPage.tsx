@@ -134,7 +134,15 @@ export default function MealPlannerPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
-  const [collections, setCollections] = useState<RecipeCollection[]>([])
+  const [fetchedCollections, setFetchedCollections] = useState<
+    RecipeCollection[]
+  >([])
+  // Un visiteur déconnecté n'a pas de collections : on le déduit, plutôt que
+  // de vider l'état depuis un effet.
+  const collections = useMemo(
+    () => (user ? fetchedCollections : []),
+    [user, fetchedCollections],
+  )
   const [planSource, setPlanSource] = useState('all')
   const [generating, setGenerating] = useState(false)
 
@@ -153,16 +161,13 @@ export default function MealPlannerPage() {
 
   // Collections de l'utilisateur (source possible pour « Surprends-moi »).
   useEffect(() => {
-    let ignore = false
+    if (!user) return
 
-    if (!user) {
-      setCollections([])
-      return
-    }
+    let ignore = false
 
     getCollections()
       .then((data) => {
-        if (!ignore) setCollections(data)
+        if (!ignore) setFetchedCollections(data)
       })
       .catch((error) => console.error(error))
 
