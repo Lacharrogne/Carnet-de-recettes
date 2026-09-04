@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Annule les exécutions précédentes d'une même branche (économise des minutes).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & vérifications
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      # Non bloquant pour l'instant : le lint remonte des erreurs préexistantes
+      # (voir les issues du dépôt). À passer en bloquant une fois nettoyé, en
+      # retirant la ligne `continue-on-error`.
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Tests
+        run: npm run test
+
+      # Valeurs de démonstration : le build a seulement besoin que les
+      # variables existent, il ne contacte aucun service.
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://demo.supabase.co
+          VITE_SUPABASE_ANON_KEY: demo
+
+  main-courante:
+    name: Main courante à jour
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Règle n°1 du dépôt (voir CLAUDE.md) : tout changement de code ou de
+      # migration doit être consigné dans CHANGELOG.md, dans le même commit.
+      - name: Vérifie que CHANGELOG.md accompagne le changement
+        run: |
+          base="origin/${{ github.base_ref }}"
+          modifies=$(git diff --name-only "$base"...HEAD)
+
+          echo "Fichiers modifiés :"
+          echo "$modifies" | sed 's/^/  /'
+
+          if echo "$modifies" | grep -qE '^(src/|supabase/)'; then
+            if ! echo "$modifies" | grep -qx 'CHANGELOG.md'; then
+              echo "::error::Cette PR touche au code ou aux migrations sans mettre à jour CHANGELOG.md. Voir la règle n°1 dans CLAUDE.md."
+              exit 1
+            fi
+            echo "OK : le code change et la main courante est à jour."
+          else
+            echo "OK : aucun changement de code ni de migration."
+          fi
