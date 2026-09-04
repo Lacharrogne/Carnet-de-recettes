@@ -12,6 +12,21 @@ Ordre antéchronologique (le plus récent en haut).
 
 ## 2026-09-04
 
+### Les erreurs rencontrées ne disparaissent plus dans le vide
+
+- **Ce qui change** : les erreurs non rattrapées (plantage de rendu, promesse
+  rejetée, erreur globale) sont remontées vers la table `client_errors` du
+  socle. L'`ErrorBoundary`, qui écrivait jusqu'ici dans une console que
+  personne ne lit, les signale désormais vraiment. La logique anti-inondation est couverte par 7 tests.
+- **Pourquoi** : un incident chez un utilisateur n'était connu que s'il prenait
+  la peine d'écrire — ou jamais.
+- **À savoir** : actif **en production uniquement**. Trois garde-fous : la
+  remontée n'échoue jamais bruyamment (un problème de journalisation ne doit
+  pas devenir un problème d'application), les doublons et le débit sont
+  plafonnés (un composant qui plante en boucle n'enverra qu'**une** erreur),
+  et seul le **chemin** de la page est transmis — jamais les paramètres d'URL,
+  qui peuvent contenir des jetons. Nécessite la migration `0020`.
+
 ### Lint nettoyé et rendu bloquant
 
 - **Ce qui change** : les 7 erreurs de lint sont traitées — cinq en supprimant des états dérivés (amis, collections, auteurs se déduisent au lieu d'être vidés depuis un effet), une en lisant l'état initial de la bannière d'installation au lieu de le poser depuis un effet, une documentée comme exception. Le lint passe de « informatif » à **bloquant** en CI :
