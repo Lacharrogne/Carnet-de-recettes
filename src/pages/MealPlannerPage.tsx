@@ -12,7 +12,7 @@ import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import {
-  PLANNER_STORAGE_KEY,
+  persistPlanner,
   MEALS,
   MAIN_MEALS,
   createEmptyPlanner,
@@ -67,8 +67,9 @@ const DAYS: { key: DayKey; label: string; shortLabel: string; emoji: string }[] 
     { key: 'sunday', label: 'Dimanche', shortLabel: 'Dim.', emoji: '🍰' },
   ]
 
+// Toutes les écritures passent par `persistPlanner`, seul point synchronisé.
 function savePlanner(planner: MealPlannerState) {
-  window.localStorage.setItem(PLANNER_STORAGE_KEY, JSON.stringify(planner))
+  persistPlanner(planner)
 }
 
 function getRecipeImage(recipe: Recipe) {

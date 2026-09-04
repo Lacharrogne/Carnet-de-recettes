@@ -21,6 +21,33 @@ export type MealPlannerState = Record<DayKey, Record<MealKey, string>>
 
 export const PLANNER_STORAGE_KEY = 'carnet-recettes-weekly-planner'
 
+/**
+ * Émis à chaque écriture du planning, avec le nouvel état complet en `detail`.
+ * La couche de synchronisation (`lib/cloudSync.ts`) l'écoute pour répercuter
+ * les changements sur le compte.
+ */
+export const PLANNER_CHANGE_EVENT = 'cr-planner-change'
+
+/**
+ * **Le** point de passage pour écrire le planning.
+ *
+ * Tout passe par ici — écran de planning, ajout depuis une recette, génération
+ * automatique — afin qu'aucune modification n'échappe à la synchronisation.
+ */
+export function persistPlanner(planner: MealPlannerState): void {
+  if (typeof window === 'undefined') return
+
+  try {
+    window.localStorage.setItem(PLANNER_STORAGE_KEY, JSON.stringify(planner))
+  } catch {
+    // Stockage indisponible : on continue, la synchronisation prendra le relais.
+  }
+
+  window.dispatchEvent(
+    new CustomEvent<MealPlannerState>(PLANNER_CHANGE_EVENT, { detail: planner }),
+  )
+}
+
 export const DAYS: { key: DayKey; label: string }[] = [
   { key: 'monday', label: 'Lundi' },
   { key: 'tuesday', label: 'Mardi' },
@@ -105,7 +132,7 @@ export function saveRecipeToPlanner(
     },
   }
 
-  window.localStorage.setItem(PLANNER_STORAGE_KEY, JSON.stringify(nextPlanner))
+  persistPlanner(nextPlanner)
 }
 
 /** Tous les IDs de recettes planifiées (tous jours, tous repas). */

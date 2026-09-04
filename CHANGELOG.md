@@ -12,6 +12,24 @@ Ordre antéchronologique (le plus récent en haut).
 
 ## 2026-09-04
 
+### Le planning de repas et l'historique suivent enfin votre compte
+
+- **Ce qui change** : le planning de la semaine et l'historique « déjà
+  cuisiné » sont désormais rattachés au compte. Rempli sur le téléphone, le
+  planning apparaît sur l'ordinateur ; vider le cache du navigateur ne l'efface
+  plus. L'affichage reste instantané : on écrit d'abord localement, la
+  synchronisation suit.
+- **Pourquoi** : le planning est une fonctionnalité **payante** qui ne tenait
+  pas la promesse « un compte, partout » — et une donnée qui ne vivait que dans
+  le navigateur pouvait disparaître sans recours.
+- **À savoir** : à la première connexion, un planning déjà présent dans le
+  navigateur est **poussé vers le compte** (rien n'est perdu) ; si le compte a
+  déjà un planning, c'est lui qui fait foi. La synchronisation est **créneau par
+  créneau** : deux appareils qui modifient des repas différents ne s'écrasent
+  pas. Si la lecture du compte échoue, on ne pousse rien et on garde la copie
+  locale, pour ne jamais effacer sur la foi d'une information incomplète.
+  Nécessite la migration `0018` (dépôt vitrine).
+
 ### Un abonné payant ne peut plus être bloqué par une panne de lecture
 
 - **Ce qui change** : `getSubscription()` distingue désormais **« lecture

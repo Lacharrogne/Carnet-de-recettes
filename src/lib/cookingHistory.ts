@@ -7,7 +7,9 @@ import { useEffect, useState } from 'react'
  */
 
 const STORAGE_KEY = 'cr-cooking-history'
-const CHANGE_EVENT = 'cr-cooking-history-change'
+/** Émis à chaque écriture ; écouté par `lib/cloudSync.ts`. */
+export const COOKING_CHANGE_EVENT = 'cr-cooking-history-change'
+const CHANGE_EVENT = COOKING_CHANGE_EVENT
 
 export type CookingEntry = {
   count: number
@@ -16,6 +18,11 @@ export type CookingEntry = {
 }
 
 export type CookingHistory = Record<string, CookingEntry>
+
+/** Remplace tout l'historique local (utilisé quand la version du compte arrive). */
+export function replaceLocalHistory(history: CookingHistory): void {
+  writeHistory(history)
+}
 
 export function getCookingHistory(): CookingHistory {
   if (typeof window === 'undefined') {
