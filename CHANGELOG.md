@@ -12,6 +12,18 @@ Ordre antéchronologique (le plus récent en haut).
 
 ## 2026-09-04
 
+### Intégration continue (CI)
+
+- **Ce qui change** : ajout d'un workflow GitHub Actions qui, sur chaque PR et
+  sur `main`, installe les dépendances, passe le lint, lance les tests et vérifie que le
+  build compile. Un second job **refuse toute PR qui touche à `src/` ou
+  `supabase/` sans mettre à jour `CHANGELOG.md`**.
+- **Pourquoi** : aucun dépôt n'avait de CI — rien n'empêchait de fusionner une
+  PR qui casse le build, et la main courante ne tenait que par la discipline.
+- **À savoir** : le lint est **non bloquant** pour l'instant (`continue-on-error`),
+  car il remonte des erreurs préexistantes. Le rendre bloquant une fois
+  celles-ci corrigées, en retirant cette ligne du workflow.
+
 ### Mise en place de la main courante
 
 - **Ce qui change** : ajout de ce `CHANGELOG.md` et d'un `CLAUDE.md` qui fixe
