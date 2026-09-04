@@ -16,6 +16,8 @@ export type Entitlement = {
   trialEndsAt: Date | null
   /** Chargement de l'abonnement en cours. */
   loading: boolean
+  /** Vrai si l'abonnement n'a pas pu être lu : accès accordé par précaution. */
+  degraded: boolean
   subscription: SubscriptionRow | null
 }
 
@@ -27,6 +29,7 @@ export const DEFAULT_ENTITLEMENT: Entitlement = {
   daysLeft: 0,
   trialEndsAt: null,
   loading: true,
+  degraded: false,
   subscription: null,
 }
 
