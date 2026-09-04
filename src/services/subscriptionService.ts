@@ -49,30 +49,60 @@ export function isSubscriptionActive(row: SubscriptionRow | null): boolean {
   return false
 }
 
-/** Lit l'abonnement de l'utilisateur (sa propre ligne, protégée par RLS). */
-export async function getSubscription(
-  userId: string,
-): Promise<SubscriptionRow | null> {
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .select('status, plan, ends_at, renews_at, customer_portal_url')
-    .eq('user_id', userId)
-    .maybeSingle()
+/**
+ * Résultat d'une lecture d'abonnement.
+ *
+ * On distingue explicitement **« lecture réussie »** de **« lecture en
+ * échec »** : renvoyer `null` dans les deux cas revenait à traiter une panne
+ * réseau comme une absence d'abonnement, et donc à verrouiller des clients
+ * qui paient.
+ */
+export type SubscriptionRead =
+  | { ok: true; row: SubscriptionRow | null }
+  | { ok: false; row: null }
 
-  if (error) {
-    console.error('getSubscription', error)
-    return null
-  }
+/** Délais avant nouvelle tentative (une panne réseau est souvent passagère). */
+const RETRY_DELAYS_MS = [400, 1200]
 
-  if (!data) {
-    return null
-  }
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-  return {
-    status: (data.status as SubscriptionStatus) ?? 'none',
-    plan: (data.plan as string | null) ?? null,
-    endsAt: data.ends_at ?? null,
-    renewsAt: data.renews_at ?? null,
-    customerPortalUrl: data.customer_portal_url ?? null,
+/**
+ * Lit l'abonnement de l'utilisateur (sa propre ligne, protégée par RLS).
+ *
+ * Réessaie quelques fois avant d'abandonner. En cas d'échec définitif, renvoie
+ * `{ ok: false }` — à l'appelant de décider, sans jamais conclure « non
+ * abonné » d'une erreur de lecture.
+ */
+export async function getSubscription(userId: string): Promise<SubscriptionRead> {
+  for (let attempt = 0; ; attempt += 1) {
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select('status, plan, ends_at, renews_at, customer_portal_url')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (!error) {
+      if (!data) {
+        return { ok: true, row: null }
+      }
+
+      return {
+        ok: true,
+        row: {
+          status: (data.status as SubscriptionStatus) ?? 'none',
+          plan: (data.plan as string | null) ?? null,
+          endsAt: data.ends_at ?? null,
+          renewsAt: data.renews_at ?? null,
+          customerPortalUrl: data.customer_portal_url ?? null,
+        },
+      }
+    }
+
+    if (attempt >= RETRY_DELAYS_MS.length) {
+      console.error('getSubscription', error)
+      return { ok: false, row: null }
+    }
+
+    await wait(RETRY_DELAYS_MS[attempt])
   }
 }

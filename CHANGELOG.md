@@ -12,6 +12,21 @@ Ordre antéchronologique (le plus récent en haut).
 
 ## 2026-09-04
 
+### Un abonné payant ne peut plus être bloqué par une panne de lecture
+
+- **Ce qui change** : `getSubscription()` distingue désormais **« lecture
+  réussie »** de **« lecture en échec »** (au lieu de renvoyer `null` dans les
+  deux cas) et réessaie deux fois avant d'abandonner. La décision d'accès passe
+  par une fonction pure, `decideEntitlement()`, qui **laisse entrer** quand
+  l'abonnement n'a pas pu être lu, et se rabat sur le dernier statut connu
+  mémorisé localement. Couverte par 11 tests unitaires.
+- **Pourquoi** : une simple coupure réseau suffisait à faire passer un client
+  qui paie pour un non-abonné ; l'essai étant terminé, il se retrouvait devant
+  l'écran « essai terminé », dehors.
+- **À savoir** : principe retenu — **on ne verrouille jamais sur un doute**.
+  L'entitlement expose un indicateur `degraded` quand la décision repose sur ce
+  repli, pour permettre plus tard un bandeau discret plutôt qu'un mur.
+
 ### Intégration continue (CI)
 
 - **Ce qui change** : ajout d'un workflow GitHub Actions qui, sur chaque PR et
